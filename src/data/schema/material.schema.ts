@@ -1,4 +1,4 @@
-import { ATTRIBUTES } from "./contracts";
+import { ATTRIBUTES, TOOL_DOMAIN_ORDER } from "./contracts";
 
 const baseAttributes = ATTRIBUTES.filter((attribute) => attribute !== "NONE");
 
@@ -64,6 +64,7 @@ export const materialCollectionSchema = {
       potency: { anyOf: [{ type: "integer", minimum: 1, maximum: 3 }, { type: "null" }] },
       cost_base: { anyOf: [{ type: "integer", minimum: 0, maximum: 2 }, { type: "null" }] },
       art: { type: "string", pattern: "^cards/[a-z][a-z0-9_]*\\.png$" },
+      tool_domain: { enum: TOOL_DOMAIN_ORDER },
     },
     allOf: [
       {
@@ -80,6 +81,11 @@ export const materialCollectionSchema = {
         if: { properties: { rarity_status: { const: "PENDING_DEPTH_CLASSIFICATION" } } },
         then: { properties: { rarity: { type: "null" } } },
         else: { properties: { rarity: { enum: ["COMMON", "UNCOMMON", "RARE", "EQUIPMENT", "LEGENDARY"] } } },
+      },
+      {
+        if: { properties: { category: { const: "TOOL" } }, required: ["category"] },
+        then: { required: ["tool_domain"], properties: { tool_domain: { enum: TOOL_DOMAIN_ORDER } } },
+        else: { not: { required: ["tool_domain"] } },
       },
     ],
   },

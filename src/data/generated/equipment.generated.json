@@ -1,0 +1,639 @@
+{
+  "schema_version": 1,
+  "generator_version": "canonical-v1",
+  "source_hash": "285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a",
+  "content_hash": "2d363142278173cd34d8dc40faa0fbeb3e918a818e2bedd407ee8084911a8aa7",
+  "count": 45,
+  "items": [
+    {
+      "card_id": "forge__tool_01__tool_02",
+      "recipe_id": "tool_01|tool_02",
+      "tool_ids": [
+        "tool_01",
+        "tool_02"
+      ],
+      "domains": [
+        "FORGE",
+        "HAND"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_HAND",
+      "passive_effect_ko": "빚기 후 드로우"
+    },
+    {
+      "card_id": "forge__tool_01__tool_03",
+      "recipe_id": "tool_01|tool_03",
+      "tool_ids": [
+        "tool_01",
+        "tool_03"
+      ],
+      "domains": [
+        "FORGE",
+        "DECK"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_DECK",
+      "passive_effect_ko": "빚기 시 덱 정리"
+    },
+    {
+      "card_id": "forge__tool_01__tool_04",
+      "recipe_id": "tool_01|tool_04",
+      "tool_ids": [
+        "tool_01",
+        "tool_04"
+      ],
+      "domains": [
+        "FORGE",
+        "INFO"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_INFO",
+      "passive_effect_ko": "결과 미리보기"
+    },
+    {
+      "card_id": "forge__tool_01__tool_05",
+      "recipe_id": "tool_01|tool_05",
+      "tool_ids": [
+        "tool_01",
+        "tool_05"
+      ],
+      "domains": [
+        "FORGE",
+        "SCALE"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_SCALE",
+      "passive_effect_ko": "빚기 결과 증폭"
+    },
+    {
+      "card_id": "forge__tool_01__tool_06",
+      "recipe_id": "tool_01|tool_06",
+      "tool_ids": [
+        "tool_01",
+        "tool_06"
+      ],
+      "domains": [
+        "FORGE",
+        "ENERGY"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_ENERGY",
+      "passive_effect_ko": "빚기 비용 감소"
+    },
+    {
+      "card_id": "forge__tool_01__tool_07",
+      "recipe_id": "tool_01|tool_07",
+      "tool_ids": [
+        "tool_01",
+        "tool_07"
+      ],
+      "domains": [
+        "FORGE",
+        "BALANCE"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_BALANCE",
+      "passive_effect_ko": "속성 균형 시 빚기 강화"
+    },
+    {
+      "card_id": "forge__tool_01__tool_08",
+      "recipe_id": "tool_01|tool_08",
+      "tool_ids": [
+        "tool_01",
+        "tool_08"
+      ],
+      "domains": [
+        "FORGE",
+        "KEEP"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_KEEP",
+      "passive_effect_ko": "즉석 결과 1장 유지"
+    },
+    {
+      "card_id": "forge__tool_01__tool_09",
+      "recipe_id": "tool_01|tool_09",
+      "tool_ids": [
+        "tool_01",
+        "tool_09"
+      ],
+      "domains": [
+        "FORGE",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_ROUTE",
+      "passive_effect_ko": "터마다 빚기 1회 무료"
+    },
+    {
+      "card_id": "forge__tool_01__tool_10",
+      "recipe_id": "tool_01|tool_10",
+      "tool_ids": [
+        "tool_01",
+        "tool_10"
+      ],
+      "domains": [
+        "FORGE",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_FORGE_CARRY",
+      "passive_effect_ko": "재료 추가 획득"
+    },
+    {
+      "card_id": "forge__tool_02__tool_03",
+      "recipe_id": "tool_02|tool_03",
+      "tool_ids": [
+        "tool_02",
+        "tool_03"
+      ],
+      "domains": [
+        "HAND",
+        "DECK"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_DECK",
+      "passive_effect_ko": "드로우 후 덱 정리"
+    },
+    {
+      "card_id": "forge__tool_02__tool_04",
+      "recipe_id": "tool_02|tool_04",
+      "tool_ids": [
+        "tool_02",
+        "tool_04"
+      ],
+      "domains": [
+        "HAND",
+        "INFO"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_INFO",
+      "passive_effect_ko": "드로우 전 확인"
+    },
+    {
+      "card_id": "forge__tool_02__tool_05",
+      "recipe_id": "tool_02|tool_05",
+      "tool_ids": [
+        "tool_02",
+        "tool_05"
+      ],
+      "domains": [
+        "HAND",
+        "SCALE"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_SCALE",
+      "passive_effect_ko": "손패 수만큼 증폭"
+    },
+    {
+      "card_id": "forge__tool_02__tool_06",
+      "recipe_id": "tool_02|tool_06",
+      "tool_ids": [
+        "tool_02",
+        "tool_06"
+      ],
+      "domains": [
+        "HAND",
+        "ENERGY"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_ENERGY",
+      "passive_effect_ko": "드로우 시 에너지"
+    },
+    {
+      "card_id": "forge__tool_02__tool_07",
+      "recipe_id": "tool_02|tool_07",
+      "tool_ids": [
+        "tool_02",
+        "tool_07"
+      ],
+      "domains": [
+        "HAND",
+        "BALANCE"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_BALANCE",
+      "passive_effect_ko": "손패 균형 보상"
+    },
+    {
+      "card_id": "forge__tool_02__tool_08",
+      "recipe_id": "tool_02|tool_08",
+      "tool_ids": [
+        "tool_02",
+        "tool_08"
+      ],
+      "domains": [
+        "HAND",
+        "KEEP"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_KEEP",
+      "passive_effect_ko": "손패 1장 이월"
+    },
+    {
+      "card_id": "forge__tool_02__tool_09",
+      "recipe_id": "tool_02|tool_09",
+      "tool_ids": [
+        "tool_02",
+        "tool_09"
+      ],
+      "domains": [
+        "HAND",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_ROUTE",
+      "passive_effect_ko": "경로 선택지 증가"
+    },
+    {
+      "card_id": "forge__tool_02__tool_10",
+      "recipe_id": "tool_02|tool_10",
+      "tool_ids": [
+        "tool_02",
+        "tool_10"
+      ],
+      "domains": [
+        "HAND",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_HAND_CARRY",
+      "passive_effect_ko": "손패 한도 증가"
+    },
+    {
+      "card_id": "forge__tool_03__tool_04",
+      "recipe_id": "tool_03|tool_04",
+      "tool_ids": [
+        "tool_03",
+        "tool_04"
+      ],
+      "domains": [
+        "DECK",
+        "INFO"
+      ],
+      "passive_effect_id": "EQUIPMENT_DECK_INFO",
+      "passive_effect_ko": "덱 상단 공개"
+    },
+    {
+      "card_id": "forge__tool_03__tool_05",
+      "recipe_id": "tool_03|tool_05",
+      "tool_ids": [
+        "tool_03",
+        "tool_05"
+      ],
+      "domains": [
+        "DECK",
+        "SCALE"
+      ],
+      "passive_effect_id": "EQUIPMENT_DECK_SCALE",
+      "passive_effect_ko": "얇을수록 증폭"
+    },
+    {
+      "card_id": "forge__tool_03__tool_06",
+      "recipe_id": "tool_03|tool_06",
+      "tool_ids": [
+        "tool_03",
+        "tool_06"
+      ],
+      "domains": [
+        "DECK",
+        "ENERGY"
+      ],
+      "passive_effect_id": "EQUIPMENT_DECK_ENERGY",
+      "passive_effect_ko": "카드 제거 시 에너지"
+    },
+    {
+      "card_id": "forge__tool_03__tool_07",
+      "recipe_id": "tool_03|tool_07",
+      "tool_ids": [
+        "tool_03",
+        "tool_07"
+      ],
+      "domains": [
+        "DECK",
+        "BALANCE"
+      ],
+      "passive_effect_id": "EQUIPMENT_DECK_BALANCE",
+      "passive_effect_ko": "덱 속성 균형 보상"
+    },
+    {
+      "card_id": "forge__tool_03__tool_08",
+      "recipe_id": "tool_03|tool_08",
+      "tool_ids": [
+        "tool_03",
+        "tool_08"
+      ],
+      "domains": [
+        "DECK",
+        "KEEP"
+      ],
+      "passive_effect_id": "EQUIPMENT_DECK_KEEP",
+      "passive_effect_ko": "제거 카드 보관"
+    },
+    {
+      "card_id": "forge__tool_03__tool_09",
+      "recipe_id": "tool_03|tool_09",
+      "tool_ids": [
+        "tool_03",
+        "tool_09"
+      ],
+      "domains": [
+        "DECK",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_DECK_ROUTE",
+      "passive_effect_ko": "덱 정리 보상"
+    },
+    {
+      "card_id": "forge__tool_03__tool_10",
+      "recipe_id": "tool_03|tool_10",
+      "tool_ids": [
+        "tool_03",
+        "tool_10"
+      ],
+      "domains": [
+        "DECK",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_DECK_CARRY",
+      "passive_effect_ko": "획득 시 자동 정리"
+    },
+    {
+      "card_id": "forge__tool_04__tool_05",
+      "recipe_id": "tool_04|tool_05",
+      "tool_ids": [
+        "tool_04",
+        "tool_05"
+      ],
+      "domains": [
+        "INFO",
+        "SCALE"
+      ],
+      "passive_effect_id": "EQUIPMENT_INFO_SCALE",
+      "passive_effect_ko": "적 수치 공개"
+    },
+    {
+      "card_id": "forge__tool_04__tool_06",
+      "recipe_id": "tool_04|tool_06",
+      "tool_ids": [
+        "tool_04",
+        "tool_06"
+      ],
+      "domains": [
+        "INFO",
+        "ENERGY"
+      ],
+      "passive_effect_id": "EQUIPMENT_INFO_ENERGY",
+      "passive_effect_ko": "정보 획득 시 에너지"
+    },
+    {
+      "card_id": "forge__tool_04__tool_07",
+      "recipe_id": "tool_04|tool_07",
+      "tool_ids": [
+        "tool_04",
+        "tool_07"
+      ],
+      "domains": [
+        "INFO",
+        "BALANCE"
+      ],
+      "passive_effect_id": "EQUIPMENT_INFO_BALANCE",
+      "passive_effect_ko": "적 속성 공개"
+    },
+    {
+      "card_id": "forge__tool_04__tool_08",
+      "recipe_id": "tool_04|tool_08",
+      "tool_ids": [
+        "tool_04",
+        "tool_08"
+      ],
+      "domains": [
+        "INFO",
+        "KEEP"
+      ],
+      "passive_effect_id": "EQUIPMENT_INFO_KEEP",
+      "passive_effect_ko": "본 카드 예약"
+    },
+    {
+      "card_id": "forge__tool_04__tool_09",
+      "recipe_id": "tool_04|tool_09",
+      "tool_ids": [
+        "tool_04",
+        "tool_09"
+      ],
+      "domains": [
+        "INFO",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_INFO_ROUTE",
+      "passive_effect_ko": "다음 터 미리보기"
+    },
+    {
+      "card_id": "forge__tool_04__tool_10",
+      "recipe_id": "tool_04|tool_10",
+      "tool_ids": [
+        "tool_04",
+        "tool_10"
+      ],
+      "domains": [
+        "INFO",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_INFO_CARRY",
+      "passive_effect_ko": "숨은 재료 발견"
+    },
+    {
+      "card_id": "forge__tool_05__tool_06",
+      "recipe_id": "tool_05|tool_06",
+      "tool_ids": [
+        "tool_05",
+        "tool_06"
+      ],
+      "domains": [
+        "SCALE",
+        "ENERGY"
+      ],
+      "passive_effect_id": "EQUIPMENT_SCALE_ENERGY",
+      "passive_effect_ko": "에너지당 증폭"
+    },
+    {
+      "card_id": "forge__tool_05__tool_07",
+      "recipe_id": "tool_05|tool_07",
+      "tool_ids": [
+        "tool_05",
+        "tool_07"
+      ],
+      "domains": [
+        "SCALE",
+        "BALANCE"
+      ],
+      "passive_effect_id": "EQUIPMENT_SCALE_BALANCE",
+      "passive_effect_ko": "균형 시 증폭"
+    },
+    {
+      "card_id": "forge__tool_05__tool_08",
+      "recipe_id": "tool_05|tool_08",
+      "tool_ids": [
+        "tool_05",
+        "tool_08"
+      ],
+      "domains": [
+        "SCALE",
+        "KEEP"
+      ],
+      "passive_effect_id": "EQUIPMENT_SCALE_KEEP",
+      "passive_effect_ko": "증폭 상태 이월"
+    },
+    {
+      "card_id": "forge__tool_05__tool_09",
+      "recipe_id": "tool_05|tool_09",
+      "tool_ids": [
+        "tool_05",
+        "tool_09"
+      ],
+      "domains": [
+        "SCALE",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_SCALE_ROUTE",
+      "passive_effect_ko": "고심도 보상 증가"
+    },
+    {
+      "card_id": "forge__tool_05__tool_10",
+      "recipe_id": "tool_05|tool_10",
+      "tool_ids": [
+        "tool_05",
+        "tool_10"
+      ],
+      "domains": [
+        "SCALE",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_SCALE_CARRY",
+      "passive_effect_ko": "획득량 증폭"
+    },
+    {
+      "card_id": "forge__tool_06__tool_07",
+      "recipe_id": "tool_06|tool_07",
+      "tool_ids": [
+        "tool_06",
+        "tool_07"
+      ],
+      "domains": [
+        "ENERGY",
+        "BALANCE"
+      ],
+      "passive_effect_id": "EQUIPMENT_ENERGY_BALANCE",
+      "passive_effect_ko": "균형 시 에너지"
+    },
+    {
+      "card_id": "forge__tool_06__tool_08",
+      "recipe_id": "tool_06|tool_08",
+      "tool_ids": [
+        "tool_06",
+        "tool_08"
+      ],
+      "domains": [
+        "ENERGY",
+        "KEEP"
+      ],
+      "passive_effect_id": "EQUIPMENT_ENERGY_KEEP",
+      "passive_effect_ko": "잔여 에너지 이월"
+    },
+    {
+      "card_id": "forge__tool_06__tool_09",
+      "recipe_id": "tool_06|tool_09",
+      "tool_ids": [
+        "tool_06",
+        "tool_09"
+      ],
+      "domains": [
+        "ENERGY",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_ENERGY_ROUTE",
+      "passive_effect_ko": "터 진입 시 에너지"
+    },
+    {
+      "card_id": "forge__tool_06__tool_10",
+      "recipe_id": "tool_06|tool_10",
+      "tool_ids": [
+        "tool_06",
+        "tool_10"
+      ],
+      "domains": [
+        "ENERGY",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_ENERGY_CARRY",
+      "passive_effect_ko": "운반량만큼 에너지"
+    },
+    {
+      "card_id": "forge__tool_07__tool_08",
+      "recipe_id": "tool_07|tool_08",
+      "tool_ids": [
+        "tool_07",
+        "tool_08"
+      ],
+      "domains": [
+        "BALANCE",
+        "KEEP"
+      ],
+      "passive_effect_id": "EQUIPMENT_BALANCE_KEEP",
+      "passive_effect_ko": "균형 상태 이월"
+    },
+    {
+      "card_id": "forge__tool_07__tool_09",
+      "recipe_id": "tool_07|tool_09",
+      "tool_ids": [
+        "tool_07",
+        "tool_09"
+      ],
+      "domains": [
+        "BALANCE",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_BALANCE_ROUTE",
+      "passive_effect_ko": "균형 시 경로 추가"
+    },
+    {
+      "card_id": "forge__tool_07__tool_10",
+      "recipe_id": "tool_07|tool_10",
+      "tool_ids": [
+        "tool_07",
+        "tool_10"
+      ],
+      "domains": [
+        "BALANCE",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_BALANCE_CARRY",
+      "passive_effect_ko": "균등 획득"
+    },
+    {
+      "card_id": "forge__tool_08__tool_09",
+      "recipe_id": "tool_08|tool_09",
+      "tool_ids": [
+        "tool_08",
+        "tool_09"
+      ],
+      "domains": [
+        "KEEP",
+        "ROUTE"
+      ],
+      "passive_effect_id": "EQUIPMENT_KEEP_ROUTE",
+      "passive_effect_ko": "터 간 이월"
+    },
+    {
+      "card_id": "forge__tool_08__tool_10",
+      "recipe_id": "tool_08|tool_10",
+      "tool_ids": [
+        "tool_08",
+        "tool_10"
+      ],
+      "domains": [
+        "KEEP",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_KEEP_CARRY",
+      "passive_effect_ko": "보관 한도 증가"
+    },
+    {
+      "card_id": "forge__tool_09__tool_10",
+      "recipe_id": "tool_09|tool_10",
+      "tool_ids": [
+        "tool_09",
+        "tool_10"
+      ],
+      "domains": [
+        "ROUTE",
+        "CARRY"
+      ],
+      "passive_effect_id": "EQUIPMENT_ROUTE_CARRY",
+      "passive_effect_ko": "경로별 재료 표시"
+    }
+  ]
+}

@@ -32,12 +32,13 @@ npm ci
 
 ```bash
 npm run dev          # Vite 개발 서버
-npm run gen:data     # T002 무작성 scaffold 상태 출력
+npm run gen:data     # canonical 카드 1,326개와 장비 상세 45개를 결정론적으로 생성
+npm run gen:data:check # 커밋된 생성물이 원본·생성기와 byte 단위로 일치하는지 검사
 npm test             # Vitest 테스트
 npm run typecheck    # TypeScript 검사
 npm run build        # 타입 검사 후 dist/ 정적 빌드
 npm run smoke:static # 기존 dist/를 실제 Chromium에서 검사
-npm run verify       # 데이터 scaffold, 테스트, 빌드, 브라우저 smoke 전체 검증
+npm run verify       # 생성물 freshness, 테스트, 빌드, 브라우저 smoke 전체 검증
 ```
 
 개발 서버는 `npm run dev`로 실행합니다. 제출용 빌드는 `npm run build`로 만들며, 생성된 `dist/`는 별도 런타임 서버 없이 정적 파일 호스트에 배포할 수 있습니다. 로컬에서 정적 결과를 직접 확인하려면 `npx vite preview`처럼 정적 파일을 제공하는 도구를 사용할 수 있습니다.
@@ -69,9 +70,15 @@ main (composition root)
 `npm test`로 함께 검증합니다. T004가 추가할 generated JSON은 이 세 source와 별도의 생성물입니다.
 검증 코드는 52개 이름이나 21개 Law 표를 복제하지 않고 ID 생성 규칙과 source 간 관계만 검사합니다.
 
-`cards.generated.json`과 `equipment.generated.json`은 생성물이므로 직접 편집하지 않습니다. 현재
-`npm run gen:data`는 **T002 scaffold**이며 구조화된 무작성 결과만 출력합니다. 세 원본은 준비되었지만,
-실제 결정론적 생성기는 T004에서 이 scaffold를 교체합니다.
+`src/data/generated/cards.generated.json`과 `equipment.generated.json`은 생성물이므로 직접 편집하지
+않습니다. `npm run gen:data`는 세 원본의 schema·semantic 검증 뒤 고정 경로에 atomic write하고,
+`npm run gen:data:check`는 파일을 쓰지 않은 채 stale·tamper 여부를 byte 단위로 검사합니다.
+
+두 파일은 `schema_version: 1`, `generator_version: "canonical-v1"`, `count`, `items`와 두 SHA-256을
+가진 envelope입니다. `source_hash`는 `materials → laws → resultClasses` 고정 순서의 canonical JSON,
+`content_hash`는 각 `items` payload의 canonical JSON을 해시합니다. 타임스탬프와 난수는 없습니다.
+`equipment.generated.json`은 메인 카드의 장비 45개를 참조하는 상세 view이며 별도 결과나 아트를
+선언하지 않습니다.
 
 ## 구현 문서
 

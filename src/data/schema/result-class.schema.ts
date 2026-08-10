@@ -1,3 +1,5 @@
+import { TOOL_DOMAIN_ORDER } from "./contracts";
+
 export const resultClassCollectionSchema = {
   $id: "fictor.result-classes",
   type: "array",
@@ -53,6 +55,26 @@ export const resultClassCollectionSchema = {
       },
       combat_effect_status: { enum: ["APPROVED", "DERIVED_PER_RECIPE", "ATTRIBUTE_MAXIMUM_RULE"] },
       combat_effect_rule: { anyOf: [{ type: "string", minLength: 1 }, { type: "null" }] },
+      equipment_interactions: {
+        type: "array",
+        minItems: 45,
+        maxItems: 45,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["domains", "passive_effect_id", "passive_effect_ko"],
+          properties: {
+            domains: {
+              type: "array",
+              items: { enum: TOOL_DOMAIN_ORDER },
+              minItems: 2,
+              maxItems: 2,
+            },
+            passive_effect_id: { type: "string", pattern: "^EQUIPMENT_[A-Z]+_[A-Z]+$" },
+            passive_effect_ko: { type: "string", minLength: 1 },
+          },
+        },
+      },
     },
     allOf: [
       {
@@ -84,6 +106,14 @@ export const resultClassCollectionSchema = {
             combat_effect_rule: { type: "string", minLength: 1 },
           },
         },
+      },
+      {
+        if: { properties: { family: { const: "EQUIPMENT" } }, required: ["family"] },
+        then: {
+          required: ["equipment_interactions"],
+          properties: { equipment_interactions: { type: "array" } },
+        },
+        else: { not: { required: ["equipment_interactions"] } },
       },
     ],
   },

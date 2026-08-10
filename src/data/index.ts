@@ -1,6 +1,2 @@
-/**
- * Hand-authored sources and generated catalog access belong in this boundary.
- * T003 keeps schemas and source JSON out of the browser graph; T004 will expose
- * generated catalog access here.
- */
+/** Node-only source validation and catalog generation stay outside the browser graph. */
 export {};

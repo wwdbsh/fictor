@@ -4,6 +4,25 @@ export const ATTRIBUTES = [...ATTRIBUTE_ORDER, "NONE"] as const;
 export type Attribute = (typeof ATTRIBUTES)[number];
 export type BaseAttribute = (typeof ATTRIBUTE_ORDER)[number];
 export type BalanceStatus = "PENDING_2026_08_21" | "APPROVED";
+export const TOOL_DOMAIN_ORDER = [
+  "FORGE",
+  "HAND",
+  "DECK",
+  "INFO",
+  "SCALE",
+  "ENERGY",
+  "BALANCE",
+  "KEEP",
+  "ROUTE",
+  "CARRY",
+] as const;
+export type ToolDomain = (typeof TOOL_DOMAIN_ORDER)[number];
+
+export interface EquipmentInteraction {
+  domains: [ToolDomain, ToolDomain];
+  passive_effect_id: string;
+  passive_effect_ko: string;
+}
 
 export interface Material {
   id: string;
@@ -27,6 +46,7 @@ export interface Material {
   potency: number | null;
   cost_base: number | null;
   art: string;
+  tool_domain?: ToolDomain;
 }
 
 export interface Law {
@@ -64,6 +84,7 @@ export interface ResultClass {
   combat_effect: string | null;
   combat_effect_status: "APPROVED" | "DERIVED_PER_RECIPE" | "ATTRIBUTE_MAXIMUM_RULE";
   combat_effect_rule: string | null;
+  equipment_interactions?: EquipmentInteraction[];
 }
 
 export function compareAttributes(left: BaseAttribute, right: BaseAttribute): number {
