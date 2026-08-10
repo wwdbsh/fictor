@@ -188,6 +188,7 @@ type Attribute = "STILL" | "BURN" | "SCATTER" | "ROT" | "WASH" | "JOIN" | "NONE"
 type Representation = "SOLID" | "PHENOMENON";
 type Category = "ORE" | "GROUND_PRODUCT" | "TOOL" | "ODDITY";
 type Rarity = "COMMON" | "UNCOMMON" | "RARE" | "EQUIPMENT" | "LEGENDARY";
+type BalanceStatus = "PENDING_2026_08_21" | "APPROVED";
 type Ground = "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER"
             | "GROUND_ROT" | "GROUND_WASH" | "GROUND_JOIN" | "NONE";
 
@@ -200,14 +201,25 @@ interface Material {
   representation: Representation;
   category: Category;
   origin: Ground;
-  rarity: Rarity;
-  potency: number;                      // 1~3, 8/21 이후 확정
-  cost_base: number;                    // 0~2, 8/21 이후 확정
+  rarity: Rarity | null;
+  rarity_status: "APPROVED" | "PENDING_DEPTH_CLASSIFICATION";
+  balance_status: BalanceStatus;
+  potency: number | null;               // APPROVED일 때만 1~3
+  cost_base: number | null;             // APPROVED일 때만 0~2
   art: string;                          // "cards/<id>.png"
 }
 ```
 
+`balance_status: "PENDING_2026_08_21"`인 동안 `potency`와 `cost_base`는 둘 다 `null`이다.
+`APPROVED`로 바꿀 때만 각각 1~3과 0~2의 수를 함께 넣는다. 일부 필드만 먼저 채우거나 0/1을
+자리표시자로 쓰지 않는다. 터 산물의 깊이별 희귀도 경계는 미확정이므로 현재
+`rarity: null`, `rarity_status: "PENDING_DEPTH_CLASSIFICATION"`이며, 원석·도구·기괴 산물은
+각각 `COMMON`·`UNCOMMON`·`RARE`로 승인 상태다.
+
 **전체 52종의 `modifier_form` · `noun_form` · 속성 · 표현은 설계서 §5-1 ⑤ 명명 필드 표에 확정되어 있다. 그대로 옮길 것.**
+
+T003 semantic validator는 이 한국어 문자열을 별도 상수로 복제하지 않는다. 세 source가 단일
+canonical 원본이며, T005/T006의 사용자 이름 검수와 source revision hash가 문자열 확정본을 보호한다.
 
 - 속성 원석 6 (`ore_*`)
 - 터 산물 30 (`still_01~05`, `burn_01~05`, `scat_01~05`, `rot_01~05`, `wash_01~05`, `join_01~05`)
@@ -224,12 +236,20 @@ interface Law {
   actor: Attribute;               // 명명 방향 결정
   law_text_ko: string;
   combat_effect: string;
-  power_coefficient: number;      // 필수. 정확한 승인값은 8/21 이후 확정
+  balance_status: BalanceStatus;
+  power_coefficient: number | null; // APPROVED일 때만 유한한 양수
   drawback?: string;              // 동일 조합 6쌍만
 }
 ```
 
+`pair`는 `STILL → BURN → SCATTER → ROT → WASH → JOIN` 순서로 canonical 정렬하며
+`actor`는 항상 `pair[0]`이다. 자바스크립트 문자열 정렬을 쓰지 않는다. 현재 모든 Law는
+`PENDING_2026_08_21`과 `power_coefficient: null`을 함께 갖고, 8/21 이후 승인 시에만 유한한
+양수를 넣는다.
+
 **21쌍 전체(교차 15 + 동일 6)는 설계서 §4 변환 법칙 표에 확정되어 있다.**
+Law의 한국어 결과군 이름은 참조하는 ResultClass `name_ko`와 같아야 한다. 정확한 문구를 validator에
+복제하지 않고 T005/T006 검수 및 source revision hash로 고정한다.
 
 ### 3.3 ResultClass (34)
 
@@ -239,15 +259,25 @@ type Density = "MIN" | "SPARSE" | "MID" | "DENSE" | "MAX";
 
 interface ResultClass {
   id: string;
-  name_ko: string;
+  name_ko: string;        // 사용자 카드명이 아닌 내부 결과군 라벨
+  family: "CROSS" | "SAME" | "CATALYST" | "EQUIPMENT" | "HEART";
   composition: Composition;
   colors: string[];      // 1~2개. 전설은 ["GOLD","VERMILION"], 심장 빚기는 GOLD + 상대 속성색
-  density: Density;
-  combat_effect: string;
+  density: Density | null;
+  density_status: "APPROVED" | "DERIVED_FROM_MATERIAL";
+  density_rule: string | null;
+  combat_effect: string | null;
+  combat_effect_status: "APPROVED" | "DERIVED_PER_RECIPE" | "ATTRIBUTE_MAXIMUM_RULE";
+  combat_effect_rule: string | null;
 }
 ```
 
-**34군 전체(교차 15 · 동일 6 · 촉매 6 · 장비 1 · 심장 6)와 각각의 구도 · 색 · 밀도는 설계서 §4-5에 확정되어 있다.**
+**34군 전체(교차 15 · 동일 6 · 촉매 6 · 장비 1 · 심장 6)와 구도·색은 설계서 §4-5를 따른다.**
+교차·동일·심장 밀도와 장비의 `DENSE` 밀도는 확정이다. 촉매 밀도는 값 하나로 고정하지 않고
+재료의 정체성과 `representation`에서 파생하므로 `density: null`,
+`density_status: "DERIVED_FROM_MATERIAL"`을 쓴다. T008 프롬프트 생성기는 이 두 재료 필드를 입력에
+반영해야 한다. 장비 효과는 레시피별 파생(`DERIVED_PER_RECIPE`)이다. 심장은 상대 속성 효과의 최상위
+강화형이라는 의미가 이미 확정되어 `ATTRIBUTE_MAXIMUM_RULE`을 쓰며, 8/21 이후 확정하는 것은 수치뿐이다.
 
 속성 색 매핑:
 
@@ -261,6 +291,11 @@ interface ResultClass {
 | `JOIN` | 자주 magenta |
 
 **색의 개수가 티어를 나타낸다:** Tier1 단색 / Tier2 교차 2색 / Tier2 동일 단색+밀도극단 / 전설 금박+주홍 / 심장 빚기 금박+상대 속성색.
+
+세 원본은 JSON Schema와 의미 검사를 통과하면 T004의 구조적 catalog 생성 입력으로 사용할 수 있다.
+터 산물 희귀도 미확정은 보상 테이블을, 밸런스 미확정은 전투 수치 적용을 각각 차단한다. 촉매의
+승인된 재료 파생 규칙과 장비 `DENSE` 결정으로 최종 아트 manifest는 준비 상태다. 준비 상태를 하나의
+boolean으로 뭉개지 않는다.
 
 ### 3.4 조합 인덱스
 
@@ -299,6 +334,8 @@ function makeTier2(A: Material, B: Material) {
 
 ### 4.2 스탯 파생
 
+아래 공식은 재료와 Law가 모두 `balance_status: "APPROVED"`일 때만 계산한다.
+
 ```ts
 potency = A.potency + B.potency + (sameAttribute ? SAME_BONUS : 0);
 cost    = Math.ceil(potency / COST_DIVISOR);
@@ -314,6 +351,10 @@ power   = potency * law.power_coefficient;
 - `도구 + 도구` → `EQUIPMENT`. 상시 패시브, 전투 중 소모 안 됨
 - **같은 도구 2장 조합은 존재하지 않는다** — 도구는 덱에 1장뿐인 유니크 카드
 - 장비 45종의 효과는 두 도구의 `domain` 교차로 결정. **매트릭스는 설계서 §8-1에 확정**
+
+촉매는 새로운 전투 효과군을 만들지 않고 기존 Law 21의 같은 속성 효과를 재사용한다. 결속 촉매는
+존재하지 않는 `AMPLIFY_JOIN`을 만들지 않으며 결속의 확정 역할인 `DOUBLE_FORGE`를 사용한다. 수치나
+부작용 차이는 이후 승인된 밸런스 계수로만 표현한다.
 
 `domain` 목록: `FORGE` · `HAND` · `DECK` · `INFO` · `SCALE` · `ENERGY` · `BALANCE` · `KEEP` · `ROUTE` · `CARRY`
 

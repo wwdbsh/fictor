@@ -1,5 +1,6 @@
 /**
  * Hand-authored sources and generated catalog access belong in this boundary.
- * T002 intentionally defines no card data.
+ * T003 keeps schemas and source JSON out of the browser graph; T004 will expose
+ * generated catalog access here.
  */
 export {};

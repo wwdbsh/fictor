@@ -63,7 +63,15 @@ main (composition root)
 - `presentation`: React 화면 경계입니다.
 - `assets`: 정적 에셋 참조 경계입니다.
 
-`cards.generated.json`과 `equipment.generated.json`은 생성물이므로 직접 편집하지 않습니다. 현재 `npm run gen:data`는 **T002 scaffold**이며 구조화된 무작성 결과만 출력합니다. 실제 원본 데이터와 결정론적 생성기는 T004에서 이 scaffold를 교체합니다.
+손으로 작성하는 데이터 원본은 `src/data/source/materials.json`(52), `laws.json`(21),
+`resultClasses.json`(34) 세 파일뿐입니다. JSON Schema 객체, 재사용 가능한 의미 validator와 준비 상태
+검사는 `src/data/schema/`, 카디널리티·canonical 쌍·참조·문체 검증은 `tests/data/`에 있습니다.
+`npm test`로 함께 검증합니다. T004가 추가할 generated JSON은 이 세 source와 별도의 생성물입니다.
+검증 코드는 52개 이름이나 21개 Law 표를 복제하지 않고 ID 생성 규칙과 source 간 관계만 검사합니다.
+
+`cards.generated.json`과 `equipment.generated.json`은 생성물이므로 직접 편집하지 않습니다. 현재
+`npm run gen:data`는 **T002 scaffold**이며 구조화된 무작성 결과만 출력합니다. 세 원본은 준비되었지만,
+실제 결정론적 생성기는 T004에서 이 scaffold를 교체합니다.
 
 ## 구현 문서
 
