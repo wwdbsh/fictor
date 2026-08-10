@@ -81,6 +81,7 @@ async function main() {
 
   const server = createServer(serve);
   let browser;
+  let runError;
 
   try {
     await new Promise((resolveListening, rejectListening) => {
@@ -180,12 +181,49 @@ async function main() {
         webSocketRequests: 0,
       }),
     );
+  } catch (error) {
+    runError = error;
   } finally {
-    await browser?.close();
-    if (server.listening) {
-      await new Promise((resolveClose, rejectClose) => {
-        server.close((error) => (error ? rejectClose(error) : resolveClose()));
-      });
+    const cleanupErrors = [];
+
+    try {
+      try {
+        await browser?.close();
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+    } finally {
+      try {
+        if (server.listening) {
+          await new Promise((resolveClose, rejectClose) => {
+            server.close((error) => (error ? rejectClose(error) : resolveClose()));
+          });
+        }
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+    }
+
+    if (runError !== undefined && cleanupErrors.length > 0) {
+      const messages = [runError, ...cleanupErrors].map((error) =>
+        error instanceof Error ? error.message : String(error),
+      );
+      throw new AggregateError(
+        [runError, ...cleanupErrors],
+        `정적 smoke 실행 및 정리 실패:\n${messages.join("\n")}`,
+      );
+    }
+    if (runError !== undefined) {
+      throw runError;
+    }
+    if (cleanupErrors.length === 1) {
+      throw cleanupErrors[0];
+    }
+    if (cleanupErrors.length > 1) {
+      const messages = cleanupErrors.map((error) =>
+        error instanceof Error ? error.message : String(error),
+      );
+      throw new AggregateError(cleanupErrors, `정적 smoke 정리 실패:\n${messages.join("\n")}`);
     }
   }
 }
