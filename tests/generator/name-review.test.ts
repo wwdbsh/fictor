@@ -17,6 +17,7 @@ import equipmentJson from "../../src/data/generated/equipment.generated.json";
 import {
   assertNoDuplicateJsonKeys,
   buildNameReview,
+  detectFormRepeatFlags,
   makeInitialNameReviewDecisions,
   makeNameReviewTarget,
   parseCsv,
@@ -24,6 +25,7 @@ import {
   sha256Utf8,
   validateNameReviewDecisions,
   NAME_REVIEW_HEADERS,
+  NAME_REVIEW_VERSION,
   type NameReviewDecisions,
   type NameReviewOverride,
 } from "../../src/data/generator/name-review";
@@ -151,11 +153,54 @@ describe("canonical name-review package", () => {
       REPEATED_WHITESPACE: 0,
       ADJACENT_TOKEN_REPEAT: 0,
       SENTENCE_MARK: 0,
-      NARROW_NOUN_ECHO: 2,
+      MODIFIER_NOUN_EXACT_COLLISION: 0,
+      FIRST_SYLLABLE_REPEAT: 8,
     });
-    expect(
-      built.rows.filter(({ flags }) => flags.includes("NARROW_NOUN_ECHO")).map(({ generated_name_ko }) => generated_name_ko),
-    ).toEqual(["재어진 재", "실려온 실"]);
+    expect(built.rows.filter(({ flag_count }) => Number(flag_count) > 0)).toHaveLength(8);
+    expect(built.rows.find(({ card_id }) => card_id === "forge__burn_05__tool_06")?.flags).toContain(
+      "FIRST_SYLLABLE_REPEAT",
+    );
+  });
+
+  it("limits the source rebaseline impact to 89 actor-derived card names and no equipment content", () => {
+    const affected = cardsEnvelope.items.filter(({ actor_id }) =>
+      actor_id === "tool_05" || actor_id === "tool_10",
+    );
+
+    expect(affected).toHaveLength(89);
+    expect(affected.every((card) =>
+      card.name_ko.startsWith(card.actor_id === "tool_05" ? "헤아린 " : "부려놓은 "),
+    )).toBe(true);
+    expect(equipmentEnvelope.source_hash).not.toBe(
+      "285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a",
+    );
+    expect(equipmentEnvelope.content_hash).toBe(
+      "2d363142278173cd34d8dc40faa0fbeb3e918a818e2bedd407ee8084911a8aa7",
+    );
+  });
+
+  it("detects only frozen normalized form-repeat rules in stable independent order", () => {
+    expect(detectFormRepeatFlags("재어진", "재")).toContain("MODIFIER_NOUN_EXACT_COLLISION");
+    expect(detectFormRepeatFlags("불어넣은", "불티")).toEqual(["FIRST_SYLLABLE_REPEAT"]);
+    expect(detectFormRepeatFlags("실려온", "실")).toEqual([
+      "MODIFIER_NOUN_EXACT_COLLISION",
+      "FIRST_SYLLABLE_REPEAT",
+    ]);
+    expect(detectFormRepeatFlags("헤아린 재", "재")).toEqual([]);
+    expect(detectFormRepeatFlags("재", "재어진")).toEqual(["FIRST_SYLLABLE_REPEAT"]);
+    expect(detectFormRepeatFlags("가늠한", "가")).toEqual([
+      "MODIFIER_NOUN_EXACT_COLLISION",
+      "FIRST_SYLLABLE_REPEAT",
+    ]);
+    expect(detectFormRepeatFlags("alpha", "a")).toEqual(["MODIFIER_NOUN_EXACT_COLLISION"]);
+    expect(detectFormRepeatFlags("", "")).toEqual([]);
+    expect(detectFormRepeatFlags(" \t\n", "\u00a0")).toEqual([]);
+    expect(detectFormRepeatFlags("재", " \u00a0")).toEqual([]);
+    expect(detectFormRepeatFlags("재\u00a0어진", "재")).toEqual([
+      "MODIFIER_NOUN_EXACT_COLLISION",
+      "FIRST_SYLLABLE_REPEAT",
+    ]);
+    expect(detectFormRepeatFlags("·재어진", "재")).toEqual([]);
   });
 
   it("uses only the approved finite overstatement token list", () => {
@@ -243,6 +288,51 @@ describe("canonical name-review package", () => {
     );
   });
 
+  it("uses the exported review version and reports exactly the sorted flagged CSV rows", () => {
+    const result = runNameReview({ repositoryRoot, checkOnly: true, requireClosed: false });
+    const [headers, ...csvRows] = parseCsv(
+      readFileSync(resolve(repositoryRoot, "docs/reviews/name-review.generated.csv"), "utf8"),
+    );
+    const column = (name: string) => headers.indexOf(name);
+    const expected = csvRows
+      .filter((row) => Number(row[column("flag_count")]) > 0)
+      .map((row) => ({
+        card_id: row[column("card_id")],
+        generated_name_ko: row[column("generated_name_ko")],
+        flags: row[column("flags")].split("|"),
+      }));
+
+    expect(result.review_version).toBe(NAME_REVIEW_VERSION);
+    expect(result.flagged_rows).toEqual(expected);
+    expect(result.flagged_rows.map(({ card_id }) => card_id)).toEqual(
+      [...result.flagged_rows.map(({ card_id }) => card_id)].sort(),
+    );
+  });
+
+  it("keeps the archived v1 decision bytes and opens a fresh pending v2 review", () => {
+    const oldSourceHash = "285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a";
+    const archivedPath = resolve(
+      repositoryRoot,
+      `docs/reviews/archive/${oldSourceHash}/name-review.decisions.json`,
+    );
+    const archivedText = readFileSync(archivedPath, "utf8");
+    const live = JSON.parse(
+      readFileSync(resolve(repositoryRoot, "docs/reviews/name-review.decisions.json"), "utf8"),
+    ) as NameReviewDecisions;
+
+    expect(sha256Utf8(archivedText)).toBe(
+      "d3b80f9eb81d9cf4322ab8bd39af95a848e28b0665800ca2eba70ecee2ffb0f9",
+    );
+    expect(JSON.parse(archivedText)).toMatchObject({
+      review_version: "name-review-v1",
+      target: { source_hash: oldSourceHash },
+    });
+    expect(live).toEqual(makeInitialNameReviewDecisions(targetFor()));
+    expect(() => runNameReview({ repositoryRoot, checkOnly: true, requireClosed: true })).toThrow(
+      /closed review requires all_rows_reviewed: true/,
+    );
+  });
+
   it("rejects unknown and duplicate override ids", () => {
     const built = build();
     const decisions = makeInitialNameReviewDecisions(targetFor(built));
@@ -285,7 +375,8 @@ describe("canonical name-review package", () => {
       ).toThrow(/default_status is invalid/);
     }
 
-    const flaggedId = rows.find(({ flag_count }) => Number(flag_count) > 0)!.card_id;
+    const flaggedRow = rows.find(({ flag_count }) => Number(flag_count) > 0)!;
+    const flaggedId = flaggedRow.card_id;
     const missingFlagDisposition = structuredClone(decisions);
     delete missingFlagDisposition.overrides[flaggedId];
     expect(() =>
@@ -302,8 +393,8 @@ describe("canonical name-review package", () => {
     const change: NameReviewOverride = {
       status: "CHANGE_REQUIRED",
       reason: "명사 반복을 줄여야 함",
-      proposed_name_ko: "계측된 재",
-      application_hint: "SOURCE:tool_05.modifier_form",
+      proposed_name_ko: `다르게 빚은 ${flaggedRow.receptor_noun_form}`,
+      application_hint: `SOURCE:${flaggedRow.actor_id}.modifier_form`,
     };
     changed.overrides[flaggedId] = change;
     expect(() => validateNameReviewDecisions(changed, changed.target, rows, true)).not.toThrow();

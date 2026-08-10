@@ -5,7 +5,7 @@ import type { Law, Material } from "../schema/contracts";
 import type { GeneratedEquipmentDetail } from "./generate-catalog";
 import { canonicalSerialize } from "./render-generated";
 
-export const NAME_REVIEW_VERSION = "name-review-v1";
+export const NAME_REVIEW_VERSION = "name-review-v2";
 export const NAME_REVIEW_ROW_COUNT = 1326;
 export const NAME_REVIEW_BRANCH_COUNTS = { LAW: 861, CATALYST: 420, EQUIPMENT: 45 } as const;
 
@@ -43,7 +43,8 @@ export type NameReviewFlag =
   | "EDGE_WHITESPACE"
   | "REPEATED_WHITESPACE"
   | "ADJACENT_TOKEN_REPEAT"
-  | "NARROW_NOUN_ECHO"
+  | "MODIFIER_NOUN_EXACT_COLLISION"
+  | "FIRST_SYLLABLE_REPEAT"
   | "SENTENCE_MARK";
 
 export type NameReviewRow = Record<NameReviewHeader, string>;
@@ -207,10 +208,32 @@ function hasAdjacentTokenRepeat(name: string): boolean {
   return tokens.some((token, index) => index > 0 && token === tokens[index - 1]);
 }
 
-function hasNarrowNounEcho(modifier: string, noun: string): boolean {
-  const compactModifier = modifier.normalize("NFKC").replace(/\s+/gu, "");
-  const compactNoun = noun.normalize("NFKC").replace(/\s+/gu, "");
-  return compactModifier.includes(compactNoun) || compactNoun.includes(compactModifier);
+export function detectFormRepeatFlags(modifier: string, noun: string): NameReviewFlag[] {
+  const compactModifier = modifier.normalize("NFKC").replace(/\s/gu, "");
+  const compactNoun = noun.normalize("NFKC").replace(/\s/gu, "");
+  const flags: NameReviewFlag[] = [];
+
+  if (
+    compactModifier.length > 0 &&
+    compactNoun.length > 0 &&
+    compactModifier.startsWith(compactNoun)
+  ) {
+    flags.push("MODIFIER_NOUN_EXACT_COLLISION");
+  }
+
+  const modifierFirst = Array.from(compactModifier)[0];
+  const nounFirst = Array.from(compactNoun)[0];
+  const isHangulSyllable = (value: string | undefined) =>
+    value !== undefined && value >= "가" && value <= "힣";
+  if (
+    isHangulSyllable(modifierFirst) &&
+    isHangulSyllable(nounFirst) &&
+    modifierFirst === nounFirst
+  ) {
+    flags.push("FIRST_SYLLABLE_REPEAT");
+  }
+
+  return flags;
 }
 
 function flagsFor(
@@ -231,7 +254,7 @@ function flagsFor(
   if (name !== name.trim()) flags.push("EDGE_WHITESPACE");
   if (/\s{2,}/u.test(name)) flags.push("REPEATED_WHITESPACE");
   if (hasAdjacentTokenRepeat(name)) flags.push("ADJACENT_TOKEN_REPEAT");
-  if (hasNarrowNounEcho(actor.modifier_form, receptor.noun_form)) flags.push("NARROW_NOUN_ECHO");
+  flags.push(...detectFormRepeatFlags(actor.modifier_form, receptor.noun_form));
   if (/[.!?。！？]/u.test(name)) flags.push("SENTENCE_MARK");
   return flags;
 }
@@ -268,7 +291,8 @@ export function buildNameReview(input: BuildNameReviewInput): BuiltNameReview {
       "EDGE_WHITESPACE",
       "REPEATED_WHITESPACE",
       "ADJACENT_TOKEN_REPEAT",
-      "NARROW_NOUN_ECHO",
+      "MODIFIER_NOUN_EXACT_COLLISION",
+      "FIRST_SYLLABLE_REPEAT",
       "SENTENCE_MARK",
     ].map((flag) => [flag, 0]),
   ) as Record<NameReviewFlag, number>;
