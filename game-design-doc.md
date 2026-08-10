@@ -352,19 +352,27 @@ const material: Material = {
   "representation": "SOLID",
   "origin": "GROUND_STILL",
   "category": "GROUND_PRODUCT",
-  "rarity": "UNCOMMON",
+  "rarity": null,
+  "rarity_status": "PENDING_DEPTH_CLASSIFICATION",
   "art": "cards/still_01.png",
-  "potency": 2,
-  "cost_base": 1
+  "balance_status": "PENDING_2026_08_21",
+  "potency": null,
+  "cost_base": null
 };
 ```
 
-기존 `Material` 필드에 `potency`와 `cost_base`를 추가한 한 재료의 예시다.
+기존 `Material` 필드에 밸런스 상태와 `potency`, `cost_base`를 추가한 한 재료의 예시다.
 
 | 필드 | 범위 | 의미 |
 |---|---|---|
-| `potency` | 1~3 | 재료의 힘. 원석 1, 터 산물 1~3, 도구 1, 기괴 산물 3 |
-| `cost_base` | 0~2 | 단독 사용 시 코스트 |
+| `balance_status` | `PENDING_2026_08_21` · `APPROVED` | 수치 승인 상태 |
+| `potency` | `null` 또는 1~3 | 재료의 힘. `APPROVED`일 때만 수를 갖는다 |
+| `cost_base` | `null` 또는 0~2 | 단독 사용 코스트. `APPROVED`일 때만 수를 갖는다 |
+
+터 산물의 깊이별 희귀도 경계는 아직 확정되지 않았다. 이 30장은
+`rarity_status: PENDING_DEPTH_CLASSIFICATION`, `rarity: null`로 둔다. 원석·도구·기괴 산물은 각각
+`COMMON`·`UNCOMMON`·`RARE`로 승인되어 있다. 미확정 수치에 0이나 1을 자리표시자로 넣지 않으며,
+`APPROVED` 전환 시 두 밸런스 값을 함께 채운다.
 
 ### 파생 공식
 
@@ -378,7 +386,9 @@ Tier2Card(A, B):
 ```
 
 **조정 가능한 계수는 넷뿐이다** — `SAME_BONUS`, `COST_DIVISOR`, 법칙별 `power_coefficient`, `RESONANCE_RATE`.
-전체 밸런싱이 이 계수들의 조정으로 수렴한다. `power_coefficient`는 각 Law에 반드시 존재하는 `number` 필드이며, 정확한 승인값은 8/21 이후 확정한다. 그 전에는 임의 수치를 넣지 않는다.
+전체 밸런싱이 이 계수들의 조정으로 수렴한다. `power_coefficient`는 각 Law에 반드시 존재하지만,
+`balance_status: PENDING_2026_08_21` 동안은 `null`이다. 8/21 이후 `APPROVED`로 전환할 때만 유한한
+양수를 넣는다. 그 전에는 임의 수치를 넣지 않는다.
 
 ### 동일 조합의 대가
 
@@ -489,7 +499,10 @@ effect_final    = power * (1 + resonance * RESONANCE_RATE)
 
 `CATALYZED_STILL` · `CATALYZED_BURN` · `CATALYZED_SCATTER` · `CATALYZED_ROT` · `CATALYZED_WASH` · `CATALYZED_JOIN`
 
-구도는 `SPECIMEN` 고정, 색은 재료 속성 단색, 밀도는 재료를 따른다. 효과는 해당 속성의 단순 강화.
+구도는 `SPECIMEN` 고정, 색은 재료 속성 단색, 밀도는 재료의 정체성과 `representation`에서 파생한다.
+T008의 프롬프트 생성기는 이 두 필드를 밀도 입력에 반영한다. 효과는 새 효과군을 만들지 않고 기존
+Law 21의 같은 속성 효과를 재사용한다. 결속 촉매는 `AMPLIFY_JOIN`이 아니라 결속의 확정 역할인
+`DOUBLE_FORGE`를 사용하며, 촉매만의 별도 수치나 부작용 효과를 추가하지 않는다.
 
 ### 도구 × 도구 = 장비
 
@@ -502,6 +515,9 @@ effect_final    = power * (1 + resonance * RESONANCE_RATE)
 | 구도 | `CUTAWAY` (기구 내부 구조도) |
 | 색 | 무채색 + 금속 광택 |
 | 효과 | 전투 중 소모되지 않는 **상시 패시브** |
+
+장비 45개의 밀도는 `DENSE`로 통일해 `CUTAWAY` 내부 구조도의 판독성을 맞춘다. 이는 T003 구현
+결정이며 T012 마스터 스타일 승인 전까지 아트 방향에 맞춰 수정할 수 있다.
 
 > §9 시스템 슬롯의 "장비 = 패시브 렐릭"이 여기서 채워진다. 세계관과도 맞는다 —
 > 이 문명에서 더 나은 도구는 도구를 빚어서 만든다.
@@ -533,6 +549,12 @@ effect_final    = power * (1 + resonance * RESONANCE_RATE)
 | 장비 | 1 |
 | 심장 | 6 |
 | **합계** | **34** |
+
+`name_ko`는 개별 사용자 카드명이 아니라 내부 결과군 라벨이다. 교차·동일·심장 밀도와 장비의
+`DENSE` 밀도는 확정되어 있다. 촉매는 `density: null`, `density_status: DERIVED_FROM_MATERIAL`로
+재료에서 파생한다. 장비 효과는 레시피별 파생 규칙이다. 심장 효과는 상대 속성 효과의 최상위
+강화형이라는 의미가 확정되어 `ATTRIBUTE_MAXIMUM_RULE`로 기록하고, 8/21 이후에는 수치만 확정한다.
+따라서 현재 최종 아트 manifest 준비 상태는 `READY`다.
 
 ---
 
@@ -674,6 +696,9 @@ effect_final    = power * (1 + resonance * RESONANCE_RATE)
 ### ⑤ 명명 필드 표 (코덱스 구현용)
 
 각 재료는 `수식어형`(행위자일 때)과 `명사형`(대상일 때)을 갖는다. §4의 명명 공식이 이 두 필드를 참조한다.
+
+아래 문자열의 단일 canonical 원본은 `materials.json`이다. validator에 52행을 다시 복제하지 않으며,
+T005/T006에서 사용자 이름을 검수하고 source revision hash로 승인본을 보호한다.
 
 #### 속성 원석
 
@@ -843,13 +868,18 @@ const law: Law = {
   "actor": "STILL",
   "law_text_ko": "터지려는 것을 붙잡으면 눌린다",
   "combat_effect": "DELAYED_EXPLOSION",
-  "power_coefficient": approvedPowerCoefficient // number. 정확한 승인값은 8/21 이후 확정
+  "balance_status": "PENDING_2026_08_21",
+  "power_coefficient": null
 };
 ```
 
 `actor` 필드가 **명명 공식의 방향**을 결정한다 — actor 쪽 재료가 `modifier_form`, 상대가 `noun_form`을 제공한다.
 
-`power_coefficient`는 모든 Law에 필요한 `number` 필드다. 위 표기는 스키마 설명용 자리표시자이며 임의의 밸런스 숫자를 뜻하지 않는다. 정확한 값은 8/21 이후 승인한다.
+속성 canonical 순서는 `STILL → BURN → SCATTER → ROT → WASH → JOIN`이다. 모든 `pair`를 이
+순서로 정렬하고 `actor`는 `pair[0]`으로 둔다. 자바스크립트 문자열 정렬은 이 순서를 보장하지 않는다.
+
+`power_coefficient`는 모든 Law에 필요한 필드다. `PENDING_2026_08_21`이면 반드시 `null`이고,
+정확한 값을 승인한 뒤에만 `APPROVED`와 유한한 양수로 함께 바꾼다.
 
 ### 카드 생성 규칙
 
