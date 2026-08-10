@@ -34,6 +34,9 @@ npm ci
 npm run dev          # Vite 개발 서버
 npm run gen:data     # canonical 카드 1,326개와 장비 상세 45개를 결정론적으로 생성
 npm run gen:data:check # 커밋된 생성물이 원본·생성기와 byte 단위로 일치하는지 검사
+npm run review:names  # 이름 검수 CSV 재생성 및 최초 PENDING 결정 파일 생성
+npm run review:names:check # 이름 검수 산출물·결정 target freshness 검사
+npm run review:names:check -- --require-closed # T006 최종 종료 게이트
 npm test             # Vitest 테스트
 npm run typecheck    # TypeScript 검사
 npm run build        # 타입 검사 후 dist/ 정적 빌드
@@ -79,6 +82,12 @@ main (composition root)
 `content_hash`는 각 `items` payload의 canonical JSON을 해시합니다. 타임스탬프와 난수는 없습니다.
 `equipment.generated.json`은 메인 카드의 장비 45개를 참조하는 상세 view이며 별도 결과나 아트를
 선언하지 않습니다.
+
+이름 검수 규칙, v1 결정 archive, source 변경 뒤 rebaseline 절차와 T006 handoff는
+[이름 검수 패키지 안내](docs/reviews/README.md)에 있습니다. 현재 target과 hash는 문서에 복사하지
+않으며 [live 결정 파일](docs/reviews/name-review.decisions.json)과
+`npm run review:names:check` 출력에서 확인합니다. live v2 결정은 새 검수의 `PENDING` 시작점이며
+최종 승인을 뜻하지 않습니다.
 
 ## 구현 문서
 

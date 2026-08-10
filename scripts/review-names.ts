@@ -12,6 +12,7 @@ import {
   renderNameReviewDecisions,
   validateNameReviewDecisions,
   NAME_REVIEW_HEADERS,
+  NAME_REVIEW_VERSION,
   type NameReviewDecisions,
 } from "../src/data/generator/name-review";
 import {
@@ -154,7 +155,7 @@ export function runNameReview(options: RunNameReviewOptions) {
 
   return {
     command: options.checkOnly ? "review:names:check" : "review:names",
-    review_version: "name-review-v1",
+    review_version: NAME_REVIEW_VERSION,
     source_hash: target.source_hash,
     cards_content_hash: target.cards_content_hash,
     cards_file_hash: target.cards_file_hash,
@@ -168,6 +169,13 @@ export function runNameReview(options: RunNameReviewOptions) {
       ]),
     ),
     flag_counts: built.flagCounts,
+    flagged_rows: built.rows
+      .filter((row) => Number(row.flag_count) > 0)
+      .map((row) => ({
+        card_id: row.card_id,
+        generated_name_ko: row.generated_name_ko,
+        flags: row.flags.split("|"),
+      })),
     require_closed: options.requireClosed,
     written: options.checkOnly
       ? []

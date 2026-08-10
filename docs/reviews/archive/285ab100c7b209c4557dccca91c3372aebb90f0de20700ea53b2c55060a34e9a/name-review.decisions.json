@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "review_version": "name-review-v1",
+  "target": {
+    "generator_version": "canonical-v1",
+    "source_hash": "285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a",
+    "cards_content_hash": "3036f5bd67adc2aa718f30a7cda7fd97ca6b3cb193d106ed91a6dcd78fc0a4b4",
+    "cards_file_hash": "02a48019a29b5921132edb943386903353879c25cf376663f0183be7cabe113e",
+    "review_rows_hash": "548842cf2c0fb9a43d3fbcfbfa3f1686f8073d6a45100cb4e4f7fae9e440075c",
+    "review_csv_hash": "966bc669852ba3aeab945fb8d38a6d2dff1647a06c8def2f6a6610e9cc7928ff",
+    "review_row_count": 1326
+  },
+  "default_status": "PENDING",
+  "all_rows_reviewed": false,
+  "reviewer": null,
+  "reviewed_at": null,
+  "evidence": null,
+  "overrides": {}
+}

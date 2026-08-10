@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "generator_version": "canonical-v1",
-  "source_hash": "285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a",
-  "content_hash": "3036f5bd67adc2aa718f30a7cda7fd97ca6b3cb193d106ed91a6dcd78fc0a4b4",
+  "source_hash": "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720",
+  "content_hash": "283054dfb4e97d4f3420d0711ff7affb0dd2afe9d6140b81c6e77ce71b2c2886",
   "count": 1326,
   "items": [
     {
@@ -1265,7 +1265,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_05",
       "receptor_id": "burn_01",
-      "name_ko": "재어진 잉걸",
+      "name_ko": "헤아린 잉걸",
       "effective_attributes": [
         "BURN"
       ],
@@ -1430,7 +1430,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_10",
       "receptor_id": "burn_01",
-      "name_ko": "실려온 잉걸",
+      "name_ko": "부려놓은 잉걸",
       "effective_attributes": [
         "BURN"
       ],
@@ -2835,7 +2835,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_05",
       "receptor_id": "burn_02",
-      "name_ko": "재어진 심지",
+      "name_ko": "헤아린 심지",
       "effective_attributes": [
         "BURN"
       ],
@@ -3000,7 +3000,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_10",
       "receptor_id": "burn_02",
-      "name_ko": "실려온 심지",
+      "name_ko": "부려놓은 심지",
       "effective_attributes": [
         "BURN"
       ],
@@ -4374,7 +4374,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_05",
       "receptor_id": "burn_03",
-      "name_ko": "재어진 재",
+      "name_ko": "헤아린 재",
       "effective_attributes": [
         "BURN"
       ],
@@ -4539,7 +4539,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_10",
       "receptor_id": "burn_03",
-      "name_ko": "실려온 재",
+      "name_ko": "부려놓은 재",
       "effective_attributes": [
         "BURN"
       ],
@@ -5882,7 +5882,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_05",
       "receptor_id": "burn_04",
-      "name_ko": "재어진 열",
+      "name_ko": "헤아린 열",
       "effective_attributes": [
         "BURN"
       ],
@@ -6047,7 +6047,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_10",
       "receptor_id": "burn_04",
-      "name_ko": "실려온 열",
+      "name_ko": "부려놓은 열",
       "effective_attributes": [
         "BURN"
       ],
@@ -7359,7 +7359,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_05",
       "receptor_id": "burn_05",
-      "name_ko": "재어진 불티",
+      "name_ko": "헤아린 불티",
       "effective_attributes": [
         "BURN"
       ],
@@ -7524,7 +7524,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_10",
       "receptor_id": "burn_05",
-      "name_ko": "실려온 불티",
+      "name_ko": "부려놓은 불티",
       "effective_attributes": [
         "BURN"
       ],
@@ -8805,7 +8805,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "join_01",
-      "name_ko": "재어진 실",
+      "name_ko": "헤아린 실",
       "effective_attributes": [
         "JOIN"
       ],
@@ -8970,7 +8970,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "join_01",
-      "name_ko": "실려온 실",
+      "name_ko": "부려놓은 실",
       "effective_attributes": [
         "JOIN"
       ],
@@ -10220,7 +10220,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "join_02",
-      "name_ko": "재어진 손",
+      "name_ko": "헤아린 손",
       "effective_attributes": [
         "JOIN"
       ],
@@ -10385,7 +10385,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "join_02",
-      "name_ko": "실려온 손",
+      "name_ko": "부려놓은 손",
       "effective_attributes": [
         "JOIN"
       ],
@@ -11604,7 +11604,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "join_03",
-      "name_ko": "재어진 매듭",
+      "name_ko": "헤아린 매듭",
       "effective_attributes": [
         "JOIN"
       ],
@@ -11769,7 +11769,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "join_03",
-      "name_ko": "실려온 매듭",
+      "name_ko": "부려놓은 매듭",
       "effective_attributes": [
         "JOIN"
       ],
@@ -12957,7 +12957,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "join_04",
-      "name_ko": "재어진 그림자",
+      "name_ko": "헤아린 그림자",
       "effective_attributes": [
         "JOIN"
       ],
@@ -13122,7 +13122,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "join_04",
-      "name_ko": "실려온 그림자",
+      "name_ko": "부려놓은 그림자",
       "effective_attributes": [
         "JOIN"
       ],
@@ -14279,7 +14279,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "join_05",
-      "name_ko": "재어진 소리",
+      "name_ko": "헤아린 소리",
       "effective_attributes": [
         "JOIN"
       ],
@@ -14444,7 +14444,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "join_05",
-      "name_ko": "실려온 소리",
+      "name_ko": "부려놓은 소리",
       "effective_attributes": [
         "JOIN"
       ],
@@ -15570,7 +15570,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "odd_01",
-      "name_ko": "재어진 주전자",
+      "name_ko": "헤아린 주전자",
       "effective_attributes": [
         "JOIN"
       ],
@@ -15735,7 +15735,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "odd_01",
-      "name_ko": "실려온 주전자",
+      "name_ko": "부려놓은 주전자",
       "effective_attributes": [
         "JOIN"
       ],
@@ -16830,7 +16830,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_05",
       "receptor_id": "odd_02",
-      "name_ko": "재어진 사다리",
+      "name_ko": "헤아린 사다리",
       "effective_attributes": [
         "STILL"
       ],
@@ -16995,7 +16995,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_10",
       "receptor_id": "odd_02",
-      "name_ko": "실려온 사다리",
+      "name_ko": "부려놓은 사다리",
       "effective_attributes": [
         "STILL"
       ],
@@ -18059,7 +18059,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_05",
       "receptor_id": "odd_03",
-      "name_ko": "재어진 초",
+      "name_ko": "헤아린 초",
       "effective_attributes": [
         "BURN"
       ],
@@ -18224,7 +18224,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_10",
       "receptor_id": "odd_03",
-      "name_ko": "실려온 초",
+      "name_ko": "부려놓은 초",
       "effective_attributes": [
         "BURN"
       ],
@@ -19257,7 +19257,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_05",
       "receptor_id": "odd_04",
-      "name_ko": "재어진 장갑",
+      "name_ko": "헤아린 장갑",
       "effective_attributes": [
         "WASH"
       ],
@@ -19422,7 +19422,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_10",
       "receptor_id": "odd_04",
-      "name_ko": "실려온 장갑",
+      "name_ko": "부려놓은 장갑",
       "effective_attributes": [
         "WASH"
       ],
@@ -20424,7 +20424,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "odd_05",
-      "name_ko": "재어진 못",
+      "name_ko": "헤아린 못",
       "effective_attributes": [
         "JOIN"
       ],
@@ -20589,7 +20589,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "odd_05",
-      "name_ko": "실려온 못",
+      "name_ko": "부려놓은 못",
       "effective_attributes": [
         "JOIN"
       ],
@@ -21560,7 +21560,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_05",
       "receptor_id": "odd_06",
-      "name_ko": "재어진 자",
+      "name_ko": "헤아린 자",
       "effective_attributes": [
         "ROT"
       ],
@@ -21725,7 +21725,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_10",
       "receptor_id": "odd_06",
-      "name_ko": "실려온 자",
+      "name_ko": "부려놓은 자",
       "effective_attributes": [
         "ROT"
       ],
@@ -22665,7 +22665,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_05",
       "receptor_id": "ore_burn",
-      "name_ko": "재어진 불씨",
+      "name_ko": "헤아린 불씨",
       "effective_attributes": [
         "BURN"
       ],
@@ -22830,7 +22830,7 @@
       "result_class": "CATALYZED_BURN",
       "actor_id": "tool_10",
       "receptor_id": "ore_burn",
-      "name_ko": "실려온 불씨",
+      "name_ko": "부려놓은 불씨",
       "effective_attributes": [
         "BURN"
       ],
@@ -23739,7 +23739,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_05",
       "receptor_id": "ore_join",
-      "name_ko": "재어진 뭉치",
+      "name_ko": "헤아린 뭉치",
       "effective_attributes": [
         "JOIN"
       ],
@@ -23904,7 +23904,7 @@
       "result_class": "CATALYZED_JOIN",
       "actor_id": "tool_10",
       "receptor_id": "ore_join",
-      "name_ko": "실려온 뭉치",
+      "name_ko": "부려놓은 뭉치",
       "effective_attributes": [
         "JOIN"
       ],
@@ -24782,7 +24782,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_05",
       "receptor_id": "ore_rot",
-      "name_ko": "재어진 부스러기",
+      "name_ko": "헤아린 부스러기",
       "effective_attributes": [
         "ROT"
       ],
@@ -24947,7 +24947,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_10",
       "receptor_id": "ore_rot",
-      "name_ko": "실려온 부스러기",
+      "name_ko": "부려놓은 부스러기",
       "effective_attributes": [
         "ROT"
       ],
@@ -25794,7 +25794,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_05",
       "receptor_id": "ore_scatter",
-      "name_ko": "재어진 티끌",
+      "name_ko": "헤아린 티끌",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -25959,7 +25959,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_10",
       "receptor_id": "ore_scatter",
-      "name_ko": "실려온 티끌",
+      "name_ko": "부려놓은 티끌",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -26775,7 +26775,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_05",
       "receptor_id": "ore_still",
-      "name_ko": "재어진 덩이",
+      "name_ko": "헤아린 덩이",
       "effective_attributes": [
         "STILL"
       ],
@@ -26940,7 +26940,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_10",
       "receptor_id": "ore_still",
-      "name_ko": "실려온 덩이",
+      "name_ko": "부려놓은 덩이",
       "effective_attributes": [
         "STILL"
       ],
@@ -27725,7 +27725,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_05",
       "receptor_id": "ore_wash",
-      "name_ko": "재어진 속살",
+      "name_ko": "헤아린 속살",
       "effective_attributes": [
         "WASH"
       ],
@@ -27890,7 +27890,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_10",
       "receptor_id": "ore_wash",
-      "name_ko": "실려온 속살",
+      "name_ko": "부려놓은 속살",
       "effective_attributes": [
         "WASH"
       ],
@@ -28644,7 +28644,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_05",
       "receptor_id": "rot_01",
-      "name_ko": "재어진 딱지",
+      "name_ko": "헤아린 딱지",
       "effective_attributes": [
         "ROT"
       ],
@@ -28809,7 +28809,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_10",
       "receptor_id": "rot_01",
-      "name_ko": "실려온 딱지",
+      "name_ko": "부려놓은 딱지",
       "effective_attributes": [
         "ROT"
       ],
@@ -29532,7 +29532,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_05",
       "receptor_id": "rot_02",
-      "name_ko": "재어진 뿌리",
+      "name_ko": "헤아린 뿌리",
       "effective_attributes": [
         "ROT"
       ],
@@ -29697,7 +29697,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_10",
       "receptor_id": "rot_02",
-      "name_ko": "실려온 뿌리",
+      "name_ko": "부려놓은 뿌리",
       "effective_attributes": [
         "ROT"
       ],
@@ -30389,7 +30389,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_05",
       "receptor_id": "rot_03",
-      "name_ko": "재어진 곰팡이",
+      "name_ko": "헤아린 곰팡이",
       "effective_attributes": [
         "ROT"
       ],
@@ -30554,7 +30554,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_10",
       "receptor_id": "rot_03",
-      "name_ko": "실려온 곰팡이",
+      "name_ko": "부려놓은 곰팡이",
       "effective_attributes": [
         "ROT"
       ],
@@ -31215,7 +31215,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_05",
       "receptor_id": "rot_04",
-      "name_ko": "재어진 얼룩",
+      "name_ko": "헤아린 얼룩",
       "effective_attributes": [
         "ROT"
       ],
@@ -31380,7 +31380,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_10",
       "receptor_id": "rot_04",
-      "name_ko": "실려온 얼룩",
+      "name_ko": "부려놓은 얼룩",
       "effective_attributes": [
         "ROT"
       ],
@@ -32010,7 +32010,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_05",
       "receptor_id": "rot_05",
-      "name_ko": "재어진 냄새",
+      "name_ko": "헤아린 냄새",
       "effective_attributes": [
         "ROT"
       ],
@@ -32175,7 +32175,7 @@
       "result_class": "CATALYZED_ROT",
       "actor_id": "tool_10",
       "receptor_id": "rot_05",
-      "name_ko": "실려온 냄새",
+      "name_ko": "부려놓은 냄새",
       "effective_attributes": [
         "ROT"
       ],
@@ -32774,7 +32774,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_05",
       "receptor_id": "scat_01",
-      "name_ko": "재어진 뼈",
+      "name_ko": "헤아린 뼈",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -32939,7 +32939,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_10",
       "receptor_id": "scat_01",
-      "name_ko": "실려온 뼈",
+      "name_ko": "부려놓은 뼈",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -33507,7 +33507,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_05",
       "receptor_id": "scat_02",
-      "name_ko": "재어진 씨",
+      "name_ko": "헤아린 씨",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -33672,7 +33672,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_10",
       "receptor_id": "scat_02",
-      "name_ko": "실려온 씨",
+      "name_ko": "부려놓은 씨",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -34209,7 +34209,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_05",
       "receptor_id": "scat_03",
-      "name_ko": "재어진 껍데기",
+      "name_ko": "헤아린 껍데기",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -34374,7 +34374,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_10",
       "receptor_id": "scat_03",
-      "name_ko": "실려온 껍데기",
+      "name_ko": "부려놓은 껍데기",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -34880,7 +34880,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_05",
       "receptor_id": "scat_04",
-      "name_ko": "재어진 먼지",
+      "name_ko": "헤아린 먼지",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -35045,7 +35045,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_10",
       "receptor_id": "scat_04",
-      "name_ko": "실려온 먼지",
+      "name_ko": "부려놓은 먼지",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -35520,7 +35520,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_05",
       "receptor_id": "scat_05",
-      "name_ko": "재어진 바람",
+      "name_ko": "헤아린 바람",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -35685,7 +35685,7 @@
       "result_class": "CATALYZED_SCATTER",
       "actor_id": "tool_10",
       "receptor_id": "scat_05",
-      "name_ko": "실려온 바람",
+      "name_ko": "부려놓은 바람",
       "effective_attributes": [
         "SCATTER"
       ],
@@ -36129,7 +36129,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_05",
       "receptor_id": "still_01",
-      "name_ko": "재어진 서리꽃",
+      "name_ko": "헤아린 서리꽃",
       "effective_attributes": [
         "STILL"
       ],
@@ -36294,7 +36294,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_10",
       "receptor_id": "still_01",
-      "name_ko": "실려온 서리꽃",
+      "name_ko": "부려놓은 서리꽃",
       "effective_attributes": [
         "STILL"
       ],
@@ -36707,7 +36707,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_05",
       "receptor_id": "still_02",
-      "name_ko": "재어진 물방울",
+      "name_ko": "헤아린 물방울",
       "effective_attributes": [
         "STILL"
       ],
@@ -36872,7 +36872,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_10",
       "receptor_id": "still_02",
-      "name_ko": "실려온 물방울",
+      "name_ko": "부려놓은 물방울",
       "effective_attributes": [
         "STILL"
       ],
@@ -37254,7 +37254,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_05",
       "receptor_id": "still_03",
-      "name_ko": "재어진 발자국",
+      "name_ko": "헤아린 발자국",
       "effective_attributes": [
         "STILL"
       ],
@@ -37419,7 +37419,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_10",
       "receptor_id": "still_03",
-      "name_ko": "실려온 발자국",
+      "name_ko": "부려놓은 발자국",
       "effective_attributes": [
         "STILL"
       ],
@@ -37770,7 +37770,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_05",
       "receptor_id": "still_04",
-      "name_ko": "재어진 입김",
+      "name_ko": "헤아린 입김",
       "effective_attributes": [
         "STILL"
       ],
@@ -37935,7 +37935,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_10",
       "receptor_id": "still_04",
-      "name_ko": "실려온 입김",
+      "name_ko": "부려놓은 입김",
       "effective_attributes": [
         "STILL"
       ],
@@ -38255,7 +38255,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_05",
       "receptor_id": "still_05",
-      "name_ko": "재어진 종소리",
+      "name_ko": "헤아린 종소리",
       "effective_attributes": [
         "STILL"
       ],
@@ -38420,7 +38420,7 @@
       "result_class": "CATALYZED_STILL",
       "actor_id": "tool_10",
       "receptor_id": "still_05",
-      "name_ko": "실려온 종소리",
+      "name_ko": "부려놓은 종소리",
       "effective_attributes": [
         "STILL"
       ],
@@ -39988,7 +39988,7 @@
       "result_class": "EQUIPMENT",
       "actor_id": "tool_05",
       "receptor_id": "tool_06",
-      "name_ko": "재어진 풀무",
+      "name_ko": "헤아린 풀무",
       "effective_attributes": [],
       "combat_effect": null,
       "passive_effect_id": "EQUIPMENT_SCALE_ENERGY",
@@ -40012,7 +40012,7 @@
       "result_class": "EQUIPMENT",
       "actor_id": "tool_05",
       "receptor_id": "tool_07",
-      "name_ko": "재어진 저울",
+      "name_ko": "헤아린 저울",
       "effective_attributes": [],
       "combat_effect": null,
       "passive_effect_id": "EQUIPMENT_SCALE_BALANCE",
@@ -40036,7 +40036,7 @@
       "result_class": "EQUIPMENT",
       "actor_id": "tool_05",
       "receptor_id": "tool_08",
-      "name_ko": "재어진 표본 상자",
+      "name_ko": "헤아린 표본 상자",
       "effective_attributes": [],
       "combat_effect": null,
       "passive_effect_id": "EQUIPMENT_SCALE_KEEP",
@@ -40060,7 +40060,7 @@
       "result_class": "EQUIPMENT",
       "actor_id": "tool_05",
       "receptor_id": "tool_09",
-      "name_ko": "재어진 지도",
+      "name_ko": "헤아린 지도",
       "effective_attributes": [],
       "combat_effect": null,
       "passive_effect_id": "EQUIPMENT_SCALE_ROUTE",
@@ -40084,7 +40084,7 @@
       "result_class": "EQUIPMENT",
       "actor_id": "tool_05",
       "receptor_id": "tool_10",
-      "name_ko": "재어진 손수레",
+      "name_ko": "헤아린 손수레",
       "effective_attributes": [],
       "combat_effect": null,
       "passive_effect_id": "EQUIPMENT_SCALE_CARRY",
@@ -40108,7 +40108,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_05",
       "receptor_id": "wash_01",
-      "name_ko": "재어진 눈물",
+      "name_ko": "헤아린 눈물",
       "effective_attributes": [
         "WASH"
       ],
@@ -40141,7 +40141,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_05",
       "receptor_id": "wash_02",
-      "name_ko": "재어진 돌",
+      "name_ko": "헤아린 돌",
       "effective_attributes": [
         "WASH"
       ],
@@ -40174,7 +40174,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_05",
       "receptor_id": "wash_03",
-      "name_ko": "재어진 껍질",
+      "name_ko": "헤아린 껍질",
       "effective_attributes": [
         "WASH"
       ],
@@ -40207,7 +40207,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_05",
       "receptor_id": "wash_04",
-      "name_ko": "재어진 자국",
+      "name_ko": "헤아린 자국",
       "effective_attributes": [
         "WASH"
       ],
@@ -40240,7 +40240,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_05",
       "receptor_id": "wash_05",
-      "name_ko": "재어진 앙금",
+      "name_ko": "헤아린 앙금",
       "effective_attributes": [
         "WASH"
       ],
@@ -41173,7 +41173,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_10",
       "receptor_id": "wash_01",
-      "name_ko": "실려온 눈물",
+      "name_ko": "부려놓은 눈물",
       "effective_attributes": [
         "WASH"
       ],
@@ -41206,7 +41206,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_10",
       "receptor_id": "wash_02",
-      "name_ko": "실려온 돌",
+      "name_ko": "부려놓은 돌",
       "effective_attributes": [
         "WASH"
       ],
@@ -41239,7 +41239,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_10",
       "receptor_id": "wash_03",
-      "name_ko": "실려온 껍질",
+      "name_ko": "부려놓은 껍질",
       "effective_attributes": [
         "WASH"
       ],
@@ -41272,7 +41272,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_10",
       "receptor_id": "wash_04",
-      "name_ko": "실려온 자국",
+      "name_ko": "부려놓은 자국",
       "effective_attributes": [
         "WASH"
       ],
@@ -41305,7 +41305,7 @@
       "result_class": "CATALYZED_WASH",
       "actor_id": "tool_10",
       "receptor_id": "wash_05",
-      "name_ko": "실려온 앙금",
+      "name_ko": "부려놓은 앙금",
       "effective_attributes": [
         "WASH"
       ],
