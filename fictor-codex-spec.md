@@ -189,6 +189,8 @@ type Representation = "SOLID" | "PHENOMENON";
 type Category = "ORE" | "GROUND_PRODUCT" | "TOOL" | "ODDITY";
 type Rarity = "COMMON" | "UNCOMMON" | "RARE" | "EQUIPMENT" | "LEGENDARY";
 type BalanceStatus = "PENDING_2026_08_21" | "APPROVED";
+type ToolDomain = "FORGE" | "HAND" | "DECK" | "INFO" | "SCALE"
+                | "ENERGY" | "BALANCE" | "KEEP" | "ROUTE" | "CARRY";
 type Ground = "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER"
             | "GROUND_ROT" | "GROUND_WASH" | "GROUND_JOIN" | "NONE";
 
@@ -207,6 +209,7 @@ interface Material {
   potency: number | null;               // APPROVED일 때만 1~3
   cost_base: number | null;             // APPROVED일 때만 0~2
   art: string;                          // "cards/<id>.png"
+  tool_domain?: ToolDomain;             // TOOL에만 필수, 다른 category에는 금지
 }
 ```
 
@@ -269,6 +272,11 @@ interface ResultClass {
   combat_effect: string | null;
   combat_effect_status: "APPROVED" | "DERIVED_PER_RECIPE" | "ATTRIBUTE_MAXIMUM_RULE";
   combat_effect_rule: string | null;
+  equipment_interactions?: Array<{      // EQUIPMENT에만 10C2 = 45개
+    domains: [ToolDomain, ToolDomain];
+    passive_effect_id: string;
+    passive_effect_ko: string;
+  }>;
 }
 ```
 
@@ -278,6 +286,8 @@ interface ResultClass {
 `density_status: "DERIVED_FROM_MATERIAL"`을 쓴다. T008 프롬프트 생성기는 이 두 재료 필드를 입력에
 반영해야 한다. 장비 효과는 레시피별 파생(`DERIVED_PER_RECIPE`)이다. 심장은 상대 속성 효과의 최상위
 강화형이라는 의미가 이미 확정되어 `ATTRIBUTE_MAXIMUM_RULE`을 쓰며, 8/21 이후 확정하는 것은 수치뿐이다.
+도구별 `tool_domain`은 `materials.json`, 장비 45칸의 `equipment_interactions`와 한국어 패시브 문구는
+`resultClasses.json`의 `EQUIPMENT` 한 항목이 유일한 원본이다. 생성기와 테스트에 매트릭스를 복제하지 않는다.
 
 속성 색 매핑:
 
@@ -305,6 +315,21 @@ key = [idA, idB].sort().join("|")     // "still_01|burn_01"
 
 순서 무관. 총 `52C2 = 1,326` 엔트리.
 
+재료 id는 `^[a-z][a-z0-9_]*$`만 허용하며 같은 id 조합은 거부한다. 생성 ID는
+`recipe_id = <low>|<high>`, `card_id = forge__<low>__<high>`,
+`art = cards/<card_id>.png`, `art_key = <result_class>/<actor_id>_<receptor_id>`다.
+
+생성기는 두 도구면 `EQUIPMENT`(낮은 id가 actor), 도구 하나면 `CATALYZED_<상대 주속성>`(도구가
+actor), 그 외에는 Law의 actor 속성을 따른다. 동일 주속성일 때는 낮은 material id가 actor다.
+기괴 산물은 `attribute[0]`만 사용한다. 미승인 수치는 숫자 자리표시자를 만들지 않고
+`balance_status: "PENDING_2026_08_21"`, `stats: { potency: null, cost: null, power: null }`로 남긴다.
+장비는 `NOT_APPLICABLE`, `stats: null`이다.
+
+생성물은 `src/data/generated/cards.generated.json`(1,326)과
+`equipment.generated.json`(장비 상세 view 45)에 기록한다. 두 envelope는 schema version 1,
+`canonical-v1`, source/content SHA-256을 가지며 타임스탬프·난수가 없다. `equipment` view는 메인
+카드의 id·recipe·passive를 참조할 뿐 art나 별도 결과를 복제하지 않는다. 두 파일은 직접 편집하지 않는다.
+
 ---
 
 ## 4. 핵심 알고리즘
@@ -328,9 +353,9 @@ function makeTier2(A: Material, B: Material) {
 
 | A | B | 법칙 | 결과 |
 |---|---|---|---|
-| 서리꽃 (응결) | 잉걸 (점화) | 응결이 점화를 눌렀다 | 서리 밑 잉걸 |
-| 첫 불티 (점화) | 무른 뿌리 (부패) | 점화가 부패를 태웠다 | 탄 뿌리 |
-| 등불 (도구) | 곰팡이 꽃 (부패) | 촉매 → 부패 강화 | 밝혀진 곰팡이 꽃 |
+| 서리꽃 (응결) | 잉걸 (점화) | 응결이 점화를 눌렀다 | 서리 낀 잉걸 |
+| 첫 불티 (점화) | 무른 뿌리 (부패) | 점화가 부패를 태웠다 | 불붙은 뿌리 |
+| 등불 (도구) | 곰팡이 꽃 (부패) | 촉매 → 부패 강화 | 밝혀진 곰팡이 |
 
 ### 4.2 스탯 파생
 

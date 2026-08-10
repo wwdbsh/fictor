@@ -12,9 +12,10 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "gen:data": "node scripts/gen-data.mjs",
+    "gen:data": "tsx scripts/gen-data.ts",
+    "gen:data:check": "tsx scripts/gen-data.ts --check",
     "smoke:static": "node scripts/smoke-static.mjs",
-    "verify": "npm run gen:data && npm test && npm run build && npm run smoke:static"
+    "verify": "npm run gen:data:check && npm test && npm run build && npm run smoke:static"
   },
   "dependencies": {
     "react": "19.2.8",
@@ -31,6 +32,7 @@
     "jsdom": "29.0.0",
     "puppeteer": "25.5.0",
     "typescript": "7.0.2",
+    "tsx": "4.23.12",
     "vite": "8.2.1",
     "vitest": "4.1.10"
   }

@@ -31,6 +31,9 @@ describe("current source architecture", () => {
       expect(source, relative(repositoryRoot, file)).not.toMatch(
         /\b(?:document|window|localStorage|fetch|WebSocket)\b/,
       );
+      expect(source, relative(repositoryRoot, file)).not.toMatch(
+        /(?:from\s+["']node:|import\s*\(\s*["']node:|\b(?:crypto|fs|path)\b)/,
+      );
     }
   });
 
@@ -45,6 +48,22 @@ describe("current source architecture", () => {
     for (const file of sourceFiles(sourceRoot).filter((path) => path !== mainPath)) {
       const source = readFileSync(file, "utf8");
       expect(source, relative(repositoryRoot, file)).not.toMatch(/react-dom\/client|\bcreateRoot\s*\(/);
+    }
+  });
+
+  it("keeps source data, schemas, generators, and generated catalogs out of the browser graph", () => {
+    const browserRoots = [
+      join(sourceRoot, "main.tsx"),
+      ...["application", "assets", "persistence", "presentation"].flatMap((directory) =>
+        sourceFiles(join(sourceRoot, directory)),
+      ),
+    ];
+
+    for (const file of browserRoots) {
+      const source = readFileSync(file, "utf8");
+      expect(source, relative(repositoryRoot, file)).not.toMatch(
+        /(?:data\/(?:source|schema|generator|generated)|\.generated\.json|\bajv\b|\btsx\b)/i,
+      );
     }
   });
 });

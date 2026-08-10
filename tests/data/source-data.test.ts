@@ -8,6 +8,7 @@ import materialsJson from "../../src/data/source/materials.json";
 import resultClassesJson from "../../src/data/source/resultClasses.json";
 import {
   ATTRIBUTE_ORDER,
+  TOOL_DOMAIN_ORDER,
   compareAttributes,
   type BaseAttribute,
   type Law,
@@ -168,6 +169,9 @@ describe("hand-authored source data", () => {
         expect(material.origin).toBe("NONE");
         expect(material.representation).toBe("SOLID");
         expect([material.rarity_status, material.rarity]).toEqual(["APPROVED", "UNCOMMON"]);
+        expect(material.tool_domain).toBeDefined();
+      } else {
+        expect(material.tool_domain).toBeUndefined();
       }
 
       if (material.category === "ORE") {
@@ -266,6 +270,11 @@ describe("hand-authored source data", () => {
       combat_effect: null,
       combat_effect_status: "DERIVED_PER_RECIPE",
     });
+    const equipment = resultClasses.find((resultClass) => resultClass.family === "EQUIPMENT")!;
+    expect(equipment.equipment_interactions).toHaveLength(45);
+    expect(new Set(equipment.equipment_interactions?.flatMap(({ domains }) => domains))).toEqual(
+      new Set(TOOL_DOMAIN_ORDER),
+    );
 
     const hearts = resultClasses.filter((resultClass) => resultClass.family === "HEART");
     for (const [index, resultClass] of hearts.entries()) {
@@ -290,6 +299,7 @@ describe("hand-authored source data", () => {
         resultClass.name_ko,
         resultClass.density_rule,
         resultClass.combat_effect_rule,
+        ...((resultClass.equipment_interactions ?? []).map(({ passive_effect_ko }) => passive_effect_ko)),
       ].filter(Boolean) as string[]),
     ];
     const finiteOverstatementTerms = ["놀라운", "엄청난", "경이로운", "압도적인", "궁극의"];
@@ -343,6 +353,16 @@ describe("hand-authored source data", () => {
     expect(validateSourceSchemas(duplicateLawPair).valid).toBe(true);
     expect(validateSourceSemantics(duplicateLawPair).valid).toBe(false);
 
+    const duplicateLawEffectWithConsistentClass = clone(source);
+    const firstLaw = duplicateLawEffectWithConsistentClass.laws[0];
+    const secondLaw = duplicateLawEffectWithConsistentClass.laws[1];
+    secondLaw.combat_effect = firstLaw.combat_effect;
+    duplicateLawEffectWithConsistentClass.resultClasses.find(
+      ({ id }) => id === secondLaw.result_class,
+    )!.combat_effect = firstLaw.combat_effect;
+    expect(validateSourceSchemas(duplicateLawEffectWithConsistentClass).valid).toBe(true);
+    expect(validateSourceSemantics(duplicateLawEffectWithConsistentClass).valid).toBe(false);
+
     const missingLawPair = clone(source);
     missingLawPair.laws.pop();
     expect(validateSourceSemantics(missingLawPair).valid).toBe(false);
@@ -361,6 +381,30 @@ describe("hand-authored source data", () => {
     );
     expect(validateSourceSchemas(pendingHeartMeaning).valid).toBe(false);
     expect(validateSourceSemantics(pendingHeartMeaning).valid).toBe(false);
+
+    const duplicateToolDomain = clone(source);
+    duplicateToolDomain.materials.find(({ id }) => id === "tool_02")!.tool_domain = "FORGE";
+    expect(validateSourceSchemas(duplicateToolDomain).valid).toBe(true);
+    expect(validateSourceSemantics(duplicateToolDomain).valid).toBe(false);
+
+    const swappedToolDomains = clone(source);
+    const firstTool = swappedToolDomains.materials.find(({ id }) => id === "tool_01")!;
+    const secondTool = swappedToolDomains.materials.find(({ id }) => id === "tool_02")!;
+    [firstTool.tool_domain, secondTool.tool_domain] = [secondTool.tool_domain, firstTool.tool_domain];
+    expect(validateSourceSchemas(swappedToolDomains).valid).toBe(true);
+    expect(validateSourceSemantics(swappedToolDomains).valid).toBe(false);
+
+    const missingEquipmentPair = clone(source);
+    missingEquipmentPair.resultClasses.find(({ id }) => id === "EQUIPMENT")!
+      .equipment_interactions!.pop();
+    expect(validateSourceSchemas(missingEquipmentPair).valid).toBe(false);
+    expect(validateSourceSemantics(missingEquipmentPair).valid).toBe(false);
+
+    const forgedEquipmentId = clone(source);
+    forgedEquipmentId.resultClasses.find(({ id }) => id === "EQUIPMENT")!
+      .equipment_interactions![0].passive_effect_id = "EQUIPMENT_HAND_FORGE";
+    expect(validateSourceSchemas(forgedEquipmentId).valid).toBe(true);
+    expect(validateSourceSemantics(forgedEquipmentId).valid).toBe(false);
   });
 
   it("allows source-owned Korean labels to change without updating a mirror", () => {

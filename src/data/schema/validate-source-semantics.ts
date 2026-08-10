@@ -1,9 +1,11 @@
 import {
   ATTRIBUTE_ORDER,
+  TOOL_DOMAIN_ORDER,
   compareAttributes,
   type BaseAttribute,
   type Material,
   type ResultClass,
+  type ToolDomain,
 } from "./contracts";
 import type { SourceData } from "./validate-source-data";
 
@@ -154,6 +156,23 @@ export function validateSourceSemantics(source: SourceData): SemanticValidationR
   }
   for (const material of source.materials) validateMaterialStructure(material, errors);
 
+  const toolDomains = source.materials
+    .filter((material) => material.category === "TOOL")
+    .map((material) => material.tool_domain);
+  if (
+    toolDomains.length !== TOOL_DOMAIN_ORDER.length ||
+    new Set(toolDomains).size !== TOOL_DOMAIN_ORDER.length ||
+    TOOL_DOMAIN_ORDER.some((domain) => !toolDomains.includes(domain))
+  ) {
+    errors.push("tool domains must be unique and complete");
+  }
+  for (const [index, expectedDomain] of TOOL_DOMAIN_ORDER.entries()) {
+    const toolId = `tool_${String(index + 1).padStart(2, "0")}`;
+    if (source.materials.find((material) => material.id === toolId)?.tool_domain !== expectedDomain) {
+      errors.push(`tool domain mapping mismatch ${toolId}`);
+    }
+  }
+
   const resultClassById = new Map(source.resultClasses.map((resultClass) => [resultClass.id, resultClass]));
   if (resultClassById.size !== source.resultClasses.length) errors.push("result class ids must be unique");
 
@@ -167,6 +186,9 @@ export function validateSourceSemantics(source: SourceData): SemanticValidationR
     [...expectedPairKeys].some((pair) => !uniqueLawPairKeys.has(pair))
   ) {
     errors.push("law pair set mismatch");
+  }
+  if (new Set(source.laws.map((law) => law.combat_effect)).size !== 21) {
+    errors.push("Law combat effects must be unique across all 21 Laws");
   }
 
   const referencedLawClassIds = new Set<string>();
@@ -249,9 +271,33 @@ export function validateSourceSemantics(source: SourceData): SemanticValidationR
     equipment.density_status !== "APPROVED" ||
     equipment.combat_effect !== null ||
     equipment.combat_effect_status !== "DERIVED_PER_RECIPE" ||
-    !equipment.combat_effect_rule
+    !equipment.combat_effect_rule ||
+    equipment.equipment_interactions?.length !== 45
   ) {
     errors.push("equipment contract mismatch");
+  }
+  if (equipment?.equipment_interactions) {
+    const expectedInteractionKeys = new Set(
+      TOOL_DOMAIN_ORDER.flatMap((left, leftIndex) =>
+        TOOL_DOMAIN_ORDER.slice(leftIndex + 1).map((right) => `${left}|${right}`),
+      ),
+    );
+    const interactionKeys = equipment.equipment_interactions.map(({ domains }) => domains.join("|"));
+    if (
+      new Set(interactionKeys).size !== 45 ||
+      interactionKeys.some((key) => !expectedInteractionKeys.has(key))
+    ) {
+      errors.push("equipment interaction pairs must equal the canonical 10C2 set");
+    }
+    for (const interaction of equipment.equipment_interactions) {
+      const [left, right] = interaction.domains as [ToolDomain, ToolDomain];
+      if (
+        interaction.passive_effect_id !== `EQUIPMENT_${left}_${right}` ||
+        interaction.passive_effect_ko.trim().length === 0
+      ) {
+        errors.push(`equipment interaction mismatch ${left}|${right}`);
+      }
+    }
   }
 
   for (const attribute of ATTRIBUTE_ORDER) {
