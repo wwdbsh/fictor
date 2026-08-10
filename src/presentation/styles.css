@@ -1,0 +1,44 @@
+:root {
+  color: #171410;
+  background: #f4f0e6;
+  font-family: Georgia, "Times New Roman", serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 20rem;
+  min-height: 100vh;
+}
+
+.bootstrap-shell {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  gap: 0.75rem;
+  padding: clamp(1.5rem, 6vw, 5rem);
+  text-align: center;
+}
+
+.bootstrap-shell h1,
+.bootstrap-shell p {
+  margin: 0;
+}
+
+.bootstrap-shell h1 {
+  font-size: clamp(2rem, 8vw, 4.5rem);
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+}
+
+.bootstrap-shell p {
+  color: #5b5145;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  line-height: 1.6;
+}

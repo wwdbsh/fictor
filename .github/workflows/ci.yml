@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.22.1
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+        env:
+          # GitHub-hosted Ubuntu runners do not expose a usable Chromium sandbox.
+          # The browser only reaches the loopback static smoke server in this job.
+          PUPPETEER_DISABLE_SANDBOX: "true"
