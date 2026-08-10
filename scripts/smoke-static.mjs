@@ -101,7 +101,11 @@ async function main() {
     const apiRequests = [];
     const webSocketRequests = [];
 
-    browser = await puppeteer.launch({ headless: true });
+    const disableSandbox = process.env.PUPPETEER_DISABLE_SANDBOX === "true";
+    browser = await puppeteer.launch({
+      headless: true,
+      args: disableSandbox ? ["--no-sandbox", "--disable-setuid-sandbox"] : [],
+    });
     const page = await browser.newPage();
     const devtools = await page.createCDPSession();
     await devtools.send("Network.enable");

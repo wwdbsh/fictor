@@ -44,6 +44,8 @@ npm run verify       # 데이터 scaffold, 테스트, 빌드, 브라우저 smoke
 
 이 애플리케이션은 런타임 서버, 외부 API, 로그인, 환경 변수 비밀값에 의존하지 않습니다. 이후 진행 저장은 브라우저 `localStorage`를 사용합니다.
 
+GitHub Actions의 정적 브라우저 smoke는 격리된 호스팅 러너에서만 Chromium sandbox 비활성화를 명시적으로 허용합니다. 로컬 실행은 기본 Chromium sandbox를 유지하며, smoke 대상 서버는 `127.0.0.1` 임시 포트에만 열립니다.
+
 ## 코드 경계
 
 `src/main.tsx`는 유일한 composition root입니다. 의존 방향은 다음과 같습니다.
