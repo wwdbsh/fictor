@@ -24,6 +24,8 @@
     "assets:style:v2:contact-sheet": "tsx scripts/assets/style-candidates-v2-cli.ts contact-sheet",
     "assets:style:v2:evidence-check": "tsx scripts/assets/style-candidates-v2-cli.ts evidence-check",
     "assets:style:v2:ops": "tsx scripts/assets/style-candidates-v2-cli.ts",
+    "assets:master-style:gen": "tsx scripts/assets/master-style-cli.ts gen",
+    "assets:master-style:check": "tsx scripts/assets/master-style-cli.ts check",
     "assets:fake": "tsx scripts/assets/cli.ts run-fake",
     "assets:approve-materials": "tsx scripts/assets/cli.ts approve-materials",
     "review:names": "tsx scripts/review-names.ts",
