@@ -1,9 +1,10 @@
-import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { runDataGeneration } from "../../scripts/gen-data";
 import cardsJson from "../../src/data/generated/cards.generated.json";
 import equipmentJson from "../../src/data/generated/equipment.generated.json";
 import { generateCatalogPayloads } from "../../src/data/generator/generate-catalog";
@@ -206,29 +207,39 @@ describe("canonical forge generator", () => {
     expect(committedCards.schema_version).toBe(1);
   });
 
-  it("passes CLI check mode and detects byte tampering without leaving it behind", () => {
-    const clean = spawnSync("npm", ["run", "gen:data:check"], {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-    });
-    expect(clean.status, clean.stderr).toBe(0);
-
-    const original = readFileSync(equipmentPath, "utf8");
+  it("checks an isolated repository and detects byte tampering without touching real generated files", () => {
+    const temporaryRoot = mkdtempSync(join(tmpdir(), "fictor-generator-check-"));
     try {
-      writeFileSync(equipmentPath, original.replace('"count": 45', '"count": 44'), "utf8");
-      const tampered = spawnSync("npm", ["run", "gen:data:check"], {
-        cwd: repositoryRoot,
-        encoding: "utf8",
+      mkdirSync(resolve(temporaryRoot, "src/data"), { recursive: true });
+      cpSync(resolve(repositoryRoot, "src/data/source"), resolve(temporaryRoot, "src/data/source"), {
+        recursive: true,
       });
-      expect(tampered.status).not.toBe(0);
-      expect(tampered.stderr).toContain("stale or tampered");
+      cpSync(resolve(repositoryRoot, "src/data/generated"), resolve(temporaryRoot, "src/data/generated"), {
+        recursive: true,
+      });
+
+      expect(runDataGeneration({ repositoryRoot: temporaryRoot, checkOnly: true })).toMatchObject({
+        command: "gen:data:check",
+        cards: 1326,
+        equipment: 45,
+        written: [],
+      });
+
+      const temporaryEquipmentPath = resolve(
+        temporaryRoot,
+        "src/data/generated/equipment.generated.json",
+      );
+      const original = readFileSync(temporaryEquipmentPath, "utf8");
+      writeFileSync(
+        temporaryEquipmentPath,
+        original.replace('"count": 45', '"count": 44'),
+        "utf8",
+      );
+      expect(() =>
+        runDataGeneration({ repositoryRoot: temporaryRoot, checkOnly: true }),
+      ).toThrow(/stale or tampered/);
     } finally {
-      writeFileSync(equipmentPath, original, "utf8");
+      rmSync(temporaryRoot, { recursive: true, force: true });
     }
-    const restored = spawnSync("npm", ["run", "gen:data:check"], {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-    });
-    expect(restored.status, restored.stderr).toBe(0);
   });
 });

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "milestone_id": "M1",
+  "phase": "PHASE_0_DATA",
+  "target_date": "2026-08-12",
+  "task_key": "T007",
+  "issue_number": 9,
+  "status": "VERIFIED",
+  "source": {
+    "combined_hash": "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720",
+    "files": [
+      {
+        "path": "src/data/source/materials.json",
+        "file_hash": "c1ce53ac380f637b9947211250313db25d03503f837de219dfb1ba8d7c897931"
+      },
+      {
+        "path": "src/data/source/laws.json",
+        "file_hash": "8e4370daf8584c3125e7dd32fc9a26599a5d7b00489f64d6b3ed5e183291ee83"
+      },
+      {
+        "path": "src/data/source/resultClasses.json",
+        "file_hash": "b986c8e787008fd76eb87b396e7153aad8a6679d23dca1111eabd9969c740975"
+      }
+    ]
+  },
+  "catalog": {
+    "generator_version": "canonical-v1",
+    "cards": {
+      "path": "src/data/generated/cards.generated.json",
+      "count": 1326,
+      "content_hash": "283054dfb4e97d4f3420d0711ff7affb0dd2afe9d6140b81c6e77ce71b2c2886",
+      "file_hash": "71eb299228432f906edc0423f6dc5b90ea546e886f0bf12e7a7ebac6ace6f84f"
+    },
+    "equipment": {
+      "path": "src/data/generated/equipment.generated.json",
+      "count": 45,
+      "content_hash": "2d363142278173cd34d8dc40faa0fbeb3e918a818e2bedd407ee8084911a8aa7",
+      "file_hash": "cbe939c14cda4b63202644e9038482e1d218fa17b7077057bb97c7800448d61d"
+    }
+  },
+  "name_review": {
+    "review_version": "name-review-v2",
+    "decisions_path": "docs/reviews/name-review.decisions.json",
+    "decisions_file_hash": "de7466939821bdf973c3431332234fcd6ad2fcfe82b49364da3ab0919be9f9cb",
+    "csv_path": "docs/reviews/name-review.generated.csv",
+    "row_count": 1326,
+    "rows_hash": "abe566ce68c9f7abf1b094f88931227bf3fa6c5cd59d0aba52aaeee30f8ee328",
+    "csv_hash": "53543dac48d591402890bc498463ce6353876efb558bc383822b9c2c0702b960",
+    "approved_names_hash": "92a963544860dab6db3d9e3e8ccf8f33bdf6668e1b145a9eed0e19b0476b2e55",
+    "effective_status_counts": {
+      "APPROVED": 1326,
+      "CHANGE_REQUIRED": 0,
+      "PENDING": 0,
+      "HOLD": 0
+    },
+    "reviewer": "상헌 님 (GitHub: @wwdbsh)",
+    "reviewed_at": "2026-08-10T23:53:30.204Z",
+    "evidence": "https://github.com/wwdbsh/fictor/issues/62#issuecomment-5247374256"
+  }
+}

@@ -16,8 +16,9 @@
     "gen:data:check": "tsx scripts/gen-data.ts --check",
     "review:names": "tsx scripts/review-names.ts",
     "review:names:check": "tsx scripts/review-names.ts --check",
+    "milestone:phase0:check": "tsx scripts/check-phase0-data.ts",
     "smoke:static": "node scripts/smoke-static.mjs",
-    "verify": "npm run gen:data:check && npm run review:names:check && npm test && npm run build && npm run smoke:static"
+    "verify": "npm run gen:data:check && npm run review:names:check && npm run milestone:phase0:check && npm test && npm run build && npm run smoke:static"
   },
   "dependencies": {
     "react": "19.2.8",

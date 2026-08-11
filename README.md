@@ -37,6 +37,7 @@ npm run gen:data:check # 커밋된 생성물이 원본·생성기와 byte 단위
 npm run review:names  # 이름 검수 CSV 재생성 및 최초 PENDING 결정 파일 생성
 npm run review:names:check # 이름 검수 산출물·결정 target freshness 검사
 npm run review:names:check -- --require-closed # T006 최종 종료 게이트
+npm run milestone:phase0:check # 불변 M1 Phase 0 데이터 기준선 전체 대응 검사
 npm test             # Vitest 테스트
 npm run typecheck    # TypeScript 검사
 npm run build        # 타입 검사 후 dist/ 정적 빌드
@@ -88,6 +89,10 @@ main (composition root)
 않으며 [live 결정 파일](docs/reviews/name-review.decisions.json)과
 `npm run review:names:check` 출력에서 확인합니다. live v2 결정은 전 행 검수와 flagged 8건의 명시적
 승인을 담은 `APPROVED` 종료 상태입니다.
+
+M1 Phase 0의 최종 데이터와 승인 대응은 [불변 데이터 마일스톤](docs/milestones/README.md)에
+고정되어 있습니다. `npm run milestone:phase0:check`는 기록된 경로·수량·hash뿐 아니라 실제 source,
+재생성 catalog, CSV ID·이름, effective 승인 상태 1,326건을 쓰기 없이 함께 검증합니다.
 
 ## 구현 문서
 
