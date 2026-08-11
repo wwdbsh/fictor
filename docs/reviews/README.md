@@ -7,7 +7,7 @@
 - `name-review.generated.csv`: 기계 생성 전용이다. 직접 수정하지 않고 `npm run review:names`로만 갱신한다.
 - `name-review.decisions.json`: 현재 target의 사람 검수 전용이다. 명령은 파일이 없을 때 초기 `PENDING` 본을 한 번 만들 뿐, 기존 파일을 덮어쓰지 않는다.
 - `archive/<full-source-hash>/name-review.decisions.json`: 이전 target의 결정 bytes를 source hash별로 보존한다. archive 파일은 수정하거나 새 target의 근거로 재사용하지 않는다.
-- `src/data/generated/cards.generated.json`과 `equipment.generated.json`: canonical 생성물이다. 이름을 고치기 위해 직접 수정하지 않는다. T007에서 결정 근거에 따라 세 source 또는 생성 규칙을 수정하고 다시 생성한다.
+- `src/data/generated/cards.generated.json`과 `equipment.generated.json`: canonical 생성물이다. 이름을 고치기 위해 직접 수정하지 않는다. 승인된 이름 처분은 이미 source에 반영되었으며, 이후 변경은 새 승인 근거에 따라 세 source 또는 생성 규칙을 수정하고 다시 생성한다.
 
 CSV는 UTF-8(BOM 없음), LF, RFC4180 quoting을 사용하며 `card_id`의 raw Unicode code-point 순서다. 1부터 시작하는 `ordinal`은 이 순서의 검수 위치다. `LAW` 행만 `law_pair`와 `rule_text_ko`를 채우며 `rule_key`도 canonical attribute pair다. 결과군은 별도 `result_class` 열에 둔다. `CATALYST`는 `rule_type=RESULT_CLASS`와 결과군을, `EQUIPMENT`는 `rule_type=DOMAIN_PAIR`와 domain 쌍·패시브 id·패시브 문구를 `rule_key`에 기록한다.
 
@@ -79,3 +79,5 @@ source 또는 검출 규칙을 바꿀 때는 현재 결정 파일을 target의 *
 이번 rebaseline에서 v1 결정은 `archive/285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a/name-review.decisions.json`에 원래 bytes로 보존했다. 상헌 님의 명시적 지시에 따라 `tool_05.modifier_form`을 `헤아린`, `tool_10.modifier_form`을 `부려놓은`으로 적용했다. 이 지시는 두 source 변경의 근거였고, 현재 live v2 결정 파일에는 새 target의 전 행 검수와 종료 승인이 기록되어 있다.
 
 현재 target의 source/catalog/review hash는 [live 결정 파일](name-review.decisions.json)이 유일한 문서 근거다. 기계 검증 결과와 정렬된 실제 플래그 행은 `npm run review:names:check` 출력으로 확인한다. 이 문서에 hash 표를 수동 복사하지 않는다.
+
+T007이 닫은 M1 Phase 0의 불변 기준선은 [데이터 마일스톤](../milestones/README.md)에서 관리한다. 이름 검수 target을 다시 잡으면 기존 milestone record가 의도적으로 실패하며, 재검수 종료와 별도 승인 없이 자동 갱신하지 않는다.

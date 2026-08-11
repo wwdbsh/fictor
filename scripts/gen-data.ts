@@ -9,14 +9,6 @@ import { validateGeneratedCatalog } from "../src/data/schema/validate-generated-
 import { validateSourceSchemas, type SourceData } from "../src/data/schema/validate-source-data";
 import { validateSourceSemantics } from "../src/data/schema/validate-source-semantics";
 
-const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const sourceRoot = resolve(repositoryRoot, "src/data/source");
-const generatedRoot = resolve(repositoryRoot, "src/data/generated");
-const outputPaths = {
-  cards: resolve(generatedRoot, "cards.generated.json"),
-  equipment: resolve(generatedRoot, "equipment.generated.json"),
-};
-
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
@@ -46,47 +38,69 @@ function checkBytes(path: string, expected: string): void {
   if (actual !== expected) throw new Error(`generated file is stale or tampered: ${path}`);
 }
 
-const argumentsSet = process.argv.slice(2);
-if (argumentsSet.length > 1 || (argumentsSet.length === 1 && argumentsSet[0] !== "--check")) {
-  throw new Error("usage: npm run gen:data [-- --check]");
-}
-const checkOnly = argumentsSet[0] === "--check";
-
-const materials = readJson<Material[]>(resolve(sourceRoot, "materials.json"));
-const laws = readJson<Law[]>(resolve(sourceRoot, "laws.json"));
-const resultClasses = readJson<ResultClass[]>(resolve(sourceRoot, "resultClasses.json"));
-const source: SourceData = { materials, laws, resultClasses };
-
-const sourceSchema = validateSourceSchemas(source);
-if (!sourceSchema.valid) fail("source schema validation failed", sourceSchema.errors);
-const sourceSemantics = validateSourceSemantics(source);
-if (!sourceSemantics.valid) fail("source semantic validation failed", sourceSemantics.errors);
-
-const payloads = generateCatalogPayloads(materials, { laws, resultClasses });
-const sourceHash = calculateSourceHash([materials, laws, resultClasses]);
-const rendered = renderCatalog(payloads.cards, payloads.equipment, sourceHash);
-const generatedValidation = validateGeneratedCatalog(
-  rendered.cardsEnvelope,
-  rendered.equipmentEnvelope,
-  source,
-);
-if (!generatedValidation.valid) fail("generated catalog validation failed", generatedValidation);
-
-if (checkOnly) {
-  checkBytes(outputPaths.cards, rendered.cardsText);
-  checkBytes(outputPaths.equipment, rendered.equipmentText);
-} else {
-  atomicWrite(outputPaths.cards, rendered.cardsText);
-  atomicWrite(outputPaths.equipment, rendered.equipmentText);
+export interface RunDataGenerationOptions {
+  repositoryRoot: string;
+  checkOnly: boolean;
 }
 
-console.log(
-  JSON.stringify({
-    command: checkOnly ? "gen:data:check" : "gen:data",
+export function runDataGeneration(options: RunDataGenerationOptions) {
+  const repositoryRoot = resolve(options.repositoryRoot);
+  const sourceRoot = resolve(repositoryRoot, "src/data/source");
+  const generatedRoot = resolve(repositoryRoot, "src/data/generated");
+  const outputPaths = {
+    cards: resolve(generatedRoot, "cards.generated.json"),
+    equipment: resolve(generatedRoot, "equipment.generated.json"),
+  };
+
+  const materials = readJson<Material[]>(resolve(sourceRoot, "materials.json"));
+  const laws = readJson<Law[]>(resolve(sourceRoot, "laws.json"));
+  const resultClasses = readJson<ResultClass[]>(resolve(sourceRoot, "resultClasses.json"));
+  const source: SourceData = { materials, laws, resultClasses };
+
+  const sourceSchema = validateSourceSchemas(source);
+  if (!sourceSchema.valid) fail("source schema validation failed", sourceSchema.errors);
+  const sourceSemantics = validateSourceSemantics(source);
+  if (!sourceSemantics.valid) fail("source semantic validation failed", sourceSemantics.errors);
+
+  const payloads = generateCatalogPayloads(materials, { laws, resultClasses });
+  const sourceHash = calculateSourceHash([materials, laws, resultClasses]);
+  const rendered = renderCatalog(payloads.cards, payloads.equipment, sourceHash);
+  const generatedValidation = validateGeneratedCatalog(
+    rendered.cardsEnvelope,
+    rendered.equipmentEnvelope,
+    source,
+  );
+  if (!generatedValidation.valid) fail("generated catalog validation failed", generatedValidation);
+
+  if (options.checkOnly) {
+    checkBytes(outputPaths.cards, rendered.cardsText);
+    checkBytes(outputPaths.equipment, rendered.equipmentText);
+  } else {
+    atomicWrite(outputPaths.cards, rendered.cardsText);
+    atomicWrite(outputPaths.equipment, rendered.equipmentText);
+  }
+
+  return {
+    command: options.checkOnly ? "gen:data:check" : "gen:data",
     generator_version: "canonical-v1",
     source_hash: sourceHash,
     cards: payloads.cards.length,
     equipment: payloads.equipment.length,
-    written: checkOnly ? [] : Object.values(outputPaths).map((path) => path.slice(repositoryRoot.length + 1)),
-  }),
-);
+    written: options.checkOnly
+      ? []
+      : Object.values(outputPaths).map((path) => path.slice(repositoryRoot.length + 1)),
+  };
+}
+
+function parseArguments(argumentsList: readonly string[]): { checkOnly: boolean } {
+  if (argumentsList.length > 1 || (argumentsList.length === 1 && argumentsList[0] !== "--check")) {
+    throw new Error("usage: npm run gen:data [-- --check]");
+  }
+  return { checkOnly: argumentsList[0] === "--check" };
+}
+
+const isMain = process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+  console.log(JSON.stringify(runDataGeneration({ repositoryRoot, ...parseArguments(process.argv.slice(2)) })));
+}
