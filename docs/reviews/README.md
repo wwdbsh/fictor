@@ -70,12 +70,12 @@ npm run verify
 
 `review:names`는 source와 canonical envelope를 먼저 검증하고 CSV만 원자적으로 재생성한다. 결정 파일은 최초 부재 시에만 만든다. `review:names:check`는 어떤 파일도 쓰지 않고 CSV bytes, 전체 id, 분기 수, 정렬, hash, 결정 스키마·target·override id를 확인한다. `--require-closed`는 T006 종료 조건이다.
 
-T006은 현재 v2 CSV 전 행의 사람 검수와 결정 기록만 담당한다. `flagged_rows` 8건은 각각 명시적인 disposition과 사유가 필요하고, 나머지 행도 `all_rows_reviewed=true` 전에 실제로 확인해야 한다. 현재 live 결정은 fresh `PENDING`이며 최종 승인이 아니다. target의 source·cards·review hash가 바뀌면 기존 결정이 의도적으로 fail closed하여, 검수 근거가 다른 입력의 결과에 조용히 재사용되거나 덮어써지는 일을 막는다.
+T006은 현재 v2 CSV 전 행의 사람 검수와 결정 기록만 담당한다. `flagged_rows` 8건은 각각 명시적인 disposition과 사유가 필요하고, 나머지 행도 `all_rows_reviewed=true` 전에 실제로 확인해야 한다. 현재 live 결정은 전 행 검수와 flagged 8건의 명시적 승인을 담은 `APPROVED` 종료 상태다. target의 source·cards·review hash가 바뀌면 기존 결정이 의도적으로 fail closed하여, 검수 근거가 다른 입력의 결과에 조용히 재사용되거나 덮어써지는 일을 막는다.
 
 ## Archive와 rebaseline
 
 source 또는 검출 규칙을 바꿀 때는 현재 결정 파일을 target의 **전체** `source_hash` 경로로 먼저 옮기고 bytes를 그대로 보존한다. 그 뒤 반드시 `npm run gen:data`, `npm run review:names` 순서로 실행한다. 새 결정 파일은 이전 결정을 복사하지 않고 새 v2 target의 initial `PENDING` 상태로 만든다. 같은 두 명령을 반복했을 때 생성 catalog와 CSV bytes/hash가 같아야 하며, `gen:data:check`와 `review:names:check`가 모두 통과해야 한다.
 
-이번 rebaseline에서 v1 결정은 `archive/285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a/name-review.decisions.json`에 원래 bytes로 보존했다. 상헌 님의 명시적 지시에 따라 `tool_05.modifier_form`을 `헤아린`, `tool_10.modifier_form`을 `부려놓은`으로 적용했다. 이 지시는 두 source 변경의 근거일 뿐 새 1,326개 이름 전체의 최종 승인 근거는 아니다. v2 검수자는 live 결정 파일에 새 target의 검수 증거를 별도로 기록해야 한다.
+이번 rebaseline에서 v1 결정은 `archive/285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a/name-review.decisions.json`에 원래 bytes로 보존했다. 상헌 님의 명시적 지시에 따라 `tool_05.modifier_form`을 `헤아린`, `tool_10.modifier_form`을 `부려놓은`으로 적용했다. 이 지시는 두 source 변경의 근거였고, 현재 live v2 결정 파일에는 새 target의 전 행 검수와 종료 승인이 기록되어 있다.
 
 현재 target의 source/catalog/review hash는 [live 결정 파일](name-review.decisions.json)이 유일한 문서 근거다. 기계 검증 결과와 정렬된 실제 플래그 행은 `npm run review:names:check` 출력으로 확인한다. 이 문서에 hash 표를 수동 복사하지 않는다.
