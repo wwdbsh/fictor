@@ -14,11 +14,15 @@
     "typecheck": "tsc -b",
     "gen:data": "tsx scripts/gen-data.ts",
     "gen:data:check": "tsx scripts/gen-data.ts --check",
+    "gen:assets": "tsx scripts/assets/cli.ts gen",
+    "gen:assets:check": "tsx scripts/assets/cli.ts check",
+    "assets:fake": "tsx scripts/assets/cli.ts run-fake",
+    "assets:approve-materials": "tsx scripts/assets/cli.ts approve-materials",
     "review:names": "tsx scripts/review-names.ts",
     "review:names:check": "tsx scripts/review-names.ts --check",
     "milestone:phase0:check": "tsx scripts/check-phase0-data.ts",
     "smoke:static": "node scripts/smoke-static.mjs",
-    "verify": "npm run gen:data:check && npm run review:names:check && npm run milestone:phase0:check && npm test && npm run build && npm run smoke:static"
+    "verify": "npm run gen:data:check && npm run gen:assets:check && npm run review:names:check && npm run milestone:phase0:check && npm test && npm run build && npm run smoke:static"
   },
   "dependencies": {
     "react": "19.2.8",
