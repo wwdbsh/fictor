@@ -86,8 +86,8 @@ main (composition root)
 이름 검수 규칙, v1 결정 archive, source 변경 뒤 rebaseline 절차와 T006 handoff는
 [이름 검수 패키지 안내](docs/reviews/README.md)에 있습니다. 현재 target과 hash는 문서에 복사하지
 않으며 [live 결정 파일](docs/reviews/name-review.decisions.json)과
-`npm run review:names:check` 출력에서 확인합니다. live v2 결정은 새 검수의 `PENDING` 시작점이며
-최종 승인을 뜻하지 않습니다.
+`npm run review:names:check` 출력에서 확인합니다. live v2 결정은 전 행 검수와 flagged 8건의 명시적
+승인을 담은 `APPROVED` 종료 상태입니다.
 
 ## 구현 문서
 

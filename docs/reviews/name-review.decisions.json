@@ -10,10 +10,43 @@
     "review_csv_hash": "53543dac48d591402890bc498463ce6353876efb558bc383822b9c2c0702b960",
     "review_row_count": 1326
   },
-  "default_status": "PENDING",
-  "all_rows_reviewed": false,
-  "reviewer": null,
-  "reviewed_at": null,
-  "evidence": null,
-  "overrides": {}
+  "default_status": "APPROVED",
+  "all_rows_reviewed": true,
+  "reviewer": "상헌 님 (GitHub: @wwdbsh)",
+  "reviewed_at": "2026-08-10T23:53:30.204Z",
+  "evidence": "https://github.com/wwdbsh/fictor/issues/62#issuecomment-5247374256; 상헌 님이 name-review-v2 1,326행 전체와 flagged 8건의 현재 이름 유지를 승인함.",
+  "overrides": {
+    "forge__burn_02__join_04": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    },
+    "forge__burn_05__ore_burn": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    },
+    "forge__burn_05__tool_06": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    },
+    "forge__join_04__still_05": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    },
+    "forge__join_04__tool_09": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    },
+    "forge__odd_06__wash_04": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    },
+    "forge__ore_burn__tool_06": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    },
+    "forge__ore_rot__tool_10": {
+      "status": "APPROVED",
+      "reason": "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함."
+    }
+  }
 }

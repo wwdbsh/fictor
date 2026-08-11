@@ -309,7 +309,7 @@ describe("canonical name-review package", () => {
     );
   });
 
-  it("keeps the archived v1 decision bytes and opens a fresh pending v2 review", () => {
+  it("keeps the archived v1 decision bytes and records a closed approved v2 review", () => {
     const oldSourceHash = "285ab100c7b209c4557dccca91c3372aebb90f0de20700ea53b2c55060a34e9a";
     const archivedPath = resolve(
       repositoryRoot,
@@ -327,10 +327,32 @@ describe("canonical name-review package", () => {
       review_version: "name-review-v1",
       target: { source_hash: oldSourceHash },
     });
-    expect(live).toEqual(makeInitialNameReviewDecisions(targetFor()));
-    expect(() => runNameReview({ repositoryRoot, checkOnly: true, requireClosed: true })).toThrow(
-      /closed review requires all_rows_reviewed: true/,
-    );
+    expect(live.target).toEqual(targetFor());
+    expect(live).toMatchObject({
+      default_status: "APPROVED",
+      all_rows_reviewed: true,
+      reviewer: "상헌 님 (GitHub: @wwdbsh)",
+      reviewed_at: "2026-08-10T23:53:30.204Z",
+      evidence:
+        "https://github.com/wwdbsh/fictor/issues/62#issuecomment-5247374256; 상헌 님이 name-review-v2 1,326행 전체와 flagged 8건의 현재 이름 유지를 승인함.",
+    });
+    const flaggedIds = [
+      "forge__burn_02__join_04",
+      "forge__burn_05__ore_burn",
+      "forge__burn_05__tool_06",
+      "forge__join_04__still_05",
+      "forge__join_04__tool_09",
+      "forge__odd_06__wash_04",
+      "forge__ore_burn__tool_06",
+      "forge__ore_rot__tool_10",
+    ];
+    for (const cardId of flaggedIds) {
+      expect(live.overrides[cardId]).toEqual({
+        status: "APPROVED",
+        reason: "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함.",
+      });
+    }
+    expect(() => runNameReview({ repositoryRoot, checkOnly: true, requireClosed: true })).not.toThrow();
   });
 
   it("rejects unknown and duplicate override ids", () => {
