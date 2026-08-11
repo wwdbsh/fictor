@@ -185,3 +185,32 @@ PNG 4개가 다시 검증된 뒤에만 `assets:style:v2:contact-sheet`로 열린
 `docs/asset-runs/contact-sheets/t011-style-candidates-v2.html`이다. `assets:style:v2:evidence-check`는
 tracked evidence를 ignored journal/completion 및 실제 local/backup PNG와 다시 대조한다. 이 완료는
 스타일 후보 4개에만 해당하며 재료/core/bulk를 열지 않는다.
+
+## T012 마스터 스타일 결정 — 후보 1
+
+상헌 님은 `2026-08-11T12:05:07.373Z`에 “후보 1 채택”으로
+`style/master-candidate-01`을 단일 로컬 마스터로 승인했다. canonical 결정은
+`assets/manifests/master-style-v1.json`, 상세 공개 기록은
+[`t012-master-style-approval-2026-08-11.md`](decisions/t012-master-style-approval-2026-08-11.md)다.
+잠금 범위는 동판 선묘의 `MEDIA_ONLY`이며 후보의 피사체·팔다리 수·기하·구도·색·종이·density·representation·
+aspect는 복제하지 않는다. 후보 2–4는 `NOT_SELECTED`다.
+
+```bash
+npm run assets:master-style:gen
+npm run assets:master-style:check
+```
+
+로컬 reference ID는 `fictor-copperplate-media-master` revision 1이다. provider media/reference ID는
+등록하지 않았으며 업로드·binding·crop·resize는 T013으로 미뤘다. 새 bytes나 revision은 사용자 재승인이
+필요하다. T013은 이 revision의 provider reference 역할/schema와 최신 비용·예산 계획이 준비되기 전까지
+`BLOCKED`이고, T012에서는 생성·업로드·T013 실행을 하지 않는다.
+
+T011의 위험 수용과 credit 승인은 스타일 후보 4장에만 한정되어 T013 재료 52장으로 승계되지 않는다.
+manifest는 `t011_approval_inherited_by_t013_materials=false`, 재료 52장 `NOT_AUTHORIZED`, 두 authorization
+경로 모두 `NOT_SATISFIED`로 고정한다. 해제에는 provider reference schema와 최신 cost/budget 준비에 더해,
+새 revision에서 다음 중 하나가 필요하다.
+
+- T013 52장 범위의 T010 policy revision 승인과 전체 preflight 재검증: 적용 Terms/Privacy, Google
+  supplemental/provider 조건, 학습·opt-out, reference 권리, 공개 기본값·attribution, 정확한 만료 시각·
+  시간대, 현재 model·가격·balance, `use_unlim=false`, batch limit/topology, 즉시 local+backup 회수
+- 현재 위험 공개 뒤 정확히 재료 52장에 한정된 새 사용자 위험 승인
