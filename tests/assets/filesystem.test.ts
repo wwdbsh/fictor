@@ -5,6 +5,7 @@ import { deflateSync } from "node:zlib";
 import { describe, expect, test } from "vitest";
 
 import {
+  DEFAULT_MAX_PNG_BYTES,
   acquireRunnerLock,
   atomicWriteJson,
   atomicWriteVerifiedPng,
@@ -95,7 +96,33 @@ describe("safe asset file recovery", () => {
       chunk("IEND", Buffer.alloc(0)),
     ]);
     expect(() => inspectPng(invalidZlib, "3:4")).toThrow("INVALID_PNG");
+    const truncatedScanlines = Buffer.concat([
+      Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      chunk("IHDR", png().subarray(16, 29)),
+      chunk("IDAT", deflateSync(Buffer.from([0]))),
+      chunk("IEND", Buffer.alloc(0)),
+    ]);
+    expect(truncatedScanlines).toHaveLength(66);
+    expect(() => inspectPng(truncatedScanlines, "3:4")).toThrow("INVALID_PNG");
+    const invalidFilterPayload = Buffer.alloc(4 * (1 + 3 * 3));
+    invalidFilterPayload[0] = 5;
+    const invalidFilter = Buffer.concat([
+      Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      chunk("IHDR", png().subarray(16, 29)),
+      chunk("IDAT", deflateSync(invalidFilterPayload)),
+      chunk("IEND", Buffer.alloc(0)),
+    ]);
+    expect(() => inspectPng(invalidFilter, "3:4")).toThrow("INVALID_PNG");
     expect(() => inspectPng(png(4, 3), "3:4")).toThrow("ASPECT_MISMATCH");
+    const providerNative = png(896, 1200);
+    expect(() => inspectPng(providerNative, "3:4")).toThrow("ASPECT_MISMATCH");
+    expect(inspectPng(providerNative, "3:4", DEFAULT_MAX_PNG_BYTES, 5_000)).toMatchObject({
+      width: 896, height: 1200, aspect_error_ppm: 4445,
+    });
+    expect(() => inspectPng(providerNative, "3:4", DEFAULT_MAX_PNG_BYTES, 4_444)).toThrow("ASPECT_MISMATCH");
+    expect(() => inspectPng(png(895, 1200), "3:4", DEFAULT_MAX_PNG_BYTES, 5_000)).toThrow("ASPECT_MISMATCH");
+    expect(inspectPng(png(603, 800), "3:4", DEFAULT_MAX_PNG_BYTES, 5_000).aspect_error_ppm).toBe(5_000);
+    expect(() => inspectPng(png(603, 800), "3:4", DEFAULT_MAX_PNG_BYTES, 4_999)).toThrow("ASPECT_MISMATCH");
     expect(() => inspectPng(Buffer.concat([png(), Buffer.alloc(20)]), "3:4", 30)).toThrow("FILE_TOO_LARGE");
   });
 

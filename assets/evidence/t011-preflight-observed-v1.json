@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t011-preflight-observed-v1",
+  "observed_at": "2026-08-11",
+  "timezone": "Asia/Seoul",
+  "secret_free": true,
+  "observations": [
+    {
+      "id": "mcp-schema",
+      "source": "Higgsfield MCP tool schema inspection",
+      "tool": "models_explore/generate_image",
+      "facts": {
+        "model": "nano_banana_2",
+        "upstream_provider": "Google",
+        "request_fields_observed": [
+          "model",
+          "aspect_ratio",
+          "resolution",
+          "prompt",
+          "use_unlim"
+        ],
+        "actual_batch_max_schema_annotation_observed": false
+      }
+    },
+    {
+      "id": "cost",
+      "source": "Higgsfield MCP cost preflight",
+      "tool": "generate_image(get_cost=true)",
+      "facts": {
+        "unit_cost_decimal": "1.50",
+        "generation_created": false,
+        "job_created": false,
+        "credits_consumed_decimal": "0"
+      }
+    },
+    {
+      "id": "balance",
+      "source": "Higgsfield MCP balance observation",
+      "tool": "balance",
+      "facts": {
+        "balance_decimal": "945.9"
+      }
+    },
+    {
+      "id": "private-default",
+      "source": "Higgsfield account generation setting observation",
+      "tool": "account setting view",
+      "facts": {
+        "automatic_publication": false,
+        "default_visibility": "PRIVATE"
+      }
+    }
+  ]
+}

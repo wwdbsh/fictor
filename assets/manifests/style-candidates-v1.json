@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "manifest_version": "style-candidates-v1",
+  "purpose": "STYLE_STUDY_ONLY",
+  "core_asset_reuse": false,
+  "remote_generation_state": "HOLD_FOR_CLARIFICATION",
+  "model": "nano_banana_2",
+  "upstream_provider": "Google",
+  "use_unlim": false,
+  "provider_limit": {
+    "status": "UNCONFIRMED",
+    "schema_max_batch_size": null,
+    "note": "ACTUAL_BATCH_MAX_SCHEMA_ANNOTATION_NOT_OBSERVED"
+  },
+  "submission_topology": "UNRESOLVED",
+  "reference_policy": "NO_EXTERNAL_REFERENCE",
+  "references": [],
+  "core_v1": {
+    "manifest_path": "assets/manifests/core-v1.plan.json",
+    "manifest_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+    "remote_budget_status": "STALE_FOR_REMOTE_EXECUTION"
+  },
+  "budget_observation": {
+    "unit_cost_decimal": "1.50",
+    "candidate_count": 4,
+    "candidate_upper_bound_decimal": "6.00",
+    "balance_decimal": "945.9",
+    "observed_date": "2026-08-11",
+    "timezone": "Asia/Seoul",
+    "core_asset_count": 1494,
+    "core_cost_at_observed_unit_decimal": "2241.00"
+  },
+  "preflight_gates": {
+    "MCP_SCHEMA": "PASS",
+    "MODEL_PROVIDER": "PASS",
+    "COST": "PASS_BUT_CHANGED",
+    "BALANCE": "PASS",
+    "AUTO_PUBLISH_PRIVATE": "PASS",
+    "ACCOUNT_TERMS": "OPEN",
+    "ACCOUNT_PRIVACY": "OPEN",
+    "PROVIDER_SUPPLEMENTAL_TERMS": "OPEN",
+    "MCP_PRIVACY_OPT_OUT": "OPEN",
+    "EXPIRY_EXACT_TIME": "OPEN",
+    "BATCH_LIMIT": "OPEN",
+    "USER_REAPPROVAL": "BLOCKED"
+  },
+  "preflight_gate_evidence": {
+    "MCP_SCHEMA": {
+      "path": "assets/evidence/t011-preflight-observed-v1.json",
+      "sha256": "6d7209e6ff6815cffdb8677635558bf9dc9b8c0bbe594d0e7c0c79546330c732",
+      "observation_ids": [
+        "mcp-schema"
+      ]
+    },
+    "MODEL_PROVIDER": {
+      "path": "assets/evidence/t011-preflight-observed-v1.json",
+      "sha256": "6d7209e6ff6815cffdb8677635558bf9dc9b8c0bbe594d0e7c0c79546330c732",
+      "observation_ids": [
+        "mcp-schema"
+      ]
+    },
+    "COST": {
+      "path": "assets/evidence/t011-preflight-observed-v1.json",
+      "sha256": "6d7209e6ff6815cffdb8677635558bf9dc9b8c0bbe594d0e7c0c79546330c732",
+      "observation_ids": [
+        "cost"
+      ]
+    },
+    "BALANCE": {
+      "path": "assets/evidence/t011-preflight-observed-v1.json",
+      "sha256": "6d7209e6ff6815cffdb8677635558bf9dc9b8c0bbe594d0e7c0c79546330c732",
+      "observation_ids": [
+        "balance"
+      ]
+    },
+    "AUTO_PUBLISH_PRIVATE": {
+      "path": "assets/evidence/t011-preflight-observed-v1.json",
+      "sha256": "6d7209e6ff6815cffdb8677635558bf9dc9b8c0bbe594d0e7c0c79546330c732",
+      "observation_ids": [
+        "private-default"
+      ]
+    }
+  },
+  "candidates": [
+    {
+      "id": "style/master-candidate-01",
+      "path": "style/master-candidate-01.png",
+      "purpose": "STYLE_STUDY_ONLY",
+      "core_asset_reuse": false,
+      "prompt_inputs": {
+        "subject": "an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening",
+        "composition": "SPECIMEN",
+        "specimen": "UNLABELED_BRASS_OVOID",
+        "paper": "CREAM",
+        "colors": [
+          "MAGENTA"
+        ],
+        "density": "SPARSE",
+        "representation": "SOLID",
+        "media_treatment": "hairline contour engraving with restrained parallel hatching and broad untouched paper"
+      },
+      "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: hairline contour engraving with restrained parallel hatching and broad untouched paper. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+      "prompt_sha256": "c85c27ed62d325ecf410463ad2869bdf5e03bb41b10e094cdf85d86bae3c0235",
+      "request": {
+        "model": "nano_banana_2",
+        "aspect_ratio": "3:4",
+        "resolution": "1k",
+        "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: hairline contour engraving with restrained parallel hatching and broad untouched paper. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+        "use_unlim": false,
+        "count": 1
+      },
+      "canonical_request_sha256": "10ea94550360c059f86c0edce83d76a1b1e193d2c46a5ef11399fcd110dbfff4"
+    },
+    {
+      "id": "style/master-candidate-02",
+      "path": "style/master-candidate-02.png",
+      "purpose": "STYLE_STUDY_ONLY",
+      "core_asset_reuse": false,
+      "prompt_inputs": {
+        "subject": "an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening",
+        "composition": "SPECIMEN",
+        "specimen": "UNLABELED_BRASS_OVOID",
+        "paper": "CREAM",
+        "colors": [
+          "MAGENTA"
+        ],
+        "density": "SPARSE",
+        "representation": "SOLID",
+        "media_treatment": "crisp burin linework with short curved hatching that follows the specimen form"
+      },
+      "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: crisp burin linework with short curved hatching that follows the specimen form. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+      "prompt_sha256": "c1f613856e0e6c0db4012ebb3e623afb04ae7364468e610dcdc0f5b36d7f1662",
+      "request": {
+        "model": "nano_banana_2",
+        "aspect_ratio": "3:4",
+        "resolution": "1k",
+        "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: crisp burin linework with short curved hatching that follows the specimen form. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+        "use_unlim": false,
+        "count": 1
+      },
+      "canonical_request_sha256": "0bb3b5e4aac30a42f1358b0aef2398b0263651ee2f62915bf52d01bb812e4979"
+    },
+    {
+      "id": "style/master-candidate-03",
+      "path": "style/master-candidate-03.png",
+      "purpose": "STYLE_STUDY_ONLY",
+      "core_asset_reuse": false,
+      "prompt_inputs": {
+        "subject": "an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening",
+        "composition": "SPECIMEN",
+        "specimen": "UNLABELED_BRASS_OVOID",
+        "paper": "CREAM",
+        "colors": [
+          "MAGENTA"
+        ],
+        "density": "SPARSE",
+        "representation": "SOLID",
+        "media_treatment": "fine crossed hatchwork with alternating shallow angles and clean highlight gaps"
+      },
+      "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: fine crossed hatchwork with alternating shallow angles and clean highlight gaps. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+      "prompt_sha256": "ba7a7b32f08bd68196aa0c1039bbc6597115d066f1b0847950b2b49acbc4d418",
+      "request": {
+        "model": "nano_banana_2",
+        "aspect_ratio": "3:4",
+        "resolution": "1k",
+        "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: fine crossed hatchwork with alternating shallow angles and clean highlight gaps. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+        "use_unlim": false,
+        "count": 1
+      },
+      "canonical_request_sha256": "49e35ad75b3208852377d2dae472d3d65d29da069f59ef4afcf6e20fa740df8c"
+    },
+    {
+      "id": "style/master-candidate-04",
+      "path": "style/master-candidate-04.png",
+      "purpose": "STYLE_STUDY_ONLY",
+      "core_asset_reuse": false,
+      "prompt_inputs": {
+        "subject": "an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening",
+        "composition": "SPECIMEN",
+        "specimen": "UNLABELED_BRASS_OVOID",
+        "paper": "CREAM",
+        "colors": [
+          "MAGENTA"
+        ],
+        "density": "SPARSE",
+        "representation": "SOLID",
+        "media_treatment": "delicate etched contour lines with sparse stipple accents between hatch groups"
+      },
+      "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: delicate etched contour lines with sparse stipple accents between hatch groups. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+      "prompt_sha256": "ab6346799f62c5674d1a7f369e26fb7f3fe16fff8c5d4bc8e9964d03bc0d6c91",
+      "request": {
+        "model": "nano_banana_2",
+        "aspect_ratio": "3:4",
+        "resolution": "1k",
+        "prompt": "Antique copperplate engraving plate, 17th century manuscript style. Media treatment: delicate etched contour lines with sparse stipple accents between hatch groups. Composition: SPECIMEN; subject: an impossible unlabeled brass specimen: a smooth ovoid shell standing on three jointed legs with one hollow spiral opening; paper: CREAM; colors: MAGENTA; density: SPARSE; representation: SOLID. Single centered subject with a strong readable silhouette at small size. No text, lettering, border, UI, logo, brand, watermark, or people.",
+        "use_unlim": false,
+        "count": 1
+      },
+      "canonical_request_sha256": "e80633a18d05ef1565356743a4d69dae4a6d2f1c8a7e25c28737933a62076a5e"
+    }
+  ]
+}

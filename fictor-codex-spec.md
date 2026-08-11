@@ -564,10 +564,19 @@ power   = potency * law.power_coefficient;
 
 **에셋 생성은 Codex가 직접 수행한다.** Higgsfield MCP 서버를 연결해 도구를 호출한다.
 
+> **`STALE_FOR_REMOTE_EXECUTION` (T011, 2026-08-11):** 이 절의 0.12 단가, 965 잔액,
+> batch 최대 12장과 125회 계산은 과거 계획값이다. 현재 관찰값과 gate는
+> [`assets/evidence/t011-preflight-observed-v1.json`](assets/evidence/t011-preflight-observed-v1.json) 및
+> [`docs/asset-runs/t011-preflight-2026-08-11.md`](docs/asset-runs/t011-preflight-2026-08-11.md)가 우선한다.
+> 관찰 단가는 1.50, 잔액은 945.9이며 실제 batch 최대치는 미확인이다. current batch limit 확인과
+> 사용자 재승인 전에는 이 절을 실행 지시로 사용하지 않는다. 2026-08-11 승인은 별도
+> [`style-candidates-v2` 제한 READY](docs/asset-runs/t011-limited-ready-v2-2026-08-11.md)의 동일한 후보
+> 4개·단건 `generate_image`에만 적용되며 이 절의 재료/core/batch 실행을 열지 않는다.
+
 | 항목 | 값 |
 |---|---|
 | MCP 서버 | `https://mcp.higgsfield.ai/mcp` |
-| 카드 · 배경 · 적 모델 | `nano_banana_2` — **0.12 크레딧/장** |
+| 카드 · 배경 · 적 모델 | `nano_banana_2` — 과거 계획 **0.12 크레딧/장** (`STALE_FOR_REMOTE_EXECUTION`) |
 | 텍스트가 들어가는 UI · 프레임 | `nano_banana_pro` (고비용, 최소한만) |
 | `use_unlim` | **반드시 `false`** |
 | 카드 종횡비 | `3:4` |
@@ -582,20 +591,26 @@ power   = potency * law.power_coefficient;
 |---|---|
 | `balance` | 잔여 크레딧 확인. **작업 시작 전과 각 배치 후** |
 | `generate_image` (`get_cost: true`) | 프리플라이트. 크레딧 소모 없이 단가 확인 |
-| `generate_image_batch` | **1회 최대 12장** 병렬 제출 |
+| `generate_image_batch` | 과거 계획 **1회 최대 12장** (`STALE_FOR_REMOTE_EXECUTION`, 현재 제한 미확인) |
 | `jobs_wait` | 제출한 job 완료 대기 |
 | `show_generation_by_ids` | 결과 확인 |
 
 ### 8.7 생성 실행 규칙
 
-**크레딧 예산**
+**크레딧 예산 — `STALE_FOR_REMOTE_EXECUTION`**
+
+> 아래 전체/core 예산은 여전히 실행 불가다. 현재 1.50 단가의 4개 스타일 후보 상한 6.00만
+> [T011 limited READY v2](docs/asset-runs/t011-limited-ready-v2-2026-08-11.md)에서 별도로 승인됐다.
 
 - 총량 **965**. 계정에 무제한 할당량 없음 (`unlim.available: false`)
 - 예상 소요 약 **179** (1,494장 × 0.12)
 - 여유가 크므로 **품질 기준을 높게 잡고 재생성을 아끼지 말 것**
 - 단, **매 배치 후 `balance`로 잔량을 확인**하고 로그에 남긴다
 
-**배치 실행**
+**배치 실행 — `STALE_FOR_REMOTE_EXECUTION`**
+
+> v2 제한 실행은 batch를 사용하지 않고 `generate_image`, `count=1`만 네 번 허용한다. 아래 125회
+> 계산과 retry 지시는 재료/core 실행에 사용할 수 없다.
 
 ```
 ceil(1,494장 ÷ 12) = 125회

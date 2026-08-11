@@ -79,10 +79,20 @@ npm test
 
 **이미지는 Codex가 직접 생성한다.** MCP 서버 `https://mcp.higgsfield.ai/mcp`.
 
-- 모델 `nano_banana_2` (0.12 크레딧/장). 텍스트 들어가는 UI만 `nano_banana_pro`
+> **`STALE_FOR_REMOTE_EXECUTION` (T011, 2026-08-11):** 아래 `0.12` 단가, `965` 잔액,
+> 12장 batch/125회 지시는 과거 계획값이며 원격 실행에 사용할 수 없다. 현재 secret-free 관찰 evidence는
+> [`assets/evidence/t011-preflight-observed-v1.json`](assets/evidence/t011-preflight-observed-v1.json),
+> gate 판정은 [`docs/asset-runs/t011-preflight-2026-08-11.md`](docs/asset-runs/t011-preflight-2026-08-11.md)를
+> 따른다. 관찰 단가는 1.50, 잔액은 945.9이고 실제 batch 최대치는 미확인이다. 현재 batch limit 확인과
+> 상헌 님의 재승인 전에는 이미지 생성 호출을 실행하지 않는다. 2026-08-11 재승인은
+> [`style-candidates-v2`](docs/asset-runs/t011-limited-ready-v2-2026-08-11.md)의 동일한 4개 후보를
+> `generate_image`, `count=1`로 실행하는 범위에만 적용된다. 재료 52장·core/bulk와 과거 batch 지시는
+> 계속 `STALE_FOR_REMOTE_EXECUTION`이다.
+
+- 모델 `nano_banana_2` (과거 계획 단가 0.12 크레딧/장 — `STALE_FOR_REMOTE_EXECUTION`). 텍스트 들어가는 UI만 `nano_banana_pro`
 - **`use_unlim`은 항상 `false`** — 계정에 무제한 할당량 없음
-- 크레딧 총량 **965**, 예상 소요 약 179. 배치마다 `balance`로 잔량 확인
-- `generate_image_batch`는 **1회 12장**. 총 1,494장 = 125회
+- 크레딧 총량 **965**, 예상 소요 약 179 (`STALE_FOR_REMOTE_EXECUTION`). 배치마다 `balance`로 잔량 확인
+- `generate_image_batch`는 **1회 12장**, 총 1,494장 = 125회라는 값은 `STALE_FOR_REMOTE_EXECUTION`
 - **배치 완료 즉시 로컬 저장.** 일괄 다운로드 금지 — 중간 실패 시 전부 잃는다
 - 프롬프트는 `card_id`에서 결정론적으로. 종이 톤은 `hash(card_id) % 4`, **난수 금지**
 - 도구 인자명은 실행 전 MCP 도구 목록으로 확인할 것
