@@ -4,17 +4,19 @@
 
 | 에셋/서비스 | provider·model | 약관 revision·적용 상태 | 권리 상태 | 결정·증빙 | manifest·run ledger | AI 표기 | 확인자·일자 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| FICTOR 카드·세계 아트 계획 1,494개 | Higgsfield / `nano_banana_2` 계획 | Terms updated 2026-07-26 / 계정 적용 여부 `PENDING_T010` | 상업 이용·제3자 재허락 공개 근거 있음 / 모델 추가 조건 `PENDING_T010` | [T009 report r1](legal/art-policy-decision-2026-08-11.md) / T010 미승인 | `assets/manifests/core-v1.plan.json` / 생성 전 | 표기안 `PENDING_T010` | 미확정, 2026-08-11 |
+| FICTOR 카드·세계 아트 계획 1,494개 | Higgsfield / `nano_banana_2` 계획 | Terms updated 2026-07-26 / 계정 적용 revision·Privacy·모델 추가 조건 `PENDING_T011_PREFLIGHT` | `CONDITIONAL_APPROVAL` — 무브랜드·비민감·텍스트 없는 입력만, `use_unlim=false`; 공개 타이틀 미승인 | [T009 report r1](legal/art-policy-decision-2026-08-11.md) / [T010 조건부 승인](decisions/t010-art-policy-approval-2026-08-11.md) | `assets/manifests/core-v1.plan.json` / T010 생성 없음, T011 preflight 전 | 공개 타이틀 승인 뒤 표기 템플릿을 최종 타이틀에 결속해 게임 크레딧·README·제출 설명·이 문서에 적용; 그 전 공개 적용 금지 | 상헌 님, 2026-08-11 |
 | `예: 파일명 또는 패키지명` | `제공자 / 모델 또는 버전` | `라이선스·약관 revision` | `APPROVED/PENDING/BLOCKED` | `URL 또는 보관 경로` | `manifest/lockfile/job ledger` | `표기 위치` | `이름, YYYY-MM-DD` |
 
 ## AI 생성물 provenance 연결
 
 - 계획과 ID·경로·프롬프트 hash: `assets/manifests/core-v1.plan.json`
 - 실행 증거: 이후 생성되는 batch/job ledger의 provider, model, policy revision, job ID, balance 전후, local·backup SHA-256
-- 정책 결정: T010의 승인 revision, 승인자, 시각, 허용 범위와 재확인 trigger
+- 정책 결정: [T010 조건부 승인](decisions/t010-art-policy-approval-2026-08-11.md)의 승인자·시각, 허용 범위, T011 preflight, 첫 52장·bulk gate와 재승인 trigger
 - 개별 이미지: manifest asset ID에서 run ledger와 local·backup 파일 hash로 연결
 
 계정 ID, 이메일, API 키, 세션 URL, 서명된 다운로드 URL과 원문 prompt에 포함된 비공개 정보는 공개 저장소에 기록하지 않습니다.
+
+T010은 이미지를 생성하지 않았습니다. T011은 계정 적용 약관·Privacy, 모델별 추가 조건, 공개/private 기본값, attribution, balance·만료 시각과 `use_unlim=false`를 증거로 확인한 뒤에만 소량의 무브랜드·비민감·텍스트 없는 스타일 후보를 생성할 수 있습니다. 재료 52장과 bulk는 각각 별도 사람 gate를 통과해야 하며, `FICTOR` 공개 타이틀은 계속 미승인입니다. 승인된 AI 표기 템플릿도 공개 타이틀 gate 전에는 게시하지 않습니다.
 
 ## 확인 메모
 
