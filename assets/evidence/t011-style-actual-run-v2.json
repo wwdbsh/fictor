@@ -1,0 +1,249 @@
+{
+  "schema_version": 2,
+  "evidence_version": "t011-style-actual-run-v2",
+  "secret_free": true,
+  "run_state": "COMPLETE",
+  "actual_call_mode": "generate_image_sequential_count_1",
+  "source_artifacts": {
+    "manifest": {
+      "path": "assets/manifests/style-candidates-v2.json",
+      "sha256": "67b84dcab57f5197112fb81c3134afc329f55f0b4580030e6a05c044cfce27bf",
+      "tracked": true
+    },
+    "provider_journal": {
+      "path": "assets/runs/t011-style/operations-v2.json",
+      "sha256": "52c9543f32b8a831afc81a75725eb4506cfa2e752dc77ef3ba4f5eec2667951b",
+      "redacted": true,
+      "tracked": false
+    },
+    "completion": {
+      "path": "assets/runs/t011-style/completion-v2.json",
+      "sha256": "147b26caa92f49983ec5475246d363ce4cd611064ff6af55be93cead95630a75",
+      "tracked": false
+    },
+    "contact_sheet": {
+      "path": "docs/asset-runs/contact-sheets/t011-style-candidates-v2.html",
+      "sha256": "5bfb09cbd4684d7833299d19f276fc04bf01322433f798fa78385322d920ee29",
+      "tracked": true
+    }
+  },
+  "totals": {
+    "candidate_count": 4,
+    "balance_before_decimal": "945.9",
+    "balance_after_decimal": "939.9",
+    "credits_consumed_decimal": "6.00",
+    "completed_at": "2026-08-11T10:37:46.048Z",
+    "requested_model": "nano_banana_2",
+    "expected_provider_reported_model": "nano_banana_flash"
+  },
+  "candidates": [
+    {
+      "candidate_id": "style/master-candidate-01",
+      "job_id": "e0f36c95-2e1b-4e38-9931-7e10e562f209",
+      "invocation_id": "mcp-generate-image:e0f36c95-2e1b-4e38-9931-7e10e562f209",
+      "tool": "generate_image",
+      "requested_model": "nano_banana_2",
+      "provider_reported_model": "nano_banana_flash",
+      "use_unlim": false,
+      "count": 1,
+      "paid_request_sha256": "b836e6f9203952e4c7690a557d4057c54d3ca982542a745c8e37525391a06ca7",
+      "submitted_at": "2026-08-11T10:17:55.796Z",
+      "completed_at": "2026-08-11T10:23:36.735Z",
+      "cost_preflight": {
+        "get_cost": true,
+        "job_created": false,
+        "unit_cost_decimal": "1.50",
+        "observed_at": "2026-08-11T10:17:38.980Z"
+      },
+      "balance_before": {
+        "decimal": "945.9",
+        "observed_at": "2026-08-11T10:17:40.011Z"
+      },
+      "balance_after": {
+        "decimal": "944.4",
+        "observed_at": "2026-08-11T10:32:16.253Z"
+      },
+      "recovery": {
+        "local_relative_path": "style/master-candidate-01.png",
+        "backup_relative_path": "style/master-candidate-01.png",
+        "sha256": "3cadedb377db1e299bf2ac355404df3c8c092a3d229665c5e519243bbb5efde3",
+        "size_bytes": 1618931,
+        "target_aspect_ratio": "3:4",
+        "actual_width": 896,
+        "actual_height": 1200,
+        "aspect_error_ppm": 4445,
+        "provider_native_unmodified": true
+      },
+      "visual_qa": {
+        "candidate_id": "style/master-candidate-01",
+        "prohibited_elements_absent": [
+          "text",
+          "logo",
+          "brand",
+          "person"
+        ],
+        "border_observation": "NO_BORDER_OBSERVED",
+        "subject_observation": "NEUTRAL_SUBJECT_WITH_LIMB_COUNT_DIFFERENT_FROM_PROMPT",
+        "flags": [
+          "LIMB_COUNT_DIFFERS_FROM_PROMPT"
+        ]
+      }
+    },
+    {
+      "candidate_id": "style/master-candidate-02",
+      "job_id": "2186c857-2ec6-4261-886d-b9044307d55d",
+      "invocation_id": "mcp-generate-image:2186c857-2ec6-4261-886d-b9044307d55d",
+      "tool": "generate_image",
+      "requested_model": "nano_banana_2",
+      "provider_reported_model": "nano_banana_flash",
+      "use_unlim": false,
+      "count": 1,
+      "paid_request_sha256": "3449f75a76c639ac5920c03e0f32b93bdb6ef51ffcda8873a029683902c5bd91",
+      "submitted_at": "2026-08-11T10:32:55.754Z",
+      "completed_at": "2026-08-11T10:33:59.196Z",
+      "cost_preflight": {
+        "get_cost": true,
+        "job_created": false,
+        "unit_cost_decimal": "1.50",
+        "observed_at": "2026-08-11T10:32:39.593Z"
+      },
+      "balance_before": {
+        "decimal": "944.4",
+        "observed_at": "2026-08-11T10:32:40.128Z"
+      },
+      "balance_after": {
+        "decimal": "942.9",
+        "observed_at": "2026-08-11T10:34:09.971Z"
+      },
+      "recovery": {
+        "local_relative_path": "style/master-candidate-02.png",
+        "backup_relative_path": "style/master-candidate-02.png",
+        "sha256": "d8cb1bb1e5864eefdf543b8b371b0d8242b1aa8294b53a888ca0d064b668abd1",
+        "size_bytes": 1669014,
+        "target_aspect_ratio": "3:4",
+        "actual_width": 896,
+        "actual_height": 1200,
+        "aspect_error_ppm": 4445,
+        "provider_native_unmodified": true
+      },
+      "visual_qa": {
+        "candidate_id": "style/master-candidate-02",
+        "prohibited_elements_absent": [
+          "text",
+          "logo",
+          "brand",
+          "person"
+        ],
+        "border_observation": "FAINT_PLATE_EDGE_OBSERVED",
+        "subject_observation": "NEUTRAL_SUBJECT",
+        "flags": [
+          "FAINT_PLATE_EDGE_DESPITE_NO_BORDER_PROMPT"
+        ]
+      }
+    },
+    {
+      "candidate_id": "style/master-candidate-03",
+      "job_id": "a7e75048-cd94-47ef-89d7-0297f46a2f2a",
+      "invocation_id": "mcp-generate-image:a7e75048-cd94-47ef-89d7-0297f46a2f2a",
+      "tool": "generate_image",
+      "requested_model": "nano_banana_2",
+      "provider_reported_model": "nano_banana_flash",
+      "use_unlim": false,
+      "count": 1,
+      "paid_request_sha256": "d7969bd4bb0ad65c0b85228d9bab6442ad0bfc1813d34b5f4980aef7fb626661",
+      "submitted_at": "2026-08-11T10:34:55.960Z",
+      "completed_at": "2026-08-11T10:35:49.474Z",
+      "cost_preflight": {
+        "get_cost": true,
+        "job_created": false,
+        "unit_cost_decimal": "1.50",
+        "observed_at": "2026-08-11T10:34:38.286Z"
+      },
+      "balance_before": {
+        "decimal": "942.9",
+        "observed_at": "2026-08-11T10:34:38.784Z"
+      },
+      "balance_after": {
+        "decimal": "941.4",
+        "observed_at": "2026-08-11T10:36:03.130Z"
+      },
+      "recovery": {
+        "local_relative_path": "style/master-candidate-03.png",
+        "backup_relative_path": "style/master-candidate-03.png",
+        "sha256": "d04e65e15ab75c94a55b6929e74fe40b17b429ff166584ff2f572d4606b09a8f",
+        "size_bytes": 1909343,
+        "target_aspect_ratio": "3:4",
+        "actual_width": 896,
+        "actual_height": 1200,
+        "aspect_error_ppm": 4445,
+        "provider_native_unmodified": true
+      },
+      "visual_qa": {
+        "candidate_id": "style/master-candidate-03",
+        "prohibited_elements_absent": [
+          "text",
+          "logo",
+          "brand",
+          "person"
+        ],
+        "border_observation": "VISIBLE_PLATE_BORDER_OBSERVED",
+        "subject_observation": "NEUTRAL_SUBJECT",
+        "flags": [
+          "VISIBLE_PLATE_BORDER_DESPITE_NO_BORDER_PROMPT"
+        ]
+      }
+    },
+    {
+      "candidate_id": "style/master-candidate-04",
+      "job_id": "6a8379a3-5337-425f-8496-e84810ae769f",
+      "invocation_id": "mcp-generate-image:6a8379a3-5337-425f-8496-e84810ae769f",
+      "tool": "generate_image",
+      "requested_model": "nano_banana_2",
+      "provider_reported_model": "nano_banana_flash",
+      "use_unlim": false,
+      "count": 1,
+      "paid_request_sha256": "01ecbd8a152562cd06053e5100848a8b81c7fe2f53d9344d2f8dd8435362051c",
+      "submitted_at": "2026-08-11T10:36:49.391Z",
+      "completed_at": "2026-08-11T10:37:35.436Z",
+      "cost_preflight": {
+        "get_cost": true,
+        "job_created": false,
+        "unit_cost_decimal": "1.50",
+        "observed_at": "2026-08-11T10:36:33.557Z"
+      },
+      "balance_before": {
+        "decimal": "941.4",
+        "observed_at": "2026-08-11T10:36:34.029Z"
+      },
+      "balance_after": {
+        "decimal": "939.9",
+        "observed_at": "2026-08-11T10:37:46.048Z"
+      },
+      "recovery": {
+        "local_relative_path": "style/master-candidate-04.png",
+        "backup_relative_path": "style/master-candidate-04.png",
+        "sha256": "071859618b0b8a6630950e920de00bb9e65d8a412eca24378379446388fae0be",
+        "size_bytes": 1630920,
+        "target_aspect_ratio": "3:4",
+        "actual_width": 896,
+        "actual_height": 1200,
+        "aspect_error_ppm": 4445,
+        "provider_native_unmodified": true
+      },
+      "visual_qa": {
+        "candidate_id": "style/master-candidate-04",
+        "prohibited_elements_absent": [
+          "text",
+          "logo",
+          "brand",
+          "person"
+        ],
+        "border_observation": "STRONG_FRAMED_SHEET_MAT_SHADOW_ARTIFACT",
+        "subject_observation": "NEUTRAL_SUBJECT",
+        "flags": [
+          "STRONG_FRAMED_SHEET_MAT_SHADOW_DESPITE_NO_BORDER_PROMPT"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>T011 style candidates v2</title>
+  <style>
+    :root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #ece4cf; color: #281f22; }
+    body { margin: 0; padding: 2rem; }
+    header, main { max-width: 72rem; margin-inline: auto; }
+    header { margin-bottom: 1.5rem; }
+    h1, p { margin: 0 0 .5rem; }
+    main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    figure { margin: 0; padding: .75rem; border: 1px solid #7d6672; background: #f6efd9; }
+    img { display: block; width: 100%; height: auto; background: #d8cfb9; }
+    figcaption { display: grid; gap: .35rem; margin-top: .65rem; }
+    span, code { overflow-wrap: anywhere; font-size: .78rem; }
+    @media (max-width: 700px) { body { padding: 1rem; } main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>마스터 스타일 후보 4종</h1>
+    <p>v2 완료 evidence, provider journal, local/backup PNG 검증을 통과한 연락표입니다.</p>
+  </header>
+  <main>
+      <figure>
+        <img src="../../../public/assets/style/master-candidate-01.png" alt="style/master-candidate-01" width="896" height="1200">
+        <figcaption><strong>style/master-candidate-01</strong><span>hairline contour engraving with restrained parallel hatching and broad untouched paper</span><span class="qa">QA: LIMB_COUNT_DIFFERS_FROM_PROMPT</span><code>3cadedb377db1e299bf2ac355404df3c8c092a3d229665c5e519243bbb5efde3</code></figcaption>
+      </figure>
+      <figure>
+        <img src="../../../public/assets/style/master-candidate-02.png" alt="style/master-candidate-02" width="896" height="1200">
+        <figcaption><strong>style/master-candidate-02</strong><span>crisp burin linework with short curved hatching that follows the specimen form</span><span class="qa">QA: FAINT_PLATE_EDGE_DESPITE_NO_BORDER_PROMPT</span><code>d8cb1bb1e5864eefdf543b8b371b0d8242b1aa8294b53a888ca0d064b668abd1</code></figcaption>
+      </figure>
+      <figure>
+        <img src="../../../public/assets/style/master-candidate-03.png" alt="style/master-candidate-03" width="896" height="1200">
+        <figcaption><strong>style/master-candidate-03</strong><span>fine crossed hatchwork with alternating shallow angles and clean highlight gaps</span><span class="qa">QA: VISIBLE_PLATE_BORDER_DESPITE_NO_BORDER_PROMPT</span><code>d04e65e15ab75c94a55b6929e74fe40b17b429ff166584ff2f572d4606b09a8f</code></figcaption>
+      </figure>
+      <figure>
+        <img src="../../../public/assets/style/master-candidate-04.png" alt="style/master-candidate-04" width="896" height="1200">
+        <figcaption><strong>style/master-candidate-04</strong><span>delicate etched contour lines with sparse stipple accents between hatch groups</span><span class="qa">QA: STRONG_FRAMED_SHEET_MAT_SHADOW_DESPITE_NO_BORDER_PROMPT</span><code>071859618b0b8a6630950e920de00bb9e65d8a412eca24378379446388fae0be</code></figcaption>
+      </figure>
+  </main>
+</body>
+</html>

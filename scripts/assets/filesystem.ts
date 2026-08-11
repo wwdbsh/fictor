@@ -32,6 +32,7 @@ export interface VerifiedFile {
   already_existed: boolean;
   width: number;
   height: number;
+  aspect_error_ppm: number;
 }
 
 function sha256Bytes(bytes: Uint8Array): string {
@@ -52,6 +53,15 @@ function assertContained(root: string, target: string): void {
   if (offset === ".." || offset.startsWith(`..${sep}`) || isAbsolute(offset)) throw new Error("UNSAFE_PATH");
 }
 
+function lstatIfPresent(path: string) {
+  try {
+    return lstatSync(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
 function ensureSafeDirectory(root: string, parts: readonly string[]): string {
   mkdirSync(root, { recursive: true });
   let cursor = root;
@@ -59,8 +69,11 @@ function ensureSafeDirectory(root: string, parts: readonly string[]): string {
   for (const part of parts) {
     cursor = resolve(cursor, part);
     assertContained(root, cursor);
-    if (!existsSync(cursor)) mkdirSync(cursor);
-    const info = lstatSync(cursor);
+    let info = lstatIfPresent(cursor);
+    if (!info) {
+      mkdirSync(cursor);
+      info = lstatSync(cursor);
+    }
     if (info.isSymbolicLink()) throw new Error("SYMLINK_TRAVERSAL");
     if (!info.isDirectory()) throw new Error("UNSAFE_PATH");
   }
@@ -76,18 +89,57 @@ export function safeResolve(rootPath: string, relativePath: string, createParent
   if (createParents) ensureSafeDirectory(root, parentParts);
   else {
     let cursor = root;
-    if (existsSync(cursor) && lstatSync(cursor).isSymbolicLink()) throw new Error("SYMLINK_TRAVERSAL");
+    const rootInfo = lstatIfPresent(cursor);
+    if (rootInfo?.isSymbolicLink()) throw new Error("SYMLINK_TRAVERSAL");
     for (const part of parentParts) {
       cursor = resolve(cursor, part);
-      if (!existsSync(cursor)) break;
-      if (lstatSync(cursor).isSymbolicLink()) throw new Error("SYMLINK_TRAVERSAL");
+      const info = lstatIfPresent(cursor);
+      if (!info) break;
+      if (info.isSymbolicLink()) throw new Error("SYMLINK_TRAVERSAL");
     }
   }
-  if (existsSync(target) && lstatSync(target).isSymbolicLink()) throw new Error("SYMLINK_TRAVERSAL");
+  if (lstatIfPresent(target)?.isSymbolicLink()) throw new Error("SYMLINK_TRAVERSAL");
   return target;
 }
 
-export function inspectPng(bytes: Uint8Array, aspectRatio: AspectRatio, maxBytes = DEFAULT_MAX_PNG_BYTES) {
+interface PngScanlineSegment {
+  rowBytes: number;
+  rowCount: number;
+}
+
+function pngScanlineLayout(width: number, height: number, bitDepth: number, colorType: number, interlace: number): PngScanlineSegment[] {
+  const channels = ({ 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 } as Record<number, number>)[colorType];
+  const allowedDepths: Record<number, readonly number[]> = {
+    0: [1, 2, 4, 8, 16],
+    2: [8, 16],
+    3: [1, 2, 4, 8],
+    4: [8, 16],
+    6: [8, 16],
+  };
+  if (!channels || !allowedDepths[colorType]?.includes(bitDepth) || (interlace !== 0 && interlace !== 1) || width > 32_768 || height > 32_768) {
+    throw new Error("INVALID_PNG");
+  }
+  const rowBytes = (rowWidth: number) => Math.ceil((rowWidth * channels * bitDepth) / 8);
+  if (interlace === 0) return [{ rowBytes: rowBytes(width), rowCount: height }];
+  const startsX = [0, 4, 0, 2, 0, 1, 0];
+  const startsY = [0, 0, 4, 0, 2, 0, 1];
+  const stepsX = [8, 8, 4, 4, 2, 2, 1];
+  const stepsY = [8, 8, 8, 4, 4, 2, 2];
+  const segments: PngScanlineSegment[] = [];
+  for (let pass = 0; pass < 7; pass += 1) {
+    const passWidth = width <= startsX[pass] ? 0 : Math.ceil((width - startsX[pass]) / stepsX[pass]);
+    const passHeight = height <= startsY[pass] ? 0 : Math.ceil((height - startsY[pass]) / stepsY[pass]);
+    if (passWidth > 0 && passHeight > 0) segments.push({ rowBytes: rowBytes(passWidth), rowCount: passHeight });
+  }
+  return segments;
+}
+
+export function inspectPng(
+  bytes: Uint8Array,
+  aspectRatio: AspectRatio,
+  maxBytes = DEFAULT_MAX_PNG_BYTES,
+  aspectTolerancePpm = 0,
+) {
   if (bytes.byteLength === 0) throw new Error("EMPTY_FILE");
   if (bytes.byteLength > maxBytes) throw new Error("FILE_TOO_LARGE");
   const buffer = Buffer.from(bytes);
@@ -97,6 +149,9 @@ export function inspectPng(bytes: Uint8Array, aspectRatio: AspectRatio, maxBytes
   let offset = 8;
   let width = 0;
   let height = 0;
+  let bitDepth = 0;
+  let colorType = -1;
+  let interlace = -1;
   let chunkIndex = 0;
   let sawIdat = false;
   let sawIend = false;
@@ -117,6 +172,10 @@ export function inspectPng(bytes: Uint8Array, aspectRatio: AspectRatio, maxBytes
       width = data.readUInt32BE(0);
       height = data.readUInt32BE(4);
       if (width === 0 || height === 0) throw new Error("INVALID_PNG");
+      bitDepth = data[8];
+      colorType = data[9];
+      if (data[10] !== 0 || data[11] !== 0) throw new Error("INVALID_PNG");
+      interlace = data[12];
     } else if (type === "IHDR") {
       throw new Error("INVALID_PNG");
     }
@@ -135,15 +194,31 @@ export function inspectPng(bytes: Uint8Array, aspectRatio: AspectRatio, maxBytes
   }
   if (!sawIdat || !sawIend || width === 0 || height === 0) throw new Error("INVALID_PNG");
   try {
-    if (inflateSync(Buffer.concat(idatChunks), { maxOutputLength: Math.min(maxBytes * 8, 256 * 1024 * 1024) }).byteLength === 0) {
-      throw new Error("INVALID_PNG");
+    const segments = pngScanlineLayout(width, height, bitDepth, colorType, interlace);
+    const expectedDecodedBytes = segments.reduce((sum, segment) => sum + segment.rowCount * (1 + segment.rowBytes), 0);
+    const decodedLimit = Math.min(maxBytes * 8, 256 * 1024 * 1024);
+    if (expectedDecodedBytes < 1 || expectedDecodedBytes > decodedLimit) throw new Error("INVALID_PNG");
+    const decoded = inflateSync(Buffer.concat(idatChunks), { maxOutputLength: expectedDecodedBytes + 1 });
+    if (decoded.byteLength !== expectedDecodedBytes) throw new Error("INVALID_PNG");
+    let scanlineOffset = 0;
+    for (const segment of segments) {
+      for (let row = 0; row < segment.rowCount; row += 1) {
+        if (decoded[scanlineOffset] > 4) throw new Error("INVALID_PNG");
+        scanlineOffset += 1 + segment.rowBytes;
+      }
     }
+    if (scanlineOffset !== decoded.byteLength) throw new Error("INVALID_PNG");
   } catch {
     throw new Error("INVALID_PNG");
   }
+  if (!Number.isSafeInteger(aspectTolerancePpm) || aspectTolerancePpm < 0 || aspectTolerancePpm > 1_000_000) {
+    throw new Error("INVALID_ASPECT_TOLERANCE");
+  }
   const [expectedWidth, expectedHeight] = aspectRatio.split(":").map(Number);
-  if (width * expectedHeight !== height * expectedWidth) throw new Error("ASPECT_MISMATCH");
-  return { sha256: sha256Bytes(buffer), size: buffer.byteLength, width, height };
+  const targetCrossProduct = height * expectedWidth;
+  const aspectErrorPpm = Math.ceil((Math.abs(width * expectedHeight - targetCrossProduct) * 1_000_000) / targetCrossProduct);
+  if (aspectErrorPpm > aspectTolerancePpm) throw new Error("ASPECT_MISMATCH");
+  return { sha256: sha256Bytes(buffer), size: buffer.byteLength, width, height, aspect_error_ppm: aspectErrorPpm };
 }
 
 function crc32(bytes: Uint8Array): number {
@@ -170,8 +245,9 @@ export function atomicWriteVerifiedPng(
   bytes: Uint8Array,
   aspectRatio: AspectRatio,
   maxBytes = DEFAULT_MAX_PNG_BYTES,
+  aspectTolerancePpm = 0,
 ): VerifiedFile {
-  const checked = inspectPng(bytes, aspectRatio, maxBytes);
+  const checked = inspectPng(bytes, aspectRatio, maxBytes, aspectTolerancePpm);
   const target = safeResolve(rootPath, relativePath, true);
   if (existsSync(target)) {
     const current = readFileSync(target);
@@ -212,10 +288,11 @@ export function verifyExistingPng(
   aspectRatio: AspectRatio,
   expectedSha256: string,
   maxBytes = DEFAULT_MAX_PNG_BYTES,
+  aspectTolerancePpm = 0,
 ): VerifiedFile {
   const target = safeResolve(rootPath, relativePath);
   if (!existsSync(target)) throw new Error("LOCAL_VERIFY_FAILED");
-  const checked = inspectPng(readFileSync(target), aspectRatio, maxBytes);
+  const checked = inspectPng(readFileSync(target), aspectRatio, maxBytes, aspectTolerancePpm);
   if (checked.sha256 !== expectedSha256) throw new Error("LOCAL_VERIFY_FAILED");
   return { path: target, ...checked, already_existed: true };
 }
@@ -227,15 +304,16 @@ export function backupVerifiedFile(
   expectedSha256: string,
   aspectRatio: AspectRatio,
   maxBytes = DEFAULT_MAX_PNG_BYTES,
+  aspectTolerancePpm = 0,
 ): VerifiedFile {
   const local = resolve(localRoot);
   const backup = resolve(backupRoot);
   assertNonOverlappingRoots(local, backup);
   const sourcePath = safeResolve(local, relativePath);
   const source = readFileSync(sourcePath);
-  const sourceInfo = inspectPng(source, aspectRatio, maxBytes);
+  const sourceInfo = inspectPng(source, aspectRatio, maxBytes, aspectTolerancePpm);
   if (sourceInfo.sha256 !== expectedSha256) throw new Error("LOCAL_HASH_CHANGED");
-  const result = atomicWriteVerifiedPng(backup, relativePath, source, aspectRatio, maxBytes);
+  const result = atomicWriteVerifiedPng(backup, relativePath, source, aspectRatio, maxBytes, aspectTolerancePpm);
   if (result.sha256 !== sourceInfo.sha256 || result.size !== sourceInfo.size) throw new Error("BACKUP_VERIFY_FAILED");
   return result;
 }

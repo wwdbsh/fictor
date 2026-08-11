@@ -1,6 +1,15 @@
 # FICTOR (픽토르) — 게임 설계 문서
 
-> 작성일: 2026-08-10 · 상태: 세계관/코어 시스템 확정, 에셋 생성 착수 가능
+> 작성일: 2026-08-10 · 상태: 세계관/코어 시스템 확정, 원격 에셋은 T011 v1 역사적 HOLD / 동일 스타일 후보 4개만 v2 제한 READY
+
+> **에셋 원격 실행 정정 (`STALE_FOR_REMOTE_EXECUTION`, T011, 2026-08-11):** 이 문서의 0.12 단가,
+> 965 잔액, batch 12장/125회와 약 179 크레딧 계산은 과거 디자인 계획값이다. 현재 secret-free evidence는
+> [`assets/evidence/t011-preflight-observed-v1.json`](assets/evidence/t011-preflight-observed-v1.json),
+> gate 상태는 [`docs/asset-runs/t011-preflight-2026-08-11.md`](docs/asset-runs/t011-preflight-2026-08-11.md)를
+> 따른다. 관찰 단가는 1.50, 잔액은 945.9이고 batch 최대치는 미확인이다. current limit 확인과 사용자
+> 재승인 전에는 아래 비용·batch 수치를 원격 실행 지시로 사용하지 않는다. 이후 재승인은
+> [`T011 limited READY v2`](docs/asset-runs/t011-limited-ready-v2-2026-08-11.md)의 동일한 후보 4개를
+> 단건 `generate_image`로 호출하는 범위에만 적용된다. 재료/core/bulk와 batch 지시는 계속 stale이다.
 
 ## 타이틀
 
@@ -26,7 +35,7 @@
 
 | 항목 | 내용 |
 |---|---|
-| 목적 | 만료 예정 Higgsfield 크레딧(965)을 **소멸하지 않는 게임 자산**으로 전환 |
+| 목적 | 만료 예정 Higgsfield 크레딧(과거 계획 965, `STALE_FOR_REMOTE_EXECUTION`)을 **소멸하지 않는 게임 자산**으로 전환 — 현재값은 [T011 preflight](docs/asset-runs/t011-preflight-2026-08-11.md) 참조 |
 | 성격 | 개인 프로젝트 (회사 프로젝트와 무관) |
 | 성공 기준 | 실제로 사람들이 즐기는 서비스 |
 | 플랫폼 | 웹 |
@@ -826,7 +835,7 @@ T005/T006에서 사용자 이름을 검수하고 source revision hash로 승인�
 
 ### 에셋 생성 처리량
 
-- 배치 1회 = 12장 → 1,494장이면 **125회**
+- 과거 계획: 배치 1회 = 12장 → 1,494장이면 **125회** (`STALE_FOR_REMOTE_EXECUTION`; [T011 preflight](docs/asset-runs/t011-preflight-2026-08-11.md)의 current limit 확인·재승인 전 실행 금지)
 - 실측 속도 기준 수 시간 규모. **물량보다 검수 시간이 변수**
 
 ---
@@ -1282,7 +1291,8 @@ Equipment(A, B):
 
 심장 빚기는 재료 개체가 아닌 속성만 구분해 6심장 × 6속성의 36종으로 수렴시킨다.
 
-> **스코프 확정:** 축소하지 않고 52종(1,326 조합) 전부로 간다. core 아트 예상 소요는 약 179 크레딧이며,
+> **스코프 확정:** 축소하지 않고 52종(1,326 조합) 전부로 간다. core 아트 예상 소요 약 179 크레딧은
+> `STALE_FOR_REMOTE_EXECUTION`인 과거 계획값이며 [T011 preflight](docs/asset-runs/t011-preflight-2026-08-11.md)가 우선한다.
 > 조합은 데이터이므로 구현 부담이 카드 수에 비례하지 않는다. 상세는 §5-2 스코프 방침.
 
 ---
@@ -1420,18 +1430,25 @@ Equipment(A, B):
 
 ---
 
-## 12. 크레딧 예산
+## 12. 크레딧 예산 — `STALE_FOR_REMOTE_EXECUTION`
 
-**실측 단가 (preflight 확인)**
+> 이 절 전체는 과거 계획 기록이다. 현재 관찰 단가·잔액과 미확인 batch limit은
+> [T011 preflight](docs/asset-runs/t011-preflight-2026-08-11.md) 및
+> [secret-free evidence](assets/evidence/t011-preflight-observed-v1.json)가 우선한다. 새 사용자 승인은
+> [T011 limited READY v2](docs/asset-runs/t011-limited-ready-v2-2026-08-11.md)의 스타일 후보 4개·상한
+> 6.00에만 적용되며, 아래 core 1,494장 계산은 실행 지시가 아니다.
+
+**과거 실측 단가 (`STALE_FOR_REMOTE_EXECUTION`)**
 
 | 항목 | 단가 |
 |---|---|
-| Soul 2 / Nano Banana 2 이미지 (3:4) | **0.12 크레딧** |
+| Soul 2 / Nano Banana 2 이미지 (3:4) | 과거 **0.12 크레딧** (`STALE_FOR_REMOTE_EXECUTION`; 현재 관찰 1.50) |
 | Kling 3.0 영상 5초 | 10 크레딧 |
 | Seedance 2.5 영상 5초 | 32.5 크레딧 |
 | Seedance 2.5 영상 30초 (네이티브 오디오) | **195 크레딧** |
 
-> **중요:** 계정에 무제한(unlim) 할당량 없음 (`unlim.available: false`). 외부에 도는 "33일 무제한 Seedance" 프로모션은 이 계정에 적용되지 않는다. **965 크레딧이 전부.**
+> **과거 계획 기록:** 계정에 무제한(unlim) 할당량 없음 (`unlim.available: false`). **965 크레딧** 표기는
+> `STALE_FOR_REMOTE_EXECUTION`이며 현재 관찰 잔액은 945.9다.
 
 ### Core 아트 예산 (필수)
 
@@ -1439,11 +1456,11 @@ Equipment(A, B):
 |---|---|---|
 | 카드 아트 (기본 52 + canonical 조합 1,326 + 신의 심장 6 + 심장 빚기 36) | 1,420장 | 170.40 |
 | 세계 아트 (배경 18 + 적 36 + 이벤트 20) | 74장 | ~9 |
-| **Core 합계** | **1,494장** | **179.28 (약 179)** |
+| **Core 합계** | **1,494장** | 과거 **179.28 (약 179)** — `STALE_FOR_REMOTE_EXECUTION` |
 
-Core 생성은 `ceil(1,494 ÷ 12) = 125`배치다. 보스 6종은 신의 심장 카드 아트를 재사용하며 별도 세계 아트 물량이 아니다.
+과거 Core 계산은 `ceil(1,494 ÷ 12) = 125`배치다 (`STALE_FOR_REMOTE_EXECUTION`). 보스 6종은 신의 심장 카드 아트를 재사용하며 별도 세계 아트 물량이 아니다.
 
-### 선택 산출물 예산 (Core 1,494장 및 125배치 밖)
+### 선택 산출물 과거 예산 (`STALE_FOR_REMOTE_EXECUTION`; Core 1,494장 및 과거 125배치 밖)
 
 | 항목 | 물량 | 크레딧 |
 |---|---|---|
@@ -1454,12 +1471,12 @@ Core 생성은 `ceil(1,494 ÷ 12) = 125`배치다. 보스 6종은 신의 심장 
 | **Core + 선택** | | **~449** |
 | **예비 (재생성 · 품질 반복)** | | **~516** |
 
-**500 크레딧 이상 여유가 있다. 품질 기준을 높게 잡아도 된다.**
+**과거 500 크레딧 이상 여유 계산은 `STALE_FOR_REMOTE_EXECUTION`이며 현재 실행 판단에 사용하지 않는다.**
 
 ### 제약
 
 - Higgsfield는 **음악·효과음 단독 생성을 지원하지 않는다.** 사운드는 별도 소스 필요
-- 배치 생성은 1회 12장. 1,494장이면 125회
+- 과거 batch 계획은 1회 12장, 1,494장이면 125회 (`STALE_FOR_REMOTE_EXECUTION`; v2의 단건 4개 승인과 무관하며 current limit·별도 재승인 필요)
 
 ---
 
@@ -1472,7 +1489,7 @@ Core 생성은 `ceil(1,494 ÷ 12) = 125`배치다. 보스 6종은 신의 심장 
 | D2–4 | canonical 조합 1,326종 배치 생성 (장비 45 포함) + 배치별 즉시 로컬 저장 | 159.12 |
 | D5 | 신의 심장 6종 + 심장 빚기 결과 36종 생성·회수 | 5.04 |
 | D5–6 | 세계 아트 신규 74종 생성·회수 (보스는 신의 심장 카드 6장 재사용) | 8.88 |
-| D6 | **Core 1,494장 완전성 및 125배치 회수 검증** | — |
+| D6 | 과거 계획: **Core 1,494장 완전성 및 125배치 회수 검증** (`STALE_FOR_REMOTE_EXECUTION`) | — |
 | D7 | Core 검증 완료 후에만 UI/프레임·트레일러·TTS 등 선택 산출물 진행 | 선택 예산 |
 
 > **Core 회수가 가장 중요하다.** 각 배치 완료 즉시 로컬 저장하고, 선택 산출물은 Core 1,494장의 완전성과 회수를 검증한 뒤에만 진행한다.
