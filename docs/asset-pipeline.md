@@ -215,7 +215,7 @@ manifest는 `t011_approval_inherited_by_t013_materials=false`, 재료 52장 `NOT
   시간대, 현재 model·가격·balance, `use_unlim=false`, batch limit/topology, 즉시 local+backup 회수
 - 현재 위험 공개 뒤 정확히 재료 52장에 한정된 새 사용자 위험 승인
 
-## T013 재료 52장 — 실행 COMPLETE, T014 승인 대기
+## T013 재료 52장 — 실행 COMPLETE, T014 승인 완료
 
 Issue 15 계약을 `assets/manifests/materials-v1.plan.json`으로 동결했다. core-v1의 MATERIAL 52개를
 동일 순서·ID·path로 사용하고 logical batch는 `12+12+12+12+4`, 실행 전 검증 단가 `1.50`, initial cap
@@ -230,10 +230,10 @@ evidence schema, plan/runner protocol은
 고정했다. 다섯 batch `12+12+12+12+4`에서 52개가 모두 완료됐고 local+backup에 회수됐다. balance는
 `939.90→861.90`, 실제 사용량은 승인 상한과 같은 `78.00`, 자동 유료 재시도는 0이다. 실제 증거는
 `assets/evidence/t013-materials-actual-run-v1.json`, 전수 연락표는
-`docs/asset-runs/contact-sheets/t013-materials-v1.html`이다. T014 스타일 최종 승인과 bulk 생성은 아직
-승인되지 않았다. 전수 육안 감사에서 `tool_08` 문자형 라벨, 일부 채색·입체 style drift와 `odd_01`의
-마스터 중앙 구도·관절 다리 형상 누출을 확인했으므로, T014는 이를 명시적으로 수용하거나 새
-revision·비용 승인 아래 표본 재생성을 요구해야 한다.
+`docs/asset-runs/contact-sheets/t013-materials-v1.html`이다. 전수 육안 감사에서 `tool_08` 문자형 라벨,
+일부 채색·입체 style drift와 `odd_01`의 마스터 중앙 구도·관절 다리 형상 누출을 확인했다.
+이 편차는 아래 T014 결정에서 기존 52개 bytes에 한해 명시적으로 수용됐으며, 신규 bytes와 후속
+bulk의 `NO_TEXT`·`MEDIA_ONLY` 규칙은 완화되지 않았다.
 
 ```bash
 npm run assets:materials:v1:gen
@@ -262,3 +262,26 @@ timeout/status/size 제한과 restrictive mktemp PNG에만 사용하며 기존 a
 local+backup 저장 직후 삭제한다. provider status와 내부 runner state는 분리하며 모호한 제출, 부분 response,
 price/model/reference drift, invalid PNG, balance 불일치는 safe 관찰값을 남기고 `FAIL_STOP`; 자동
 재제출하지 않는다. 실제 52개가 모두 완료되기 전에는 tracked evidence/contact sheet를 만들 수 없다.
+
+## T014 재료 스타일 결정 — 기존 T013 52장 승인
+
+상헌 님은 전체 연락표와 `tool_08` 문자형 라벨, `odd_01`의 master 중앙 구도·관절 다리 형상 누출,
+일부 이미지의 style·paper·3D·color drift 고지를 확인한 뒤 `2026-08-12T01:34:36.573Z`에 정확히
+“승인”했다. canonical 결정은 `assets/manifests/material-style-approval-v1.json`, 상세 기록은
+[`t014-material-style-approval-2026-08-12.md`](decisions/t014-material-style-approval-2026-08-12.md)다.
+
+```bash
+npm run assets:material-style:gen
+npm run assets:material-style:check
+```
+
+승인은 T013에서 회수된 정확히 52개 기존 PNG bytes에만 적용된다. manifest는 plan·actual evidence·전체
+연락표·T012 master의 고정 SHA와 52개 local+별도 backup의 실제 SHA/순서/recovery를 재검증한다.
+`reviewed=approved=52`, pending/rejected/replacement는 모두 0이다. 알려진 세 QA 항목은
+`ACCEPTED_FOR_EXISTING_T013_52_ONLY`로 보존하며 미래의 `NO_TEXT`, `MEDIA_ONLY` 비복제, prompt/style
+정책을 완화하지 않는다.
+
+canonical bulk style gate는 `GO`이고 T015 dependency는 충족됐다. 다만 T014는 provider 호출 자체를
+실행하거나 즉시 승인하지 않는다. T015에는 별도의 선택된 Task cycle, 동결 run plan, 현재
+cost·balance·preflight 및 provider schema/model 제약, batch `<=12`, `use_unlim=false`, 생성 직후 local과
+별도 backup 회수가 필요하다.

@@ -5,7 +5,7 @@
 | 에셋/서비스 | provider·model | 약관 revision·적용 상태 | 권리 상태 | 결정·증빙 | manifest·run ledger | AI 표기 | 확인자·일자 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | FICTOR 카드·세계 아트 계획 1,494개 | Higgsfield / `nano_banana_2` 계획 | Terms updated 2026-07-26 / 계정 적용 revision·Privacy·모델 추가 조건 `PENDING_T011_PREFLIGHT` | `CONDITIONAL_APPROVAL` — 무브랜드·비민감·텍스트 없는 입력만, `use_unlim=false`; 공개 타이틀 미승인 | [T009 report r1](legal/art-policy-decision-2026-08-11.md) / [T010 조건부 승인](decisions/t010-art-policy-approval-2026-08-11.md) | `assets/manifests/core-v1.plan.json` / T010 생성 없음, T011 preflight 전 | 공개 타이틀 승인 뒤 표기 템플릿을 최종 타이틀에 결속해 게임 크레딧·README·제출 설명·이 문서에 적용; 그 전 공개 적용 금지 | 상헌 님, 2026-08-11 |
-| T013 기본 재료 52장 | Higgsfield / 요청 `nano_banana_2`, 보고 `nano_banana_flash` | T013 위험 공개·정확 범위 승인 적용; 미확인 계정 약관 항목은 기존 조건부 상태 유지 | `GENERATED_CONDITIONAL` — T013 표본 범위만; `tool_08` 텍스트, 일부 style drift, `odd_01` 마스터 형상 누출 QA flag, T014 스타일·bulk 승인 아님 | [T013 실행 기록](asset-runs/t013-materials-local-preparation-2026-08-11.md) / `assets/evidence/t013-materials-approval-v1.json` | `assets/manifests/materials-v1.plan.json` / `assets/evidence/t013-materials-actual-run-v1.json` / ignored canonical journal+별도 backup | 공개 타이틀과 최종 attribution gate 전 게시 금지; 현재 저장소 내부 표본 | 상헌 님, 2026-08-12 |
+| T013 기본 재료 52장 | Higgsfield / 요청 `nano_banana_2`, 보고 `nano_banana_flash` | T013 위험 공개·정확 범위 승인 적용; 미확인 계정 약관 항목은 기존 조건부 상태 유지 | `APPROVED_EXISTING_T013_52_ONLY` — `tool_08` 텍스트, 일부 style·paper·3D·color drift, `odd_01` 마스터 구도·관절 다리 형상 누출 flag를 기존 bytes에만 수용; 미래 정책 완화 아님 | [T013 실행 기록](asset-runs/t013-materials-local-preparation-2026-08-11.md) / [T014 결정](decisions/t014-material-style-approval-2026-08-12.md) | `assets/manifests/materials-v1.plan.json` / `assets/evidence/t013-materials-actual-run-v1.json` / `assets/manifests/material-style-approval-v1.json` / ignored canonical journal+별도 backup | 공개 타이틀과 최종 attribution gate 전 게시 금지; 현재 저장소 내부 표본 | 상헌 님, 2026-08-12 |
 | `예: 파일명 또는 패키지명` | `제공자 / 모델 또는 버전` | `라이선스·약관 revision` | `APPROVED/PENDING/BLOCKED` | `URL 또는 보관 경로` | `manifest/lockfile/job ledger` | `표기 위치` | `이름, YYYY-MM-DD` |
 
 ## AI 생성물 provenance 연결
@@ -17,7 +17,7 @@
 
 계정 ID, 이메일, API 키, 세션 URL, 서명된 다운로드 URL과 원문 prompt에 포함된 비공개 정보는 공개 저장소에 기록하지 않습니다.
 
-T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과 T013 재료 표본 52장은 각각의 제한 승인 아래 생성됐습니다. T013은 balance `939.90→861.90`, 총 `78.00 credits`, 자동 유료 재시도 0으로 완료됐고 local+backup SHA가 actual evidence에 결속됩니다. T014 스타일 승인과 bulk는 별도 사람 gate이며, `FICTOR` 공개 타이틀은 계속 미승인입니다. 승인된 AI 표기 템플릿도 공개 타이틀 gate 전에는 게시하지 않습니다.
+T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과 T013 재료 표본 52장은 각각의 제한 승인 아래 생성됐습니다. T013은 balance `939.90→861.90`, 총 `78.00 credits`, 자동 유료 재시도 0으로 완료됐고 local+backup SHA가 actual evidence에 결속됩니다. T014는 고지된 QA flag를 포함한 기존 T013 52개 bytes를 승인해 canonical bulk style gate와 T015 dependency를 열었지만 provider 호출은 승인하지 않습니다. T015는 별도 Task cycle과 최신 실행 gate가 필요하며, `FICTOR` 공개 타이틀은 계속 미승인입니다. 승인된 AI 표기 템플릿도 공개 타이틀 gate 전에는 게시하지 않습니다.
 
 ## 확인 메모
 

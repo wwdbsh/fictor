@@ -26,6 +26,8 @@
     "assets:style:v2:ops": "tsx scripts/assets/style-candidates-v2-cli.ts",
     "assets:master-style:gen": "tsx scripts/assets/master-style-cli.ts gen",
     "assets:master-style:check": "tsx scripts/assets/master-style-cli.ts check",
+    "assets:material-style:gen": "tsx scripts/assets/material-style-approval-cli.ts gen",
+    "assets:material-style:check": "tsx scripts/assets/material-style-approval-cli.ts check",
     "assets:materials:v1:gen": "tsx scripts/assets/materials-v1-cli.ts gen",
     "assets:materials:v1:check": "tsx scripts/assets/materials-v1-cli.ts check",
     "assets:materials:v1": "tsx scripts/assets/materials-v1-cli.ts",
