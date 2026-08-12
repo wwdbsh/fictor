@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t013-higgsfield-schema-v1",
+  "observed_at": "2026-08-11T13:57:31.503Z",
+  "source": "T013 second review live Higgsfield schema observation",
+  "secret_free": true,
+  "media_binding": {
+    "field": "medias",
+    "item_shape": {
+      "role": "image",
+      "value": "SOURCE_JOB_ID"
+    }
+  },
+  "generate_image_batch": {
+    "request_shape": "requests[index,params[model,prompt,aspect_ratio,resolution,count,use_unlim,medias]]",
+    "response_shape": "submitted_count,failed_count,jobs[index,job_id,status,adjustments?,error?,warning?,preset_recommendation?]",
+    "statuses": [
+      "pending",
+      "waiting",
+      "queued",
+      "in_progress",
+      "ip_detect",
+      "completed",
+      "failed",
+      "canceled",
+      "nsfw",
+      "ip_detected",
+      "submission_failed"
+    ],
+    "optional_job_field_policy": "VALIDATE_REDACT_PRESERVE_DEFINITE_JOB_IDS_FAIL_STOP_ON_SIGNAL",
+    "benign_warning_allowlist": []
+  },
+  "jobs_wait": {
+    "request_shape": "jobs[index,job_id]",
+    "response_shape": "all_terminal,jobs[index,job_id,status,model?,result_url?,thumbnail_url?,error?,retryable?,type?],summary,poll_after_seconds?,timed_out?,aborted?",
+    "statuses": [
+      "pending",
+      "waiting",
+      "queued",
+      "in_progress",
+      "ip_detect",
+      "completed",
+      "failed",
+      "canceled",
+      "nsfw",
+      "ip_detected",
+      "lookup_failed"
+    ],
+    "lookup_failed_policy": "RETRYABLE_TRUE_REPOLL_SAME_JOB_FALSE_OR_MISSING_FAIL_STOP_NO_RESUBMIT",
+    "sensitive_field_policy": "RESULT_URL_THUMBNAIL_URL_ERROR_TRANSIENT_ONLY_NEVER_PERSIST",
+    "handoff": "ACTUAL_JSON_STDIN_ONLY_PUBLIC_DNS_PINNED_HTTPS_REDIRECT_REVALIDATED_TEMP_INGEST_DELETE",
+    "observed_download_host_allowlist": [],
+    "download_network_policy": "GENERIC_HTTPS_HOSTNAME_DEFAULT_443_ALL_DNS_ANSWERS_PUBLIC_PINNED_ORIGINAL_TLS_IDENTITY_NO_PROXY",
+    "redirect_policy": "MAX_3_EACH_HOP_URL_DNS_PIN_REVALIDATED",
+    "completion_provenance": "ONLY_JOBS_HANDOFF_STDIN_JOB_BOUND_RECOVERIES",
+    "diagnostic_command_policy": "JOBS_FILE_AND_INGEST_INPUT_PNG_TEST_INTERNAL_ONLY_NOT_PRODUCTION"
+  },
+  "generate_image_get_cost": {
+    "request_shape": "params[model,prompt,aspect_ratio,resolution,count,use_unlim,medias,get_cost:true]",
+    "response_shape": "cost[credits:number,credits_exact:number]",
+    "representative_asset": "FIRST_ASSET_IN_EACH_BATCH",
+    "price_affecting_params": [
+      "model",
+      "aspect_ratio",
+      "resolution",
+      "count",
+      "use_unlim",
+      "medias"
+    ],
+    "prompt_pricing_policy": "EXEMPT_PROVIDER_PRICING_INDEPENDENT",
+    "no_job_submission_observation": "DERIVED_FROM_TOOL_CONTRACT_NO_JOB_SUBMITTED"
+  },
+  "balance": {
+    "response_shape": "credits:number",
+    "normalization": "EXACT_DECIMAL_INTERNAL"
+  }
+}

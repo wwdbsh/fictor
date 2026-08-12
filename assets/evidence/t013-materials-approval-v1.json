@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t013-materials-approval-v1",
+  "secret_free": true,
+  "decision": "APPROVE_T013_EXACTLY_52_MATERIALS_WITH_DISCLOSED_RISKS",
+  "source": "current user conversation",
+  "exact_user_quote": "위 위험을 확인했고 T013 재료 52장과 초기 78.00 credits 상한, 자동 유료 재시도 0을 승인합니다.",
+  "approved_at": "2026-08-12T00:30:55.000Z",
+  "disclosed_at": "2026-08-11T15:46:23.000Z",
+  "plan_sha256": "22cc0b976501b6d2f9fc0df5d584e891c214ec0c4da4797ddcbf8b98c86b7611",
+  "risk_disclosure_evidence_sha256": "5e73e3e1104d0334f7fe79e4c9c612de057fd9de8e94141f5e4257b91e6129c5",
+  "risk_disclosure_text_sha256": "933bc62c074bad6b59d7f27914420a067f9845cac11fb8eb6282aa9d334b36e1",
+  "disclosure_presentation_evidence_sha256": "48182ac1c5a0b97f62bb88ee0646637f0ecc7652cca6a83ee1179f6169b15ec4",
+  "scope": {
+    "category": "MATERIAL",
+    "asset_count": 52,
+    "initial_credit_cap_decimal": "78.00",
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "core_or_bulk_allowed": false
+  },
+  "acknowledges_t011_approval_not_inherited": true
+}
