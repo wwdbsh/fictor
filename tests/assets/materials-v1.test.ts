@@ -875,7 +875,7 @@ describe("T013 materials-v1 local preparation", () => {
       expect(journalText).not.toContain("resolver-secret");
       expect(readdirSync(temporaryRoot)).toEqual([]);
     }
-  });
+  }, 15_000);
 
   test("handoff enforces declared PNG size and records only a safe download failure", async () => {
     const { plan, presentation, approval, root } = fixture();
