@@ -1,0 +1,1600 @@
+{
+  "schema_version": 1,
+  "plan_version": "t013-materials-v1",
+  "issue_contract_sha256": "dcb076f1af7ad35029ec7169cc8406e1fbdd868d5fae854da18cfd58c219b947",
+  "state": "HOLD_FOR_SCOPED_USER_APPROVAL",
+  "remote_execution_allowed_without_approval": false,
+  "scope": {
+    "category": "MATERIAL",
+    "asset_count": 52,
+    "core_or_bulk_allowed": false
+  },
+  "sources": {
+    "materials": {
+      "path": "src/data/source/materials.json",
+      "sha256": "c1ce53ac380f637b9947211250313db25d03503f837de219dfb1ba8d7c897931"
+    },
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "risk_disclosure": {
+      "path": "assets/evidence/t013-materials-risk-disclosure-v1.json",
+      "sha256": "5e73e3e1104d0334f7fe79e4c9c612de057fd9de8e94141f5e4257b91e6129c5",
+      "text_sha256": "933bc62c074bad6b59d7f27914420a067f9845cac11fb8eb6282aa9d334b36e1"
+    },
+    "provider_schema": {
+      "path": "assets/evidence/t013-higgsfield-schema-v1.json",
+      "sha256": "7a35a1b70db613402a3661cb686a94dc2afd8464220348aadc883ef6a3334850"
+    }
+  },
+  "provider_contract": {
+    "tool": "generate_image_batch",
+    "requested_model": "nano_banana_2",
+    "expected_provider_reported_model_for_drift_detection": "nano_banana_flash",
+    "upstream_provider": "Google",
+    "aspect_ratio": "3:4",
+    "resolution": "1k",
+    "count_per_asset": 1,
+    "use_unlim": false,
+    "response_topology": "INDEXED_JOB_ONE_TO_ONE_PER_ASSET",
+    "cost_preflight": {
+      "tool": "generate_image",
+      "representative_asset": "FIRST_ASSET_IN_EACH_BATCH",
+      "get_cost": true,
+      "price_affecting_params_identical_within_batch": true,
+      "prompt_pricing_policy": "EXEMPT_PROVIDER_PRICING_INDEPENDENT",
+      "no_job_submission_observation": "DERIVED_FROM_TOOL_CONTRACT_NO_JOB_SUBMITTED"
+    }
+  },
+  "reference_binding": {
+    "role": "image",
+    "source_job_id": "e0f36c95-2e1b-4e38-9931-7e10e562f209",
+    "reference_id": "fictor-copperplate-media-master",
+    "revision": 1,
+    "source_sha256": "3cadedb377db1e299bf2ac355404df3c8c092a3d229665c5e519243bbb5efde3",
+    "kind": "LOCAL_MASTER_IMAGE",
+    "lock_scope": "MEDIA_ONLY",
+    "reference_instruction": "Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.",
+    "provider_media_id": null,
+    "provider_reference_id": null
+  },
+  "prompt_contract": {
+    "core_prompt_preserved_verbatim": true,
+    "reference_instruction": "Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.",
+    "no_copy_boundary": "MEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+    "deterministic_text_only": true
+  },
+  "budget": {
+    "unit_cost_decimal": "1.50",
+    "initial_request_count": 52,
+    "initial_credit_cap_decimal": "78.00",
+    "automatic_paid_retry_reserve_decimal": "0.00"
+  },
+  "retry_policy": {
+    "automatic_paid_retry_allowed": false,
+    "terminal_generation_failure_max_retries": 3,
+    "each_retry_requires_new_scoped_user_approval": true,
+    "ambiguous_or_partial_submission_retry_allowed": false
+  },
+  "recovery_policy": {
+    "local_root": "public/assets",
+    "backup_root": "assets/backups/t013-materials",
+    "provider_native_unmodified": true,
+    "crop_or_resize_allowed": false,
+    "aspect_tolerance_ppm": 5000,
+    "immediate_local_and_backup_before_next_batch": true,
+    "production_jobs_wait_input": "STDIN_ONLY",
+    "production_diagnostic_file_commands_allowed": false,
+    "completion_requires_jobs_handoff_provenance": true,
+    "observed_download_host_allowlist": [],
+    "download_network_policy": "GENERIC_HTTPS_DEFAULT_443_ALL_DNS_ANSWERS_PUBLIC_PINNED_ORIGINAL_TLS_IDENTITY_REDIRECT_REVALIDATED"
+  },
+  "approval_gate": {
+    "disclosure_presentation_path": "assets/evidence/t013-materials-disclosure-presentation-v1.json",
+    "path": "assets/evidence/t013-materials-approval-v1.json",
+    "status": "MISSING_NOT_AUTHORIZED",
+    "exact_scope_asset_count": 52,
+    "exact_cap_decimal": "78.00",
+    "t011_approval_inherited": false
+  },
+  "assets": [
+    {
+      "index": 0,
+      "id": "ore_still",
+      "path": "cards/ore_still.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=굳은 조각 (덩이); colors=TEAL; density=SPARSE; paper=CREAM; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "8c0afd26db67cc73482954b6378c053784070dd765a032ee821a580c10b0e581",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=굳은 조각 (덩이); colors=TEAL; density=SPARSE; paper=CREAM; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "b1ee11a10c3706478e2c3374e3d398fe747cafc07089735fc53a4ee2cf2e414f",
+      "request": {
+        "index": 0,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=굳은 조각 (덩이); colors=TEAL; density=SPARSE; paper=CREAM; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "6a2f693fc34e1adcd5cd064030c2793098df2f4bcc28da1833c338c6c7e3baef"
+    },
+    {
+      "index": 1,
+      "id": "ore_burn",
+      "path": "cards/ore_burn.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=타는 조각 (불씨); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "c24f34c9c567d816a0536557048bcb72c17c75128d24aa8f07f391f386796098",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=타는 조각 (불씨); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "36d57862b47354bd3c7547f86c6dd08b00ede161d7f97d05c4549058a6d64040",
+      "request": {
+        "index": 1,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=타는 조각 (불씨); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "1528bf3d22669a234cb94c2a3072d86dee7cadbab3383b3d22d70b6bef58c55d"
+    },
+    {
+      "index": 2,
+      "id": "ore_scatter",
+      "path": "cards/ore_scatter.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=흩어지는 조각 (티끌); colors=SULPHUR; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "2d94e9e7dc391766db1515f9db21535c3cf21fbc879bba3f56c919f7fde0d7a1",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=흩어지는 조각 (티끌); colors=SULPHUR; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "0b40dac3c0edb98158977d77f6addb4a2c580e13a406ee32f5092267bd81acda",
+      "request": {
+        "index": 2,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=흩어지는 조각 (티끌); colors=SULPHUR; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "905a2ff778a075750cf9c2903853d9da05788bbca563054286b93f2795a10412"
+    },
+    {
+      "index": 3,
+      "id": "ore_rot",
+      "path": "cards/ore_rot.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=삭은 조각 (부스러기); colors=ACID_GREEN; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "44adab38fb2c82cf0267e77322b1367f586ac931791c39f2ca83894a9e236af8",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=삭은 조각 (부스러기); colors=ACID_GREEN; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "2730d8853fd1e4ad8b7fe4ae9ed149673d06b5bc7378a393175533b2ef64f9ad",
+      "request": {
+        "index": 3,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=삭은 조각 (부스러기); colors=ACID_GREEN; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "8e8d83387ce3c97aad68e16026a41b74680548376c32f7d9868f607b17391c2a"
+    },
+    {
+      "index": 4,
+      "id": "ore_wash",
+      "path": "cards/ore_wash.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=씻긴 조각 (속살); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "fdb5066f323c7c46537d7152b47c01a9c8abf95ae0bd447885ec52e32e2ff734",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=씻긴 조각 (속살); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "cc644d5cf6b96a3666c278d9f9187b1393a71ee70aa2f93241eb43b4d2927fee",
+      "request": {
+        "index": 4,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=씻긴 조각 (속살); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "2f626d4379b6559d68a1813b8dadfba80ee08c46a0b9f6e57a86d110ea019092"
+    },
+    {
+      "index": 5,
+      "id": "ore_join",
+      "path": "cards/ore_join.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=엉긴 조각 (뭉치); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "0d1ced115639d9132d567ae2a296aa2fbcc0da3ef0d3394c4330d1cbca007de0",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=엉긴 조각 (뭉치); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "7e3bc4dd574d7c5a713afdcd3427f336508f70517a29e84675372cef9b78472d",
+      "request": {
+        "index": 5,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=엉긴 조각 (뭉치); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "b4fc069a35ff643fb09056efba28403922ee2563e3aeb5f707220b45355d55ba"
+    },
+    {
+      "index": 6,
+      "id": "still_01",
+      "path": "cards/still_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=서리꽃 (서리꽃); colors=TEAL; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "8320f0a1e1c10c10d42d0aaf03687cf9558877e4cd988980d9cf895a72aec87b",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=서리꽃 (서리꽃); colors=TEAL; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "ed554d5c452109c46eebd8feb1a2281aed6dd998f4d2941e1ef94d445fd54720",
+      "request": {
+        "index": 6,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=서리꽃 (서리꽃); colors=TEAL; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "c3f874604ac65458e20c4c163d0323aa3afa9e31165b1c93553d205f4dd33e6a"
+    },
+    {
+      "index": 7,
+      "id": "still_02",
+      "path": "cards/still_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=멈춘 물방울 (물방울); colors=TEAL; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "ee0134ffd5008355daa4a84c696ac5d98aad983341ff6ae9f6d279750fd2d6fb",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=멈춘 물방울 (물방울); colors=TEAL; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "8abf7d1f388491a86a120188e4d11647d90d09df10c2362295ea4e7a3c898cdb",
+      "request": {
+        "index": 7,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=멈춘 물방울 (물방울); colors=TEAL; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "ce49c872ced4c712f4ca5f6103290feddc66ba1ad69d67244f3d087bf746c075"
+    },
+    {
+      "index": 8,
+      "id": "still_03",
+      "path": "cards/still_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=잠긴 발자국 (발자국); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "1e1dcd6c47bd508efa0904c662c771991491c75b14a5cd0c06f4eb114ffe86de",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=잠긴 발자국 (발자국); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "f011dfad62c1c52e5539a7d182c2edd55829b1c3663baaeae29803c3cbdd050a",
+      "request": {
+        "index": 8,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=잠긴 발자국 (발자국); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "4bdb9904814a29f4181f6a9fc0f9e2efd5d8698817da1ccebf289e5dc26976d7"
+    },
+    {
+      "index": 9,
+      "id": "still_04",
+      "path": "cards/still_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=굳은 숨 (입김); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=STILL. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "e877f79b07d472a54ad63d33cc92752859e2761df3d5cac55da6baf892d55942",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=굳은 숨 (입김); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=STILL. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "ac4310803706e08322c4389aa636ae378a0c7d23269dde0c74d6f57f06e561d6",
+      "request": {
+        "index": 9,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=굳은 숨 (입김); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=STILL. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "4f9ef6b528cc5798c3af6091297cfa50898767af723cbd0df452ffc1bbd8670c"
+    },
+    {
+      "index": 10,
+      "id": "still_05",
+      "path": "cards/still_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=그친 종소리 (종소리); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=STILL. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "e93e9fc8a7731fd0ae9e464bd67edbabf764164ccd2633c3427c1c81ff2d7201",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=그친 종소리 (종소리); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=STILL. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "31659430a6924b7e3b6e896308d2d88c00f8190cb9334cbf84bc67a18f99d6b7",
+      "request": {
+        "index": 10,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=그친 종소리 (종소리); colors=TEAL; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=STILL. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "52d762ebb9389dc9489365ff31e2d599e8ce406249d7a86ba17b7864fe46e878"
+    },
+    {
+      "index": 11,
+      "id": "burn_01",
+      "path": "cards/burn_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=잉걸 (잉걸); colors=VERMILION; density=SPARSE; paper=CREAM; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "cc9aa6e29d5bf6ac5914a4352ee1b03fd1c63454a056df9a1d895ee77dc12275",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=잉걸 (잉걸); colors=VERMILION; density=SPARSE; paper=CREAM; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "a99528dcc99fd89a6f79b9a901e9a401ce6041410f7eb42e9775f7a3a469b951",
+      "request": {
+        "index": 11,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=잉걸 (잉걸); colors=VERMILION; density=SPARSE; paper=CREAM; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "3db42242ce6cea04ac6e79a6133bbd76dd37fb73897436978caf765a6131825f"
+    },
+    {
+      "index": 12,
+      "id": "burn_02",
+      "path": "cards/burn_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=꺼진 심지 (심지); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "8a712e859d67aa883b0684adcac570378b1577a2c199fa3ae3c73b1c9523c790",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=꺼진 심지 (심지); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "5343d328048b6306cc3a8d4901bb1484eaec9349d9e50dc53a0c853f76e79368",
+      "request": {
+        "index": 12,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=꺼진 심지 (심지); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "42e9d74a34aaa288b5796b7934ec61b05b41582fe1fce72e82f0191a7c5d9d18"
+    },
+    {
+      "index": 13,
+      "id": "burn_03",
+      "path": "cards/burn_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=눌어붙은 재 (재); colors=VERMILION; density=SPARSE; paper=CREAM; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "63f9e3ca8a7b7f4cf429819499337ff9dacc5c2806df01cfaa9a413fb1b63f3b",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=눌어붙은 재 (재); colors=VERMILION; density=SPARSE; paper=CREAM; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "12ad78ce7725c2ac993e685926e3e94a4a6f224a28a7e8f8b45a7110d521f425",
+      "request": {
+        "index": 13,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=눌어붙은 재 (재); colors=VERMILION; density=SPARSE; paper=CREAM; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "06e069989d36e8f2245f7b63a0325c8d1a4123e1c0097ae0f28d0c2fc44b29be"
+    },
+    {
+      "index": 14,
+      "id": "burn_04",
+      "path": "cards/burn_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=남은 열 (열); colors=VERMILION; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=BURN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "9f859435e975df045d901d3afe9db8fbaf87f3a5fb203f30c36a91c234ac6468",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=남은 열 (열); colors=VERMILION; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=BURN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "31337fd97b3a34fc7f3b95e62137fc8198f7cef8d09b98ded0e038a2eca1e8ae",
+      "request": {
+        "index": 14,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=남은 열 (열); colors=VERMILION; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=BURN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "c06dd286cf3cc8ada622d30b5f6ac795f42025051204adf473bc9fd4ffa75b54"
+    },
+    {
+      "index": 15,
+      "id": "burn_05",
+      "path": "cards/burn_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=첫 불티 (불티); colors=VERMILION; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=BURN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "4a71ad483f79641d9cf6ebf4536a6cda49973961d5a7aec78e6a2405fda71c0d",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=첫 불티 (불티); colors=VERMILION; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=BURN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "2c00ba46387c71c25d4126c8a143275b44ad42e209703808a5cbd5f43c7a9bf2",
+      "request": {
+        "index": 15,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=첫 불티 (불티); colors=VERMILION; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=BURN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "e5bb592c9b2654d6e1ffd1e7795cdf1a5d127d91e3dac3fe4f0bb821ac5339be"
+    },
+    {
+      "index": 16,
+      "id": "scat_01",
+      "path": "cards/scat_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=가벼운 뼈 (뼈); colors=SULPHUR; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "2fc721e7f3af1697b2f31ba3039dc780ca16dd612003ec8e5c517d980d8d9c46",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=가벼운 뼈 (뼈); colors=SULPHUR; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "8eb0f30ef3f3cd9a0848696f7a25e6f0998935b970a7b1621e71b8e89398c51d",
+      "request": {
+        "index": 16,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=가벼운 뼈 (뼈); colors=SULPHUR; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "ccc6bb51391f7b470768653505feaa7a2e8ecbe5a621a6cceb92723671b19822"
+    },
+    {
+      "index": 17,
+      "id": "scat_02",
+      "path": "cards/scat_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=흩날리는 씨 (씨); colors=SULPHUR; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "49b48b9edf0bc5cfa0f5e8efdc3dd821c4040cb51553b567ccc380417ca52628",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=흩날리는 씨 (씨); colors=SULPHUR; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "03ba19238500d36f9e3efc6dfa8db19b04d868a732146150b4dd2af4db16d92c",
+      "request": {
+        "index": 17,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=흩날리는 씨 (씨); colors=SULPHUR; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "af4058c02d944b29936612d1c171c7beabbfd52c92089d5416fa22a3874c99db"
+    },
+    {
+      "index": 18,
+      "id": "scat_03",
+      "path": "cards/scat_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=벗겨진 껍데기 (껍데기); colors=SULPHUR; density=SPARSE; paper=CREAM; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "3ad8c5b8e355cff151bbdcf988fc36e19fecdfe19ad931924971dd99b3ca5799",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=벗겨진 껍데기 (껍데기); colors=SULPHUR; density=SPARSE; paper=CREAM; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "b7871e5e73e53738ab7cf5db46a29f0417e97b474fd61549e5f71b6e80db09a6",
+      "request": {
+        "index": 18,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=벗겨진 껍데기 (껍데기); colors=SULPHUR; density=SPARSE; paper=CREAM; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "696219f155886871130ea630f8502b26c933b9cdcd6edce411b23b550a6ea4cc"
+    },
+    {
+      "index": 19,
+      "id": "scat_04",
+      "path": "cards/scat_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=뜬 먼지 (먼지); colors=SULPHUR; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "04c7b60ecc48e7cdc186bb5fd968d928a65b04d31abf09b9796090a7c3096c40",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=뜬 먼지 (먼지); colors=SULPHUR; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "d511bd8e7da398c1b79da7e69db36b80417b0c17836b40101b73d7f737382778",
+      "request": {
+        "index": 19,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=뜬 먼지 (먼지); colors=SULPHUR; density=SPARSE; paper=SCORCHED_BROWN; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "702d4e6781f1d08037a3e4b18f6440a7869f2a49e863078b824ab22e6faa234b"
+    },
+    {
+      "index": 20,
+      "id": "scat_05",
+      "path": "cards/scat_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=마른 바람 (바람); colors=SULPHUR; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "5a0b8d107f9281ed0f1ca78838d63187f5a2f0148bc4b9a35aa742a974f148a0",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=마른 바람 (바람); colors=SULPHUR; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "42c10bb42c0f74aadff2b4de780092ecc86c068ddc611c74082392fefca70858",
+      "request": {
+        "index": 20,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=마른 바람 (바람); colors=SULPHUR; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=SCATTER. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "9734fe0ce21fa033215770edb8ca0ee42d9da7eadb4c14c0da42a6df09a68c92"
+    },
+    {
+      "index": 21,
+      "id": "rot_01",
+      "path": "cards/rot_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=딱지 (딱지); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "a6618d5ae28d5f28d39428a43b4063dad9cc0098c3c1f51788ff0f44f982f975",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=딱지 (딱지); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "2626aba8997a9a62cf897287af8f0efb6a44f2456a0857c2232f5cff028ded0e",
+      "request": {
+        "index": 21,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=딱지 (딱지); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "305eed3e490e20ad8d41c4c58df831e0b0d07d6f5906db31a5047f356d0ed737"
+    },
+    {
+      "index": 22,
+      "id": "rot_02",
+      "path": "cards/rot_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=무른 뿌리 (뿌리); colors=ACID_GREEN; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "a4a6295e40337fbc65c08fb1a2e344523e6ab3f078c0e034fbcefdf2405fb51b",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=무른 뿌리 (뿌리); colors=ACID_GREEN; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "2c9d6dfacde825fe0effa40260270969991600a5a513485b33d011908414e150",
+      "request": {
+        "index": 22,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=무른 뿌리 (뿌리); colors=ACID_GREEN; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "de2e4eeee1d6dd5ab116f604414d82939873251b465f6c4a85fa4ff8989bea36"
+    },
+    {
+      "index": 23,
+      "id": "rot_03",
+      "path": "cards/rot_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=곰팡이 꽃 (곰팡이); colors=ACID_GREEN; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "3c9eae4529ebbf73d7893f6bc90d6581b776d45efa702ad18fb4d20775c95516",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=곰팡이 꽃 (곰팡이); colors=ACID_GREEN; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "ff08d2d143496fadac59da088451751c8e54d4ed9bb88b2d9668dbd05f59850e",
+      "request": {
+        "index": 23,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=곰팡이 꽃 (곰팡이); colors=ACID_GREEN; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "73eb47b3c4b1d9576771f108e4fc474efa0b2f0231a65cbc89e3223e30426ab4"
+    },
+    {
+      "index": 24,
+      "id": "rot_04",
+      "path": "cards/rot_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=번지는 얼룩 (얼룩); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=ROT. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "def7f666e69e530313419a0626252bba18bc1e5b81cca8d9a9579bc659bbbad8",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=번지는 얼룩 (얼룩); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=ROT. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "3ab89d022fe4f920bbf854137c4bf864e48fb3b7b5b6132a39d36857544a6601",
+      "request": {
+        "index": 24,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=번지는 얼룩 (얼룩); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=ROT. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "4cf93175c3a341132921507fcf570a3f8ca4046d47dff0439210779763a16503"
+    },
+    {
+      "index": 25,
+      "id": "rot_05",
+      "path": "cards/rot_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=내려앉은 냄새 (냄새); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=ROT. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "d825c1a131e40657b67a39d8f09b0a194481e921bb572227ece17f051876f097",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=내려앉은 냄새 (냄새); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=ROT. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "32953f7ddd2a5e31c7c4f11da7269e959d784162a072d4646cd5c19cdb1d8b6e",
+      "request": {
+        "index": 25,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=내려앉은 냄새 (냄새); colors=ACID_GREEN; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=ROT. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "a82d4937cb615526d2bc6369eb174f6ff8a287fc426459a1c7b33581fe80a6fd"
+    },
+    {
+      "index": 26,
+      "id": "wash_01",
+      "path": "cards/wash_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=맑은 눈물 (눈물); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "4d6db635ef54820edecf08bb40b56d3540dd797c969547507f095b1ae2226700",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=맑은 눈물 (눈물); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "cfb2b5afca8e671893a7aba12f362752d17d565b6de800c8c98c542e83be314d",
+      "request": {
+        "index": 26,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=맑은 눈물 (눈물); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "2aac9f20c3b9deaf1de8a24436c0217810d9e04ee6f055fe840759d5aa4142f3"
+    },
+    {
+      "index": 27,
+      "id": "wash_02",
+      "path": "cards/wash_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=닳은 돌 (돌); colors=ULTRAMARINE; density=SPARSE; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "5c9a1c00ea84c4daf586540f0bd34fe4403995742960645575d97911411dc74b",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=닳은 돌 (돌); colors=ULTRAMARINE; density=SPARSE; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "f2927811fce6252cd2596b964e74145d06914f557d93d91f0f78931b17b55cd0",
+      "request": {
+        "index": 27,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=닳은 돌 (돌); colors=ULTRAMARINE; density=SPARSE; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "2db2926f80614b67fb28db2a4ff60c532c68b672f2b3d34e2c8c3ee691db6725"
+    },
+    {
+      "index": 28,
+      "id": "wash_03",
+      "path": "cards/wash_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=빈 껍질 (껍질); colors=ULTRAMARINE; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "3434a0fb222fe10d3f9777ef2e7e48e4d9ec4f9d472670ac983fef5884681be7",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=빈 껍질 (껍질); colors=ULTRAMARINE; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "aa43d060824896c8797bc827c988c38781856e97e6d86d5ae2a80a7625c66812",
+      "request": {
+        "index": 28,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=빈 껍질 (껍질); colors=ULTRAMARINE; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "4e77374d02a9bacb65fe7a1d393526878839be66e9efd48fcc00b2e43f197e53"
+    },
+    {
+      "index": 29,
+      "id": "wash_04",
+      "path": "cards/wash_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=지워진 자국 (자국); colors=ULTRAMARINE; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=WASH. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "f15b75a50c1c994b09c5b2dcdeb2ff7feeca1114bc72c2eeee45621ed5826453",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=지워진 자국 (자국); colors=ULTRAMARINE; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=WASH. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "5ca9bcd23a4c03f2caf9a1f0326b764127d58e669804e1cb7b79217463860602",
+      "request": {
+        "index": 29,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=지워진 자국 (자국); colors=ULTRAMARINE; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=WASH. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "6896cde47102afd700afeef6a6b5305a9055e4ab643850635ac1c6c2a208c9ea"
+    },
+    {
+      "index": 30,
+      "id": "wash_05",
+      "path": "cards/wash_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=가라앉은 앙금 (앙금); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=WASH. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "265453941a62886e76d638dc3e8c273eb729cf6bd5fc2157b370a989777b34c5",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=가라앉은 앙금 (앙금); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=WASH. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "2b265db48b5599dd22e4ebf50dc5fcf679d65ef89bb4ade42c58fd0cdb102f64",
+      "request": {
+        "index": 30,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=가라앉은 앙금 (앙금); colors=ULTRAMARINE; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=WASH. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "78e19e38a5645530b5a1281846eb5aa8e541d1277e1422f9603c9f62a63130aa"
+    },
+    {
+      "index": 31,
+      "id": "join_01",
+      "path": "cards/join_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=엉킨 실 (실); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "029149608415700d7041fb8f40699bdd12399e71ba33a5b0565b9895880b12dd",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=엉킨 실 (실); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "51a71a429af4692052371467e3bd0703d4ded46561eb352905a21e19a2198c3a",
+      "request": {
+        "index": 31,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=엉킨 실 (실); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "c4aaf7278d9481292a9eb3d70a0c9275a35501b4ed8dae3def95916632119281"
+    },
+    {
+      "index": 32,
+      "id": "join_02",
+      "path": "cards/join_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=붙은 손 (손); colors=MAGENTA; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "2a9178b2ab11c362afbebea672c3586607ad1a249e6d74f926ad61ee601f9d31",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=붙은 손 (손); colors=MAGENTA; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "b2707d55686eab02782d633a166902bf0f1c4640bf5ee5f2659231c159397522",
+      "request": {
+        "index": 32,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=붙은 손 (손); colors=MAGENTA; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "820170d6185fd6b984c911856352a9878478ab45cdd9f8e01247ab3a0831528a"
+    },
+    {
+      "index": 33,
+      "id": "join_03",
+      "path": "cards/join_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=자란 매듭 (매듭); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "b60fd9b9b2d91ba6d96f8d0cd57b473c2a4eca2df282cf43ed168b8dfe61616d",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=자란 매듭 (매듭); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "079dbde09dacc97166306baac6290a3886c801706aaf3682c9b8677ceb00261c",
+      "request": {
+        "index": 33,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=자란 매듭 (매듭); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "b13d2e893a08a0b041914b075077f4a2fc2d05a29cc83e9c48784493064cb0a8"
+    },
+    {
+      "index": 34,
+      "id": "join_04",
+      "path": "cards/join_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=이어진 그림자 (그림자); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=JOIN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "8a900f193b9e592107bc1b92ad708a4811031bebb7e395e36f1e7ecef7b5fb63",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=이어진 그림자 (그림자); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=JOIN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "c90f6c28a4cd766073a57f530a344d064190e40cb5e901953d59a285299c5b35",
+      "request": {
+        "index": 34,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=이어진 그림자 (그림자); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=PHENOMENON; attribute=JOIN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "7873d63698dfb8abeb02b6c2ee9a10b11e3251d5403a7786721193fc98694a5a"
+    },
+    {
+      "index": 35,
+      "id": "join_05",
+      "path": "cards/join_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=겹친 소리 (소리); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=JOIN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "80d77dec603ffd8bb0b1b98670e00b4906be8976e7193c557cf4918db54c4438",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=겹친 소리 (소리); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=JOIN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "991893fbd02bd84834447c60a21b65b487dbe807cf2b5b1f5d600b1748399785",
+      "request": {
+        "index": 35,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=겹친 소리 (소리); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=PHENOMENON; attribute=JOIN. Depict the phenomenon directly with swirl lines, rays, dotted paths, or diffusion arrows; do not put it in a container or turn it into an object. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "66f468566986d8c75688169078c112d4ea710e992e731882849662b43f0679d2"
+    },
+    {
+      "index": 36,
+      "id": "tool_01",
+      "path": "cards/tool_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=도가니 (도가니); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=BLUE_GREY; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "cf2d9964287e765d76b4cabad2b2f2649e3243357268741c9ba89da448c7bb12",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=도가니 (도가니); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=BLUE_GREY; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "8138e7c6ce7f4fba870eeacc6f7d35700e309f4c1c59eb5c909a406fa5c4584a",
+      "request": {
+        "index": 36,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=도가니 (도가니); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=BLUE_GREY; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "0007e7557c97a14aafe86724a07012b8aee4d50ea31641c1e067b5361b902fe7"
+    },
+    {
+      "index": 37,
+      "id": "tool_02",
+      "path": "cards/tool_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=집게 (집게); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=OCHRE; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "642859db84df17a779b323f82ec473d64a281ae160af830996ec09af25cbad60",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=집게 (집게); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=OCHRE; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "8ad6c8973209de101609ba766f66a60545939ec5b7ff679b0d563c531b724c08",
+      "request": {
+        "index": 37,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=집게 (집게); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=OCHRE; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "02a2aabe4e37b3d26e448ecd28dcb895db8b8fa8d618d88019a99465699106d1"
+    },
+    {
+      "index": 38,
+      "id": "tool_03",
+      "path": "cards/tool_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=체 (체); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=BLUE_GREY; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "9ec0610af814bfb27817403f2d4aa70b9564e6631af725816e40c1292f0afd65",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=체 (체); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=BLUE_GREY; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "44f1fcae60123e582e1ec13c63fd9db8d07aef51d281a3ca515163e9fe47bdca",
+      "request": {
+        "index": 38,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=체 (체); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=BLUE_GREY; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "bc6f7ac9389562ff332763187beb5fbb41f9bd48567858efd9a19365ee67408f"
+    },
+    {
+      "index": 39,
+      "id": "tool_04",
+      "path": "cards/tool_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=등불 (등불); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "382bf27c49d8f7111e5a7b94a294ae9f6080b434360e8b7ebd9c07c5a74e8a38",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=등불 (등불); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "02c0e5d7483c89dcb66c240c2eb9ae3cfb892d75b1fc45d43819a21eee27ed0d",
+      "request": {
+        "index": 39,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=등불 (등불); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "5fd1d03e420b321e19aece76e57dcf22d69538fb9703778eb755e26546988aa6"
+    },
+    {
+      "index": 40,
+      "id": "tool_05",
+      "path": "cards/tool_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=계측기 (계측기); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=OCHRE; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "d1e2527a5092d0e8862822096e6758653602e2754d065914af9a523669da8ddf",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=계측기 (계측기); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=OCHRE; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "99265c025e4970f8bd8d9ba5f964c9506f78e0af8f10d3874b2b357407625123",
+      "request": {
+        "index": 40,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=계측기 (계측기); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=OCHRE; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "92a7ea1ef8799c5c6a85551b22608d05eb574367a649d6fd63b7f5f900c6f96b"
+    },
+    {
+      "index": 41,
+      "id": "tool_06",
+      "path": "cards/tool_06.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=풀무 (풀무); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "156d495cace6bac8279fe8914993a3213ea7d52d28641ab201809bfd1f8aafcd",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=풀무 (풀무); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "adaebc72d903d539e0945bddc081402caa53892bf9cc87d691be36ae6fc5bc2f",
+      "request": {
+        "index": 41,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=풀무 (풀무); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "e4f989452ab551cdd74446cc530af1fe3463d9e0d6fa85a42700144c4d5e378c"
+    },
+    {
+      "index": 42,
+      "id": "tool_07",
+      "path": "cards/tool_07.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=저울 (저울); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "27fb0540ea504d6c802e45d216fcddbd414c41e432794d775d88bbee8149df34",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=저울 (저울); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "1e8c12a8db79d74683a6529ab0ce2f504d7da8ff0c4a1fb358adb395321ebf24",
+      "request": {
+        "index": 42,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=저울 (저울); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "3fc2b561fb3bdf157d6f765acab561dbfe91b415d020481786726799239630db"
+    },
+    {
+      "index": 43,
+      "id": "tool_08",
+      "path": "cards/tool_08.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=표본 상자 (표본 상자); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "85fceede18f79cb95f1f07e4dd956f849f9f105d21408b1415ce0d28678daeb7",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=표본 상자 (표본 상자); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "40f27e05c2c5239ae270388896304af5fbeb9d5d962689a3a63884a4787e60cf",
+      "request": {
+        "index": 43,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=표본 상자 (표본 상자); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "93fc6a5d1cc4ddb44cae73f70eb9df9dd4c877b09900bfe086ddfcdb78483903"
+    },
+    {
+      "index": 44,
+      "id": "tool_09",
+      "path": "cards/tool_09.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=갱도 지도 (지도); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "436494c20196fb84e26ab42b6b8e1c626bfcd481c8ac4a5783a788708d40aa6a",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=갱도 지도 (지도); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "51960a3202d5c11a007e19ddbed648d6e60d06604860eecc1b841ba52af63bfa",
+      "request": {
+        "index": 44,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=갱도 지도 (지도); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "5ec5925a3900eee6d59618a29a71b8084dfae50cb0747fb21ebe2c47c1fe0170"
+    },
+    {
+      "index": 45,
+      "id": "tool_10",
+      "path": "cards/tool_10.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=손수레 (손수레); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "f69b24b1c9399cd3a0ac79a0e2b526a32123fa0d0da36ced21174eca64afad56",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=손수레 (손수레); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "225b64d3c15988c0428262893476170de2892982f08c37919a6495123ee471ad",
+      "request": {
+        "index": 45,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=손수레 (손수레); colors=ACHROMATIC+METALLIC; density=SPARSE; paper=CREAM; representation=SOLID. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "1287157dd9ca36895d4be35c0e53bf0d89d60868d3be9b0081025caf4a18bb60"
+    },
+    {
+      "index": 46,
+      "id": "odd_01",
+      "path": "cards/odd_01.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=걸어다니는 주전자 (주전자); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "0af98485821c8c4700d454da9e5d50597eb37ab6e2e4b8e312b0aa27339e3e65",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=걸어다니는 주전자 (주전자); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "48f4c9f1c40a770b2ec2dcf349089514444e85cd5d5bea19f4d64986917e4214",
+      "request": {
+        "index": 46,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=걸어다니는 주전자 (주전자); colors=MAGENTA; density=SPARSE; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "aa8559ea5397106c65a5d846cd8111b455f19a32c6d22e1fbfea63f731bf7071"
+    },
+    {
+      "index": 47,
+      "id": "odd_02",
+      "path": "cards/odd_02.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=두 번 접힌 사다리 (사다리); colors=TEAL; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "4bfba958f4d7893014bc03ca4663dbbd6544ffd8414453ed64ad90ba086384a7",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=두 번 접힌 사다리 (사다리); colors=TEAL; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "5ee0cd11687c2d14a61dc6749fbda0357f0b355f322842ef0f257a170f73affc",
+      "request": {
+        "index": 47,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=두 번 접힌 사다리 (사다리); colors=TEAL; density=SPARSE; paper=SCORCHED_BROWN; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "2602768f4ec10079d9c14e6121e3e44d797a32969463f309d9f083974d14f18a"
+    },
+    {
+      "index": 48,
+      "id": "odd_03",
+      "path": "cards/odd_03.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=스스로 켜지는 초 (초); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "d207db6d6622f2c19067e08bb53513ebebd24d9f90c9609674f2e6c613a8e778",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=스스로 켜지는 초 (초); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "cb05164849f08d1c6f3d3c494423aabddc7de001299c74ebec880f303a9ecd2a",
+      "request": {
+        "index": 48,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=스스로 켜지는 초 (초); colors=VERMILION; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "abd39b837189d504e4503aa98052de88c1d76a71e857bf2a5f4134f39f91b411"
+    },
+    {
+      "index": 49,
+      "id": "odd_04",
+      "path": "cards/odd_04.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=뒤집힌 장갑 (장갑); colors=ULTRAMARINE; density=SPARSE; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "5ffa6085303cd5404a409831b0051d6457c47998015dae64dd178a12d471badc",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=뒤집힌 장갑 (장갑); colors=ULTRAMARINE; density=SPARSE; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "3d22b8b536b77dadf489af6766fe51ce4300dfc62f86ee993676aad8f1635e3c",
+      "request": {
+        "index": 49,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=뒤집힌 장갑 (장갑); colors=ULTRAMARINE; density=SPARSE; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "7cf0647d1e30ece5100f3f6ce4bb43aab9e93fca77f459828aac7d68ea2540e1"
+    },
+    {
+      "index": 50,
+      "id": "odd_05",
+      "path": "cards/odd_05.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=노래하는 못 (못); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "50c4413a6234d48a172c5259a86c2e32576a26ef98412890967b8c6f800cfbc8",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=노래하는 못 (못); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "0559988bba9188d669da3945a5027033b665ed77d93c764f959aa96243910436",
+      "request": {
+        "index": 50,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=노래하는 못 (못); colors=MAGENTA; density=SPARSE; paper=OCHRE; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "44fff53ed3aa714483d6d6a77a67a5bbff80e280d03a55f1bef65489bea31f93"
+    },
+    {
+      "index": 51,
+      "id": "odd_06",
+      "path": "cards/odd_06.png",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=자기를 재는 자 (자); colors=ACID_GREEN; density=SPARSE; paper=CREAM; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "9d7a13f44037e9c49bf7626a156e163fe9ff32722a600964dd7fa6e11069d95c",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=자기를 재는 자 (자); colors=ACID_GREEN; density=SPARSE; paper=CREAM; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+      "effective_prompt_sha256": "093a715f26e8600e58c89370c908747bc1ddf5ee153aa4b7aa21eafa41ad7775",
+      "request": {
+        "index": 51,
+        "params": {
+          "model": "nano_banana_2",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SPECIMEN; subject=자기를 재는 자 (자); colors=ACID_GREEN; density=SPARSE; paper=CREAM; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core material prompt, never from the reference subject.",
+          "use_unlim": false,
+          "count": 1,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "752fd34ff3633c50570ca31955d8a3f5aabdc9d86bfbe9f0fdf16e6d5b05160e"
+    }
+  ],
+  "batches": [
+    {
+      "id": "materials-001",
+      "index": 0,
+      "asset_ids": [
+        "ore_still",
+        "ore_burn",
+        "ore_scatter",
+        "ore_rot",
+        "ore_wash",
+        "ore_join",
+        "still_01",
+        "still_02",
+        "still_03",
+        "still_04",
+        "still_05",
+        "burn_01"
+      ],
+      "size": 12
+    },
+    {
+      "id": "materials-002",
+      "index": 1,
+      "asset_ids": [
+        "burn_02",
+        "burn_03",
+        "burn_04",
+        "burn_05",
+        "scat_01",
+        "scat_02",
+        "scat_03",
+        "scat_04",
+        "scat_05",
+        "rot_01",
+        "rot_02",
+        "rot_03"
+      ],
+      "size": 12
+    },
+    {
+      "id": "materials-003",
+      "index": 2,
+      "asset_ids": [
+        "rot_04",
+        "rot_05",
+        "wash_01",
+        "wash_02",
+        "wash_03",
+        "wash_04",
+        "wash_05",
+        "join_01",
+        "join_02",
+        "join_03",
+        "join_04",
+        "join_05"
+      ],
+      "size": 12
+    },
+    {
+      "id": "materials-004",
+      "index": 3,
+      "asset_ids": [
+        "tool_01",
+        "tool_02",
+        "tool_03",
+        "tool_04",
+        "tool_05",
+        "tool_06",
+        "tool_07",
+        "tool_08",
+        "tool_09",
+        "tool_10",
+        "odd_01",
+        "odd_02"
+      ],
+      "size": 12
+    },
+    {
+      "id": "materials-005",
+      "index": 4,
+      "asset_ids": [
+        "odd_03",
+        "odd_04",
+        "odd_05",
+        "odd_06"
+      ],
+      "size": 4
+    }
+  ]
+}

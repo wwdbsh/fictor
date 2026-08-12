@@ -214,3 +214,51 @@ manifest는 `t011_approval_inherited_by_t013_materials=false`, 재료 52장 `NOT
   supplemental/provider 조건, 학습·opt-out, reference 권리, 공개 기본값·attribution, 정확한 만료 시각·
   시간대, 현재 model·가격·balance, `use_unlim=false`, batch limit/topology, 즉시 local+backup 회수
 - 현재 위험 공개 뒤 정확히 재료 52장에 한정된 새 사용자 위험 승인
+
+## T013 재료 52장 — 실행 COMPLETE, T014 승인 대기
+
+Issue 15 계약을 `assets/manifests/materials-v1.plan.json`으로 동결했다. core-v1의 MATERIAL 52개를
+동일 순서·ID·path로 사용하고 logical batch는 `12+12+12+12+4`, 실행 전 검증 단가 `1.50`, initial cap
+`78.00`, 자동 유료 retry reserve `0.00`이다. model은 `nano_banana_2`, `use_unlim=false`, `count=1`,
+`3:4`, `1k`이고 T012 reference revision 1을 `MEDIA_ONLY`로만 결속한다.
+
+2026-08-12 상헌 님의 정확한 범위 승인과 disclosure presentation/approval evidence를 검증한 뒤 실행했다.
+승인은 위험 문구를 제시한 실제 시각 뒤의 정확한 allow-list 문구만 허용한다. live provider schema와
+media role은 `assets/evidence/t013-higgsfield-schema-v1.json`에 결속했다. 공개 risk 문구, 승인
+evidence schema, plan/runner protocol은
+[`t013-materials-local-preparation-2026-08-11.md`](asset-runs/t013-materials-local-preparation-2026-08-11.md)에
+고정했다. 다섯 batch `12+12+12+12+4`에서 52개가 모두 완료됐고 local+backup에 회수됐다. balance는
+`939.90→861.90`, 실제 사용량은 승인 상한과 같은 `78.00`, 자동 유료 재시도는 0이다. 실제 증거는
+`assets/evidence/t013-materials-actual-run-v1.json`, 전수 연락표는
+`docs/asset-runs/contact-sheets/t013-materials-v1.html`이다. T014 스타일 최종 승인과 bulk 생성은 아직
+승인되지 않았다. 전수 육안 감사에서 `tool_08` 문자형 라벨, 일부 채색·입체 style drift와 `odd_01`의
+마스터 중앙 구도·관절 다리 형상 누출을 확인했으므로, T014는 이를 명시적으로 수용하거나 새
+revision·비용 승인 아래 표본 재생성을 요구해야 한다.
+
+```bash
+npm run assets:materials:v1:gen
+npm run assets:materials:v1:check
+```
+
+runner는 승인 뒤에도 MCP를 직접 호출하지 않는다. 각 batch 첫 자산의 실제 `generate_image` params에
+`get_cost:true`를 붙인 대표 request/hash와 numeric fresh balance를
+`PREFLIGHT_REQUESTED→PREFLIGHT_VERIFIED`로 먼저 저장한다. prompt 외 가격 영향 인자가 batch 전체에서
+동일할 때만 대표 가격을 적용하며, provider 응답의 numeric credits는 정확한 decimal 단위로 정규화한다.
+그 뒤 `prepare`가 durable `SUBMITTING`과 직접
+호출 가능한 live `requests[index,params]` envelope를 출력한다. 운영자는 exact generate response와
+actual-shaped jobs_wait 응답을 구분한다. generate job의 실제 optional
+`adjustments|error|warning|preset_recommendation`은 definite job ID를 먼저 보존하고 원문 없이 safe signal만
+남긴 뒤 fail-stop한다(입증된 benign warning allow-list는 현재 비어 있음). 제출 status와 jobs_wait status는
+분리하며 후자의 `lookup_failed`는 `retryable=true`일 때 같은 job만 다시 poll하고 false/누락은 재제출 없이
+terminal/ambiguous fail-stop한다. mixed poll의 completed job은 sparse recovery로 즉시 ingest하되 state는
+`SUBMITTED`로 유지하고, recovery를 submitted index/job과 completed poll/source에 결속한다. actual
+jobs_wait JSON은 파일·argv가 아닌 production `jobs-handoff` stdin으로만 받으며 production CLI의 진단용
+`jobs --file`·`ingest --input-png`는 파일 접근 전에 거부한다. COMPLETE/evidence는 모든 poll/recovery가
+stdin handoff provenance일 때만 가능하다. 메모리에서 URL·thumbnail URL·raw error를 제거한다. 관찰된
+download host allow-list가 없으므로 발명하지 않고, generic HTTPS hostname의 기본 443 port와 모든 DNS 응답이 public인지
+검증한 뒤 하나를 custom lookup에 고정해 원래 hostname/SNI/TLS identity로 직접 연결한다. socket peer가
+고정값과 다르거나 redirect hop의 URL·DNS·pin 재검증이 실패하면 중단한다. completed URL은
+timeout/status/size 제한과 restrictive mktemp PNG에만 사용하며 기존 atomic ingest로 index/job→asset 순서의
+local+backup 저장 직후 삭제한다. provider status와 내부 runner state는 분리하며 모호한 제출, 부분 response,
+price/model/reference drift, invalid PNG, balance 불일치는 safe 관찰값을 남기고 `FAIL_STOP`; 자동
+재제출하지 않는다. 실제 52개가 모두 완료되기 전에는 tracked evidence/contact sheet를 만들 수 없다.
