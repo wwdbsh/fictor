@@ -41,6 +41,28 @@ import {
   type T015DownloadDependencies,
   type T015OperationsJournal,
 } from "../../scripts/assets/canonical-shard-1-v1-ops-cli";
+import {
+  T015_V1_JOURNAL_PATH,
+  T015_V2_APPROVAL_PATH,
+  T015_V2_EXACT_APPROVAL_PHRASE,
+  T015_V2_PLAN_PATH,
+  buildT015V1ForensicMigrationEvidence,
+  buildT015V2CanonicalShardPlan,
+  buildT015V2DisclosurePacket,
+  buildT015V2ProviderSchemaEvidence,
+  buildT015V2RiskDisclosure,
+  isT015V2Authorized,
+  renderT015V2Plan,
+} from "../../scripts/assets/canonical-shard-1-v1-continuation-v2";
+import {
+  T015_V2_JOURNAL_PATH,
+  runT015V2JobsHandoffInternal,
+  runT015V2RecoveryOpsInternal,
+  validateT015V2Journal,
+  type T015V2DownloadDependencies,
+  type T015V2LegacySourcePins,
+  type T015V2OperationsJournal,
+} from "../../scripts/assets/canonical-shard-1-v1-continuation-v2-ops-cli";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 
@@ -82,6 +104,26 @@ function submitFirst(root: string, fixtureValue = fixture()) {
   runT015OpsInternal(["response", "--batch", prepared.batch.id, "--file", response, "--observed-at", "2026-08-12T03:07:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval);
   runT015OpsInternal(["recovery-open", "--batch", prepared.batch.id, "--operator-phrase", T015_RECOVERY_OPERATOR_PHRASE, "--observed-at", "2026-08-12T03:08:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval);
   return { ...prepared, jobs };
+}
+
+const T015_V1_FORENSIC_FILES = [
+  "assets/manifests/canonical-shard-1-v1.plan.json",
+  "assets/manifests/t015-implementation-binding-v1.json",
+  "assets/evidence/t015-canonical-shard-1-risk-disclosure-v1.json",
+  "assets/evidence/t015-higgsfield-schema-v1.json",
+  "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v1.json",
+  "assets/evidence/t015-forensic-approval-v1.json",
+  "assets/evidence/t015-controller-disclosure-attestation-v1.json",
+  "assets/evidence/t015-forensic-controller-approval-attestation-v1.json",
+] as const;
+
+function v2RecoveryFixture(): { root: string; plan: ReturnType<typeof buildT015V2CanonicalShardPlan>; pins: T015V2LegacySourcePins; jobs: Array<{ index: number; job_id: string; status: "queued" }> } {
+  const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v2-recovery-"));
+  for (const path of T015_V1_FORENSIC_FILES) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
+  const legacyFixture = fixture(); const legacy = buildInitialT015Journal(legacyFixture.plan, legacyFixture.presentation, legacyFixture.approval); const record = legacy.batches[0]; const jobs = legacyFixture.plan.batches[0].asset_ids.map((assetId) => { const asset = legacyFixture.plan.assets.find(({ id }) => id === assetId)!; return { index: asset.index, job_id: `v2-job-${asset.index}`, status: "queued" as const }; });
+  record.state = "RECOVERY_ONLY"; record.submission = { observed_at: "2026-08-12T07:27:00.000Z", expected_count: 12, submitted_count: 12, failed_count: 0, complete: true, missing_asset_ids: [], jobs: jobs.map((job) => { const asset = legacyFixture.plan.assets[job.index]; return { ...job, asset_id: asset.id, canonical_request_sha256: asset.canonical_request_sha256 }; }) }; record.recovery_gate = { opened_at: "2026-08-12T07:28:00.000Z", exact_operator_phrase_sha256: sha256T015(T015_RECOVERY_OPERATOR_PHRASE), no_new_paid_submit: true }; record.job_polls = [{ observed_at: "2026-08-12T07:29:00.000Z", all_terminal: true, timed_out: false, aborted: false, jobs: record.submission.jobs.map((job) => ({ index: job.index, job_id: job.job_id, status: "completed", model: "nano_banana_flash", download_available: true, lookup_retryable: null, provider_failure_detail_present: false })) }]; record.recovery_failures = [{ code: "PROVIDER_RESPONSE_SIGNAL", observed_at: "2026-08-12T07:29:00.000Z", facts: { stage: "JOBS_WAIT", definite_job_ids_preserved: true }, original_terminal_code: null, recovery_only_preserved: true, automatic_paid_retry: false, paid_retry_count: 0, no_resubmit: true }]; record.transitions = [{ state: "SUBMITTED", observed_at: "2026-08-12T07:27:00.000Z" }, { state: "RECOVERY_ONLY", observed_at: "2026-08-12T07:28:00.000Z" }]; legacy.run_state = "FAIL_STOP";
+  const bytes = renderT015CanonicalJson(legacy); mkdirSync(resolve(root, T015_V1_JOURNAL_PATH, ".."), { recursive: true }); writeFileSync(resolve(root, T015_V1_JOURNAL_PATH), bytes); const pins = { journal_sha256: sha256T015(bytes), exact_job_id_list_sha256: sha256T015(`${jobs.map(({ job_id }) => job_id).join("\n")}\n`) };
+  return { root, plan: buildT015V2CanonicalShardPlan(repositoryRoot), pins, jobs };
 }
 
 describe("T015 CANONICAL shard 1 preparation", () => {
@@ -372,5 +414,48 @@ describe("T015 CANONICAL shard 1 preparation", () => {
     expect(() => writeT015NoClobberJsonForTest(root, "evidence/actual.json", { value: 2 })).toThrow("no-clobber conflict");
     const linked = mkdtempSync(resolve(tmpdir(), "fictor-t015-evidence-link-")); mkdirSync(resolve(linked, "evidence")); symlinkSync(resolve(root, "evidence/actual.json"), resolve(linked, "evidence/actual.json"));
     expect(() => writeT015NoClobberJsonForTest(linked, "evidence/actual.json", { value: 1 })).toThrow("SYMLINK_TRAVERSAL");
+  });
+
+  describe("T015 immutable v1 to recovery-only v2 migration", () => {
+    test("pins the old failure while splitting 12 recovered plus 320 fresh-paid assets under the original 498 cap", () => {
+      const plan = buildT015V2CanonicalShardPlan(repositoryRoot); const risk = buildT015V2RiskDisclosure(); const schema = buildT015V2ProviderSchemaEvidence(); const packet = buildT015V2DisclosurePacket(repositoryRoot, plan, risk, schema); const forensics = buildT015V1ForensicMigrationEvidence();
+      expect(plan.assets).toHaveLength(332); expect(plan.legacy_recovery.batch.size).toBe(12); expect(plan.batches).toHaveLength(27); expect(plan.batches.reduce((sum, batch) => sum + batch.size, 0)).toBe(320); expect(plan.budget.legacy_cap_committed_decimal).toBe("18.00"); expect(plan.budget.legacy_provider_balance_delta_verified).toBe(false); expect(plan.budget.additional_credit_cap_decimal).toBe("480.00"); expect(plan.budget.total_credit_cap_decimal).toBe("498.00"); expect(Number(plan.budget.legacy_cap_committed_decimal) + Number(plan.budget.additional_credit_cap_decimal)).toBe(498);
+      expect(plan.approval_gate.prior_t015_v1_approval_inherited).toBe(false); expect(packet.authorized).toBe(false); expect(packet.prior_t015_v1_approval_inherited).toBe(false); expect(isT015V2Authorized(repositoryRoot, plan)).toBe(false); expect(T015_V2_EXACT_APPROVAL_PHRASE).toContain("12..331"); expect(T015_V2_EXACT_APPROVAL_PHRASE).toContain("480.00"); expect(T015_V2_EXACT_APPROVAL_PHRASE).toContain("이미 사용 18.00");
+      expect(forensics.legacy.journal.sha256).toBe("81d7ab7abdadbf86ee420953690550b62621910907fd9bb11cd8ccb19cf0d6f5"); expect(forensics.observed.preserved_failure_code).toBe("PROVIDER_RESPONSE_SIGNAL"); expect(forensics.observed.recovery_count).toBe(0); expect(forensics.observed.provider_balance_delta_verified).toBe(false); expect(forensics.migration_policy.mutate_legacy_journal).toBe(false); expect(readFileSync(resolve(repositoryRoot, T015_V2_PLAN_PATH), "utf8")).toBe(renderT015V2Plan(plan));
+      const oldApprovalRoot = mkdtempSync(resolve(tmpdir(), "fictor-t015-v2-old-approval-")); copyFixtureSources(oldApprovalRoot); mkdirSync(resolve(oldApprovalRoot, T015_V2_APPROVAL_PATH, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, "assets/evidence/t015-forensic-approval-v1.json"), resolve(oldApprovalRoot, T015_V2_APPROVAL_PATH)); expect(isT015V2Authorized(oldApprovalRoot, plan)).toBe(false);
+    });
+
+    test("migrates the exact durable jobs into a separate reloadable journal without touching v1", () => {
+      const prepared = v2RecoveryFixture(); const legacyBefore = readFileSync(resolve(prepared.root, T015_V1_JOURNAL_PATH)); const migrated = runT015V2RecoveryOpsInternal(["migrate", "--observed-at", "2026-08-12T08:00:00.000Z"], prepared.root, prepared.plan, undefined, prepared.pins); expect(migrated.state).toBe("RECOVERY_ONLY"); expect(migrated.new_paid_submit).toBe(false); expect(migrated.paid_retry_count).toBe(0);
+      const request = runT015V2RecoveryOpsInternal(["jobs-request"], prepared.root, prepared.plan, undefined, prepared.pins); expect(request.jobs).toEqual(prepared.jobs.map(({ index, job_id }) => ({ index, job_id }))); expect(request.new_paid_submit).toBe(false);
+      const again = runT015V2RecoveryOpsInternal(["migrate", "--observed-at", "2026-08-12T08:00:01.000Z"], prepared.root, prepared.plan, undefined, prepared.pins); expect(again.idempotent).toBe(true); expect(readFileSync(resolve(prepared.root, T015_V1_JOURNAL_PATH))).toEqual(legacyBefore);
+      const journal = JSON.parse(readFileSync(resolve(prepared.root, T015_V2_JOURNAL_PATH), "utf8")) as T015V2OperationsJournal; validateT015V2Journal(journal, prepared.root, prepared.plan, prepared.pins); expect(journal.immutable_legacy_journal.source_mutated).toBe(false); expect(journal.accounting.legacy_cap_committed_decimal).toBe("18.00"); expect(journal.accounting.legacy_provider_balance_delta_verified).toBe(false); expect(journal.continuation.authorization).toBeNull(); expect(journal.continuation.batches).toHaveLength(27);
+    });
+
+    test("accepts actual-shaped type=image jobs and atomically recovers all 12 while retaining the old failure", async () => {
+      const prepared = v2RecoveryFixture(); runT015V2RecoveryOpsInternal(["migrate", "--observed-at", "2026-08-12T08:00:00.000Z"], prepared.root, prepared.plan, undefined, prepared.pins); const bytes = png(); const response = { all_terminal: true, jobs: prepared.jobs.map((job) => ({ ...job, status: "completed", type: "image", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")), poll_after_seconds: 0, timed_out: false, aborted: false };
+      const dependencies: T015V2DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async ({ pinned }) => ({ status: 200, headers: { "content-type": "image/png" }, bytes, remoteAddress: pinned.address }) };
+      const result = await runT015V2JobsHandoffInternal(["jobs-handoff", "--observed-at", "2026-08-12T08:01:00.000Z"], JSON.stringify(response), prepared.root, prepared.plan, dependencies, undefined, prepared.pins); expect(result.state).toBe("HOLD_FOR_FRESH_CONTINUATION_APPROVAL"); expect(result.recovered).toBe(12); expect(result.legacy_failure_preserved).toBe(true); expect(result.new_paid_locked).toBe(true); expect(result.new_paid_submit).toBe(false);
+      const journalBytes = readFileSync(resolve(prepared.root, T015_V2_JOURNAL_PATH), "utf8"); expect(journalBytes).not.toMatch(/https?:\/\//); expect(journalBytes).not.toContain("result_url"); expect(journalBytes).not.toContain("raw_error"); const journal = JSON.parse(journalBytes) as T015V2OperationsJournal; validateT015V2Journal(journal, prepared.root, prepared.plan, prepared.pins); expect(journal.legacy_recovery.recoveries).toHaveLength(12); expect(journal.legacy_recovery.failures).toHaveLength(0); expect(journal.immutable_legacy_journal.preserved_failure_code).toBe("PROVIDER_RESPONSE_SIGNAL"); expect(journal.continuation.authorization).toBeNull();
+      for (const recovery of journal.legacy_recovery.recoveries) { expect(readFileSync(resolve(prepared.root, "public/assets", recovery.local_relative_path))).toEqual(bytes); expect(readFileSync(resolve(prepared.root, "assets/backups/t015-canonical-shard-1", recovery.backup_relative_path))).toEqual(bytes); }
+    });
+
+    test.each([
+      { name: "missing type", mutate: (job: any) => { delete job.type; } },
+      { name: "wrong type", mutate: (job: any) => { job.type = "video"; } },
+      { name: "null type", mutate: (job: any) => { job.type = null; } },
+      { name: "provider error", mutate: (job: any) => { job.error = "opaque"; } },
+      { name: "thumbnail", mutate: (job: any) => { job.thumbnail_url = "https://thumb.example.com/x.png"; } },
+      { name: "unknown optional", mutate: (job: any) => { job.warning = "opaque"; } },
+      { name: "retryable on completed", mutate: (job: any) => { job.retryable = false; } },
+    ])("fail-stops actual-shaped jobs_wait $name before fetch and remains reloadable", async ({ mutate }) => {
+      const prepared = v2RecoveryFixture(); runT015V2RecoveryOpsInternal(["migrate", "--observed-at", "2026-08-12T08:00:00.000Z"], prepared.root, prepared.plan, undefined, prepared.pins); const response: any = { all_terminal: true, jobs: prepared.jobs.map((job) => ({ ...job, status: "completed", type: "image", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) }; mutate(response.jobs[0]); let fetchCalls = 0; const dependencies: T015V2DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async () => { fetchCalls += 1; throw new Error("must not fetch"); } };
+      await expect(runT015V2JobsHandoffInternal(["jobs-handoff", "--observed-at", "2026-08-12T08:01:00.000Z"], JSON.stringify(response), prepared.root, prepared.plan, dependencies, undefined, prepared.pins)).rejects.toThrow(/UNKNOWN_PROVIDER_FIELD|fail-stop/); expect(fetchCalls).toBe(0); const journal = JSON.parse(readFileSync(resolve(prepared.root, T015_V2_JOURNAL_PATH), "utf8")) as T015V2OperationsJournal; validateT015V2Journal(journal, prepared.root, prepared.plan, prepared.pins); expect(journal.run_state).toBe("FAIL_STOP"); expect(journal.legacy_recovery.jobs).toHaveLength(12); expect(journal.legacy_recovery.recoveries).toHaveLength(0); expect(journal.accounting.paid_retry_count).toBe(0); const request = runT015V2RecoveryOpsInternal(["jobs-request"], prepared.root, prepared.plan, undefined, prepared.pins); expect(request.jobs).toHaveLength(12); expect(request.new_paid_submit).toBe(false);
+    });
+
+    test("rejects any legacy journal or exact-job-set tamper after migration", () => {
+      const prepared = v2RecoveryFixture(); runT015V2RecoveryOpsInternal(["migrate", "--observed-at", "2026-08-12T08:00:00.000Z"], prepared.root, prepared.plan, undefined, prepared.pins); const legacy = JSON.parse(readFileSync(resolve(prepared.root, T015_V1_JOURNAL_PATH), "utf8")); legacy.batches[0].submission.jobs[0].job_id = "tampered"; writeFileSync(resolve(prepared.root, T015_V1_JOURNAL_PATH), renderT015CanonicalJson(legacy)); expect(() => runT015V2RecoveryOpsInternal(["status"], prepared.root, prepared.plan, undefined, prepared.pins)).toThrow("pinned source changed");
+      const fresh = v2RecoveryFixture(); const wrongPins = { ...fresh.pins, exact_job_id_list_sha256: "0".repeat(64) }; expect(() => runT015V2RecoveryOpsInternal(["migrate", "--observed-at", "2026-08-12T08:00:00.000Z"], fresh.root, fresh.plan, undefined, wrongPins)).toThrow("exact job ID set changed");
+    });
   });
 });

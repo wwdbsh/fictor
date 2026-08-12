@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t015-canonical-shard-1-v1-forensic-migration",
+  "secret_free": true,
+  "immutable_source": true,
+  "legacy": {
+    "journal": {
+      "path": "assets/runs/t015-canonical-shard-1/operations-v1.json",
+      "sha256": "81d7ab7abdadbf86ee420953690550b62621910907fd9bb11cd8ccb19cf0d6f5"
+    },
+    "plan": {
+      "path": "assets/manifests/canonical-shard-1-v1.plan.json",
+      "sha256": "1a7ca4b377211a917d32ae856ecb50847dad360cb87ebb799975d573522b4e6c"
+    },
+    "implementation_binding": {
+      "path": "assets/manifests/t015-implementation-binding-v1.json",
+      "sha256": "78b1a2c3b827334bbfc012c466ca75e1167e7f30e5c3a9796bfd1effc9f96eb6"
+    },
+    "risk": {
+      "path": "assets/evidence/t015-canonical-shard-1-risk-disclosure-v1.json",
+      "sha256": "b0b381c55ebec210f611f81d1a30ec7cbcddfc82285b43f828ae7aaeb6b7383e"
+    },
+    "provider_schema": {
+      "path": "assets/evidence/t015-higgsfield-schema-v1.json",
+      "sha256": "35c2dfb05a22824d69d5549125559fecfa89156b81f63278db936bf26fb7a352"
+    },
+    "disclosure_presentation": {
+      "path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v1.json",
+      "sha256": "13419414982a916a7ec06a9b3e7971bda3bb283856adc566b8876a00d6604ac0"
+    },
+    "approval": {
+      "path": "assets/evidence/t015-forensic-approval-v1.json",
+      "sha256": "d7e69e1a631529109329ff6c94ba1bd4311d1e175eaf5321a537956dc6542350"
+    },
+    "controller_disclosure": {
+      "path": "assets/evidence/t015-controller-disclosure-attestation-v1.json",
+      "sha256": "21922b6a484287fafea50161e31f29303c0b375f4a61d21970c744f599b570ae"
+    },
+    "controller_approval": {
+      "path": "assets/evidence/t015-forensic-controller-approval-attestation-v1.json",
+      "sha256": "2d844ee36c5468dc0c3bf2c61594c599c2a1d4a4fa72112eb18f883c7201951b"
+    }
+  },
+  "observed": {
+    "first_batch_id": "canonical-shard-1-001",
+    "asset_slice": "0..11",
+    "asset_count": 12,
+    "exact_job_id_list_sha256": "485a7c875f1893444d8eca01912f68dec30d8b7643976b86b6cb9856885fc9d3",
+    "submitted_exactly_once": true,
+    "submitted_count": 12,
+    "completed_count": 12,
+    "reported_model": "nano_banana_flash",
+    "cap_committed_decimal": "18.00",
+    "provider_balance_delta_verified": false,
+    "job_poll_count": 1,
+    "recovery_count": 0,
+    "preserved_failure_code": "PROVIDER_RESPONSE_SIGNAL",
+    "recovery_failure_count": 1,
+    "remaining_planned_batch_count": 27
+  },
+  "migration_policy": {
+    "copy_exact_job_ids_at_runtime": true,
+    "mutate_legacy_journal": false,
+    "paid_submit_allowed": false,
+    "paid_retry_count": 0,
+    "signed_urls_or_raw_errors_persisted": false
+  }
+}

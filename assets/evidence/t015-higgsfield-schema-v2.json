@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "evidence_version": "t015-higgsfield-schema-v2",
+  "source": "T015 v1 nonpaid preflight and first paid batch observations",
+  "secret_free": true,
+  "model": {
+    "requested": "nano_banana_2",
+    "provider_reported": "nano_banana_flash",
+    "upstream_provider": "Google",
+    "aspect_ratio": "3:4",
+    "resolution": "1k",
+    "media_role": "image",
+    "use_unlim": false
+  },
+  "cost": {
+    "display_credits_decimal": "1.00",
+    "exact_credits_decimal": "1.50",
+    "billing_basis": "credits_exact"
+  },
+  "batch": {
+    "observed_contract_max_requests": 12,
+    "response_topology": "INDEXED_JOB_ONE_TO_ONE_PER_ASSET"
+  },
+  "jobs_wait": {
+    "production_input": "STDIN_ONLY",
+    "expected_safe_job_type": "image",
+    "other_type_values_fail_stop": true,
+    "other_optional_signals_fail_stop": true,
+    "signed_urls_persisted": false,
+    "raw_errors_persisted": false,
+    "same_job_repoll_only": true
+  }
+}

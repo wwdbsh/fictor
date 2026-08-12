@@ -1,0 +1,58 @@
+{
+  "schema_version": 2,
+  "artifact_version": "t015-canonical-shard-1-disclosure-presentation-v2-pending",
+  "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
+  "secret_free": true,
+  "plan_sha256": "b27a1c87d2e4872b10e8c5336e440d7c8bf703423cb0fb14f500e60e966e2a74",
+  "risk_disclosure_evidence_sha256": "6ed56cb736cef7b30fe5f4c38619a54ec7ca37982570506db6f0450225b35bd5",
+  "risk_disclosure_text_sha256": "1a79942514bf8c6ebdbc3c9e4f2f8f991b76a63622dcf5f22e2fd4a750b5c502",
+  "provider_schema_evidence_sha256": "b97e53baf351aa13312bd7c8005ca36a386e2effcd9b4277988f81684a366191",
+  "legacy_run_forensics_sha256": "4b0d6811734d1556dbf8b61ab200a616c24f4485063402e16be2ea18ed554e0d",
+  "implementation_binding_sha256": "21a6b07720e3d9f39cea25d9aa8e4b6742b77b1dae3a05000490e8f2e61b3238",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/canonical-shard-1-v1-continuation-v2-controller.ts",
+      "sha256": "6e9552b6f71385d0be33a905f7f8b22702570857a579ea2ea2cba765a13fd797"
+    },
+    "plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1-continuation-v2.ts",
+      "sha256": "f34f8fa936abf233ad55eab1fb5310709bface62a876d6c78544554dbc525cfb"
+    },
+    "ops": {
+      "path": "scripts/assets/canonical-shard-1-v1-continuation-v2-ops-cli.ts",
+      "sha256": "b05d4be39ddb57ef9ff9e7ee892355b876e1fe1eb8262d9e33cb67a898e9e971"
+    },
+    "cli": {
+      "path": "scripts/assets/canonical-shard-1-v1-continuation-v2-cli.ts",
+      "sha256": "ed02960c2a25c36e3998e5d64facc44d40868888592d02c56f33fe2164f8e1d1"
+    },
+    "legacy_plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1.ts",
+      "sha256": "9d347f0ac264d129943f82e3c3b34a3ee915b4ef124e455203fc75d1ec1328f2"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    },
+    "package_json": {
+      "path": "package.json",
+      "sha256": "a1e0807b75b2a18c3d927f107993c1d683daae49949ed2ecd0478d89252c3b1b"
+    },
+    "package_lock": {
+      "path": "package-lock.json",
+      "sha256": "13471a5f8fefa27551d342f9c0d45863cad31677557f528d7039524ff4abe6c4"
+    }
+  },
+  "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
+  "exact_approval_phrase_required": "위 변경된 위험을 확인했고 T015 기존 12개 job ID의 무과금 복구와 CANONICAL 12..331 정확히 320장의 추가 480.00 credits 상한(이미 사용 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
+  "prior_t015_v1_approval_inherited": false,
+  "authorized": false
+}
