@@ -1,0 +1,457 @@
+{
+  "schema_version": 1,
+  "manifest_version": "material-style-approval-v1",
+  "decision": {
+    "decision_id": "T014_MATERIAL_STYLE_APPROVAL",
+    "issue_contract_sha256": "aa64fa1b7737c67ce3acca9587668ab996674e80faf27f119bee1d5a4f30da50",
+    "state": "APPROVED_EXISTING_T013_52_ONLY",
+    "user_evidence": {
+      "exact_text_ko": "승인",
+      "controller_approved_at": "2026-08-12T01:34:36.573Z",
+      "source": "current user conversation",
+      "sequence": "AFTER_FULL_SET_HANDOFF_AND_QA_DISCLOSURE"
+    }
+  },
+  "sources": {
+    "t013_plan": {
+      "path": "assets/manifests/materials-v1.plan.json",
+      "sha256": "22cc0b976501b6d2f9fc0df5d584e891c214ec0c4da4797ddcbf8b98c86b7611"
+    },
+    "t013_actual_run": {
+      "path": "assets/evidence/t013-materials-actual-run-v1.json",
+      "sha256": "722937487ecf6d4248c1ce6aa0fdec44cd730b3ddfbc4ca3a008762d6812d610"
+    },
+    "t013_contact_sheet": {
+      "path": "docs/asset-runs/contact-sheets/t013-materials-v1.html",
+      "sha256": "2334fac68feefddd2069625aa8e461f9525e3ba5733f34d72b2657f7bd8e0908"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    }
+  },
+  "review": {
+    "scope": "EXACT_T013_MATERIAL_IMAGE_BYTES",
+    "total": 52,
+    "reviewed": 52,
+    "approved": 52,
+    "pending": 0,
+    "rejected": 0,
+    "replacement_required": 0,
+    "assets": [
+      {
+        "index": 0,
+        "id": "ore_still",
+        "path": "cards/ore_still.png",
+        "image_sha256": "33a2dcae1c8c3dfc27fe5fc869f24fceab94ba4c23a297feef20781f2c65edb5",
+        "status": "APPROVED"
+      },
+      {
+        "index": 1,
+        "id": "ore_burn",
+        "path": "cards/ore_burn.png",
+        "image_sha256": "28ee7a32dbb4ccafd47de598604d1790d501c7f5f38dc04475b9d6df02205023",
+        "status": "APPROVED"
+      },
+      {
+        "index": 2,
+        "id": "ore_scatter",
+        "path": "cards/ore_scatter.png",
+        "image_sha256": "e69c6e11062819ed3f175b7b78b0dbfe101285875cd618a5c5b7080447dbec74",
+        "status": "APPROVED"
+      },
+      {
+        "index": 3,
+        "id": "ore_rot",
+        "path": "cards/ore_rot.png",
+        "image_sha256": "8e4be1f57beecb30c4bce94926e6718a30951e195c12562a326e7a206e1d5fb4",
+        "status": "APPROVED"
+      },
+      {
+        "index": 4,
+        "id": "ore_wash",
+        "path": "cards/ore_wash.png",
+        "image_sha256": "b66502509aeba83e76b1ec79bd2f9829f357e1c69b2783bd74257585455b80c2",
+        "status": "APPROVED"
+      },
+      {
+        "index": 5,
+        "id": "ore_join",
+        "path": "cards/ore_join.png",
+        "image_sha256": "e54ad70e7a56b4f8a97df7c818c6b7450949648d4d320bb9788bc552b7db3cfb",
+        "status": "APPROVED"
+      },
+      {
+        "index": 6,
+        "id": "still_01",
+        "path": "cards/still_01.png",
+        "image_sha256": "0070b5d805fe66c6eba963a1f81a5395e09ec90dc5665a1233e25c3bf37adff5",
+        "status": "APPROVED"
+      },
+      {
+        "index": 7,
+        "id": "still_02",
+        "path": "cards/still_02.png",
+        "image_sha256": "919269fb53594c2cd6abb1c53031281f537e7a63cab29a1cd7e6d5afcf3bbd8a",
+        "status": "APPROVED"
+      },
+      {
+        "index": 8,
+        "id": "still_03",
+        "path": "cards/still_03.png",
+        "image_sha256": "899ee057f52654d6e80e17c120fac42cfacf3bb6139681334a70c8afa3331349",
+        "status": "APPROVED"
+      },
+      {
+        "index": 9,
+        "id": "still_04",
+        "path": "cards/still_04.png",
+        "image_sha256": "2640624d74c9e05ee4df82a199a4b36c57be0c99f8a775b98c904c641ec87036",
+        "status": "APPROVED"
+      },
+      {
+        "index": 10,
+        "id": "still_05",
+        "path": "cards/still_05.png",
+        "image_sha256": "a6ed4f666578aee684c0043db3e802c8a62c57bf0c4ce200c91330590518b315",
+        "status": "APPROVED"
+      },
+      {
+        "index": 11,
+        "id": "burn_01",
+        "path": "cards/burn_01.png",
+        "image_sha256": "c7f3be4133f94209793cd25fac27496ef4978a84c1af7302a39b9d5b557dface",
+        "status": "APPROVED"
+      },
+      {
+        "index": 12,
+        "id": "burn_02",
+        "path": "cards/burn_02.png",
+        "image_sha256": "50e2efe458f46d69e7147248ed883de5985b76fc4061756a6735288ffdee5c48",
+        "status": "APPROVED"
+      },
+      {
+        "index": 13,
+        "id": "burn_03",
+        "path": "cards/burn_03.png",
+        "image_sha256": "f37e8cfc1099b0c56d66c36045ba288d93eccb4d2ab3e8c4420f7eb5ba8c21f8",
+        "status": "APPROVED"
+      },
+      {
+        "index": 14,
+        "id": "burn_04",
+        "path": "cards/burn_04.png",
+        "image_sha256": "5ddb497a6051075e94a4a4e09602d2287ad670256f6218740160f615b778ca0c",
+        "status": "APPROVED"
+      },
+      {
+        "index": 15,
+        "id": "burn_05",
+        "path": "cards/burn_05.png",
+        "image_sha256": "4c7e04f150223a3f1206ae2bd51c06274ae0295923f7ecd9bf86a3430317fb04",
+        "status": "APPROVED"
+      },
+      {
+        "index": 16,
+        "id": "scat_01",
+        "path": "cards/scat_01.png",
+        "image_sha256": "f363a3ec3ae82bbc462f2416f49b60d6cd3a2b1ce8c7b7d46d8663c03c1d4a08",
+        "status": "APPROVED"
+      },
+      {
+        "index": 17,
+        "id": "scat_02",
+        "path": "cards/scat_02.png",
+        "image_sha256": "852bdcb0fed587d5c19609ceb442c1d0cd84692c8ef4eb4e9385ca5a819ceb2b",
+        "status": "APPROVED"
+      },
+      {
+        "index": 18,
+        "id": "scat_03",
+        "path": "cards/scat_03.png",
+        "image_sha256": "ad5553fafdd438afe7993c5e1f78569c9379e487cbbd4d02aab867bbead8dcbb",
+        "status": "APPROVED"
+      },
+      {
+        "index": 19,
+        "id": "scat_04",
+        "path": "cards/scat_04.png",
+        "image_sha256": "9c2bfbfec776952d594484da7b8b814e7aa7b91de5ba90dd57733adf933f0d1d",
+        "status": "APPROVED"
+      },
+      {
+        "index": 20,
+        "id": "scat_05",
+        "path": "cards/scat_05.png",
+        "image_sha256": "49050d85b033b56fb3afa0b1788c718b02787d11b9887d1f68df85b56b225ba5",
+        "status": "APPROVED"
+      },
+      {
+        "index": 21,
+        "id": "rot_01",
+        "path": "cards/rot_01.png",
+        "image_sha256": "db6ace4f3f59ff65816f7bfe78457b8bc850624403be210ed20489cd71f84484",
+        "status": "APPROVED"
+      },
+      {
+        "index": 22,
+        "id": "rot_02",
+        "path": "cards/rot_02.png",
+        "image_sha256": "de408301f704e9682116e8068a0669065302c70b34201430d5df5a8affc5c9fb",
+        "status": "APPROVED"
+      },
+      {
+        "index": 23,
+        "id": "rot_03",
+        "path": "cards/rot_03.png",
+        "image_sha256": "67a231f4bc7fed01cd967630f5bd09b68a4286d9fe2cc44546f23c7b24311cfe",
+        "status": "APPROVED"
+      },
+      {
+        "index": 24,
+        "id": "rot_04",
+        "path": "cards/rot_04.png",
+        "image_sha256": "288d3ba7b4578d950a35d672e14892c8556cb6a3ede38a5938372c311765603b",
+        "status": "APPROVED"
+      },
+      {
+        "index": 25,
+        "id": "rot_05",
+        "path": "cards/rot_05.png",
+        "image_sha256": "61c443fd0712d1f76e0580c1ff2f9805159d3f385dcde3bb7931f5dfbf33894e",
+        "status": "APPROVED"
+      },
+      {
+        "index": 26,
+        "id": "wash_01",
+        "path": "cards/wash_01.png",
+        "image_sha256": "461882049ebb71153875b9009aa65a0bcd83b22575ccb589628d6666114121e9",
+        "status": "APPROVED"
+      },
+      {
+        "index": 27,
+        "id": "wash_02",
+        "path": "cards/wash_02.png",
+        "image_sha256": "da101a4e7fe4512dbb6583c56c6cbe65591136b5c7e50f5b4cb49c66ba2f4a02",
+        "status": "APPROVED"
+      },
+      {
+        "index": 28,
+        "id": "wash_03",
+        "path": "cards/wash_03.png",
+        "image_sha256": "adbd3438a393872bb8e2cce684fe495ae9ac99d4a24576cb25d341154ecf68da",
+        "status": "APPROVED"
+      },
+      {
+        "index": 29,
+        "id": "wash_04",
+        "path": "cards/wash_04.png",
+        "image_sha256": "bc5a54fbe241eeb7c35a38b800be8d5aab1a42927cf95a9fd4e51202ee5c7bb2",
+        "status": "APPROVED"
+      },
+      {
+        "index": 30,
+        "id": "wash_05",
+        "path": "cards/wash_05.png",
+        "image_sha256": "dabce86422d63cad64456a574d64c7184fed1a225e44af4179da2bff1f0708ad",
+        "status": "APPROVED"
+      },
+      {
+        "index": 31,
+        "id": "join_01",
+        "path": "cards/join_01.png",
+        "image_sha256": "2c5e38da33db6d3e8d531925be3738a69bceb73a9bf5a7f3b30411ac7e91d377",
+        "status": "APPROVED"
+      },
+      {
+        "index": 32,
+        "id": "join_02",
+        "path": "cards/join_02.png",
+        "image_sha256": "8e159018fa4e9ce12eccefae600c4fdf51c75efb99a825559e9019133f239ad3",
+        "status": "APPROVED"
+      },
+      {
+        "index": 33,
+        "id": "join_03",
+        "path": "cards/join_03.png",
+        "image_sha256": "c8f69856d0851ac0700595c51d6de0cd23077926caf96d71e20295ef4b4a5108",
+        "status": "APPROVED"
+      },
+      {
+        "index": 34,
+        "id": "join_04",
+        "path": "cards/join_04.png",
+        "image_sha256": "847c14c78d5a0782ff621547462026b297536ec933baa019552ff38551c0c26e",
+        "status": "APPROVED"
+      },
+      {
+        "index": 35,
+        "id": "join_05",
+        "path": "cards/join_05.png",
+        "image_sha256": "9aa9e38ffac5a66ed99c030ecdf396dcbcf2447c8b3b6c93f50af30e0c003ce6",
+        "status": "APPROVED"
+      },
+      {
+        "index": 36,
+        "id": "tool_01",
+        "path": "cards/tool_01.png",
+        "image_sha256": "793bb9fe4651f9495c6990374e49b02e422e200097ef838fb9c4932324d838f2",
+        "status": "APPROVED"
+      },
+      {
+        "index": 37,
+        "id": "tool_02",
+        "path": "cards/tool_02.png",
+        "image_sha256": "d9beac5f9c727ae5f5bdde70835c12a959b5ec62c4b947172755d37869f0d50a",
+        "status": "APPROVED"
+      },
+      {
+        "index": 38,
+        "id": "tool_03",
+        "path": "cards/tool_03.png",
+        "image_sha256": "3c5f48ec7cdf469b4e70d1094091eaa7e5c09f1461a26098eabbff4a6ff74031",
+        "status": "APPROVED"
+      },
+      {
+        "index": 39,
+        "id": "tool_04",
+        "path": "cards/tool_04.png",
+        "image_sha256": "d40c69db1ed6709a8ad2f81f85b6792e510f20bc73e3a2476ecfc3769e197ca5",
+        "status": "APPROVED"
+      },
+      {
+        "index": 40,
+        "id": "tool_05",
+        "path": "cards/tool_05.png",
+        "image_sha256": "981d6db25ba1653e269a8fc243716d9f8da30ec7bb953db17ffd31749761758f",
+        "status": "APPROVED"
+      },
+      {
+        "index": 41,
+        "id": "tool_06",
+        "path": "cards/tool_06.png",
+        "image_sha256": "dd1d570125564dff2e42e51f8547488fc641c8f9a217e7a6ea950d98010f7800",
+        "status": "APPROVED"
+      },
+      {
+        "index": 42,
+        "id": "tool_07",
+        "path": "cards/tool_07.png",
+        "image_sha256": "9fd1f8ceeb23a9d62e57bf01ce9c735eb214a534b31e8fc2f5295058dcd902ab",
+        "status": "APPROVED"
+      },
+      {
+        "index": 43,
+        "id": "tool_08",
+        "path": "cards/tool_08.png",
+        "image_sha256": "6f18d32e0d6ef8df663e283926ea3fdd455badb2409dd5274bb76a4cf7e50881",
+        "status": "APPROVED"
+      },
+      {
+        "index": 44,
+        "id": "tool_09",
+        "path": "cards/tool_09.png",
+        "image_sha256": "e4fd637f1ab89a8c0570edd6948a7f12d050a9d83130991c41658bbf3971d5f9",
+        "status": "APPROVED"
+      },
+      {
+        "index": 45,
+        "id": "tool_10",
+        "path": "cards/tool_10.png",
+        "image_sha256": "a5ad8c64c6c38e709558916962933e21e2c8c96775905372a8cbbc0049416c12",
+        "status": "APPROVED"
+      },
+      {
+        "index": 46,
+        "id": "odd_01",
+        "path": "cards/odd_01.png",
+        "image_sha256": "91ae77d15fe7e97e3045d013e4f8093dc669e6d915a80dcb051955645c7075e2",
+        "status": "APPROVED"
+      },
+      {
+        "index": 47,
+        "id": "odd_02",
+        "path": "cards/odd_02.png",
+        "image_sha256": "b17c984b61272d674502b21d8cefdb5f0f526e436f48b341f4eb3fd2e1e82eb4",
+        "status": "APPROVED"
+      },
+      {
+        "index": 48,
+        "id": "odd_03",
+        "path": "cards/odd_03.png",
+        "image_sha256": "10148b37e5147422cc7181498930972c418293782f731759373dabd640861267",
+        "status": "APPROVED"
+      },
+      {
+        "index": 49,
+        "id": "odd_04",
+        "path": "cards/odd_04.png",
+        "image_sha256": "d8ce54b9de9bb88a72cac16d25eea3ce298ae72c2ef205309835e81ae79bba53",
+        "status": "APPROVED"
+      },
+      {
+        "index": 50,
+        "id": "odd_05",
+        "path": "cards/odd_05.png",
+        "image_sha256": "a01fee4e3260520eff0aecdabd18cfd5a5a73f41ee481e765bbc4cd009800f24",
+        "status": "APPROVED"
+      },
+      {
+        "index": 51,
+        "id": "odd_06",
+        "path": "cards/odd_06.png",
+        "image_sha256": "23b74a071007bb44adeda66c4f7d83a6121d86487eeafe05462c3d4a4f7a5a4f",
+        "status": "APPROVED"
+      }
+    ]
+  },
+  "accepted_qa_flags": [
+    {
+      "flag_id": "TOOL_08_TEXT_LIKE_LABEL",
+      "asset_ids": [
+        "tool_08"
+      ],
+      "observation": "Readable text-like label appears on the specimen box front, violating the T013 No text prompt constraint.",
+      "disposition": "ACCEPTED_FOR_EXISTING_T013_52_ONLY"
+    },
+    {
+      "flag_id": "ODD_01_MASTER_COMPOSITION_AND_JOINTED_LEG_LEAKAGE",
+      "asset_ids": [
+        "odd_01"
+      ],
+      "observation": "The required walking-kettle subject also strongly inherits the master's central composition and jointed-leg form and placement, so the MEDIA_ONLY non-copy boundary is not judged fully preserved for this asset.",
+      "disposition": "ACCEPTED_FOR_EXISTING_T013_52_ONLY"
+    },
+    {
+      "flag_id": "GENERAL_STYLE_PAPER_3D_COLOR_DRIFT",
+      "asset_ids": [
+        "MULTIPLE_T013_MATERIALS"
+      ],
+      "observation": "Some images drift from line-led copperplate treatment toward smooth color and three-dimensional rendering, with background brightness and paper texture variation.",
+      "disposition": "ACCEPTED_FOR_EXISTING_T013_52_ONLY"
+    }
+  ],
+  "future_policy": {
+    "existing_byte_acceptance_is_precedent": false,
+    "no_text_policy": "UNCHANGED_REQUIRED",
+    "media_only_non_copy_policy": "UNCHANGED_REQUIRED",
+    "prompt_policy": "UNCHANGED_REQUIRED",
+    "style_policy": "UNCHANGED_REQUIRED",
+    "replacement_or_new_bytes_require_new_revision_and_approval": true
+  },
+  "downstream": {
+    "canonical_bulk_style_gate": "GO",
+    "t015_dependency": "SATISFIED",
+    "t014_authorizes_provider_call": false,
+    "immediate_provider_call": "NOT_AUTHORIZED",
+    "t015_requires_selected_task_cycle": true,
+    "t015_execution_requirements": [
+      "FROZEN_RUN_PLAN",
+      "CURRENT_COST_BALANCE_AND_PREFLIGHT",
+      "CURRENT_PROVIDER_SCHEMA_MODEL_AND_BATCH_CONSTRAINTS",
+      "BATCH_SIZE_AT_MOST_12",
+      "USE_UNLIM_FALSE",
+      "IMMEDIATE_LOCAL_AND_DISTINCT_BACKUP_RECOVERY"
+    ]
+  }
+}
