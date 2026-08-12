@@ -32,13 +32,17 @@
     "assets:materials:v1:check": "tsx scripts/assets/materials-v1-cli.ts check",
     "assets:materials:v1": "tsx scripts/assets/materials-v1-cli.ts",
     "assets:materials:v1:ops": "tsx scripts/assets/materials-v1-ops-cli.ts",
+    "assets:canonical:shard1:v1:gen": "tsx scripts/assets/canonical-shard-1-v1-controller.ts preparation gen",
+    "assets:canonical:shard1:v1:check": "tsx scripts/assets/canonical-shard-1-v1-controller.ts preparation check",
+    "assets:canonical:shard1:v1": "tsx scripts/assets/canonical-shard-1-v1-controller.ts preparation",
+    "assets:canonical:shard1:v1:ops": "tsx scripts/assets/canonical-shard-1-v1-controller.ts ops",
     "assets:fake": "tsx scripts/assets/cli.ts run-fake",
     "assets:approve-materials": "tsx scripts/assets/cli.ts approve-materials",
     "review:names": "tsx scripts/review-names.ts",
     "review:names:check": "tsx scripts/review-names.ts --check",
     "milestone:phase0:check": "tsx scripts/check-phase0-data.ts",
     "smoke:static": "node scripts/smoke-static.mjs",
-    "verify": "npm run gen:data:check && npm run gen:assets:check && npm run review:names:check && npm run milestone:phase0:check && npm test && npm run build && npm run smoke:static"
+    "verify": "npm run gen:data:check && npm run gen:assets:check && npm run assets:canonical:shard1:v1:check && npm run review:names:check && npm run milestone:phase0:check && npm test && npm run build && npm run smoke:static"
   },
   "dependencies": {
     "react": "19.2.8",

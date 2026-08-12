@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t015-higgsfield-schema-v1",
+  "observation_window_utc": "2026-08-12 around 02:38Z",
+  "source": "fresh nonpaid Higgsfield observations supplied by the T015 contract",
+  "secret_free": true,
+  "model": {
+    "id": "nano_banana_2",
+    "exists": true,
+    "upstream_provider": "Google",
+    "resolutions": [
+      "1k",
+      "2k",
+      "4k"
+    ],
+    "aspect_ratio": "3:4",
+    "media_role": "image",
+    "supports_unlim": true
+  },
+  "account": {
+    "plan": "Plus",
+    "unlim_available": false,
+    "observed_balance_decimal": "861.90",
+    "projected_remainder_decimal": "363.90"
+  },
+  "batch": {
+    "tool": "generate_image_batch",
+    "observed_contract_max_requests": 12,
+    "response_topology": "INDEXED_JOB_ONE_TO_ONE_PER_ASSET",
+    "optional_fields_fail_stop": true
+  },
+  "cost": {
+    "tool": "generate_image",
+    "get_cost": true,
+    "credits_exact_decimal": "1.50",
+    "nonpaid_contract": true
+  },
+  "jobs_wait": {
+    "production_input": "STDIN_ONLY",
+    "signed_urls_persisted": false,
+    "raw_errors_persisted": false,
+    "same_job_repoll_only": true
+  }
+}

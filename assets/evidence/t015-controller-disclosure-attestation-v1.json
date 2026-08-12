@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t015-controller-disclosure-attestation-v1",
+  "attester": "USER_CREATED_CONTROL_PLANE_MAIN_SESSION",
+  "goal_slug": "ship-fictor-track1-2026",
+  "task_key": "T015",
+  "issue_number": 17,
+  "issue_contract_sha256": "9b1e9fa39c72101fd653d4c11696bf022aa5c6c1c899871863c90895239f451e",
+  "event_sequence": {
+    "user_message_exact_ko": "계속 진행하자. 크래딧 사용 승인할게",
+    "user_message_interpretation": "GENERIC_T015_CREDIT_INTENT_NOT_EXACT_EXECUTION_APPROVAL",
+    "assistant_disclosure_presented_at": "2026-08-12T03:01:17.021Z",
+    "assistant_disclosure_text_sha256": "94c6502453a57d52019a10d60678a6694fb3399efcf1c610a1f12dd51ac4bafd",
+    "assistant_disclosure_was_presented_in_current_conversation": true,
+    "exact_scoped_approval_received_after_disclosure": false
+  },
+  "scope": {
+    "category": "CANONICAL",
+    "slice": "0..331",
+    "asset_count": 332,
+    "initial_credit_cap_decimal": "498.00",
+    "automatic_paid_retry_reserve_decimal": "0.00"
+  },
+  "secret_free": true
+}
