@@ -13,7 +13,7 @@
     },
     "ops": {
       "path": "scripts/assets/canonical-shard-1-v1-ops-cli.ts",
-      "sha256": "7baaa5e910ba048428c66972381317d0ac7bb5880e49a378842b5378f49ddf8a"
+      "sha256": "efbb729758b3e3229609f4127e5ddccec4cd8ed50a67742ae92d2909781c467d"
     },
     "cli": {
       "path": "scripts/assets/canonical-shard-1-v1-cli.ts",

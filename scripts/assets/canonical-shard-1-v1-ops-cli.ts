@@ -78,7 +78,7 @@ export interface T015BatchRecord {
   asset_ids: string[];
   state: BatchState;
   transitions: Array<{ state: BatchState; observed_at: string }>;
-  preflight?: { requests: Array<{ index: number; params: T015CanonicalShardPlan["assets"][number]["request"]["params"] & { get_cost: true } }>; requests_sha256: string; requested_at: string; costs?: Array<{ index: number; request_sha256: string; credits: number; credits_exact: 1.5; normalized_decimal: "1.50"; provider_observed_at: string }>; balance?: { credits: number; normalized_decimal: string; provider_observed_at: string } };
+  preflight?: { requests: Array<{ index: number; params: T015CanonicalShardPlan["assets"][number]["request"]["params"] & { get_cost: true } }>; requests_sha256: string; requested_at: string; costs?: Array<{ index: number; request_sha256: string; credits: 1; credits_decimal: "1.00"; credits_exact: 1.5; credits_exact_decimal: "1.50"; provider_observed_at: string }>; balance?: { credits: number; normalized_decimal: string; provider_observed_at: string } };
   paid_request?: { request_sha256: string; prepared_at: string };
   submission?: { observed_at: string; expected_count: number; submitted_count: number; failed_count: number; complete: boolean; missing_asset_ids: string[]; jobs: T015ProviderJob[] };
   recovery_gate?: { opened_at: string; exact_operator_phrase_sha256: string; no_new_paid_submit: true };
@@ -190,7 +190,7 @@ export function validateT015Journal(journal: T015OperationsJournal, plan: T015Ca
           const expectedRequestSha = sha256T015(canonicalJson(getCostRequest(asset.request)));
           timestamp(cost.provider_observed_at);
           const previousAt = index === 0 ? record.preflight!.requested_at : record.preflight!.costs![index - 1].provider_observed_at;
-          if (cost.index !== asset.index || cost.request_sha256 !== expectedRequestSha || cost.credits_exact !== 1.5 || cost.normalized_decimal !== "1.50" || decimals(cost.credits, "journal cost").decimal !== "1.50" || seenCostTimestamps.has(cost.provider_observed_at) || Date.parse(cost.provider_observed_at) <= Date.parse(previousAt) || Date.parse(cost.provider_observed_at) - Date.parse(record.preflight!.requested_at) > FRESHNESS_MS) throw new Error("T015 invalid per-request preflight cost");
+          if (cost.index !== asset.index || cost.request_sha256 !== expectedRequestSha || cost.credits !== 1 || cost.credits_decimal !== "1.00" || cost.credits_exact !== 1.5 || cost.credits_exact_decimal !== "1.50" || seenCostTimestamps.has(cost.provider_observed_at) || Date.parse(cost.provider_observed_at) <= Date.parse(previousAt) || Date.parse(cost.provider_observed_at) - Date.parse(record.preflight!.requested_at) > FRESHNESS_MS) throw new Error("T015 invalid per-request preflight cost");
           seenCostTimestamps.add(cost.provider_observed_at);
         });
       }
@@ -360,8 +360,8 @@ export function runT015OpsInternal(args: readonly string[], root: string, plan: 
         try { exactKeys(value.cost as Record<string, unknown>, ["credits", "credits_exact"]); } catch { persistFail(root, journal, record, "UNKNOWN_PROVIDER_FIELD", fallbackAt, { stage: "PER_REQUEST_COST_VALUE_FIELDS", item_index: itemIndex }); }
         let display; let exact;
         try { display = decimals((value.cost as { credits?: unknown }).credits, "cost credits"); exact = decimals((value.cost as { credits_exact?: unknown }).credits_exact, "cost credits_exact"); } catch { persistFail(root, journal, record, "PRICE_CHANGED", fallbackAt, { stage: "PER_REQUEST_COST_NORMALIZATION", item_index: itemIndex }); }
-        if (display.decimal !== "1.50" || exact.decimal !== "1.50") persistFail(root, journal, record, "PRICE_CHANGED", fallbackAt, { item_index: itemIndex, observed_display_decimal: display.decimal, observed_exact_decimal: exact.decimal });
-        costs.push({ index: asset.index, request_sha256: expectedRequestSha, credits: display.value, credits_exact: 1.5, normalized_decimal: "1.50", provider_observed_at: costAt });
+        if (display.decimal !== "1.00" || exact.decimal !== "1.50") persistFail(root, journal, record, "PRICE_CHANGED", fallbackAt, { item_index: itemIndex, observed_display_decimal: display.decimal, observed_exact_decimal: exact.decimal });
+        costs.push({ index: asset.index, request_sha256: expectedRequestSha, credits: 1, credits_decimal: "1.00", credits_exact: 1.5, credits_exact_decimal: "1.50", provider_observed_at: costAt });
       });
       const balanceAtRaw = (balanceRaw as { provider_observed_at?: unknown }).provider_observed_at;
       const balanceAt = typeof balanceAtRaw === "string" ? balanceAtRaw : fallbackAt;
@@ -651,8 +651,17 @@ export async function runT015JobsHandoffInternal(args: readonly string[], stdinJ
       redacted.push({ index: expected.index, job_id: expected.job_id, status, model, download_available: url !== null, lookup_retryable: typeof job.retryable === "boolean" ? job.retryable : null, provider_failure_detail_present: "error" in job });
     }); redacted.sort((a, b) => a.index - b.index);
     if (!topology || redacted.length !== record.submission.jobs.length) persistRecoveryFail(root, journal, record, "RECOVERY_FAILED", at, { stage: "JOBS_WAIT_TOPOLOGY", definite_job_count: redacted.length });
-    const derivedSummary = Object.fromEntries([...WAIT_STATUSES].filter((status) => redacted.some((job) => job.status === status)).map((status) => [status, redacted.filter((job) => job.status === status).length]));
+    const activeStatuses: readonly WaitStatus[] = ["pending", "waiting", "queued", "in_progress", "ip_detect"];
+    const failedStatuses: readonly WaitStatus[] = ["failed", "canceled", "nsfw", "ip_detected"];
+    const derivedSummary = {
+      active: redacted.filter((job) => activeStatuses.includes(job.status)).length,
+      completed: redacted.filter((job) => job.status === "completed").length,
+      errors: redacted.filter((job) => job.status === "lookup_failed").length,
+      failed: redacted.filter((job) => failedStatuses.includes(job.status)).length,
+      total: redacted.length,
+    };
     const summary = response.summary as Record<string, unknown>;
+    try { exactKeys(summary, ["active", "completed", "errors", "failed", "total"]); } catch { persistRecoveryFail(root, journal, record, "UNKNOWN_PROVIDER_FIELD", at, { stage: "JOBS_WAIT_SUMMARY_FIELDS" }); }
     if (Object.values(summary).some((count) => !Number.isSafeInteger(count) || (count as number) < 0) || canonicalJson(summary) !== canonicalJson(derivedSummary)) persistRecoveryFail(root, journal, record, "UNKNOWN_PROVIDER_FIELD", at, { stage: "JOBS_WAIT_SUMMARY_MISMATCH" });
     const derivedAllTerminal = redacted.every((job) => ["completed", "failed", "canceled", "nsfw", "ip_detected", "lookup_failed"].includes(job.status));
     if (response.all_terminal !== derivedAllTerminal) persistRecoveryFail(root, journal, record, "PROVIDER_RESPONSE_SIGNAL", at, { stage: "JOBS_WAIT_TERMINAL_CONTRADICTION" });

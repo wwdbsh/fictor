@@ -2,12 +2,12 @@
   "schema_version": 1,
   "evidence_version": "t015-canonical-shard-1-disclosure-presentation-v1",
   "secret_free": true,
-  "plan_sha256": "b6defbafb9942f56d5b7d97f7cf222e790804bc2dfc473d6a78c91da0b403f14",
+  "plan_sha256": "1a7ca4b377211a917d32ae856ecb50847dad360cb87ebb799975d573522b4e6c",
   "risk_disclosure_evidence_sha256": "b0b381c55ebec210f611f81d1a30ec7cbcddfc82285b43f828ae7aaeb6b7383e",
   "risk_disclosure_text_sha256": "94c6502453a57d52019a10d60678a6694fb3399efcf1c610a1f12dd51ac4bafd",
   "provider_schema_evidence_sha256": "35c2dfb05a22824d69d5549125559fecfa89156b81f63278db936bf26fb7a352",
   "controller_attestation_sha256": "21922b6a484287fafea50161e31f29303c0b375f4a61d21970c744f599b570ae",
-  "implementation_binding_sha256": "b2a2ead707d33f3231317b6d2f9816b624c100d9bfa3681053acb33b0e8c2bf0",
+  "implementation_binding_sha256": "78b1a2c3b827334bbfc012c466ca75e1167e7f30e5c3a9796bfd1effc9f96eb6",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/canonical-shard-1-v1-controller.ts",
@@ -19,7 +19,7 @@
     },
     "ops": {
       "path": "scripts/assets/canonical-shard-1-v1-ops-cli.ts",
-      "sha256": "7baaa5e910ba048428c66972381317d0ac7bb5880e49a378842b5378f49ddf8a"
+      "sha256": "efbb729758b3e3229609f4127e5ddccec4cd8ed50a67742ae92d2909781c467d"
     },
     "cli": {
       "path": "scripts/assets/canonical-shard-1-v1-cli.ts",

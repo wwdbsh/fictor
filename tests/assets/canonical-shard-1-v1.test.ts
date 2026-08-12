@@ -35,7 +35,6 @@ import {
   checkExcludedT015CanonicalPaths,
   isPublicT015ResolvedAddress,
   runT015JobsHandoffInternal,
-  runT015Ops,
   runT015OpsInternal,
   validateT015Journal,
   writeT015NoClobberJsonForTest,
@@ -49,6 +48,7 @@ function crc32(bytes: Uint8Array): number { let crc = 0xffffffff; for (const byt
 function chunk(type: string, data: Buffer): Buffer { const typeBytes = Buffer.from(type); const result = Buffer.alloc(12 + data.length); result.writeUInt32BE(data.length, 0); typeBytes.copy(result, 4); data.copy(result, 8); result.writeUInt32BE(crc32(Buffer.concat([typeBytes, data])), 8 + data.length); return result; }
 function png(fill = 0): Buffer { const header = Buffer.alloc(13); header.writeUInt32BE(3, 0); header.writeUInt32BE(4, 4); header[8] = 8; header[9] = 2; const pixels = Buffer.alloc(4 * 10, fill); return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(pixels)), chunk("IEND", Buffer.alloc(0))]); }
 function json(root: string, name: string, value: unknown): string { const path = resolve(root, name); writeFileSync(path, `${JSON.stringify(value)}\n`); return path; }
+function jobsSummary(statuses: readonly string[]) { const active = ["pending", "waiting", "queued", "in_progress", "ip_detect"]; const failed = ["failed", "canceled", "nsfw", "ip_detected"]; return { active: statuses.filter((status) => active.includes(status)).length, completed: statuses.filter((status) => status === "completed").length, errors: statuses.filter((status) => status === "lookup_failed").length, failed: statuses.filter((status) => failed.includes(status)).length, total: statuses.length }; }
 
 let authorizationRoot: string | undefined;
 const T015_FIXTURE_SOURCES = ["assets/manifests/core-v1.plan.json", "assets/manifests/master-style-v1.json", "assets/manifests/material-style-approval-v1.json", "assets/manifests/t015-implementation-binding-v1.json", "assets/evidence/t015-controller-disclosure-attestation-v1.json", ...Object.values(T015_RUNTIME_FILE_PATHS)];
@@ -70,7 +70,7 @@ function prepareFirst(root: string, fixtureValue = fixture()) {
   const { plan, presentation, approval } = fixtureValue; const batch = plan.batches[0];
   runT015OpsInternal(["init"], root, plan, presentation, approval);
   const preflight = runT015OpsInternal(["preflight-request", "--batch", batch.id, "--observed-at", "2026-08-12T03:03:00.000Z"], root, plan, presentation, approval) as { requests: unknown[] };
-  const cost = json(root, "cost.json", { costs: batch.asset_ids.map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1.5, credits_exact: 1.5 }, provider_observed_at: `2026-08-12T03:03:${String(itemIndex + 1).padStart(2, "0")}.000Z` })) }); const balance = json(root, "balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:03:13.000Z" });
+  const cost = json(root, "cost.json", { costs: batch.asset_ids.map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1, credits_exact: 1.5 }, provider_observed_at: `2026-08-12T03:03:${String(itemIndex + 1).padStart(2, "0")}.000Z` })) }); const balance = json(root, "balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:03:13.000Z" });
   runT015OpsInternal(["preflight-result", "--batch", batch.id, "--cost-file", cost, "--balance-file", balance], root, plan, presentation, approval);
   const envelope = runT015OpsInternal(["prepare", "--batch", batch.id, "--observed-at", "2026-08-12T03:06:00.000Z"], root, plan, presentation, approval);
   return { ...fixtureValue, batch, envelope };
@@ -109,8 +109,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
   test("requires the root-created post-disclosure approval attestation and binds every approval input", () => {
     const { plan, presentation, approval } = fixture(); expect(approval.plan_sha256).toBe(presentation.plan_sha256); expect(approval.provider_schema_evidence_sha256).toBe(presentation.provider_schema_evidence_sha256); expect(approval.t014_approval_sha256).toBe(presentation.t014_approval_sha256);
     expect(approval.controller_approval_attestation_path).toBe(T015_CONTROLLER_APPROVAL_ATTESTATION_PATH); expect(approval.controller_approval_attestation_sha256).toMatch(/^[a-f0-9]{64}$/);
-    expect(() => buildT015ApprovalEvidence(repositoryRoot, buildT015CanonicalShardPlan(repositoryRoot), buildT015RiskDisclosure(), buildT015ProviderSchemaEvidence(), buildT015DisclosurePresentationEvidence(repositoryRoot, buildT015CanonicalShardPlan(repositoryRoot), buildT015RiskDisclosure(), buildT015ProviderSchemaEvidence()), new Date("2026-08-12T03:03:00.000Z"))).toThrow();
-    expect(isT015Authorized(repositoryRoot, plan)).toBe(false);
+    const absentRoot = mkdtempSync(resolve(tmpdir(), "fictor-t015-absent-approval-")); copyFixtureSources(absentRoot); const absentPlan = buildT015CanonicalShardPlan(absentRoot); expect(() => buildT015ApprovalEvidence(absentRoot, absentPlan, buildT015RiskDisclosure(), buildT015ProviderSchemaEvidence(), buildT015DisclosurePresentationEvidence(absentRoot, absentPlan, buildT015RiskDisclosure(), buildT015ProviderSchemaEvidence()), new Date("2026-08-12T03:03:00.000Z"))).toThrow(); expect(isT015Authorized(absentRoot, absentPlan)).toBe(false);
     const falseRoot = mkdtempSync(resolve(tmpdir(), "fictor-t015-false-approval-")); copyFixtureSources(falseRoot); const falsePlan = buildT015CanonicalShardPlan(falseRoot); const risk = buildT015RiskDisclosure(); const schema = buildT015ProviderSchemaEvidence(); const falsePresentation = buildT015DisclosurePresentationEvidence(falseRoot, falsePlan, risk, schema);
     const falseAttestation = JSON.parse(readFileSync(resolve(authorizationRoot!, T015_CONTROLLER_APPROVAL_ATTESTATION_PATH), "utf8")); falseAttestation.event_sequence.exact_scoped_approval_received_after_disclosure = false; mkdirSync(resolve(falseRoot, T015_CONTROLLER_APPROVAL_ATTESTATION_PATH, ".."), { recursive: true }); writeFileSync(resolve(falseRoot, T015_CONTROLLER_APPROVAL_ATTESTATION_PATH), renderT015CanonicalJson(falseAttestation));
     expect(() => buildT015ApprovalEvidence(falseRoot, falsePlan, risk, schema, falsePresentation, new Date("2026-08-12T03:03:00.000Z"))).toThrow("not affirmative");
@@ -132,7 +131,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
     const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-costs-")); const { plan, presentation, approval } = fixture(); const batch = plan.batches[0];
     runT015OpsInternal(["init"], root, plan, presentation, approval);
     const preflight = runT015OpsInternal(["preflight-request", "--batch", batch.id, "--observed-at", "2026-08-12T03:03:00.000Z"], root, plan, presentation, approval) as { requests: unknown[] };
-    const cost = json(root, "cost.json", { costs: batch.asset_ids.slice(0, 11).map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1.5, credits_exact: 1.5 }, provider_observed_at: `2026-08-12T03:03:${String(itemIndex + 1).padStart(2, "0")}.000Z` })) });
+    const cost = json(root, "cost.json", { costs: batch.asset_ids.slice(0, 11).map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1, credits_exact: 1.5 }, provider_observed_at: `2026-08-12T03:03:${String(itemIndex + 1).padStart(2, "0")}.000Z` })) });
     const balance = json(root, "balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:03:13.000Z" });
     expect(() => runT015OpsInternal(["preflight-result", "--batch", batch.id, "--cost-file", cost, "--balance-file", balance], root, plan, presentation, approval)).toThrow("PRICE_CHANGED");
   });
@@ -140,17 +139,23 @@ describe("T015 CANONICAL shard 1 preparation", () => {
   test("rejects duplicate per-request provider timestamps before paid prepare", () => {
     const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-cost-time-")); const { plan, presentation, approval } = fixture(); const batch = plan.batches[0]; runT015OpsInternal(["init"], root, plan, presentation, approval);
     const preflight = runT015OpsInternal(["preflight-request", "--batch", batch.id, "--observed-at", "2026-08-12T03:03:00.000Z"], root, plan, presentation, approval) as { requests: unknown[] };
-    const cost = json(root, "cost.json", { costs: batch.asset_ids.map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1.5, credits_exact: 1.5 }, provider_observed_at: "2026-08-12T03:03:01.000Z" })) }); const balance = json(root, "balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:03:13.000Z" });
+    const cost = json(root, "cost.json", { costs: batch.asset_ids.map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1, credits_exact: 1.5 }, provider_observed_at: "2026-08-12T03:03:01.000Z" })) }); const balance = json(root, "balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:03:13.000Z" });
     expect(() => runT015OpsInternal(["preflight-result", "--batch", batch.id, "--cost-file", cost, "--balance-file", balance], root, plan, presentation, approval)).toThrow("PRICE_CHANGED");
   });
 
-  test("production init fails closed before creating a journal when approval artifacts are absent", () => {
-    expect(() => runT015Ops(["init"])).toThrow(/implementation scope is dirty|approval is missing/); expect(() => readFileSync(resolve(repositoryRoot, T015_JOURNAL_PATH))).toThrow();
+  test.each(["display tamper", "unknown field"] as const)("rejects get_cost %s while billing remains bound to credits_exact", (mode) => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-cost-shape-")); const { plan, presentation, approval } = fixture(); const batch = plan.batches[0]; runT015OpsInternal(["init"], root, plan, presentation, approval); const preflight = runT015OpsInternal(["preflight-request", "--batch", batch.id, "--observed-at", "2026-08-12T03:03:00.000Z"], root, plan, presentation, approval) as { requests: unknown[] };
+    const costs = batch.asset_ids.map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: itemIndex === 0 && mode === "display tamper" ? 1.5 : 1, credits_exact: 1.5, ...(itemIndex === 0 && mode === "unknown field" ? { currency: "credits" } : {}) }, provider_observed_at: `2026-08-12T03:03:${String(itemIndex + 1).padStart(2, "0")}.000Z` })); const cost = json(root, "cost.json", { costs }); const balance = json(root, "balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:03:13.000Z" });
+    expect(() => runT015OpsInternal(["preflight-result", "--batch", batch.id, "--cost-file", cost, "--balance-file", balance], root, plan, presentation, approval)).toThrow(mode === "display tamper" ? "PRICE_CHANGED" : "UNKNOWN_PROVIDER_FIELD");
+  });
+
+  test("authorization fails closed without creating a journal in an isolated root lacking approval artifacts", () => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-no-approval-init-")); copyFixtureSources(root); const plan = buildT015CanonicalShardPlan(root); expect(isT015Authorized(root, plan)).toBe(false); expect(() => readFileSync(resolve(root, T015_JOURNAL_PATH))).toThrow();
   });
 
   test("makes SUBMITTING durable, emits one exact batch envelope, and never offers a retry", () => {
     const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-")); const prepared = prepareFirst(root); expect((prepared.envelope.requests as unknown[]).length).toBe(12);
-    const journal = JSON.parse(readFileSync(resolve(root, T015_JOURNAL_PATH), "utf8")) as T015OperationsJournal; expect(journal.batches[0].state).toBe("SUBMITTING"); expect(journal.paid_retry_count).toBe(0);
+    const journal = JSON.parse(readFileSync(resolve(root, T015_JOURNAL_PATH), "utf8")) as T015OperationsJournal; expect(journal.batches[0].state).toBe("SUBMITTING"); expect(journal.paid_retry_count).toBe(0); expect(journal.batches[0].preflight?.costs?.every((cost) => cost.credits === 1 && cost.credits_decimal === "1.00" && cost.credits_exact === 1.5 && cost.credits_exact_decimal === "1.50")).toBe(true); expect(journal.batches[0].preflight?.costs).toHaveLength(12);
     expect(() => runT015OpsInternal(["prepare", "--batch", prepared.batch.id, "--observed-at", "2026-08-12T03:06:01.000Z"], root, prepared.plan, prepared.presentation, prepared.approval)).toThrow();
     expect(() => runT015OpsInternal(["ambiguous", "--batch", prepared.batch.id, "--reason", "TIMEOUT", "--observed-at", "2026-08-12T03:07:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval)).toThrow("no paid retry");
     const stopped = readFileSync(resolve(root, T015_JOURNAL_PATH), "utf8"); expect(stopped).not.toMatch(/https?:\/\//); expect(JSON.parse(stopped).run_state).toBe("FAIL_STOP");
@@ -172,7 +177,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
     expect(() => runT015OpsInternal(["response", "--batch", prepared.batch.id, "--file", responsePath, "--observed-at", "2026-08-12T03:07:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval)).toThrow("PARTIAL_OR_MISMATCHED");
     const opened = runT015OpsInternal(["recovery-open", "--batch", prepared.batch.id, "--operator-phrase", T015_RECOVERY_OPERATOR_PHRASE, "--observed-at", "2026-08-12T03:08:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval);
     expect(opened.jobs).toBe(3); expect(opened.new_paid_submit).toBe(false);
-    const bytes = png(); const wait = { all_terminal: true, jobs: jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 3 } };
+    const bytes = png(); const wait = { all_terminal: true, jobs: jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(3).fill("completed")) };
     const deps: T015DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async ({ pinned }) => ({ status: 200, headers: { "content-type": "image/png" }, bytes, remoteAddress: pinned.address }) };
     const result = await runT015JobsHandoffInternal(["jobs-handoff", "--batch", prepared.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(wait), root, prepared.plan, prepared.presentation, prepared.approval, deps);
     expect(result.state).toBe("RECOVERING");
@@ -184,7 +189,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
     const root = mkdtempSync(resolve(tmpdir(), `fictor-t015-partial-${mode}-`)); const prepared = prepareFirst(root); const assets = prepared.plan.assets.slice(0, 3); const jobs = assets.map((asset) => ({ index: asset.index, job_id: `partial-${asset.index}`, status: "queued" })); const responsePath = json(root, "partial.json", { submitted_count: 3, failed_count: 9, jobs });
     expect(() => runT015OpsInternal(["response", "--batch", prepared.batch.id, "--file", responsePath, "--observed-at", "2026-08-12T03:07:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval)).toThrow("PARTIAL_OR_MISMATCHED");
     runT015OpsInternal(["recovery-open", "--batch", prepared.batch.id, "--operator-phrase", T015_RECOVERY_OPERATOR_PHRASE, "--observed-at", "2026-08-12T03:08:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval);
-    const wait = mode === "timeout" ? { all_terminal: false, jobs: [], summary: {}, timed_out: true } : { all_terminal: true, jobs: jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 3 } };
+    const wait = mode === "timeout" ? { all_terminal: false, jobs: [], summary: jobsSummary([]), timed_out: true } : { all_terminal: true, jobs: jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(3).fill("completed")) };
     const dependencies: T015DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async () => { throw new Error("offline download failure"); } };
     await expect(runT015JobsHandoffInternal(["jobs-handoff", "--batch", prepared.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(wait), root, prepared.plan, prepared.presentation, prepared.approval, dependencies)).rejects.toThrow(mode === "timeout" ? "PROVIDER_RESPONSE_SIGNAL" : "RECOVERY_FAILED");
     const reopened = runT015OpsInternal(["recovery-open", "--batch", prepared.batch.id, "--operator-phrase", T015_RECOVERY_OPERATOR_PHRASE, "--observed-at", "2026-08-12T03:10:00.000Z"], root, prepared.plan, prepared.presentation, prepared.approval); expect(reopened.idempotent).toBe(true);
@@ -195,8 +200,8 @@ describe("T015 CANONICAL shard 1 preparation", () => {
   test.each(["timeout", "download", "model-drift"] as const)("keeps a complete submission reloadable and recovery-only after %s failure", async (mode) => {
     const root = mkdtempSync(resolve(tmpdir(), `fictor-t015-complete-${mode}-`)); const submitted = submitFirst(root);
     const wait = mode === "timeout"
-      ? { all_terminal: false, jobs: [], summary: {}, timed_out: true }
-      : { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: mode === "model-drift" ? "unexpected" : "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } };
+      ? { all_terminal: false, jobs: [], summary: jobsSummary([]), timed_out: true }
+      : { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: mode === "model-drift" ? "unexpected" : "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     let fetchCalls = 0; const dependencies: T015DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async () => { fetchCalls += 1; throw new Error("offline download failure"); } };
     await expect(runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(wait), root, submitted.plan, submitted.presentation, submitted.approval, dependencies)).rejects.toThrow(mode === "timeout" ? "PROVIDER_RESPONSE_SIGNAL" : mode === "model-drift" ? "MODEL_DRIFT" : "RECOVERY_FAILED");
     expect(fetchCalls).toBe(mode === "download" ? 1 : 0);
@@ -209,18 +214,30 @@ describe("T015 CANONICAL shard 1 preparation", () => {
 
   test.each([
     { name: "summary mismatch", mutate: (value: any) => { value.summary = { completed: 11, failed: 1 }; } },
+    { name: "summary total tamper", mutate: (value: any) => { value.summary.total = 11; } },
+    { name: "summary unknown field", mutate: (value: any) => { value.summary.queued = 0; } },
     { name: "timed out contradiction", mutate: (value: any) => { value.timed_out = true; } },
     { name: "all-terminal contradiction", mutate: (value: any) => { value.all_terminal = false; } },
     { name: "invalid poll_after", mutate: (value: any) => { value.poll_after_seconds = Number.POSITIVE_INFINITY; } },
   ])("rejects jobs_wait $name before fetch", async ({ mutate }) => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-jobs-schema-")); const submitted = submitFirst(root); const response: any = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } }; mutate(response);
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-jobs-schema-")); const submitted = submitFirst(root); const response: any = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) }; mutate(response);
     let fetchCalls = 0; const deps: T015DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async () => { fetchCalls += 1; throw new Error("must not fetch"); } };
     await expect(runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval, deps)).rejects.toThrow();
     expect(fetchCalls).toBe(0);
   });
 
+  test.each([
+    { name: "active", statuses: ["queued", ...Array(11).fill("completed")], summary: { active: 1, completed: 11, errors: 0, failed: 0, total: 12 }, allTerminal: false },
+    { name: "lookup error", statuses: ["lookup_failed", ...Array(11).fill("completed")], summary: { active: 0, completed: 11, errors: 1, failed: 0, total: 12 }, allTerminal: true },
+  ])("accepts actual jobs_wait $name summary semantics and repolls the same jobs", async ({ statuses, summary, allTerminal }) => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-actual-summary-")); const submitted = submitFirst(root); const response = { all_terminal: allTerminal, jobs: submitted.jobs.map((job, index) => statuses[index] === "completed" ? { ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` } : { ...job, status: statuses[index], ...(statuses[index] === "lookup_failed" ? { retryable: true } : {}) }), summary };
+    let fetchCalls = 0; const dependencies: T015DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async () => { fetchCalls += 1; throw new Error("must not fetch while repolling"); } };
+    const result = await runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval, dependencies); expect(result.repoll_same_jobs_only).toBe(true); expect(result.new_paid_submit).toBe(false); expect(fetchCalls).toBe(0);
+    const journal = JSON.parse(readFileSync(resolve(root, T015_JOURNAL_PATH), "utf8")) as T015OperationsJournal; validateT015Journal(journal, submitted.plan, submitted.presentation, submitted.approval); expect(journal.batches[0].job_polls.at(-1)?.jobs).toHaveLength(12);
+  });
+
   test("includes DNS resolution in the per-hop deadline and never fetches after timeout", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-dns-timeout-")); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } };
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-dns-timeout-")); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     let fetchCalls = 0;
     const deps: T015DownloadDependencies = { timeout_ms: 5, resolve: async (_hostname, signal) => new Promise((resolvePromise) => signal.addEventListener("abort", () => resolvePromise([{ address: "93.184.216.34", family: 4 }]), { once: true })), fetch: async () => { fetchCalls += 1; throw new Error("must not fetch"); } };
     await expect(runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval, deps)).rejects.toThrow("RECOVERY_FAILED");
@@ -228,7 +245,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
   });
 
   test("revalidates DNS and peer identity on every redirect hop", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-redirect-")); const submitted = submitFirst(root); const bytes = png(); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://one.example.com/${job.index}.png` })), summary: { completed: 12 } };
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-redirect-")); const submitted = submitFirst(root); const bytes = png(); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://one.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     const resolved: string[] = [];
     const deps: T015DownloadDependencies = { resolve: async (hostname) => { resolved.push(hostname); return [{ address: "93.184.216.34", family: 4 }]; }, fetch: async ({ hostname, pinned }) => hostname === "one.example.com" ? { status: 302, headers: { location: "https://two.example.com/result.png" }, bytes: Buffer.alloc(0), remoteAddress: pinned.address } : { status: 200, headers: { "content-type": "image/png" }, bytes, remoteAddress: pinned.address } };
     const result = await runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval, deps);
@@ -236,7 +253,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
   });
 
   test.each(["peer", "content-type", "oversize", "abort"] as const)("fail-stops secure download on %s violation", async (mode) => {
-    const root = mkdtempSync(resolve(tmpdir(), `fictor-t015-download-${mode}-`)); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } };
+    const root = mkdtempSync(resolve(tmpdir(), `fictor-t015-download-${mode}-`)); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     const deps: T015DownloadDependencies = {
       timeout_ms: 5,
       resolve: async () => [{ address: "93.184.216.34", family: 4 }],
@@ -252,19 +269,19 @@ describe("T015 CANONICAL shard 1 preparation", () => {
     const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-clock-")); const { plan, presentation, approval } = fixture(); const now = () => new Date("2026-08-12T04:00:00.000Z"); runT015OpsInternal(["init"], root, plan, presentation, approval, false, now);
     expect(() => runT015OpsInternal(["preflight-request", "--batch", plan.batches[0].id, "--observed-at", "2026-08-12T04:00:01.000Z"], root, plan, presentation, approval, false, now)).toThrow("future");
     const preflight = runT015OpsInternal(["preflight-request", "--batch", plan.batches[0].id, "--observed-at", "2026-08-12T03:00:00.000Z"], root, plan, presentation, approval, false, now) as { requests: unknown[] };
-    const cost = json(root, "stale-cost.json", { costs: plan.batches[0].asset_ids.map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1.5, credits_exact: 1.5 }, provider_observed_at: `2026-08-12T03:01:${String(itemIndex).padStart(2, "0")}.000Z` })) }); const balance = json(root, "stale-balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:02:00.000Z" });
+    const cost = json(root, "stale-cost.json", { costs: plan.batches[0].asset_ids.map((id, itemIndex) => ({ index: plan.assets.find((asset) => asset.id === id)!.index, request_sha256: sha256T015(canonicalJson(preflight.requests[itemIndex])), cost: { credits: 1, credits_exact: 1.5 }, provider_observed_at: `2026-08-12T03:01:${String(itemIndex).padStart(2, "0")}.000Z` })) }); const balance = json(root, "stale-balance.json", { credits: 861.9, provider_observed_at: "2026-08-12T03:02:00.000Z" });
     expect(() => runT015OpsInternal(["preflight-result", "--batch", plan.batches[0].id, "--cost-file", cost, "--balance-file", balance], root, plan, presentation, approval, false, now)).toThrow(/stale|PRICE_CHANGED/);
   });
 
   test("opens recovery only for durable IDs and blocks batch 2 on canary model drift", async () => {
     const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-drift-")); const submitted = submitFirst(root); const jobsRequest = runT015OpsInternal(["jobs-request", "--batch", submitted.batch.id], root, submitted.plan, submitted.presentation, submitted.approval); expect(jobsRequest.new_paid_submit).toBe(false);
-    const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "unexpected", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } };
+    const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "unexpected", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     await expect(runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval)).rejects.toThrow("MODEL_DRIFT");
     const stopped = JSON.parse(readFileSync(resolve(root, T015_JOURNAL_PATH), "utf8")) as T015OperationsJournal; expect(stopped.run_state).toBe("FAIL_STOP"); expect(stopped.batches[1].state).toBe("PLANNED");
   });
 
   test("redacts stdin URLs, rejects private DNS, and does not submit a replacement", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-ssrf-")); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}?secret=x` })), summary: { completed: 12 } };
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-ssrf-")); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}?secret=x` })), summary: jobsSummary(Array(12).fill("completed")) };
     const deps: T015DownloadDependencies = { resolve: async () => [{ address: "127.0.0.1", family: 4 }], fetch: async () => { throw new Error("must not fetch"); } };
     await expect(runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval, deps)).rejects.toThrow("no paid retry");
     const journal = readFileSync(resolve(root, T015_JOURNAL_PATH), "utf8"); expect(journal).not.toContain("cdn.example.com"); expect(journal).not.toContain("secret=x"); expect(JSON.parse(journal).paid_retry_count).toBe(0);
@@ -298,7 +315,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
     "::ffff:7f00:1",
     "::ffff:93.184.216.34",
   ])("never reaches fetch for mapped IPv6 resolver result %s", async (address) => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-mapped-")); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } };
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-mapped-")); const submitted = submitFirst(root); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     let fetchCalls = 0;
     const deps: T015DownloadDependencies = { resolve: async () => [{ address, family: 6 }], fetch: async () => { fetchCalls += 1; throw new Error("mapped address must never reach fetch"); } };
     await expect(runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval, deps)).rejects.toThrow("RECOVERY_FAILED");
@@ -306,7 +323,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
   });
 
   test("recovers provider-native PNGs atomically to distinct local and backup roots", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-recovery-")); const submitted = submitFirst(root); const bytes = png(); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } };
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-recovery-")); const submitted = submitFirst(root); const bytes = png(); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     const deps: T015DownloadDependencies = { resolve: async () => [{ address: "93.184.216.34", family: 4 }], fetch: async ({ hostname, servername, pinned }) => { expect(hostname).toBe("cdn.example.com"); expect(servername).toBe(hostname); expect(pinned).toEqual({ address: "93.184.216.34", family: 4 }); return { status: 200, headers: { "content-type": "image/png" }, bytes, remoteAddress: pinned.address }; } };
     const result = await runT015JobsHandoffInternal(["jobs-handoff", "--batch", submitted.batch.id, "--observed-at", "2026-08-12T03:09:00.000Z"], JSON.stringify(response), root, submitted.plan, submitted.presentation, submitted.approval, deps); expect(result.state).toBe("RECOVERED");
     for (const id of submitted.batch.asset_ids) { const path = submitted.plan.assets.find((asset) => asset.id === id)!.path; expect(readFileSync(resolve(root, "public/assets", path))).toEqual(bytes); expect(readFileSync(resolve(root, "assets/backups/t015-canonical-shard-1", path))).toEqual(bytes); }
@@ -314,7 +331,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
   });
 
   test("accepts a public IPv6 pin, preserves hostname/SNI, and canonicalizes peer spelling", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-ipv6-")); const submitted = submitFirst(root); const bytes = png(); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: { completed: 12 } };
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-ipv6-")); const submitted = submitFirst(root); const bytes = png(); const response = { all_terminal: true, jobs: submitted.jobs.map((job) => ({ ...job, status: "completed", model: "nano_banana_flash", result_url: `https://cdn.example.com/${job.index}.png` })), summary: jobsSummary(Array(12).fill("completed")) };
     let fetchCalls = 0;
     const deps: T015DownloadDependencies = {
       resolve: async () => [{ address: "2606:4700:4700:0:0:0:0:1111", family: 6 }],
@@ -329,7 +346,7 @@ describe("T015 CANONICAL shard 1 preparation", () => {
     journal.batches.forEach((record, batchIndex) => {
       const batch = plan.batches[batchIndex]; const before = balance; const after = before - batch.size * 150; const at = `2026-08-12T${String(4 + Math.floor(batchIndex / 6)).padStart(2, "0")}:${String((batchIndex % 6) * 10).padStart(2, "0")}:00.000Z`; const plus = (seconds: number) => new Date(Date.parse(at) + seconds * 1000).toISOString();
       const preflightRequest = { requests: batch.asset_ids.map((id) => { const request = plan.assets.find((asset) => asset.id === id)!.request; return { index: request.index, params: { ...request.params, get_cost: true as const } }; }) };
-      record.preflight = { requests: preflightRequest.requests, requests_sha256: sha256T015(canonicalJson(preflightRequest)), requested_at: at, costs: batch.asset_ids.map((id, itemIndex) => { const asset = plan.assets.find((item) => item.id === id)!; return { index: asset.index, request_sha256: sha256T015(canonicalJson(preflightRequest.requests[itemIndex])), credits: 1.5, credits_exact: 1.5, normalized_decimal: "1.50", provider_observed_at: plus(itemIndex + 1) }; }), balance: { credits: before / 100, normalized_decimal: (before / 100).toFixed(2), provider_observed_at: plus(batch.size + 1) } };
+      record.preflight = { requests: preflightRequest.requests, requests_sha256: sha256T015(canonicalJson(preflightRequest)), requested_at: at, costs: batch.asset_ids.map((id, itemIndex) => { const asset = plan.assets.find((item) => item.id === id)!; return { index: asset.index, request_sha256: sha256T015(canonicalJson(preflightRequest.requests[itemIndex])), credits: 1, credits_decimal: "1.00", credits_exact: 1.5, credits_exact_decimal: "1.50", provider_observed_at: plus(itemIndex + 1) }; }), balance: { credits: before / 100, normalized_decimal: (before / 100).toFixed(2), provider_observed_at: plus(batch.size + 1) } };
       const paidRequest = { requests: batch.asset_ids.map((id) => plan.assets.find((asset) => asset.id === id)!.request) };
       const preparedAt = plus(batch.size + 2); const submittedAt = plus(batch.size + 3); const recoveryOpenedAt = plus(batch.size + 4); const recoveredAt = plus(batch.size + 5); const completedAt = plus(batch.size + 6);
       record.paid_request = { request_sha256: sha256T015(canonicalJson(paidRequest)), prepared_at: preparedAt }; record.submission = { observed_at: submittedAt, expected_count: batch.size, submitted_count: batch.size, failed_count: 0, complete: true, missing_asset_ids: [], jobs: batch.asset_ids.map((id) => { const asset = plan.assets.find((item) => item.id === id)!; return { index: asset.index, asset_id: id, job_id: `job-${asset.index}`, status: "completed", canonical_request_sha256: asset.canonical_request_sha256 }; }) };

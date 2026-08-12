@@ -39,8 +39,9 @@ closure, `package.json`, `package-lock.json`의 정확한 bytes를 묶는다. pr
 `nano_banana_flash` canary이며 drift면 batch 2가 열리지 않는다.
 
 각 cost 항목은 정확히 `index`, get-cost request의 `request_sha256`, `cost`, 고유하고 단조 증가하는
-`provider_observed_at`을 가지며 10분 freshness와 실제 시각을 통과해야 한다. balance 관찰도 마지막 cost보다
-엄격히 뒤이고 같은 freshness window 안이어야 한다.
+`provider_observed_at`을 가지며 10분 freshness와 실제 시각을 통과해야 한다. provider의 실제 응답인 표시값
+`credits: 1`과 청구 정확값 `credits_exact: 1.5`를 각각 `1.00`/`1.50`으로 그대로 보존하고, billing·cap은
+오직 정확값 1.50을 사용한다. balance 관찰도 마지막 cost보다 엄격히 뒤이고 같은 freshness window 안이어야 한다.
 
 제출 response가 exact indexed job 1:1로 확정된 뒤 다음 문구로 recovery-only gate를 연다.
 
@@ -50,6 +51,9 @@ closure, `package.json`, `package-lock.json`의 정확한 bytes를 묶는다. pr
 signed URL/raw error는 durable artifact에 남지 않는다. HTTPS public DNS pin, redirect 재검증, TLS peer,
 PNG type/size/3:4 검증 뒤 provider-native bytes를 `public/assets`와
 `assets/backups/t015-canonical-shard-1`에 no-clobber로 저장한다.
+jobs_wait summary는 실제 provider schema `{active, completed, errors, failed, total}`만 허용하며 각 job status에서
+정확히 재계산한다. `lookup_failed`는 `errors`, 생성 실패·취소·NSFW·IP 감지는 `failed`, 비종결 상태는
+`active`에만 집계한다.
 부분 제출의 원래 terminal과 모든 확정 job binding은 복구 중 timeout/model drift/download/PNG 실패가 나도
 덮어쓰지 않는다. 완전 제출에서 같은 복구 실패가 나도 새 submission terminal이나 모순된 `FAIL_STOP`
 transition을 만들지 않는다. 두 경우 모두 복구 실패는 별도 `recovery_failures`에 no-resubmit/retry 0으로

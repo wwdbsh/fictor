@@ -41,7 +41,7 @@
     },
     "implementation_binding": {
       "path": "assets/manifests/t015-implementation-binding-v1.json",
-      "sha256": "b2a2ead707d33f3231317b6d2f9816b624c100d9bfa3681053acb33b0e8c2bf0",
+      "sha256": "78b1a2c3b827334bbfc012c466ca75e1167e7f30e5c3a9796bfd1effc9f96eb6",
       "files": {
         "controller": {
           "path": "scripts/assets/canonical-shard-1-v1-controller.ts",
@@ -53,7 +53,7 @@
         },
         "ops": {
           "path": "scripts/assets/canonical-shard-1-v1-ops-cli.ts",
-          "sha256": "7baaa5e910ba048428c66972381317d0ac7bb5880e49a378842b5378f49ddf8a"
+          "sha256": "efbb729758b3e3229609f4127e5ddccec4cd8ed50a67742ae92d2909781c467d"
         },
         "cli": {
           "path": "scripts/assets/canonical-shard-1-v1-cli.ts",
