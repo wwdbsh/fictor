@@ -40,9 +40,9 @@ manifest 순서. ID 목록 sha256 `8ed8dae20fbbc3edaee02163edf435f0829ccf3bb8cf7
 ## 2. 파생 plan
 
 - 경로: `assets/manifests/t020-world-art-v1.plan.json`
-- **plan sha256: `b471dcae615508ebe28cf514489bff59f06517391bb94fb2b9ed43f3cb65c78d`**
-- pending 공시 패킷 sha256: `38539dd73e98e25fc75be42fcadccdf980ac12595f9d66a4dfff06c37d83ae6a`
-- 구현 바인딩 sha256: `5eb84a311c017d947be758060a4ba0650a7096f52a832c2213d56a02e910d094` (7개 파일)
+- **plan sha256: `3ff66685ad5c1c96ff061055677212fb051edffda43483a19d3433c2fc4ab5ed`**
+- pending 공시 패킷 sha256: `c97bf01afc54672f185e114fda1483f4eed9ff7444c03f1fea463beadff3b3ee`
+- 구현 바인딩 sha256: `5b5d0af60654f43dc2da53ec80e6ad28fe3cf2412a50f3e3a64ce36fac91a8f3` (7개 파일)
 
 파생은 완전 결정론적이다. `Date.now()`/`Math.random()`을 쓰지 않고, plan 바이트 안에
 타임스탬프가 존재하지 않는다. 같은 입력이면 항상 같은 sha가 나온다(회귀 테스트로 고정).
@@ -100,9 +100,29 @@ plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다.
 다른 것을 사고 있다"는 증거이므로, 한 번이라도 관찰되면 이후 모든 배치가 열리지 않는다.
 손실 확인·재개 문구로도 열리지 않으며 새 고지와 새 승인이 필요하다. 동시에 두 코드는 손실
 코드이기도 하므로 이미 지출된 금액은 저널에 정직하게 기록되고 실행은 CLOSED_WITH_LOSSES로
-닫힌다. (`ASPECT_MISMATCH`를 `RECOVERY_FAILED`에서 분리한 이유가 이것이다.
-`RECOVERY_FAILED`는 "polling을 읽지 못했다"는 무과금·재시도 가능 코드이므로 손실을 기록할
-수 없고, 그대로 두면 종횡비 실패 시 실행을 닫을 방법이 사라진다.)
+닫힌다.
+
+### 종료 코드 분류와 방면(discharge) 규칙
+
+독립 적대적 리뷰에서 이 분류가 실행을 막다른 상태로 만들 수 있다는 결함 4건이 드러나
+아래와 같이 고쳤다.
+
+- **`RECOVERY_FAILED`는 "polling을 읽지 못했다"만 의미한다.** 그 자체로는 과금을 뜻하지
+  않는다. 다만 이 코드가 붙은 배치라도 이미 `prepare`를 지났다면 지출은 실재한다. 즉
+  "이 코드는 무과금"이 아니라 "이 관찰 자체가 지출을 증명하지 않는다"가 정확한 서술이다.
+  (이전 판의 "무과금·재시도 가능 코드" 서술은 틀렸다.)
+- **사실이 관찰을 이긴다.** 확정된 job이 전부 회수되면 `RECOVERY_FAILED`는 비활성이 된다.
+  이 규칙이 없으면 일시적 다운로드 실패 한 번으로 54/54를 정확히 81.00에 회수한 실행조차
+  영구히 `COMPLETE`에 도달하지 못하고 감사도 마감도 불가능해진다.
+- **과금된 뒤 쓸 수 없는 바이트는 별도 코드로 기록한다.** `INVALID_PNG`, `FILE_TOO_LARGE`,
+  `EMPTY_FILE`은 `PAYLOAD_UNUSABLE`, 로컬 저장 충돌(`LOCAL_VERIFY_FAILED` 포함)은
+  `FILE_CONFLICT`, 종횡비 초과는 `ASPECT_MISMATCH`. ingest 단계에 도달한 실패는 모두 이미
+  과금된 job에 관한 것이므로 어느 것도 `RECOVERY_FAILED`로 기록되지 않는다.
+- **방면 가능 여부는 코드 이름이 아니라 "유료 envelope이 나갔는가"로 판정한다.**
+  `prepare` 이후에 발생한 모든 terminal은 실지출 위에 놓인다. 이름으로 걸러내면
+  `FILE_CONFLICT` 같은 코드가 방면도 재개도 불가능한 흡수 상태를 만든다. 저널 검증기도
+  같은 규칙을 쓰므로 명령이 쓴 저널을 읽기에서 거부하는 일이 없다.
+- 지출이 0인 배치는 방면 대상이 아니라 `reset` 대상이다(무비용 재실행).
 
 ## 4. 경제 계약
 
@@ -127,7 +147,9 @@ plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다.
    배치 단위. 지출 0 배치만 재실행 가능하고, 지출이 있었던 배치는 정확한 손실 확인 문구가
    있어야만 다음 배치가 열린다.
 6. **balance**: 신선도 10분, provider 타임스탬프 순증가 강제, 배치별 사전·사후 기록,
-   배치 간 balance 체인 연결 검증.
+   배치 간 balance 체인 연결 검증. 사전·사후 모두 동일한 2-키 계약(`credits`,
+   `provider_observed_at`)을 요구한다. 사후 관측값은 다음 배치의 preflight 기준점이자
+   손실 계산의 기준점이므로 날짜 없는 단일 값은 받지 않는다.
 7. **저널**: 원자적 쓰기 + 락(mkdir 원자성, stale 탈취), 유료 제출 전에 `SUBMITTING`을 먼저
    durable 기록, 종결된 배치 레코드는 변형 금지, 쓰기 전에 읽기 검증기를 먼저 통과시킨다.
 8. **무클로버 이중 저장**: 로컬 + 백업, 양측 sha256 동일 검증.
@@ -142,6 +164,26 @@ plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다.
     (T015 v4에서 package.json 바이트가 바인딩에 묶여 npm 스크립트 실행이 승인을 무효화한
     함정을 되풀이하지 않기 위해, T020에는 npm 스크립트를 일부러 추가하지 않았다.)
 11. **결정론**: plan 파생 단계에 시계·난수 없음. 타임스탬프는 런타임 저널 레코드에만 존재.
+
+### 승인 증거의 한계 (고지문 (viii)에 명시)
+
+승인 파일(controller approval attestation, approval evidence)은 agent가 직접 쓸 수 있고 그
+안의 "정확한 사용자 발화"는 코드 상수에서 나온다. 따라서 이 파일들의 존재는 사용자 승인의
+증거가 아니라 승인이 있었다고 기록되었다는 사실일 뿐이다. **실제 인적 게이트는 절차적이다**
+— 사용자가 고지를 본 뒤 세션에서 정확한 문구를 직접 입력해야 하며, 그 사실은 파일이 아니라
+대화 기록으로만 확인된다.
+
+### 준비 명령의 안전장치
+
+`gen`과 `binding-gen`은 `assets/runs/t020-world-art/operations-v1.json`이 존재하면 거부한다.
+실행 중 plan을 다시 파생하면 `plan_sha256`이 바뀌어 이미 지출이 기록된 저널의 헤더가
+고아가 되기 때문이다.
+
+### 러너 락
+
+`jobs-handoff`는 다운로드 전체 구간에서 락을 쥔다. 같은 호스트에서 보유 프로세스가 죽은 것이
+확인되면(PID 검사) 락을 즉시 회수한다. 다른 호스트가 쥔 락은 PID를 신뢰할 수 없으므로 기존의
+15분 staleness 창을 그대로 기다린다.
 
 T015 v4에 있었으나 T020에서 **제거한** 기계장치: legacy 회수 체인, legacy 기사용 상한,
 `excluded_first_id`, 저널 이관(`migrate`) 명령, 상실 지수 재생성(remediation) 배치.
@@ -167,13 +209,13 @@ presentation, approval, `assets/runs/t020-world-art/operations-v1.json`.
 
 ```
 npx tsx …-controller.ts preparation binding-gen   → 7 files pinned
-npx tsx …-controller.ts preparation gen           → plan sha b471dcae…
+npx tsx …-controller.ts preparation gen           → plan sha 3ff66685…
 npx tsx …-controller.ts preparation check         → authorized:false
 npx tsx …-controller.ts preparation dry-run       → 제출 0, 쓰기 0,
     54 asset id, 배치 [6,12,12,12,12], 상한 8100 units,
     disclosure_chain_status "pending approval"
 npm run typecheck / npm run build                 → 통과
-npm test                                          → 341 passed (신규 54)
+npm test                                          → 357 passed (신규 70)
 ```
 
 ## 8. 다음 단계 (아직 하지 않음)

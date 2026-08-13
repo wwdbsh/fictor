@@ -5,18 +5,19 @@ import { closeSync, constants, existsSync, fsyncSync, lstatSync, mkdirSync, open
 import type { IncomingHttpHeaders } from "node:http";
 import { request as httpsRequest, type RequestOptions as HttpsRequestOptions } from "node:https";
 import { isIP } from "node:net";
+import { hostname } from "node:os";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { DEFAULT_MAX_PNG_BYTES, assertNonOverlappingRoots, atomicWriteJson, atomicWriteVerifiedPng, backupVerifiedFile, safeResolve, verifyExistingPng, type VerifiedFile } from "./filesystem";
 import type { AspectRatio } from "./types";
 import {
-  T020_CORE_PLAN_PATH, T020_V1_ASPECT_TOLERANCE_PPM, T020_V1_ASSET_COUNT, T020_V1_BACKUP_ROOT, T020_V1_BATCH_COUNT, T020_V1_BINDING_PATH,
+  T020_CORE_PLAN_PATH, T020_CORE_PLAN_SHA256, T020_V1_ASPECT_TOLERANCE_PPM, T020_V1_ASSET_COUNT, T020_V1_BACKUP_ROOT, T020_V1_BATCH_COUNT, T020_V1_BINDING_PATH,
   T020_V1_CANARY_BATCH_ID, T020_V1_CANARY_BLOCKED_BATCH_ID, T020_V1_CONTACT_INDEX_PATH, T020_V1_CONTACT_SEGMENT_ROOT, T020_V1_EXPECTED_MODEL,
   T020_V1_JOURNAL_PATH, T020_V1_LOCAL_ROOT, T020_V1_LOCK_PATH, T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, T020_V1_PLAN_PATH,
   T020_V1_RECOVERY_OPERATOR_PHRASE, T020_V1_RESUME_OPERATOR_PHRASE, T020_V1_TOTAL_CAP_UNITS, T020_V1_UNIT_COST_UNITS,
   buildT020Plan, canonicalJsonT020 as canonicalJson, decimalT020 as decimal, isT020Authorized, loadT020Authorization, loadT020Binding,
-  renderT020CanonicalJson, renderT020Plan, sha256T020 as sha256, t020PlanSha256,
+  readPinnedT020, renderT020CanonicalJson, renderT020Plan, sha256T020 as sha256, t020PlanSha256,
   type T020Approval, type T020Asset, type T020Plan, type T020Presentation,
 } from "./t020-world-art-production-v1";
 
@@ -31,7 +32,7 @@ const LOCK_STALE_MS = 15 * 60 * 1000;
 
 export type T020BatchState = "PLANNED" | "PREFLIGHT_REQUESTED" | "PREFLIGHT_VERIFIED" | "SUBMITTING" | "SUBMITTED" | "RECOVERY_OPEN" | "RECOVERING" | "RECOVERED" | "COMPLETE" | "FAIL_STOP";
 export type T020RunState = "ACTIVE" | "FAIL_STOP" | "COMPLETE" | "CLOSED_WITH_LOSSES";
-export type T020TerminalCode = "PRICE_CHANGED" | "BALANCE_CHANGED" | "AMBIGUOUS_SUBMISSION" | "PARTIAL_OR_MISMATCHED_BATCH_RESPONSE" | "PROVIDER_RESPONSE_SIGNAL" | "UNKNOWN_PROVIDER_FIELD" | "GENERATION_FAILED" | "MODEL_DRIFT" | "ASPECT_MISMATCH" | "RECOVERY_FAILED" | "FILE_CONFLICT";
+export type T020TerminalCode = "PRICE_CHANGED" | "BALANCE_CHANGED" | "AMBIGUOUS_SUBMISSION" | "PARTIAL_OR_MISMATCHED_BATCH_RESPONSE" | "PROVIDER_RESPONSE_SIGNAL" | "UNKNOWN_PROVIDER_FIELD" | "GENERATION_FAILED" | "MODEL_DRIFT" | "ASPECT_MISMATCH" | "PAYLOAD_UNUSABLE" | "RECOVERY_FAILED" | "FILE_CONFLICT";
 type SubmitStatus = "pending" | "waiting" | "queued" | "in_progress" | "ip_detect" | "completed" | "failed" | "canceled" | "nsfw" | "ip_detected" | "submission_failed";
 type WaitStatus = "pending" | "waiting" | "queued" | "in_progress" | "ip_detect" | "completed" | "failed" | "canceled" | "nsfw" | "ip_detected" | "lookup_failed";
 const SUBMIT_STATUSES: readonly SubmitStatus[] = ["pending", "waiting", "queued", "in_progress", "ip_detect", "completed", "failed", "canceled", "nsfw", "ip_detected", "submission_failed"];
@@ -40,14 +41,18 @@ const ACTIVE_WAIT_STATUSES: readonly WaitStatus[] = ["pending", "waiting", "queu
 const FAILED_WAIT_STATUSES: readonly WaitStatus[] = ["failed", "canceled", "nsfw", "ip_detected"];
 const TERMINAL_SUBMIT_FAILURES: readonly SubmitStatus[] = ["failed", "canceled", "nsfw", "ip_detected", "submission_failed"];
 const JOB_OPTIONAL_KEYS = ["adjustments", "error", "warning", "preset_recommendation"] as const;
+/** Local storage refused the bytes; the provider is not at fault but the image was billed. */
+const LOCAL_STORE_CONFLICT_MESSAGES: readonly string[] = ["EXISTING_FILE_CONFLICT", "SYMLINK_TRAVERSAL", "BACKUP_VERIFY_FAILED", "LOCAL_HASH_CHANGED", "LOCAL_VERIFY_FAILED"];
+/** The provider billed us and handed back bytes that are not a usable PNG. */
+const PROVIDER_PAYLOAD_MESSAGES: readonly string[] = ["INVALID_PNG", "FILE_TOO_LARGE", "EMPTY_FILE"];
 /**
- * Only these terminal codes can leave provider credits spent with nothing to show for them.
- * ASPECT_MISMATCH belongs here rather than under RECOVERY_FAILED: a PNG outside the aspect
- * tolerance was generated, billed, and is unusable, which is a real loss the ledger must be
- * able to book. RECOVERY_FAILED stays reserved for "the poll could not be read", which a
- * later successful re-poll supersedes at no cost.
+ * Terminal codes that typically leave provider credits spent with nothing to show for them.
+ * This list is DESCRIPTIVE — it drives reporting only. Dischargeability is decided by
+ * `t020Dischargeable`, which asks whether a paid envelope escaped for the batch rather than
+ * what the terminal happens to be called. Gating discharge on this list was a wedge: any
+ * terminal raised after `prepare` leaves real spend, whatever its name.
  */
-export const T020_LOSS_CODES: readonly T020TerminalCode[] = ["AMBIGUOUS_SUBMISSION", "GENERATION_FAILED", "MODEL_DRIFT", "ASPECT_MISMATCH", "BALANCE_CHANGED"];
+export const T020_LOSS_CODES: readonly T020TerminalCode[] = ["AMBIGUOUS_SUBMISSION", "GENERATION_FAILED", "MODEL_DRIFT", "ASPECT_MISMATCH", "PAYLOAD_UNUSABLE", "BALANCE_CHANGED"];
 /**
  * Drift in the provider's own contract, as opposed to a one-off failure: the model it ran is
  * not the approved one, or the geometry it returned is outside tolerance. Either means the
@@ -57,10 +62,17 @@ export const T020_LOSS_CODES: readonly T020TerminalCode[] = ["AMBIGUOUS_SUBMISSI
  */
 export const T020_CONTRACT_DRIFT_CODES: readonly T020TerminalCode[] = ["MODEL_DRIFT", "ASPECT_MISMATCH"];
 /**
- * A RECOVERY_FAILED terminal books no spend of its own: it records that a poll could not be
- * read, and a later successful re-poll of the same job ids supersedes it. Such a terminal may
- * therefore sit inside the span a single loss discharge covers, but it can never be the thing
- * being discharged — at least one covered terminal must still be a real loss code.
+ * A RECOVERY_FAILED terminal books no spend of its own: it records only that a poll could not
+ * be read. It is the one code a later fact can supersede — once every confirmed job for the
+ * batch has actually landed, the observation "the poll could not be read" has been answered by
+ * the assets themselves, and the terminal goes inactive (see `t020ActiveTerminals`).
+ *
+ * Without that rule a single transient download blip left a fully recovered, exactly-billed
+ * batch stuck short of COMPLETE with no command able to clear it, which made a 100%-successful
+ * 54-asset run permanently un-closable and un-auditable.
+ *
+ * Note the deliberately narrow membership: codes that mean "the provider billed us for bytes
+ * we cannot use" (ASPECT_MISMATCH, PAYLOAD_UNUSABLE) are NOT superseded by anything.
  */
 export const T020_SUPERSEDED_TERMINAL_CODES: readonly T020TerminalCode[] = ["RECOVERY_FAILED"];
 const LEGAL_EDGES: Record<T020BatchState, readonly T020BatchState[]> = {
@@ -108,7 +120,7 @@ export interface T020BatchRecord {
   recovery_gates: Array<{ opened_at: string; exact_operator_phrase_sha256: string; no_new_paid_submit: true }>;
   job_polls: Array<{ observed_at: string; all_terminal: boolean; jobs: Array<{ index: number; job_id: string; status: WaitStatus; model: string | null; download_available: boolean; lookup_retryable: boolean | null }> }>;
   recoveries: T020Recovery[];
-  balance_after?: { credits: number; normalized_decimal: string; observed_at: string; delta_decimal: string; delta_units: number; charged_job_count: number };
+  balance_after?: { credits: number; normalized_decimal: string; observed_at: string; provider_observed_at: string; delta_decimal: string; delta_units: number; charged_job_count: number };
   terminals: T020Terminal[];
   discharges: T020Discharge[];
 }
@@ -221,9 +233,16 @@ function lockDirIsStale(holderPath: string, directory: string, staleAfterMs: num
   let stale: boolean;
   try { stale = Date.now() - lstatSync(directory).mtimeMs > staleAfterMs; } catch { return false; }
   try {
-    const data = JSON.parse(readFileSync(holderPath, "utf8")) as { pid?: number; created_at_ms?: number };
-    if (typeof data.pid === "number" && processAlive(data.pid)) return false;
-    if (typeof data.created_at_ms === "number") return Date.now() - data.created_at_ms > staleAfterMs;
+    const data = JSON.parse(readFileSync(holderPath, "utf8")) as { pid?: number; host?: string; created_at_ms?: number };
+    if (typeof data.pid !== "number") return typeof data.created_at_ms === "number" ? Date.now() - data.created_at_ms > staleAfterMs : stale;
+    // The PID is only meaningful for a holder on this host; elsewhere it may name an unrelated
+    // live process, so those still wait out the full staleness window.
+    const sameHost = data.host === hostname();
+    if (!sameHost) return typeof data.created_at_ms === "number" ? Date.now() - data.created_at_ms > staleAfterMs : stale;
+    // A SIGKILL mid-download used to cost a 15-minute wait before any recovery command could
+    // run. A holder that is provably gone on this host is reclaimed immediately instead.
+    if (processAlive(data.pid)) return false;
+    return true;
   } catch { /* an unreadable holder can only be reclaimed once the directory is stale */ }
   return stale;
 }
@@ -247,7 +266,7 @@ export function acquireT020Lock(trustedRoot: string, relativePath: string = T020
     }
     try {
       const descriptor = openSync(holderPath, constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY, 0o600);
-      try { writeFileSync(descriptor, JSON.stringify({ pid: process.pid, created_at_ms: Date.now(), token }), "utf8"); fsyncSync(descriptor); } finally { closeSync(descriptor); }
+      try { writeFileSync(descriptor, JSON.stringify({ pid: process.pid, host: hostname(), created_at_ms: Date.now(), token }), "utf8"); fsyncSync(descriptor); } finally { closeSync(descriptor); }
       fsyncDirectory(directory);
     } catch { rmSync(directory, { recursive: true, force: true }); throw new Error("RUNNER_LOCKED"); }
     return {
@@ -281,7 +300,22 @@ function zeroSpend(record: T020BatchRecord): boolean { return record.paid_reques
 function confirmedJobs(record: T020BatchRecord): T020ProviderJob[] { return record.submission?.jobs ?? []; }
 function unrecoveredConfirmed(record: T020BatchRecord): number { return confirmedJobs(record).filter((job) => !record.recoveries.some(({ asset_id }) => asset_id === job.asset_id)).length; }
 function dischargedTerminalCount(record: T020BatchRecord): number { return record.discharges.at(-1)?.terminals_discharged ?? 0; }
-export function t020ActiveTerminals(record: T020BatchRecord): T020Terminal[] { return record.terminals.slice(dischargedTerminalCount(record)); }
+export function t020ActiveTerminals(record: T020BatchRecord): T020Terminal[] {
+  const undischarged = record.terminals.slice(dischargedTerminalCount(record));
+  // Fact beats observation: if every job the provider confirmed has since been recovered,
+  // a "the poll could not be read" terminal has been answered and no longer blocks the batch.
+  const answered = record.submission !== undefined && record.submission.jobs.length > 0 && unrecoveredConfirmed(record) === 0;
+  return answered ? undischarged.filter(({ code }) => !T020_SUPERSEDED_TERMINAL_CODES.includes(code)) : undischarged;
+}
+/**
+ * Whether this batch's stop can be discharged as a loss. The question is never what the
+ * terminal is called, only whether money left the building: once a paid envelope escaped,
+ * every way the batch can stop leaves spend that the ledger has to be able to book. A batch
+ * that never submitted is reset and re-run instead, at no cost.
+ */
+export function t020Dischargeable(record: T020BatchRecord): boolean {
+  return !zeroSpend(record) && !lossDischarged(record) && record.balance_after === undefined && t020ActiveTerminals(record).length > 0;
+}
 function hasActiveTerminal(record: T020BatchRecord): boolean { return t020ActiveTerminals(record).length > 0; }
 function lossDischarged(record: T020BatchRecord): boolean { return record.discharges.some(({ kind }) => kind === "LOSS_ACKNOWLEDGED"); }
 /**
@@ -331,7 +365,7 @@ function balanceAnchor(journal: T020Journal, index: number): T020Balance {
     const record = journal.batches[cursor];
     const loss = record.discharges.at(-1)?.balance_after_loss;
     if (loss) return loss;
-    if (record.balance_after) return { credits: record.balance_after.credits, normalized_decimal: record.balance_after.normalized_decimal, provider_observed_at: record.balance_after.observed_at };
+    if (record.balance_after) return { credits: record.balance_after.credits, normalized_decimal: record.balance_after.normalized_decimal, provider_observed_at: record.balance_after.provider_observed_at };
   }
   return journal.initial_balance;
 }
@@ -341,7 +375,7 @@ function spendAnchor(journal: T020Journal, index: number): T020Balance {
   const record = journal.batches[index];
   const loss = record.discharges.at(-1)?.balance_after_loss;
   if (loss) return loss;
-  if (record.balance_after) return { credits: record.balance_after.credits, normalized_decimal: record.balance_after.normalized_decimal, provider_observed_at: record.balance_after.observed_at };
+  if (record.balance_after) return { credits: record.balance_after.credits, normalized_decimal: record.balance_after.normalized_decimal, provider_observed_at: record.balance_after.provider_observed_at };
   return balanceAnchor(journal, index);
 }
 export function t020BatchCanDeliverAllAssets(record: T020BatchRecord): boolean {
@@ -470,6 +504,10 @@ export function validateT020Journal(journal: T020Journal, plan: T020Plan, presen
       const chargedJobs = hasActiveTerminal(record) ? confirmedJobs(record).length : record.asset_ids.length;
       const expectedDelta = chargedJobs * T020_V1_UNIT_COST_UNITS;
       const after = decimalsT020(record.balance_after.credits, "journal balance after");
+      timestamp(record.balance_after.observed_at); timestamp(record.balance_after.provider_observed_at);
+      // The provider observation must sit after the pre-submit reading and no later than the
+      // journal stamp, so the anchor every later batch compares against is a real reading.
+      if (!record.preflight?.balance || Date.parse(record.balance_after.provider_observed_at) < Date.parse(record.preflight.balance.provider_observed_at) || Date.parse(record.balance_after.observed_at) < Date.parse(record.balance_after.provider_observed_at)) throw new Error("T020 balance-after observation chronology changed");
       if (record.balance_after.charged_job_count !== chargedJobs || record.balance_after.delta_units !== expectedDelta || record.balance_after.delta_decimal !== decimal(expectedDelta) || after.decimal !== record.balance_after.normalized_decimal || unrecoveredConfirmed(record) !== 0 || !record.preflight?.balance || decimalsT020(record.preflight.balance.credits, "journal balance before").units - after.units !== expectedDelta) throw new Error("T020 batch credit delta changed");
     }
     record.terminals.forEach((terminal) => { timestamp(terminal.observed_at); if (terminal.automatic_paid_retry !== false || terminal.paid_retry_count !== 0 || terminal.no_resubmit !== true || terminal.scope !== "BATCH" || canonicalJson(terminal.facts) !== canonicalJson(sanitizeFacts(terminal.facts))) throw new Error("T020 terminal retry policy changed"); });
@@ -479,11 +517,12 @@ export function validateT020Journal(journal: T020Journal, plan: T020Plan, presen
       const recoveredCeiling = record.recoveries.length * T020_V1_UNIT_COST_UNITS;
       const shapeIsBad = discharge.resubmitted !== false || discharge.terminals_discharged <= previous || discharge.terminals_discharged > record.terminals.length || discharge.acknowledged_loss_units !== discharge.observed_delta_units - discharge.recovered_units || discharge.acknowledged_loss_units < 0 || discharge.acknowledged_loss_decimal !== decimal(discharge.acknowledged_loss_units) || discharge.observed_delta_units < 0 || discharge.max_exposure_units !== maxExposureUnits(record) || discharge.observed_delta_units > discharge.max_exposure_units || discharge.recovered_units < 0 || discharge.recovered_units > recoveredCeiling;
       const zeroSpendIsBad = discharge.kind === "ZERO_SPEND_RESET" && (discharge.observed_delta_units !== 0 || discharge.recovered_units !== 0 || discharge.balance_after_loss !== null || discharge.exact_operator_phrase_sha256 !== null || !record.resets.some(({ observed_at }) => observed_at === discharge.observed_at));
-      // Every terminal this discharge covers must be a spend-losing code or a zero-cost
-      // RECOVERY_FAILED that a later successful re-poll superseded, and at least one of them
-      // must be a real loss code so a discharge can never be booked against nothing.
+      // A discharge must cover at least one terminal and may only be booked against a batch
+      // whose paid envelope actually escaped. The reader and the writer agree exactly: the
+      // command applies the same rule, so no journal the command produces can be rejected on
+      // read, and no journal the reader accepts describes a discharge the command would refuse.
       const covered = record.terminals.slice(previous, discharge.terminals_discharged);
-      const coverageIsBad = covered.length === 0 || covered.some(({ code }) => !T020_LOSS_CODES.includes(code) && !T020_SUPERSEDED_TERMINAL_CODES.includes(code)) || !covered.some(({ code }) => T020_LOSS_CODES.includes(code));
+      const coverageIsBad = covered.length === 0 || zeroSpend(record);
       const lossIsBad = discharge.kind === "LOSS_ACKNOWLEDGED" && (discharge.exact_operator_phrase_sha256 !== sha256(T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE) || discharge.balance_after_loss === null || decimalsT020(discharge.balance_after_loss.credits, "discharge balance").decimal !== discharge.balance_after_loss.normalized_decimal || record.balance_after !== undefined || coverageIsBad || record.discharges.filter(({ kind }) => kind === "LOSS_ACKNOWLEDGED").length !== 1);
       if (shapeIsBad || zeroSpendIsBad || lossIsBad) throw new Error(`T020 discharge evidence changed: ${record.batch_id}`);
     });
@@ -669,13 +708,16 @@ function ingest(context: T020Context, journal: T020Journal, record: T020BatchRec
     if (local.sha256 !== backup.sha256 || local.size !== backup.size) throw new Error("EXISTING_FILE_CONFLICT");
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    const conflict = ["EXISTING_FILE_CONFLICT", "SYMLINK_TRAVERSAL", "BACKUP_VERIFY_FAILED", "LOCAL_HASH_CHANGED"].includes(message);
+    // Everything reaching this point concerns a job the provider already billed, so nothing
+    // here may be coded as the no-charge, supersedable RECOVERY_FAILED. The three classes are
+    // distinguished because they mean different things about who is at fault and what a
+    // re-poll could achieve.
+    const conflict = LOCAL_STORE_CONFLICT_MESSAGES.includes(message);
+    const unusable = PROVIDER_PAYLOAD_MESSAGES.includes(message);
     const mismatch = message === "ASPECT_MISMATCH";
-    const reason = mismatch ? "PNG_DIMENSION_MISMATCH" : conflict ? "FILE_CONFLICT" : "PNG_OR_ATOMIC_STORE_FAILED";
-    // An out-of-tolerance PNG gets its own terminal code: it was billed and is unusable, so
-    // it is a loss the ledger can book and a contract drift that stops every later batch.
-    const code: T020TerminalCode = mismatch ? "ASPECT_MISMATCH" : conflict ? "FILE_CONFLICT" : "RECOVERY_FAILED";
-    persistFail(context, journal, record, code, at, { asset_id: job.asset_id, reason, actual_width: dimensions?.width ?? null, actual_height: dimensions?.height ?? null, expected_aspect_ratio: aspect, aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM });
+    const reason = mismatch ? "PNG_DIMENSION_MISMATCH" : conflict ? "FILE_CONFLICT" : unusable ? "PROVIDER_PAYLOAD_UNUSABLE" : "PNG_OR_ATOMIC_STORE_FAILED";
+    const code: T020TerminalCode = mismatch ? "ASPECT_MISMATCH" : conflict ? "FILE_CONFLICT" : "PAYLOAD_UNUSABLE";
+    persistFail(context, journal, record, code, at, { asset_id: job.asset_id, reason, store_error: message === "" ? "UNKNOWN" : message, actual_width: dimensions?.width ?? null, actual_height: dimensions?.height ?? null, expected_aspect_ratio: aspect, aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM });
   }
   record.recoveries.push({ asset_id: job.asset_id, provider_job_index: job.index, provider_job_id: job.job_id, source: "JOBS_HANDOFF_STDIN", observed_at: at, local_relative_path: asset.path, backup_relative_path: asset.path, aspect_ratio: aspect, sha256: local.sha256, size_bytes: local.size, actual_width: local.width, actual_height: local.height, aspect_error_ppm: local.aspect_error_ppm, provider_native_unmodified: true });
   if (record.state === "RECOVERY_OPEN") transition(record, "RECOVERING", at);
@@ -868,15 +910,22 @@ export function runT020OpsInternal(args: readonly string[], root: string, plan: 
       if (unrecoveredConfirmed(record) !== 0 || record.recoveries.length !== chargedJobs) throw new Error("T020 balance-after requires every confirmed job recovered");
       const raw = loadProviderJsonOrFail(context, fileRelative, journal, record, "BALANCE_CHANGED", at, "BALANCE_AFTER_JSON");
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) persistFail(context, journal, record, "BALANCE_CHANGED", at, { stage: "BALANCE_AFTER" });
-      try { exactKeys(raw as Record<string, unknown>, ["credits"]); } catch { persistFail(context, journal, record, "UNKNOWN_PROVIDER_FIELD", at, { stage: "BALANCE_AFTER" }); }
-      let after; try { after = decimalsT020((raw as { credits?: unknown }).credits, "balance after"); } catch { persistFail(context, journal, record, "BALANCE_CHANGED", at, { stage: "BALANCE_AFTER_NORMALIZATION" }); }
+      // Same declared balance contract as every other reading: two keys exactly, a real
+      // provider timestamp, 10-minute freshness, strictly after the pre-submit observation.
+      // This value anchors every later batch's preflight and any later loss math, so it may
+      // not be a bare, undated number.
+      try { exactKeys(raw as Record<string, unknown>, ["credits", "provider_observed_at"]); } catch { persistFail(context, journal, record, "UNKNOWN_PROVIDER_FIELD", at, { stage: "BALANCE_AFTER" }); }
+      let observation; try { observation = parseBalanceFile(raw); } catch { persistFail(context, journal, record, "BALANCE_CHANGED", at, { stage: "BALANCE_AFTER_NORMALIZATION" }); }
+      try { assertWallClock(observation.provider_observed_at, now, record.preflight.balance.provider_observed_at, FRESHNESS_MS); } catch { persistFail(context, journal, record, "BALANCE_CHANGED", at, { stage: "BALANCE_AFTER_OBSERVATION_TIME" }); }
+      if (Date.parse(observation.provider_observed_at) <= Date.parse(record.preflight.balance.provider_observed_at) || Date.parse(at) < Date.parse(observation.provider_observed_at)) persistFail(context, journal, record, "BALANCE_CHANGED", at, { stage: "BALANCE_AFTER_OBSERVATION_ORDER" });
+      const after = { value: observation.credits, units: observation.units, decimal: observation.decimal };
       const before = decimalsT020(record.preflight.balance.credits, "balance before");
       const delta = before.units - after.units;
       const expected = chargedJobs * T020_V1_UNIT_COST_UNITS;
       // The observation itself is persisted in the terminal facts so a later
       // acknowledge-loss can reconcile against what the provider actually reported.
       if (delta !== expected) persistFail(context, journal, record, "BALANCE_CHANGED", at, { stage: "BALANCE_AFTER_DELTA", expected_delta_decimal: decimal(expected), observed_delta_units: delta, observed_delta_decimal: decimal(delta), observed_balance_decimal: after.decimal, observed_balance_credits: after.value, provider_observed_at: at });
-      record.balance_after = { credits: after.value, normalized_decimal: after.decimal, observed_at: at, delta_decimal: decimal(delta), delta_units: delta, charged_job_count: chargedJobs };
+      record.balance_after = { credits: after.value, normalized_decimal: after.decimal, observed_at: at, provider_observed_at: observation.provider_observed_at, delta_decimal: decimal(delta), delta_units: delta, charged_job_count: chargedJobs };
       if (!hasActiveTerminal(record)) { transition(record, "COMPLETE", at); if (journal.batches.every(({ state }) => state === "COMPLETE")) journal.run_state = "COMPLETE"; }
       writeJournal(context, journal);
       return { command, batch_id: id, state: record.state, run_state: journal.run_state, delta_units: delta, delta_decimal: decimal(delta), charged_job_count: chargedJobs };
@@ -893,8 +942,11 @@ export function runT020OpsInternal(args: readonly string[], root: string, plan: 
       const active = t020ActiveTerminals(record);
       if (active.length === 0) throw new Error("T020 loss acknowledgment requires an undischarged terminal");
       if (zeroSpend(record)) throw new Error("T020 zero-spend batches are reset and re-run, never discharged as a loss");
-      if (!T020_LOSS_CODES.includes(active.at(-1)!.code)) throw new Error(`T020 loss acknowledgment only discharges ${T020_LOSS_CODES.join("|")}`);
       if (record.balance_after) throw new Error("T020 a balance-verified batch has no unexplained loss to discharge");
+      // Deliberately NOT gated on the terminal code. Every terminal raised after `prepare`
+      // sits on top of real spend, so refusing to discharge one because of its name was an
+      // absorbing state: the money could not be booked and the run could not be resumed.
+      if (!t020Dischargeable(record)) throw new Error("T020 loss acknowledgment requires a batch whose paid envelope escaped and that still has an undischarged terminal");
       if (!record.preflight?.balance) throw new Error("T020 loss acknowledgment requires the durable pre-submit balance");
       assertWallClock(at, now, record.transitions.at(-1)?.observed_at);
       const observation = parseBalanceFile(loadJson(root, balanceRelative));
@@ -1079,7 +1131,9 @@ export function writeT020ContactSegments(root: string, plan: T020Plan, recovered
  * cards must never appear under it, and nothing outside the plan may either.
  */
 export function checkT020BackupScope(root: string, plan: T020Plan): { checked_count: number; out_of_scope_present_count: 0; all_absent: true } {
-  const core = JSON.parse(readFileSync(resolve(root, T020_CORE_PLAN_PATH), "utf8")) as { assets: Array<{ id: string; category: string; path: string }> };
+  // Pinned, like every other consumer: the out-of-scope enumeration must come from the sha
+  // the plan was derived against, not from whatever the working tree happens to hold.
+  const core = JSON.parse(readPinnedT020(root, T020_CORE_PLAN_PATH, T020_CORE_PLAN_SHA256).toString("utf8")) as { assets: Array<{ id: string; category: string; path: string }> };
   const planned = new Set(plan.assets.map(({ path }) => path));
   const outOfScope = core.assets.filter(({ path }) => !planned.has(path));
   const present = outOfScope.filter(({ path }) => existsSync(safeResolve(resolve(root, T020_V1_BACKUP_ROOT), path)));

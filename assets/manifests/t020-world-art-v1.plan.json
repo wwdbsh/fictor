@@ -43,8 +43,8 @@
     },
     "risk_disclosure": {
       "path": "assets/evidence/t020-world-art-risk-disclosure-v1.json",
-      "sha256": "117489742c11814aae365e1dfb7d5d333d1916116cfa93d23e35626fb6fdd3a7",
-      "text_sha256": "0ae0ee255303b243040030b346b7b0eeff0db5e8f263cc92b0e3deb1dd07b578"
+      "sha256": "db12d9b76665afc51906974486f0f51b07e7ee3d0e1472b382473f0ab5104401",
+      "text_sha256": "6297866bd377da88820331b1e548cda1d56e18376cdc334731e7c4ed2171871a"
     },
     "provider_schema": {
       "path": "assets/evidence/t020-world-art-higgsfield-schema-v1.json",
@@ -56,7 +56,7 @@
     },
     "implementation_binding": {
       "path": "assets/evidence/t020-world-art-implementation-binding-v1.json",
-      "sha256": "5eb84a311c017d947be758060a4ba0650a7096f52a832c2213d56a02e910d094",
+      "sha256": "5b5d0af60654f43dc2da53ec80e6ad28fe3cf2412a50f3e3a64ce36fac91a8f3",
       "files": {
         "controller": {
           "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
@@ -64,15 +64,15 @@
         },
         "preparation": {
           "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
-          "sha256": "2757f6136c639b1bf48811378b20ad884af649dd8cfc04d63ac6476aa7c7b39d"
+          "sha256": "42583d97d916fc9ee3b4a325cb2cf5860b663ebd44496858bf708f089325734c"
         },
         "production": {
           "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
-          "sha256": "8958b14153abb82a46e38e998c2c4dc3cbb21517964865393d2024313b20031c"
+          "sha256": "bd8816ce8b86867889504f92ceb3e42db9939a78a31fc32e1a8e369c836953d9"
         },
         "contract": {
           "path": "scripts/assets/t020-world-art-production-v1.ts",
-          "sha256": "6100b3724053276326a581c5ddeb753026cb38888326481030a311d4e46fec9b"
+          "sha256": "ac8f45f308a765e27fa5159905837e64b697bf5297fb10dd40433594984d74cc"
         },
         "filesystem": {
           "path": "scripts/assets/filesystem.ts",

@@ -7,7 +7,7 @@ import { atomicWriteJson, safeResolve } from "./filesystem";
 import {
   T020_V1_APPROVAL_PATH, T020_V1_ASSET_COUNT, T020_V1_BACKGROUND_ASSET_COUNT, T020_V1_BATCH_COUNT, T020_V1_BINDING_PATH, T020_V1_CANARY_BATCH_ID, T020_V1_CANARY_EXPOSURE_UNITS,
   T020_V1_CONTROLLER_APPROVAL_PATH, T020_V1_CONTROLLER_DISCLOSURE_PATH, T020_V1_ENEMY_ASSET_COUNT, T020_V1_EXACT_APPROVAL_PHRASE, T020_V1_EXPECTED_MODEL,
-  T020_V1_FORENSICS_PATH, T020_V1_PENDING_PATH, T020_V1_PLAN_PATH, T020_V1_PRESENTATION_PATH, T020_V1_RISK_PATH, T020_V1_SCHEMA_PATH, T020_V1_TOTAL_CAP_UNITS,
+  T020_V1_FORENSICS_PATH, T020_V1_JOURNAL_PATH, T020_V1_PENDING_PATH, T020_V1_PLAN_PATH, T020_V1_PRESENTATION_PATH, T020_V1_RISK_PATH, T020_V1_SCHEMA_PATH, T020_V1_TOTAL_CAP_UNITS,
   buildT020Approval, buildT020Binding, buildT020ControllerApproval, buildT020ControllerDisclosure, buildT020Forensics, buildT020Pending, buildT020Plan,
   buildT020Presentation, buildT020Risk, buildT020Schema, crossCheckT020EffectivePrompts, decimalT020, isT020Authorized, loadT020Binding, parseT020BalanceFile,
   renderT020CanonicalJson, renderT020Plan, sha256T020, t020PlanSha256,
@@ -105,16 +105,28 @@ export function dryRunT020(root = repositoryRoot): Record<string, unknown> {
   };
 }
 
+/**
+ * Re-deriving the plan or re-pinning the binding after a run has started would change
+ * `plan_sha256`, and the live journal's header is bound to the old one — the journal would
+ * become unreadable with real spend on record. Both writers are clobbering by design, so the
+ * guard is on the door.
+ */
+function assertNoLiveJournal(root: string, command: string): void {
+  if (existsSync(resolve(root, T020_V1_JOURNAL_PATH))) throw new Error(`T020 ${command} is refused while a run journal exists at ${T020_V1_JOURNAL_PATH}; re-deriving the plan or binding mid-run would orphan the journal's header hashes`);
+}
+
 export function runT020Preparation(args: readonly string[]): Record<string, unknown> {
   const command = args[0];
   if (command === "binding-gen") {
     if (args.length !== 1) throw new Error("usage: t020-world-art binding-gen");
+    assertNoLiveJournal(repositoryRoot, command);
     const binding = buildT020Binding(repositoryRoot);
     atomicWriteJson(repositoryRoot, T020_V1_BINDING_PATH, binding);
     return { command, binding_sha256: sha256T020(renderT020CanonicalJson(binding)), files: Object.keys(binding.files).length };
   }
   if (command === "gen") {
     if (args.length !== 1) throw new Error("usage: t020-world-art gen");
+    assertNoLiveJournal(repositoryRoot, command);
     atomicWriteJson(repositoryRoot, T020_V1_RISK_PATH, buildT020Risk());
     atomicWriteJson(repositoryRoot, T020_V1_SCHEMA_PATH, buildT020Schema());
     atomicWriteJson(repositoryRoot, T020_V1_FORENSICS_PATH, buildT020Forensics(repositoryRoot));

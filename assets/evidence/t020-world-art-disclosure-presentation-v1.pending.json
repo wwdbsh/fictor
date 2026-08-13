@@ -3,15 +3,15 @@
   "artifact_version": "t020-world-art-disclosure-presentation-v1-pending",
   "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
   "secret_free": true,
-  "plan_sha256": "b471dcae615508ebe28cf514489bff59f06517391bb94fb2b9ed43f3cb65c78d",
-  "risk_disclosure_evidence_sha256": "117489742c11814aae365e1dfb7d5d333d1916116cfa93d23e35626fb6fdd3a7",
-  "risk_disclosure_text_sha256": "0ae0ee255303b243040030b346b7b0eeff0db5e8f263cc92b0e3deb1dd07b578",
+  "plan_sha256": "3ff66685ad5c1c96ff061055677212fb051edffda43483a19d3433c2fc4ab5ed",
+  "risk_disclosure_evidence_sha256": "db12d9b76665afc51906974486f0f51b07e7ee3d0e1472b382473f0ab5104401",
+  "risk_disclosure_text_sha256": "6297866bd377da88820331b1e548cda1d56e18376cdc334731e7c4ed2171871a",
   "provider_schema_evidence_sha256": "14f964da57b77d13efd48d89b978ca1db21b65e16c48eaca30c8977b4fbcdb7d",
   "forensics_evidence_sha256": "7fc0941ee3a3cf330d07709a5671824e2fe3047aed33cff503acdee2ebfc9dc1",
   "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
   "master_style_sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d",
   "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
-  "implementation_binding_sha256": "5eb84a311c017d947be758060a4ba0650a7096f52a832c2213d56a02e910d094",
+  "implementation_binding_sha256": "5b5d0af60654f43dc2da53ec80e6ad28fe3cf2412a50f3e3a64ce36fac91a8f3",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
@@ -19,15 +19,15 @@
     },
     "preparation": {
       "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
-      "sha256": "2757f6136c639b1bf48811378b20ad884af649dd8cfc04d63ac6476aa7c7b39d"
+      "sha256": "42583d97d916fc9ee3b4a325cb2cf5860b663ebd44496858bf708f089325734c"
     },
     "production": {
       "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
-      "sha256": "8958b14153abb82a46e38e998c2c4dc3cbb21517964865393d2024313b20031c"
+      "sha256": "bd8816ce8b86867889504f92ceb3e42db9939a78a31fc32e1a8e369c836953d9"
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v1.ts",
-      "sha256": "6100b3724053276326a581c5ddeb753026cb38888326481030a311d4e46fec9b"
+      "sha256": "ac8f45f308a765e27fa5159905837e64b697bf5297fb10dd40433594984d74cc"
     },
     "filesystem": {
       "path": "scripts/assets/filesystem.ts",
@@ -47,6 +47,8 @@
   "resume_operator_phrase": "T020 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
   "loss_acknowledgment_operator_phrase": "T020 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.",
   "operator_phrases_are_agent_satisfiable": true,
+  "approval_attestation_is_agent_writable": true,
+  "human_approval_gate_is_procedural": true,
   "prior_task_approval_inherited": false,
   "committed_clean_runtime_binding_required": true,
   "scope": {

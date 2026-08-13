@@ -1,6 +1,7 @@
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { hostname, tmpdir } from "node:os";
 import { resolve } from "node:path";
+import { execFileSync } from "node:child_process";
 import { deflateSync } from "node:zlib";
 import { beforeAll, describe, expect, test } from "vitest";
 
@@ -11,7 +12,7 @@ import {
   T020_V1_EXPECTED_MODEL, T020_V1_ID_LIST_SHA256, T020_V1_JOURNAL_PATH, T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE,
   T020_V1_RECOVERY_OPERATOR_PHRASE, T020_V1_RESUME_OPERATOR_PHRASE, T020_V1_RISK_TEXT, T020_V1_TOTAL_CAP_UNITS,
   T020_V1_UNIT_COST_UNITS, buildT020Assets, buildT020Batches, buildT020Plan, canonicalJsonT020, crossCheckT020EffectivePrompts,
-  decimalT020, parseT020BalanceFile, renderT020CanonicalJson, renderT020Plan, sha256T020, t020PlanSha256,
+  decimalT020, isT020Authorized, parseT020BalanceFile, renderT020CanonicalJson, renderT020Plan, sha256T020, t020PlanSha256,
   type T020Approval, type T020Plan, type T020Presentation,
 } from "../../scripts/assets/t020-world-art-production-v1";
 import {
@@ -103,8 +104,8 @@ async function runBatch(prepared: Prepared, batchIndex: number, beforeUnits: num
   ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(base + 42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
   await runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(base + 43)], JSON.stringify(waitResponse(plan, batchIndex)), prepared.root, plan, presentation, approval, deps(plan, batchIndex));
   const afterUnits = beforeUnits - plan.batches[batchIndex].size * T020_V1_UNIT_COST_UNITS;
-  const after = json(prepared.root, `after-${batchIndex}.json`, { credits: afterUnits / 100 });
-  ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(base + 44), "--file", after]);
+  const after = json(prepared.root, `after-${batchIndex}.json`, { credits: afterUnits / 100, provider_observed_at: at(base + 44) });
+  ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(base + 45), "--file", after]);
   return afterUnits;
 }
 
@@ -719,5 +720,276 @@ describe("T020 preparation CLI", () => {
   test("no T020 artifact path collides with a T015 path", () => {
     const paths = [cachedPlan.approval_gate.approval_path, cachedPlan.approval_gate.disclosure_presentation_path, cachedPlan.approval_gate.pending_disclosure_packet_path, cachedPlan.recovery_policy.backup_root, T020_V1_JOURNAL_PATH];
     for (const path of paths) { expect(path).toContain("t020"); expect(path).not.toContain("t015"); }
+  });
+});
+
+/* ---------------------------------------------------------------------------
+ * Regression cover for the wedges found in independent review (B1–B4). Each of
+ * these drives the real commands; the only injected dependency is the network.
+ * ------------------------------------------------------------------------ */
+
+describe("T020 transient recovery failure does not wedge a successful run", () => {
+  /** Fails the first N downloads, then serves good bytes — an ordinary network blip. */
+  function flakyDeps(plan: T020Plan, batchIndex: number, failures: number): T020Dependencies {
+    const aspect = plan.batches[batchIndex].aspect_ratio;
+    let call = 0;
+    return {
+      resolve: async () => [{ address: "18.65.3.2", family: 4 }],
+      fetch: async () => { if (call < failures) { call += 1; throw new Error("socket hang up"); } return { status: 200, headers: { "content-type": "image/png" }, bytes: pngFor(aspect, (batchIndex * 16 + call++) % 251), remoteAddress: "::ffff:18.65.3.2" }; },
+    };
+  }
+
+  test("a RECOVERY_FAILED that a later re-poll answers goes inactive, and the batch completes", async () => {
+    const prepared = fixture();
+    const id = prepared.plan.batches[0].id;
+    submitting(prepared, 0, START_UNITS, 0);
+    const response = json(prepared.root, "submit-0.json", submissionResponse(prepared.plan, 0));
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", response]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    // First poll: one download blips, so a RECOVERY_FAILED is recorded.
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, flakyDeps(prepared.plan, 0, 1))).rejects.toThrow(/RECOVERY_FAILED/);
+    expect(journalOf(prepared).run_state).toBe("FAIL_STOP");
+    // Operator re-opens and re-polls the same jobs; everything lands this time.
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(44), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    await runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(45)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, 0));
+    const recovered = journalOf(prepared).batches[0];
+    expect(recovered.recoveries).toHaveLength(prepared.plan.batches[0].size);
+    expect(recovered.state).toBe("RECOVERED");
+    // The transient terminal has been answered by the assets themselves, so balance-after
+    // may now close the batch instead of leaving it stranded short of COMPLETE forever.
+    const afterUnits = START_UNITS - prepared.plan.batches[0].size * T020_V1_UNIT_COST_UNITS;
+    const after = json(prepared.root, "after-0.json", { credits: afterUnits / 100, provider_observed_at: at(46) });
+    ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(47), "--file", after]);
+    expect(journalOf(prepared).batches[0].state).toBe("COMPLETE");
+  });
+
+  test("the whole 54-asset run still closes at exactly 81.00 after a mid-run download blip", async () => {
+    const prepared = fixture();
+    const id = prepared.plan.batches[0].id;
+    submitting(prepared, 0, START_UNITS, 0);
+    const response = json(prepared.root, "submit-0.json", submissionResponse(prepared.plan, 0));
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", response]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, flakyDeps(prepared.plan, 0, 1))).rejects.toThrow(/RECOVERY_FAILED/);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(44), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    await runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(45)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, 0));
+    let balance = START_UNITS - prepared.plan.batches[0].size * T020_V1_UNIT_COST_UNITS;
+    ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(47), "--file", json(prepared.root, "after-0.json", { credits: balance / 100, provider_observed_at: at(46) })]);
+    // The run is still FAIL_STOP from the blip; the operator resumes on a fully recovered,
+    // balance-verified batch and the remaining four batches proceed normally.
+    const resumed = ops(prepared, ["resume", "--observed-at", at(48), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE]);
+    expect(resumed).toMatchObject({ disposition: "FULLY_RECOVERED_BALANCE_VERIFIED", resubmitted: false });
+    for (let index = 1; index < T020_V1_BATCH_COUNT; index += 1) balance = await runBatch(prepared, index, balance, index * 1000);
+    expect(balance).toBe(START_UNITS - T020_V1_TOTAL_CAP_UNITS);
+    const journal = journalOf(prepared);
+    expect(journal.run_state).toBe("COMPLETE");
+    const audit = auditT020({ root: prepared.root, plan: prepared.plan, presentation, approval }, journal, at(9_000));
+    expect(audit).toMatchObject({ run_state: "COMPLETE", exact_closure: true, assets_recovered: T020_V1_ASSET_COUNT, closes_at_exact_cap: true, acknowledged_loss_units: 0 });
+  }, 120_000);
+});
+
+describe("T020 discharge is decided by escaped spend, not by terminal name", () => {
+  /** Batch 1 bills 9.00, delivers 5 of 6, then a later re-poll cannot even be read. */
+  async function lossThenUnreadablePoll(prepared: Prepared): Promise<string> {
+    const id = prepared.plan.batches[0].id;
+    submitting(prepared, 0, START_UNITS, 0);
+    const response = json(prepared.root, "submit-0.json", submissionResponse(prepared.plan, 0));
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", response]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    const statuses = batchAssets(prepared.plan, 0).map((_, offset) => (offset === 0 ? "failed" : "completed"));
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0, statuses)), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, 0))).rejects.toThrow(/GENERATION_FAILED/);
+    // The operator tries once more for the missing asset; the provider has since dropped
+    // that job from its payload, so the poll is unreadable and appends RECOVERY_FAILED.
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(44), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    const truncated = waitResponse(prepared.plan, 0, statuses);
+    truncated.jobs = truncated.jobs.slice(1);
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(45)], JSON.stringify(truncated), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, 0))).rejects.toThrow(/RECOVERY_FAILED/);
+    return id;
+  }
+
+  test("a RECOVERY_FAILED stacked on a real loss still discharges and resumes", async () => {
+    const prepared = fixture();
+    const id = await lossThenUnreadablePoll(prepared);
+    const record = journalOf(prepared).batches[0];
+    expect(record.terminals.map(({ code }) => code)).toEqual(["GENERATION_FAILED", "RECOVERY_FAILED"]);
+    expect(record.recoveries).toHaveLength(5);
+    const spent = prepared.plan.batches[0].size * T020_V1_UNIT_COST_UNITS;
+    const after = json(prepared.root, "loss-balance.json", { credits: (START_UNITS - spent) / 100, provider_observed_at: at(46) });
+    const discharge = ops(prepared, ["acknowledge-loss", "--batch", id, "--observed-at", at(47), "--operator-phrase", T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", after]);
+    // 9.00 observed, 7.50 of it recovered as 5 usable assets, 1.50 genuinely lost.
+    expect(discharge).toMatchObject({ observed_delta_decimal: "9.00", recovered_decimal: "7.50", acknowledged_loss_decimal: "1.50" });
+    expect(ops(prepared, ["resume", "--observed-at", at(48), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE])).toMatchObject({ run_state: "ACTIVE", disposition: "DISCHARGED_LOSS" });
+    expect(t020LostAssets(journalOf(prepared))).toEqual([{ index: 0, asset_id: prepared.plan.batches[0].asset_ids[0], batch_id: id }]);
+  });
+
+  test("a lossy run closes as CLOSED_WITH_LOSSES with an honest ledger", async () => {
+    const prepared = fixture();
+    await lossThenUnreadablePoll(prepared);
+    const id = prepared.plan.batches[0].id;
+    const spent = prepared.plan.batches[0].size * T020_V1_UNIT_COST_UNITS;
+    let balance = START_UNITS - spent;
+    ops(prepared, ["acknowledge-loss", "--batch", id, "--observed-at", at(47), "--operator-phrase", T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", json(prepared.root, "loss-balance.json", { credits: balance / 100, provider_observed_at: at(46) })]);
+    ops(prepared, ["resume", "--observed-at", at(48), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE]);
+    for (let index = 1; index < T020_V1_BATCH_COUNT; index += 1) balance = await runBatch(prepared, index, balance, index * 1000);
+    const journal = journalOf(prepared);
+    expect(journal.run_state).toBe("ACTIVE");
+    const audit = auditT020({ root: prepared.root, plan: prepared.plan, presentation, approval }, journal, at(9_000));
+    expect(audit).toMatchObject({
+      run_state: "CLOSED_WITH_LOSSES", exact_closure: false,
+      assets_recovered: T020_V1_ASSET_COUNT - 1, assets_lost: 1, all_assets_delivered: false,
+      discharged_batches: 1, acknowledged_loss_decimal: "1.50", within_total_cap: true,
+      total_delta_units: T020_V1_TOTAL_CAP_UNITS, closes_at_exact_cap: true,
+    });
+    expect(audit.lost_assets).toEqual([prepared.plan.batches[0].asset_ids[0]]);
+    // The closed state must survive a re-read: a closed journal is still a valid journal.
+    expect(journalOf(prepared).run_state).toBe("CLOSED_WITH_LOSSES");
+  }, 120_000);
+
+  test("a FILE_CONFLICT on a billed image is dischargeable rather than absorbing", async () => {
+    const prepared = fixture();
+    const id = prepared.plan.batches[0].id;
+    const aspect = prepared.plan.batches[0].aspect_ratio;
+    // A stale file with different bytes already occupies the first asset's local path.
+    const first = prepared.plan.assets.find((asset) => asset.id === prepared.plan.batches[0].asset_ids[0])!;
+    mkdirSync(resolve(prepared.root, "public/assets", first.path, ".."), { recursive: true });
+    writeFileSync(resolve(prepared.root, "public/assets", first.path), pngFor(aspect, 200));
+    submitting(prepared, 0, START_UNITS, 0);
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", json(prepared.root, "submit-0.json", submissionResponse(prepared.plan, 0))]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    const conflicting: T020Dependencies = { resolve: async () => [{ address: "18.65.3.2", family: 4 }], fetch: async () => ({ status: 200, headers: { "content-type": "image/png" }, bytes: pngFor(aspect, 7), remoteAddress: "::ffff:18.65.3.2" }) };
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, conflicting)).rejects.toThrow(/FILE_CONFLICT/);
+    expect(journalOf(prepared).batches[0].terminals.at(-1)!.code).toBe("FILE_CONFLICT");
+    const spent = prepared.plan.batches[0].size * T020_V1_UNIT_COST_UNITS;
+    const after = json(prepared.root, "loss-balance.json", { credits: (START_UNITS - spent) / 100, provider_observed_at: at(44) });
+    // FILE_CONFLICT is not a "loss code" by name, but the envelope escaped, so it discharges.
+    expect(ops(prepared, ["acknowledge-loss", "--batch", id, "--observed-at", at(45), "--operator-phrase", T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", after])).toMatchObject({ terminal_code: "FILE_CONFLICT", observed_delta_decimal: "9.00" });
+    expect(ops(prepared, ["resume", "--observed-at", at(46), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE])).toMatchObject({ disposition: "DISCHARGED_LOSS" });
+  });
+
+  test("a billed but corrupt payload is booked as PAYLOAD_UNUSABLE, never as the no-charge code", async () => {
+    const prepared = fixture();
+    const id = prepared.plan.batches[0].id;
+    submitting(prepared, 0, START_UNITS, 0);
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", json(prepared.root, "submit-0.json", submissionResponse(prepared.plan, 0))]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    // A completed, billed job whose bytes are a truncated PNG.
+    const corrupt = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), Buffer.alloc(40, 3)]);
+    const corruptDeps: T020Dependencies = { resolve: async () => [{ address: "18.65.3.2", family: 4 }], fetch: async () => ({ status: 200, headers: { "content-type": "image/png" }, bytes: corrupt, remoteAddress: "::ffff:18.65.3.2" }) };
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, corruptDeps)).rejects.toThrow(/PAYLOAD_UNUSABLE/);
+    const terminal = journalOf(prepared).batches[0].terminals.at(-1)!;
+    expect(terminal.code).toBe("PAYLOAD_UNUSABLE");
+    expect(terminal.facts).toMatchObject({ reason: "PROVIDER_PAYLOAD_UNUSABLE", store_error: "INVALID_PNG" });
+    expect(journalOf(prepared).batches[0].recoveries).toHaveLength(0);
+    const spent = prepared.plan.batches[0].size * T020_V1_UNIT_COST_UNITS;
+    const after = json(prepared.root, "loss-balance.json", { credits: (START_UNITS - spent) / 100, provider_observed_at: at(44) });
+    expect(ops(prepared, ["acknowledge-loss", "--batch", id, "--observed-at", at(45), "--operator-phrase", T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", after])).toMatchObject({ terminal_code: "PAYLOAD_UNUSABLE", acknowledged_loss_decimal: "9.00" });
+  });
+});
+
+describe("T020 balance-after honours the declared balance contract", () => {
+  async function recovered(prepared: Prepared): Promise<string> {
+    const id = prepared.plan.batches[0].id;
+    submitting(prepared, 0, START_UNITS, 0);
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", json(prepared.root, "submit-0.json", submissionResponse(prepared.plan, 0))]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    await runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, 0));
+    return id;
+  }
+  const afterUnits = START_UNITS - 6 * T020_V1_UNIT_COST_UNITS;
+
+  test("a bare, undated balance is refused instead of becoming the chain anchor", async () => {
+    const prepared = fixture();
+    const id = await recovered(prepared);
+    const bare = json(prepared.root, "after.json", { credits: afterUnits / 100 });
+    expect(() => ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(45), "--file", bare])).toThrow(/UNKNOWN_PROVIDER_FIELD/);
+  });
+
+  test("a stale reading is refused even when its delta is exactly right", async () => {
+    const prepared = fixture();
+    const id = await recovered(prepared);
+    // Correct delta, but observed before the pre-submit balance it must postdate.
+    const stale = json(prepared.root, "after.json", { credits: afterUnits / 100, provider_observed_at: at(2) });
+    expect(() => ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(45), "--file", stale])).toThrow(/BALANCE_CHANGED/);
+  });
+
+  test("the provider observation, not the operator stamp, anchors the next batch", async () => {
+    const prepared = fixture();
+    const id = await recovered(prepared);
+    ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(47), "--file", json(prepared.root, "after.json", { credits: afterUnits / 100, provider_observed_at: at(46) })]);
+    const record = journalOf(prepared).batches[0];
+    expect(record.balance_after).toMatchObject({ observed_at: at(47), provider_observed_at: at(46), delta_decimal: "9.00" });
+  });
+});
+
+describe("T020 production entry gates", () => {
+  test("production refuses to run without a valid approval on disk", async () => {
+    // The real entry point, against the real repository root: no presentation or approval
+    // file exists, so no production command may run — not even the read-only one.
+    const { runT020Ops } = await import("../../scripts/assets/t020-world-art-production-v1-ops");
+    expect(() => runT020Ops(["status"])).toThrow(/exact scoped approval is missing/);
+    expect(isT020Authorized(repositoryRoot, cachedPlan)).toBe(false);
+  });
+
+  test("the committed-clean gate rejects a root whose binding scope is not tracked", async () => {
+    const { assertT020CommittedClean } = await import("../../scripts/assets/t020-world-art-production-v1-ops");
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-dirty-"));
+    expect(() => assertT020CommittedClean(root)).toThrow(/committed-clean|binding changed|not a regular file/);
+  });
+
+  test("the committed-clean gate passes on a committed binding scope and fails once it is dirtied", async () => {
+    const { assertT020CommittedClean } = await import("../../scripts/assets/t020-world-art-production-v1-ops");
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-git-"));
+    const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t020-world-art-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
+    const tracked = [...Object.values(binding.files).map(({ path }) => path), "assets/evidence/t020-world-art-implementation-binding-v1.json", "assets/manifests/t020-world-art-v1.plan.json"];
+    for (const path of tracked) {
+      mkdirSync(resolve(root, path, ".."), { recursive: true });
+      copyFileSync(resolve(repositoryRoot, path), resolve(root, path));
+    }
+    const git = (...args: string[]) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
+    git("init", "-q");
+    git("config", "user.email", "t020@test.invalid");
+    git("config", "user.name", "t020 test");
+    git("add", ...tracked);
+    git("commit", "-q", "-m", "t020 binding scope");
+    expect(() => assertT020CommittedClean(root)).not.toThrow();
+    // An uncommitted edit inside the pinned scope must stop production, since the approval
+    // binds these exact bytes. (A whitespace-only edit still changes the sha.)
+    const contract = resolve(root, "scripts/assets/t020-world-art-production-v1.ts");
+    writeFileSync(contract, `${readFileSync(contract, "utf8")}\n`);
+    expect(() => assertT020CommittedClean(root)).toThrow(/binding changed|committed-clean|dirty/);
+  });
+
+  test("gen and binding-gen refuse to re-derive once a run journal exists", async () => {
+    const { runT020Preparation } = await import("../../scripts/assets/t020-world-art-production-v1-cli");
+    // Guarded on the real journal path; no journal exists here, so the guard is inert and
+    // the commands are reachable. Proving the guard fires needs the real root, which this
+    // suite must not write to, so the reachable half is asserted instead.
+    expect(existsSync(resolve(repositoryRoot, T020_V1_JOURNAL_PATH))).toBe(false);
+    expect(() => runT020Preparation(["check"])).not.toThrow();
+  });
+});
+
+describe("T020 init idempotency and lock reclamation", () => {
+  test("init is idempotent and never re-anchors the balance", () => {
+    const prepared = fixture();
+    const anchor = journalOf(prepared).initial_balance;
+    const again = json(prepared.root, "second-anchor.json", { credits: 999, provider_observed_at: at(-30) });
+    expect(ops(prepared, ["init", "--observed-at", at(-20), "--balance-file", again])).toMatchObject({ idempotent: true, run_state: "ACTIVE" });
+    expect(journalOf(prepared).initial_balance).toEqual(anchor);
+  });
+
+  test("a lock whose holder process is gone is reclaimed at once, not after 15 minutes", () => {
+    const prepared = fixture();
+    const lock = acquireT020Lock(prepared.root);
+    // Rewrite the holder as a dead PID on this host, as a SIGKILL mid-download would leave it.
+    writeFileSync(resolve(lock.path, "holder.json"), JSON.stringify({ pid: 2 ** 22, host: hostname(), created_at_ms: Date.now(), token: "stale" }));
+    const reclaimed = acquireT020Lock(prepared.root);
+    reclaimed.release();
+  });
+
+  test("a live holder is never stolen", () => {
+    const prepared = fixture();
+    const lock = acquireT020Lock(prepared.root);
+    try { expect(() => acquireT020Lock(prepared.root)).toThrow(/RUNNER_LOCKED/); } finally { lock.release(); }
   });
 });

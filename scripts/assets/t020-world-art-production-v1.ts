@@ -136,7 +136,7 @@ export const T020_V1_RISK_TEXT = `T020은 세계 아트 정확히 54장(배경 1
 (v) 저장 경로 - 각 자산은 고정된 core manifest의 path 필드를 그대로 씁니다. 배경은 ${T020_V1_LOCAL_ROOT}/backgrounds/, 적과 엘리트는 ${T020_V1_LOCAL_ROOT}/enemies/에 저장되고 같은 상대 경로로 ${T020_V1_BACKUP_ROOT} 아래에 백업됩니다. 두 사본은 저장 직후 sha256이 서로 같아야 하며 다르면 fail-stop입니다.
 (vi) 과금은 provider가 보고하는 credits_exact(1.50)만 사용합니다. 화면 표시값 credits(1.00)는 기록만 하고 상한 계산에 절대 쓰지 않습니다.
 (vii) credits는 2026-08-17에 만료됩니다. 정확한 만료 시각(hour)은 알 수 없습니다.
-(viii) 복구 개시와 재개에 쓰는 operator 문구는 agent가 스스로 입력할 수 있으므로 사용자 동의를 대신하지 않습니다. 사고와 오작동을 막는 게이트일 뿐입니다.
+(viii) 승인 증거의 성격을 분명히 합니다. 복구 개시와 재개에 쓰는 operator 문구는 agent가 스스로 입력할 수 있으므로 사용자 동의를 대신하지 않으며, 사고와 오작동을 막는 게이트일 뿐입니다. 같은 한계가 승인 파일 자체에도 적용됩니다. controller approval attestation과 approval evidence는 agent가 직접 쓸 수 있는 파일이고, 그 안의 "정확한 사용자 발화"는 코드에 박힌 상수에서 나옵니다. 따라서 이 파일들이 디스크에 존재한다는 사실은 사용자가 승인했다는 증거가 아니라 승인이 있었다고 기록되었다는 사실일 뿐입니다. 실제 인적 게이트는 절차적입니다. 사용자가 이 고지를 본 뒤 이 세션에서 정확한 승인 문구를 직접 입력해야 하고, 그 사실은 파일이 아니라 대화 기록으로만 확인됩니다.
 (ix) 모든 요청은 use_unlim:false를 문자 그대로 포함하며 이 값은 각 자산의 canonical_request_sha256 안에 고정되어 있습니다.
 (x) 모델 canary는 배치 1회성이 아니라 모든 배치에 적용됩니다. 모든 배치의 모든 완료 job은 provider-reported model이 ${T020_V1_EXPECTED_MODEL}이어야 하며, 하나라도 다르면 그 배치는 즉시 fail-stop하고 다음 배치는 직전 배치가 모델 확인을 통과할 때까지 열리지 않습니다. 첫 배치 ${T020_V1_CANARY_BATCH_ID}은 모델 canary와 16:9 종횡비 canary를 겸합니다. 두 검사는 서로 다른 증거를 보므로 배치 1이 실패해도 원인을 구분할 수 있습니다. 모델 문제는 model 필드로(MODEL_DRIFT), 종횡비 문제는 실제 전달된 화소 크기로(ASPECT_MISMATCH) 나타납니다.
 (xi) provider 계약 드리프트는 영구 정지입니다. MODEL_DRIFT와 ASPECT_MISMATCH는 둘 다 "승인한 것과 다른 것을 사고 있다"는 증거이므로, 어느 배치에서 한 번이라도 관찰되면 이후 모든 배치가 열리지 않습니다. 손실을 확인하고 재개 문구를 입력해도 열리지 않으며, 계속하려면 별도의 새 고지와 새 승인이 필요합니다. 다만 이 두 코드는 손실 코드이기도 하므로 이미 지출된 금액은 저널에 정직하게 기록되고 실행은 CLOSED_WITH_LOSSES로 닫힙니다. 어느 쪽으로 멈추든 그 배치에 이미 지출된 credits는 회수되지 않습니다.
@@ -173,7 +173,7 @@ export function readRegularT020(root: string, path: string): Buffer {
   if (!existsSync(target) || lstatSync(target).isSymbolicLink() || !lstatSync(target).isFile()) throw new Error(`T020 source is not a regular file: ${path}`);
   return readFileSync(target);
 }
-function readPinnedT020(root: string, path: string, expected: string): Buffer {
+export function readPinnedT020(root: string, path: string, expected: string): Buffer {
   const bytes = readRegularT020(root, path);
   if (sha256T020(bytes) !== expected) throw new Error(`T020 pinned source changed: ${path}`);
   return bytes;
@@ -480,7 +480,8 @@ export function buildT020Pending(root: string, plan: T020Plan) {
     implementation_binding_sha256: sha256T020(renderT020CanonicalJson(binding)), implementation_files: binding.files,
     exact_approval_phrase_required: T020_V1_EXACT_APPROVAL_PHRASE, recovery_operator_phrase: T020_V1_RECOVERY_OPERATOR_PHRASE,
     resume_operator_phrase: T020_V1_RESUME_OPERATOR_PHRASE, loss_acknowledgment_operator_phrase: T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE,
-    operator_phrases_are_agent_satisfiable: true, prior_task_approval_inherited: false, committed_clean_runtime_binding_required: true,
+    operator_phrases_are_agent_satisfiable: true, approval_attestation_is_agent_writable: true, human_approval_gate_is_procedural: true,
+    prior_task_approval_inherited: false, committed_clean_runtime_binding_required: true,
     scope: t020ApprovalScope(), authorized: false,
   } as const;
 }
@@ -523,7 +524,8 @@ export function buildT020Presentation(root: string, plan: T020Plan, balance: T02
     balance_disclosure: disclosure, scope: t020ApprovalScope(),
     exact_approval_phrase_required: T020_V1_EXACT_APPROVAL_PHRASE, recovery_operator_phrase: T020_V1_RECOVERY_OPERATOR_PHRASE,
     resume_operator_phrase: T020_V1_RESUME_OPERATOR_PHRASE, loss_acknowledgment_operator_phrase: T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE,
-    operator_phrases_are_agent_satisfiable: true, prior_task_approval_inherited: false, committed_clean_runtime_binding_required: true, authorized: false,
+    operator_phrases_are_agent_satisfiable: true, approval_attestation_is_agent_writable: true, human_approval_gate_is_procedural: true,
+    prior_task_approval_inherited: false, committed_clean_runtime_binding_required: true, authorized: false,
   } as const;
 }
 function presentationBalance(value: unknown): T020BalanceObservation | null {
