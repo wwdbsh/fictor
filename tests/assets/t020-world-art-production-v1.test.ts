@@ -197,7 +197,7 @@ describe("T020 plan determinism", () => {
 });
 
 describe("T020 batch partitioning", () => {
-  test("five batches of [12,12,12,12,6] covering all 54 assets", () => {
+  test("five batches of [6,12,12,12,12] covering all 54 assets", () => {
     expect(cachedPlan.batches).toHaveLength(T020_V1_BATCH_COUNT);
     expect(cachedPlan.batches.map(({ size }) => size)).toEqual([...T020_V1_BATCH_SIZES]);
     expect(cachedPlan.batches.reduce((sum, { size }) => sum + size, 0)).toBe(T020_V1_ASSET_COUNT);
