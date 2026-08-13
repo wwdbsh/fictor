@@ -46,3 +46,17 @@ CANONICAL 12..331 (정확히 320장, 추가 480.00 상한)의 유료 제출 경�
 - 새 공시(v4)와 새 정확 승인 문구를 요구할 것 (v3 승인은 상속되지 않음)
 - `tests/assets/canonical-shard-1-recovery-v3.test.ts`의 committed-clean 단언
   유예(NOTE(v4) 주석)를 복원할 것
+
+## 후속: v4 유료 구현 완료 (2026-08-13, 커밋 ce23ee6)
+
+v4 사이클 요구사항이 이행되었다: Node 22 결함 3건이 v4 소스에서 직접 수정됐고
+(명시적 maxBuffer, `git show` 제거, `agent:false`+`autoSelectFamily:false`+
+이중 모드 lookup 콜백, 응답 헤더 시점 remoteAddress 캡처), 심 없는 테스트
+58건을 포함한 전체 271 테스트가 통과했으며, 적대적 독립 리뷰 2라운드(블로커
+6건 + 후속 결함 1건 수정)를 거쳐 APPROVED 판정을 받았다. 실행은 npm 스크립트가
+아니라 `npx tsx scripts/assets/canonical-shard-1-production-v4-controller.ts`로
+한다 — package.json 바이트가 v1/v3 바인딩에 고정되어 있기 때문이며, 이 함정은
+회귀 테스트로 고정했다. v4 공시 시점의 실측 잔액 843.90은 레거시 18.00 델타를
+provider 측에서 처음으로 실증했다(861.90 − 843.90 = 18.00). v3 테스트의
+committed-clean 유예 노트는 ENOBUFS 특성화 테스트와 v4의
+`assertT015V4CommittedClean` 커버리지로 대체되었다.
