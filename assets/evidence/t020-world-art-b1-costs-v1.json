@@ -1,0 +1,8 @@
+{ "costs": [
+  { "index": 0, "request_sha256": "dcd14ac2bdb26820da45b032870c645663a05862e83c488f2954ab4bbfe80a63", "cost": { "credits": 1, "credits_exact": 1.5 }, "provider_observed_at": "2026-08-13T22:18:25.000Z" },
+  { "index": 1, "request_sha256": "2fbbfdc9fa7608168ca1ee8174cacbcf89334ed92eace4f98229eba702a70d04", "cost": { "credits": 1, "credits_exact": 1.5 }, "provider_observed_at": "2026-08-13T22:18:36.000Z" },
+  { "index": 2, "request_sha256": "1b741da665b53ca5cd49a3978e94608c7bcc7acd2f2a404ebe78a2c323213aa6", "cost": { "credits": 1, "credits_exact": 1.5 }, "provider_observed_at": "2026-08-13T22:18:46.000Z" },
+  { "index": 3, "request_sha256": "b0e89abe5385bd2bd8fe27429be09bedeef807f6e6bbd9e0c73cbf76c5b85e55", "cost": { "credits": 1, "credits_exact": 1.5 }, "provider_observed_at": "2026-08-13T22:18:56.000Z" },
+  { "index": 4, "request_sha256": "4140fe097dd9e3c3039463f4688c8abd95f2356ec29656f34b979c875b23a0d1", "cost": { "credits": 1, "credits_exact": 1.5 }, "provider_observed_at": "2026-08-13T22:19:07.000Z" },
+  { "index": 5, "request_sha256": "ca6b87d341ab67ddecaaf142ca205ed9d5652f57dc3f1facb2dfa11d95049e18", "cost": { "credits": 1, "credits_exact": 1.5 }, "provider_observed_at": "2026-08-13T22:19:18.000Z" }
+] }
