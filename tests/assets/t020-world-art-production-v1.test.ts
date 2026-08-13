@@ -695,8 +695,11 @@ describe("T020 preparation CLI", () => {
       submitted_anything: false, wrote_anything: false, asset_count: T020_V1_ASSET_COUNT, batch_count: T020_V1_BATCH_COUNT,
       total_credit_cap_units: T020_V1_TOTAL_CAP_UNITS, planned_spend_units: T020_V1_TOTAL_CAP_UNITS,
       batches_are_aspect_homogeneous: true, canary_batch_id: T020_V1_CANARY_BATCH_ID,
-      disclosure_chain_status: "pending approval", authorized: false,
     });
+    // v1 has since been approved and closed, so `authorized` is a fact about the repository
+    // rather than a fixed expectation. What must always hold is that the reported chain
+    // status and the boolean agree — a dry-run may never claim one and mean the other.
+    expect(result.disclosure_chain_status).toBe(result.authorized ? "approved" : "pending approval");
     expect(result.plan_sha256).toBe(t020PlanSha256(cachedPlan));
     expect(result.asset_ids).toHaveLength(T020_V1_ASSET_COUNT);
     expect(result.batch_sizes).toEqual([...T020_V1_BATCH_SIZES]);
@@ -922,12 +925,16 @@ describe("T020 balance-after honours the declared balance contract", () => {
 });
 
 describe("T020 production entry gates", () => {
-  test("production refuses to run without a valid approval on disk", async () => {
-    // The real entry point, against the real repository root: no presentation or approval
-    // file exists, so no production command may run — not even the read-only one.
-    const { runT020Ops } = await import("../../scripts/assets/t020-world-art-production-v1-ops");
-    expect(() => runT020Ops(["status"])).toThrow(/exact scoped approval is missing/);
-    expect(isT020Authorized(repositoryRoot, cachedPlan)).toBe(false);
+  test("the authorization gate refuses a root with no approval evidence", () => {
+    // `productionContext` admits a command only when `isT020Authorized` holds, so that is the
+    // gate under test. A root without the evidence chain must never satisfy it.
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-unapproved-"));
+    mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
+    expect(isT020Authorized(root, cachedPlan)).toBe(false);
+    // The real repository has since received the v1 approval, and the gate reports that
+    // honestly rather than being pinned to the pre-approval state this test was written in.
+    expect(existsSync(resolve(repositoryRoot, "assets/evidence/t020-world-art-approval-v1.json"))).toBe(true);
+    expect(isT020Authorized(repositoryRoot, cachedPlan)).toBe(true);
   });
 
   test("gen and binding-gen refuse to re-derive once a run journal exists", async () => {

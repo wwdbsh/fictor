@@ -1,0 +1,124 @@
+{
+  "schema_version": 2,
+  "evidence_version": "t020-world-art-higgsfield-schema-v2",
+  "source": "T015 observations plus the T020 v1 batch-1 delivery",
+  "secret_free": true,
+  "submit": {
+    "tool": "generate_image_batch",
+    "batch_max": 12,
+    "requested_model": "nano_banana_2",
+    "expected_provider_reported_model": "nano_banana_flash",
+    "use_unlim": false,
+    "aspect_ratio_per_asset": true,
+    "aspect_ratios": [
+      "3:4",
+      "16:9"
+    ],
+    "aspect_homogeneous_batches": true,
+    "resolution": "1k",
+    "count_per_asset": 1,
+    "response_required_keys": [
+      "submitted_count",
+      "failed_count",
+      "jobs"
+    ],
+    "job_required_keys": [
+      "index",
+      "job_id",
+      "status"
+    ],
+    "job_allowed_optional_keys": [
+      "adjustments",
+      "error",
+      "warning",
+      "preset_recommendation"
+    ],
+    "any_optional_key_fail_stops_batch": true
+  },
+  "cost": {
+    "display_credits_decimal": "1.00",
+    "exact_credits_decimal": "1.50",
+    "integer_units_per_image": 150,
+    "billing_uses_credits_exact_only": true,
+    "freshness_ms": 600000,
+    "strictly_monotonic_observations": true,
+    "unpaid_16_9_get_cost_matches_3_4": true
+  },
+  "jobs_wait": {
+    "expected_type": "image",
+    "summary_required_keys": [
+      "active",
+      "completed",
+      "errors",
+      "failed",
+      "total"
+    ],
+    "summary_compared_by_value": true,
+    "retryable_presence_only_for_status": "lookup_failed",
+    "optional_model_or_result_url_on_non_completed": true,
+    "download_only_when_completed": true,
+    "legacy_job_ids_repollable": "UNKNOWN_AT_DISCLOSURE_TIME_VERIFIED_AT_EXECUTION"
+  },
+  "secure_download": {
+    "resolver_mapped_ipv6_allowed": false,
+    "resolver_public_ipv4_allowed": true,
+    "transport_peer_pin_required": true,
+    "fresh_connection_per_request": true,
+    "auto_select_family": false,
+    "remote_address_captured_at_response_headers": true,
+    "url_or_host_diagnostics_persisted": false
+  },
+  "model_canary": {
+    "canary_batch_id": "world-art-v2-001",
+    "applies_to_every_batch": true,
+    "blocks_next_batch_until_previous_model_verified": true,
+    "drift_still_costs_batch_spend": true
+  },
+  "aspect_expectation": {
+    "criterion": "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
+    "tolerance_ppm_by_aspect": {
+      "3:4": 5000,
+      "16:9": 12500
+    },
+    "provider_dimension_grid_px": 32,
+    "resolution": "1k",
+    "observed_3_4": {
+      "width": 896,
+      "height": 1200,
+      "aspect_error_ppm": 4445,
+      "source": "T015 recovered PNGs",
+      "provider_validated": true
+    },
+    "observed_16_9": {
+      "width": 1376,
+      "height": 768,
+      "aspect_error_ppm": 7813,
+      "source": "T020 v1 batch world-art-001 delivery",
+      "provider_validated": true,
+      "accepted_under_v1_tolerance": false,
+      "accepted_under_v2_tolerance": true
+    },
+    "grid_worst_case_16_9_ppm_at_1mp": 11364,
+    "boundary_examples_16_9": [
+      {
+        "dimensions": "1408x800",
+        "aspect_error_ppm": 10000,
+        "note": "GRID_NEAREST_LANDS_EXACTLY_ON_A_10000_LIMIT"
+      },
+      {
+        "dimensions": "1344x768",
+        "ratio": "7:4",
+        "aspect_error_ppm": 15625,
+        "note": "GRID_ROUND_DOWN_INDISTINGUISHABLE_FROM_A_REAL_7_4_DELIVERY_REFUSED"
+      },
+      {
+        "dimensions": "1024x768",
+        "ratio": "4:3",
+        "aspect_error_ppm": 250000,
+        "note": "REFUSED"
+      }
+    ],
+    "out_of_tolerance_terminal_code": "ASPECT_MISMATCH",
+    "out_of_tolerance_blocks_all_later_batches": true
+  }
+}

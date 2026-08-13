@@ -1,0 +1,58 @@
+{
+  "schema_version": 2,
+  "evidence_version": "t020-world-art-forensics-v2",
+  "secret_free": true,
+  "immutable_sources": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    },
+    "v1_journal_forensic_copy": {
+      "path": "assets/evidence/t020-world-art-v1-final-journal-forensic.json",
+      "sha256": "2f017a34afb7aadef6d0bd2ff93e30bc02e7c916fb36066225e78ce6b6e51636",
+      "runtime_path": "assets/runs/t020-world-art/operations-v1.json",
+      "mutated": false
+    },
+    "v1_plan": {
+      "path": "assets/manifests/t020-world-art-v1.plan.json",
+      "sha256": "b3e86fbbc593b87fdf6411102f2df25fbd7c55079121d01b2011e083289db419"
+    },
+    "v1_approval": {
+      "path": "assets/evidence/t020-world-art-approval-v1.json",
+      "sha256": "46c36f69e5ea2b8c4db917c4d1ca9793aa8e594e5d8e88bd97781506bbe528ed"
+    }
+  },
+  "observed": {
+    "v1_run_state": "CLOSED_WITH_LOSSES",
+    "v1_discharged_batch": "world-art-001",
+    "v1_terminal_code": "ASPECT_MISMATCH",
+    "v1_spend_units": 900,
+    "v1_recovered_asset_count": 0,
+    "v1_confirmed_job_count": 6,
+    "v1_delivered_dimensions": "1376x768",
+    "v1_delivered_aspect_error_ppm": 7813,
+    "v1_tolerance_ppm": 5000,
+    "provider_dimension_grid_px": 32,
+    "model_canary_passed_in_v1": true,
+    "paid_retry_count": 0
+  },
+  "policy": {
+    "mutate_v1_journal": false,
+    "legacy_recovery_is_zero_cost": true,
+    "legacy_recovery_precedes_any_paid_batch": true,
+    "expired_legacy_jobs_fall_back_to_paid_regeneration": false,
+    "expired_legacy_jobs_fail_stop": true,
+    "automatic_paid_retry_allowed": false,
+    "batch_scoped_fail_stop": true,
+    "aspect_homogeneous_batches": true,
+    "prior_task_approval_inherited": false
+  }
+}

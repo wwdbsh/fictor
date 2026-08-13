@@ -1,0 +1,525 @@
+{
+  "schema_version": 1,
+  "journal_version": "t020-world-art-operations-v1",
+  "redacted": true,
+  "plan_sha256": "b3e86fbbc593b87fdf6411102f2df25fbd7c55079121d01b2011e083289db419",
+  "disclosure_presentation_evidence_sha256": "d516f3fc5ddacd08fe9a57c6bf54d41550a212a98e03f655c145f8e28563edfe",
+  "approval_evidence_sha256": "46c36f69e5ea2b8c4db917c4d1ca9793aa8e594e5d8e88bd97781506bbe528ed",
+  "immutable_forensics": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    }
+  },
+  "run_state": "CLOSED_WITH_LOSSES",
+  "fail_stop_batch_id": null,
+  "initial_balance": {
+    "credits": 363.9,
+    "normalized_decimal": "363.90",
+    "provider_observed_at": "2026-08-13T22:17:56.000Z"
+  },
+  "total_credit_cap_units": 8100,
+  "automatic_paid_retry_reserve_decimal": "0.00",
+  "paid_retry_count": 0,
+  "local_root": "public/assets",
+  "backup_root": "assets/backups/t020-world-art",
+  "expected_provider_reported_model": "nano_banana_flash",
+  "resumes": [
+    {
+      "observed_at": "2026-08-13T22:27:15.000Z",
+      "failed_batch_id": "world-art-001",
+      "terminal_index": 0,
+      "disposition": "DISCHARGED_LOSS",
+      "exact_operator_phrase_sha256": "47eed92d7825a3ca4e6e8920a4ba974cc9d77d7a37059bbdb3cd32fa27f37c9a",
+      "resubmitted": false
+    }
+  ],
+  "batches": [
+    {
+      "batch_id": "world-art-001",
+      "asset_ids": [
+        "background__still__depth_01",
+        "background__still__depth_02",
+        "background__still__depth_03",
+        "background__burn__depth_01",
+        "background__burn__depth_02",
+        "background__burn__depth_03"
+      ],
+      "aspect_ratio": "16:9",
+      "state": "FAIL_STOP",
+      "transitions": [
+        {
+          "state": "PREFLIGHT_REQUESTED",
+          "observed_at": "2026-08-13T22:18:03.000Z"
+        },
+        {
+          "state": "PREFLIGHT_VERIFIED",
+          "observed_at": "2026-08-13T22:19:43.000Z"
+        },
+        {
+          "state": "SUBMITTING",
+          "observed_at": "2026-08-13T22:19:51.000Z"
+        },
+        {
+          "state": "SUBMITTED",
+          "observed_at": "2026-08-13T22:20:40.000Z"
+        },
+        {
+          "state": "RECOVERY_OPEN",
+          "observed_at": "2026-08-13T22:20:44.000Z"
+        },
+        {
+          "state": "FAIL_STOP",
+          "observed_at": "2026-08-13T22:21:07.000Z"
+        }
+      ],
+      "resets": [],
+      "recovery_gates": [
+        {
+          "opened_at": "2026-08-13T22:20:44.000Z",
+          "exact_operator_phrase_sha256": "246e0b8e76be674e8f20c1d478d5710cd7bf17870dd76b3834f751d4ddf35039",
+          "no_new_paid_submit": true
+        }
+      ],
+      "job_polls": [
+        {
+          "observed_at": "2026-08-13T22:21:07.000Z",
+          "all_terminal": true,
+          "jobs": [
+            {
+              "index": 0,
+              "job_id": "ad3fe157-0d79-47b2-aef3-da9e607dedc5",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 1,
+              "job_id": "d402ea62-7681-4a2b-a870-2f904487ea57",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 2,
+              "job_id": "c670da3a-7421-4658-9d94-2180ecf36533",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 3,
+              "job_id": "2f05a23f-0b2c-4f79-a284-9c838c1fb10f",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 4,
+              "job_id": "fa287077-f8a2-42b0-b289-839c8d778b53",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 5,
+              "job_id": "31a962bd-b57e-473c-96fd-b385ab9ba61d",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            }
+          ]
+        }
+      ],
+      "recoveries": [],
+      "terminals": [
+        {
+          "code": "ASPECT_MISMATCH",
+          "observed_at": "2026-08-13T22:21:07.000Z",
+          "facts": {
+            "asset_id": "background__still__depth_01",
+            "reason": "PNG_DIMENSION_MISMATCH",
+            "store_error": "ASPECT_MISMATCH",
+            "actual_width": 1376,
+            "actual_height": 768,
+            "expected_aspect_ratio": "16:9",
+            "aspect_tolerance_ppm": 5000
+          },
+          "automatic_paid_retry": false,
+          "paid_retry_count": 0,
+          "no_resubmit": true,
+          "scope": "BATCH"
+        }
+      ],
+      "discharges": [
+        {
+          "kind": "LOSS_ACKNOWLEDGED",
+          "observed_at": "2026-08-13T22:23:12.000Z",
+          "terminals_discharged": 1,
+          "exact_operator_phrase_sha256": "d93a06827256c63586fe4bae2740cc8f07b2b7a5e92b26ccce5fbbafd97b0081",
+          "max_exposure_units": 900,
+          "recovered_units": 0,
+          "observed_delta_units": 900,
+          "acknowledged_loss_units": 900,
+          "acknowledged_loss_decimal": "9.00",
+          "balance_after_loss": {
+            "credits": 354.9,
+            "normalized_decimal": "354.90",
+            "provider_observed_at": "2026-08-13T22:23:12.000Z"
+          },
+          "resubmitted": false
+        }
+      ],
+      "preflight": {
+        "requests": [
+          {
+            "index": 0,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate landscape engraving, 17th century topographical plate style, cross-hatching, atmospheric perspective, aged paper, wide vista. composition=LANDSCAPE; subject=frost-covered plain of interrupted objects; low pale light with long motionless shadows; colors=TEAL; density=SPARSE; paper=BLUE_GREY; attribute=STILL; depth=1. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this world asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core world prompt, never from the reference subject. Background plates are wide 16:9 landscape vistas and enemy plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "16:9",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 1,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate landscape engraving, 17th century topographical plate style, cross-hatching, atmospheric perspective, aged paper, wide vista. composition=LANDSCAPE; subject=frozen waterfall and stairs; low pale light with long motionless shadows; colors=TEAL; density=MID; paper=BLUE_GREY; attribute=STILL; depth=2. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this world asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core world prompt, never from the reference subject. Background plates are wide 16:9 landscape vistas and enemy plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "16:9",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 2,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate landscape engraving, 17th century topographical plate style, cross-hatching, atmospheric perspective, aged paper, wide vista. composition=LANDSCAPE; subject=colossal structure in absolute stillness; low pale light with long motionless shadows; colors=TEAL; density=DENSE; paper=BLUE_GREY; attribute=STILL; depth=3. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this world asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core world prompt, never from the reference subject. Background plates are wide 16:9 landscape vistas and enemy plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "16:9",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 3,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate landscape engraving, 17th century topographical plate style, cross-hatching, atmospheric perspective, aged paper, wide vista. composition=LANDSCAPE; subject=field of cooled ash; light rising from the ground itself; colors=VERMILION; density=SPARSE; paper=SCORCHED_BROWN; attribute=BURN; depth=1. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this world asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core world prompt, never from the reference subject. Background plates are wide 16:9 landscape vistas and enemy plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "16:9",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 4,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate landscape engraving, 17th century topographical plate style, cross-hatching, atmospheric perspective, aged paper, wide vista. composition=LANDSCAPE; subject=burning light beneath cracked ground; light rising from the ground itself; colors=VERMILION; density=MID; paper=SCORCHED_BROWN; attribute=BURN; depth=2. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this world asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core world prompt, never from the reference subject. Background plates are wide 16:9 landscape vistas and enemy plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "16:9",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 5,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate landscape engraving, 17th century topographical plate style, cross-hatching, atmospheric perspective, aged paper, wide vista. composition=LANDSCAPE; subject=inextinguishable deep fire core; light rising from the ground itself; colors=VERMILION; density=DENSE; paper=SCORCHED_BROWN; attribute=BURN; depth=3. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this world asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core world prompt, never from the reference subject. Background plates are wide 16:9 landscape vistas and enemy plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "16:9",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          }
+        ],
+        "requests_sha256": "cb1ec59f0b5ffd2024970700c83513f28572a75185728dd30f64fab9e11cce81",
+        "requested_at": "2026-08-13T22:18:03.000Z",
+        "costs": [
+          {
+            "index": 0,
+            "request_sha256": "dcd14ac2bdb26820da45b032870c645663a05862e83c488f2954ab4bbfe80a63",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-13T22:18:25.000Z"
+          },
+          {
+            "index": 1,
+            "request_sha256": "2fbbfdc9fa7608168ca1ee8174cacbcf89334ed92eace4f98229eba702a70d04",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-13T22:18:36.000Z"
+          },
+          {
+            "index": 2,
+            "request_sha256": "1b741da665b53ca5cd49a3978e94608c7bcc7acd2f2a404ebe78a2c323213aa6",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-13T22:18:46.000Z"
+          },
+          {
+            "index": 3,
+            "request_sha256": "b0e89abe5385bd2bd8fe27429be09bedeef807f6e6bbd9e0c73cbf76c5b85e55",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-13T22:18:56.000Z"
+          },
+          {
+            "index": 4,
+            "request_sha256": "4140fe097dd9e3c3039463f4688c8abd95f2356ec29656f34b979c875b23a0d1",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-13T22:19:07.000Z"
+          },
+          {
+            "index": 5,
+            "request_sha256": "ca6b87d341ab67ddecaaf142ca205ed9d5652f57dc3f1facb2dfa11d95049e18",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-13T22:19:18.000Z"
+          }
+        ],
+        "balance": {
+          "credits": 363.9,
+          "normalized_decimal": "363.90",
+          "provider_observed_at": "2026-08-13T22:19:43.000Z"
+        }
+      },
+      "paid_request": {
+        "request_sha256": "2cef3955d32470bd467249adbe6bf322b03c853e37daccea47d399c713493c6d",
+        "prepared_at": "2026-08-13T22:19:51.000Z"
+      },
+      "submission": {
+        "observed_at": "2026-08-13T22:20:40.000Z",
+        "expected_count": 6,
+        "submitted_count": 6,
+        "failed_count": 0,
+        "topology_valid": true,
+        "complete": true,
+        "missing_asset_ids": [],
+        "jobs": [
+          {
+            "index": 0,
+            "asset_id": "background__still__depth_01",
+            "job_id": "ad3fe157-0d79-47b2-aef3-da9e607dedc5",
+            "status": "pending",
+            "canonical_request_sha256": "632b08aab8d52c295774dc2d5dca515d71f23cf9db645016ad46458083930907"
+          },
+          {
+            "index": 1,
+            "asset_id": "background__still__depth_02",
+            "job_id": "d402ea62-7681-4a2b-a870-2f904487ea57",
+            "status": "pending",
+            "canonical_request_sha256": "4944ed0c666d03d8c86e4f5ded2b1a8eaa2e699bf9626d1f08e832b4c51b70bb"
+          },
+          {
+            "index": 2,
+            "asset_id": "background__still__depth_03",
+            "job_id": "c670da3a-7421-4658-9d94-2180ecf36533",
+            "status": "pending",
+            "canonical_request_sha256": "6fb7e8bd92fdd4806b74aef294d5f7016be01c632d53943eb5a8ff0a804122d5"
+          },
+          {
+            "index": 3,
+            "asset_id": "background__burn__depth_01",
+            "job_id": "2f05a23f-0b2c-4f79-a284-9c838c1fb10f",
+            "status": "pending",
+            "canonical_request_sha256": "81d52f4e14df753cb866b0acb874ce05be9e86336873cfeb3f8e4dfcdf6b9211"
+          },
+          {
+            "index": 4,
+            "asset_id": "background__burn__depth_02",
+            "job_id": "fa287077-f8a2-42b0-b289-839c8d778b53",
+            "status": "pending",
+            "canonical_request_sha256": "cb99be8561a59bf3a18a4fc3275e6b71a52352c187e9a59778fedcb681770af7"
+          },
+          {
+            "index": 5,
+            "asset_id": "background__burn__depth_03",
+            "job_id": "31a962bd-b57e-473c-96fd-b385ab9ba61d",
+            "status": "pending",
+            "canonical_request_sha256": "9b6fd95ea00af51cf43702f732f7bef02030575777bbd44f163673b2be789358"
+          }
+        ]
+      }
+    },
+    {
+      "batch_id": "world-art-002",
+      "asset_ids": [
+        "background__scatter__depth_01",
+        "background__scatter__depth_02",
+        "background__scatter__depth_03",
+        "background__rot__depth_01",
+        "background__rot__depth_02",
+        "background__rot__depth_03",
+        "background__wash__depth_01",
+        "background__wash__depth_02",
+        "background__wash__depth_03",
+        "background__join__depth_01",
+        "background__join__depth_02",
+        "background__join__depth_03"
+      ],
+      "aspect_ratio": "16:9",
+      "state": "PLANNED",
+      "transitions": [],
+      "resets": [],
+      "recovery_gates": [],
+      "job_polls": [],
+      "recoveries": [],
+      "terminals": [],
+      "discharges": []
+    },
+    {
+      "batch_id": "world-art-003",
+      "asset_ids": [
+        "enemy__still__swarm",
+        "enemy__still__bulk",
+        "enemy__still__shell",
+        "enemy__still__reach",
+        "enemy__still__mimic",
+        "enemy__burn__swarm",
+        "enemy__burn__bulk",
+        "enemy__burn__shell",
+        "enemy__burn__reach",
+        "enemy__burn__mimic",
+        "enemy__scatter__swarm",
+        "enemy__scatter__bulk"
+      ],
+      "aspect_ratio": "3:4",
+      "state": "PLANNED",
+      "transitions": [],
+      "resets": [],
+      "recovery_gates": [],
+      "job_polls": [],
+      "recoveries": [],
+      "terminals": [],
+      "discharges": []
+    },
+    {
+      "batch_id": "world-art-004",
+      "asset_ids": [
+        "enemy__scatter__shell",
+        "enemy__scatter__reach",
+        "enemy__scatter__mimic",
+        "enemy__rot__swarm",
+        "enemy__rot__bulk",
+        "enemy__rot__shell",
+        "enemy__rot__reach",
+        "enemy__rot__mimic",
+        "enemy__wash__swarm",
+        "enemy__wash__bulk",
+        "enemy__wash__shell",
+        "enemy__wash__reach"
+      ],
+      "aspect_ratio": "3:4",
+      "state": "PLANNED",
+      "transitions": [],
+      "resets": [],
+      "recovery_gates": [],
+      "job_polls": [],
+      "recoveries": [],
+      "terminals": [],
+      "discharges": []
+    },
+    {
+      "batch_id": "world-art-005",
+      "asset_ids": [
+        "enemy__wash__mimic",
+        "enemy__join__swarm",
+        "enemy__join__bulk",
+        "enemy__join__shell",
+        "enemy__join__reach",
+        "enemy__join__mimic",
+        "elite__still__burn",
+        "elite__burn__scatter",
+        "elite__scatter__rot",
+        "elite__rot__wash",
+        "elite__wash__join",
+        "elite__join__still"
+      ],
+      "aspect_ratio": "3:4",
+      "state": "PLANNED",
+      "transitions": [],
+      "resets": [],
+      "recovery_gates": [],
+      "job_polls": [],
+      "recoveries": [],
+      "terminals": [],
+      "discharges": []
+    }
+  ]
+}

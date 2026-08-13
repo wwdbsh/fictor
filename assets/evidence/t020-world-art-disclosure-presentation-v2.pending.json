@@ -1,0 +1,103 @@
+{
+  "schema_version": 2,
+  "artifact_version": "t020-world-art-disclosure-presentation-v2-pending",
+  "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
+  "secret_free": true,
+  "plan_sha256": "9952c0947707da1d5f41315ab25b0e93b13e74629f61ed646d85af53c67a7ae7",
+  "risk_disclosure_evidence_sha256": "05046b55438eb95ba033ebf862bdfb2af91e776ac1c6118088d781def7da06c0",
+  "risk_disclosure_text_sha256": "f380b211ac0d07ff492fc8099cdb2c4ef2e70e6368abb6859f1c52783be0e208",
+  "provider_schema_evidence_sha256": "513c84d5569084f49748b777d2f133b74ad5ab1332797dd0f67ff1f73dd8e343",
+  "forensics_evidence_sha256": "882909454d6c968e1c2cd0f739abf28fee1df68a9841f324dbfd179f01cbc316",
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "v1_journal_forensic_sha256": "2f017a34afb7aadef6d0bd2ff93e30bc02e7c916fb36066225e78ce6b6e51636",
+  "implementation_binding_sha256": "d45e6cfe351427dc3269c6af69ac01c692224f46b07cd557848eda2319513432",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t020-world-art-production-v2-controller.ts",
+      "sha256": "79cf6915f3a46dbf2bf2e831780ca4b6648202b77e9f2219f887fdeebb1ac0f2"
+    },
+    "preparation": {
+      "path": "scripts/assets/t020-world-art-production-v2-cli.ts",
+      "sha256": "8cdbcf21cacfa53e968d00635cd93ad1e49fc421b5c66d3c0881e07a45b1e100"
+    },
+    "production": {
+      "path": "scripts/assets/t020-world-art-production-v2-ops.ts",
+      "sha256": "11c5567aa4d781edb524beced35a0cb827af0e144928f296ea9443e0db9f0f28"
+    },
+    "contract": {
+      "path": "scripts/assets/t020-world-art-production-v2.ts",
+      "sha256": "3a61069d18433177cca4fa76886c7e769d3ebecb01ffc640aadb59b4a36223c8"
+    },
+    "v1_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "v1_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "exact_approval_phrase_required": "T020 세계 아트 v2 실행을 승인한다. 신규 한도 72.00 크레딧, 기존 6장 무비용 복구 포함.",
+  "legacy_recovery_operator_phrase": "T020 v2 기존 6장의 확정 job ID만 무비용으로 복구하고 새 유료 제출은 하지 않습니다.",
+  "recovery_operator_phrase": "T020 v2 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T020 v2 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "loss_acknowledgment_operator_phrase": "T020 v2 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "approval_attestation_is_agent_writable": true,
+  "human_approval_gate_is_procedural": true,
+  "v1_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "scope": {
+    "task_key": "T020",
+    "revision": "v2",
+    "total_asset_count": 54,
+    "legacy_recovered_asset_count": 6,
+    "legacy_recovery_credit_units": 0,
+    "paid_asset_count": 48,
+    "paid_batch_count": 4,
+    "paid_batch_sizes": [
+      12,
+      12,
+      12,
+      12
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "new_credit_cap_decimal": "72.00",
+    "new_credit_cap_units": 7200,
+    "v1_sunk_decimal": "9.00",
+    "v1_sunk_units": 900,
+    "combined_t020_spend_on_full_success_decimal": "81.00",
+    "net_monetary_loss_target_decimal": "0.00",
+    "aspect_tolerance_ppm_3_4": 5000,
+    "aspect_tolerance_ppm_16_9": 12500,
+    "provider_dimension_grid_px": 32,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 4,
+    "model_canary_applies_to_every_batch": true,
+    "contract_drift_blocks_all_later_batches": true,
+    "legacy_job_expiry_falls_back_to_paid": false,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "boss_world_art_allowed": false,
+    "event_art_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "authorized": false
+}
