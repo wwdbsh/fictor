@@ -1,0 +1,64 @@
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
+import { deflateSync } from "node:zlib";
+import { describe, expect, test } from "vitest";
+
+import { T015_V2_JOURNAL_PATH, T015_V2_JOURNAL_SHA256, T015_V3_EXACT_APPROVAL_PHRASE, T015_V3_PENDING_PATH, T015_V3_PLAN_PATH, buildT015V3Forensics, buildT015V3Plan, isT015V3Authorized, sha256T015V3 } from "../../scripts/assets/canonical-shard-1-recovery-v3";
+import { T015_V3_JOURNAL_PATH, assertT015V3CommittedClean, isPublicT015V3ResolvedAddress, runT015V3JobsHandoffInternal, runT015V3OpsInternal, transportPeerMatchesT015V3Pin, type T015V3Dependencies, type T015V3Journal } from "../../scripts/assets/canonical-shard-1-recovery-v3-ops";
+
+const repositoryRoot = resolve(import.meta.dirname, "../..");
+function crc32(bytes: Uint8Array): number { let crc = 0xffffffff; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ 0xffffffff) >>> 0; }
+function chunk(type: string, data: Buffer): Buffer { const name = Buffer.from(type); const result = Buffer.alloc(12 + data.length); result.writeUInt32BE(data.length, 0); name.copy(result, 4); data.copy(result, 8); result.writeUInt32BE(crc32(Buffer.concat([name, data])), 8 + data.length); return result; }
+function png(fill = 0): Buffer { const header = Buffer.alloc(13); header.writeUInt32BE(3, 0); header.writeUInt32BE(4, 4); header[8] = 8; header[9] = 2; const pixels = Buffer.alloc(40, fill); for (let row = 0; row < 4; row += 1) pixels[row * 10] = 0; return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(pixels)), chunk("IEND", Buffer.alloc(0))]); }
+function summary(statuses: readonly string[]) { const active = ["pending", "waiting", "queued", "in_progress", "ip_detect"]; const failed = ["failed", "canceled", "nsfw", "ip_detected"]; return { active: statuses.filter((status) => active.includes(status)).length, completed: statuses.filter((status) => status === "completed").length, errors: statuses.filter((status) => status === "lookup_failed").length, failed: statuses.filter((status) => failed.includes(status)).length, total: statuses.length }; }
+function fixture() { const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v3-")); mkdirSync(resolve(root, T015_V2_JOURNAL_PATH, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, T015_V2_JOURNAL_PATH), resolve(root, T015_V2_JOURNAL_PATH)); const plan = buildT015V3Plan(repositoryRoot); runT015V3OpsInternal(["migrate", "--observed-at", "2026-08-12T09:00:00.000Z"], root, plan); const v2 = JSON.parse(readFileSync(resolve(root, T015_V2_JOURNAL_PATH), "utf8")); const jobs = v2.legacy_recovery.jobs as Array<{ index: number; job_id: string }>; const response = { all_terminal: true, jobs: jobs.map(({ index, job_id }) => ({ index, job_id, status: "completed", type: "image", model: "nano_banana_flash", result_url: `https://d111111abcdef8.cloudfront.net/${index}.png` })), summary: summary(Array(12).fill("completed")) }; return { root, plan, jobs, response }; }
+
+describe("T015 bounded recovery v3", () => {
+  // The fresh v3 approval was controller-attested and committed on 2026-08-13
+  // (assets/evidence/t015-canonical-shard-1-approval-v3.json), so the live gate
+  // is now authorized; the frozen pending disclosure packet stays authorized:false
+  // by design as the immutable pre-approval record.
+  test("pins both failed journals and records fresh v3 authorization with exactly 12 recovery plus 320 locked", () => { expect(sha256T015V3(readFileSync(resolve(repositoryRoot, T015_V2_JOURNAL_PATH)))).toBe(T015_V2_JOURNAL_SHA256); const plan = buildT015V3Plan(repositoryRoot); const forensics = buildT015V3Forensics(repositoryRoot); expect(forensics.observed).toMatchObject({ asset_count: 12, completed_count: 12, type_image_count: 12, v1_failure_code: "PROVIDER_RESPONSE_SIGNAL", v2_failure_code: "RECOVERY_FAILED", v2_failure_stage: "SECURE_DOWNLOAD", v2_recovery_count: 0, paid_retry_count: 0 }); expect(plan.legacy_recovery.batch.size).toBe(12); expect(plan.batches.reduce((sum, batch) => sum + batch.size, 0)).toBe(320); expect(plan.budget.additional_credit_cap_decimal).toBe("480.00"); expect(plan.budget.total_credit_cap_decimal).toBe("498.00"); expect(plan.approval_gate.prior_t015_v1_or_v2_approval_inherited).toBe(false); expect(isT015V3Authorized(repositoryRoot, plan)).toBe(true); expect(JSON.parse(readFileSync(resolve(repositoryRoot, T015_V3_PENDING_PATH), "utf8"))).toMatchObject({ authorized: false, paid_submit_path_present: false, exact_approval_phrase_required: T015_V3_EXACT_APPROVAL_PHRASE }); });
+
+  test("forbids mapped resolver answers but accepts only an exact mapped transport peer for a pinned IPv4", () => { expect(isPublicT015V3ResolvedAddress({ address: "::ffff:18.65.3.2", family: 6 })).toBe(false); expect(isPublicT015V3ResolvedAddress({ address: "18.65.3.2", family: 4 })).toBe(true); expect(transportPeerMatchesT015V3Pin("::ffff:18.65.3.2", { address: "18.65.3.2", family: 4 })).toBe(true); expect(transportPeerMatchesT015V3Pin("::ffff:18.65.3.3", { address: "18.65.3.2", family: 4 })).toBe(false); expect(transportPeerMatchesT015V3Pin("::ffff:127.0.0.1", { address: "18.65.3.2", family: 4 })).toBe(false); });
+
+  test("recovers all 12 through a public CloudFront-shaped IPv4 and mapped socket peer without persisting URLs", async () => { const prepared = fixture(); const bytes = png(); const deps: T015V3Dependencies = { resolve: async () => [{ address: "18.65.3.2", family: 4 }], fetch: async ({ hostname, pinned }) => { expect(hostname).toBe("d111111abcdef8.cloudfront.net"); expect(pinned).toEqual({ address: "18.65.3.2", family: 4 }); return { status: 200, headers: { "content-type": "image/png" }, bytes, remoteAddress: "::ffff:18.65.3.2" }; } }; const result = await runT015V3JobsHandoffInternal(["jobs-handoff", "--observed-at", "2026-08-12T09:01:00.000Z"], JSON.stringify(prepared.response), prepared.root, prepared.plan, deps); expect(result).toMatchObject({ recovered: 12, future_paid_locked: true, paid_submit_path_present: false, new_paid_submit: false, paid_retry_count: 0 }); const journalBytes = readFileSync(resolve(prepared.root, T015_V3_JOURNAL_PATH), "utf8"); expect(journalBytes).not.toMatch(/https?:\/\//); expect(journalBytes).not.toMatch(/cloudfront|result_url|hostname/); const journal = JSON.parse(journalBytes) as T015V3Journal; expect(journal.legacy_recovery.recoveries).toHaveLength(12); expect(journal.run_state).toBe("HOLD_FOR_FUTURE_PAID_IMPLEMENTATION"); });
+
+  test.each([
+    ["missing type", (job: Record<string, unknown>) => { delete job.type; }],
+    ["wrong type", (job: Record<string, unknown>) => { job.type = "video"; }],
+    ["retryable on completed", (job: Record<string, unknown>) => { job.retryable = false; }],
+    ["retryable absent on lookup_failed", (job: Record<string, unknown>) => { job.status = "lookup_failed"; delete job.result_url; delete job.model; }],
+  ] as const)("fail-stops strict jobs_wait shape: %s", async (_name, mutate) => { const prepared = fixture(); mutate(prepared.response.jobs[0] as Record<string, unknown>); const deps: T015V3Dependencies = { resolve: async () => { throw new Error("no fetch"); }, fetch: async () => { throw new Error("no fetch"); } }; await expect(runT015V3JobsHandoffInternal(["jobs-handoff", "--observed-at", "2026-08-12T09:01:00.000Z"], JSON.stringify(prepared.response), prepared.root, prepared.plan, deps)).rejects.toThrow("JOBS_WAIT_TOPOLOGY"); const bytes = readFileSync(resolve(prepared.root, T015_V3_JOURNAL_PATH), "utf8"); expect(bytes).not.toMatch(/https?:\/\//); expect(JSON.parse(bytes).accounting.paid_retry_count).toBe(0); });
+
+  test("never blesses unjournaled PNGs and fetches provider bytes before accepting existing files", async () => { const prepared = fixture(); const bytes = png(); const arbitrary = png(7); const first = prepared.plan.assets[prepared.jobs[0].index].path; mkdirSync(resolve(prepared.root, "public/assets", first, ".."), { recursive: true }); writeFileSync(resolve(prepared.root, "public/assets", first), arbitrary); let fetches = 0; const deps: T015V3Dependencies = { resolve: async () => [{ address: "18.65.3.2", family: 4 }], fetch: async () => { fetches += 1; return { status: 200, headers: { "content-type": "image/png" }, bytes, remoteAddress: "18.65.3.2" }; } }; await expect(runT015V3JobsHandoffInternal(["jobs-handoff", "--observed-at", "2026-08-12T09:01:00.000Z"], JSON.stringify(prepared.response), prepared.root, prepared.plan, deps)).rejects.toThrow("PNG_ATOMIC_STORE"); expect(fetches).toBe(1); const journal = JSON.parse(readFileSync(resolve(prepared.root, T015_V3_JOURNAL_PATH), "utf8")) as T015V3Journal; expect(journal.legacy_recovery.recoveries).toHaveLength(0); expect(journal.run_state).toBe("FAIL_STOP"); });
+
+  test.each([{ timed_out: "false" }, { aborted: 0 }, { poll_after_seconds: Number.NaN }, { poll_after_seconds: -1 }])("rejects invalid optional top-level jobs_wait types %#", async (optional) => { const prepared = fixture(); Object.assign(prepared.response, optional); const deps: T015V3Dependencies = { resolve: async () => { throw new Error("must not fetch"); }, fetch: async () => { throw new Error("must not fetch"); } }; await expect(runT015V3JobsHandoffInternal(["jobs-handoff", "--observed-at", "2026-08-12T09:01:00.000Z"], JSON.stringify(prepared.response), prepared.root, prepared.plan, deps)).rejects.toThrow("JOBS_WAIT_TOPOLOGY"); });
+
+  // Post-approval: the gate is authorized and the paid path stays locked.
+  // NOTE(v4): assertT015V3CommittedClean still cannot be asserted here in either
+  // direction — its execFileSync("git show") lacks a maxBuffer override, so the
+  // 1.1MB v3 plan manifest raises ENOBUFS and masquerades as "not
+  // committed-clean" regardless of the actual git state; the characterization
+  // below pins that defect. ops.ts is hash-bound by the v3 approval and is left
+  // untouched. The corrected committed-clean check (git ls-files/diff/status
+  // only, no `git show`, explicit 64MB maxBuffer on every execFileSync) lives in
+  // assertT015V4CommittedClean and is covered by
+  // tests/assets/canonical-shard-1-production-v4.test.ts.
+  test("keeps the paid path locked after fresh v3 authorization at the current gate", () => {
+    const plan = buildT015V3Plan(repositoryRoot);
+    expect(isT015V3Authorized(repositoryRoot, plan)).toBe(true);
+    expect(plan.approval_gate.prior_t015_v1_or_v2_approval_inherited).toBe(false);
+    expect(plan.approval_gate.committed_clean_runtime_binding_required).toBe(true);
+    expect(typeof assertT015V3CommittedClean).toBe("function");
+    const show = ["show", `HEAD:${T015_V3_PLAN_PATH}`];
+    let thrown: NodeJS.ErrnoException | undefined;
+    try { execFileSync("git", show, { cwd: repositoryRoot }); } catch (error) { thrown = error as NodeJS.ErrnoException; }
+    expect(thrown?.code).toBe("ENOBUFS");
+    expect(execFileSync("git", show, { cwd: repositoryRoot, maxBuffer: 64 * 1024 * 1024 }).length).toBeGreaterThan(1024 * 1024);
+  });
+
+  test("active legacy v1 production ops cannot reinitialize even when its journal path is absent", () => { const run = spawnSync("npx", ["tsx", "scripts/assets/canonical-shard-1-v1-controller.ts", "ops", "init"], { cwd: repositoryRoot, encoding: "utf8" }); expect(run.status).not.toBe(0); expect(`${run.stdout}${run.stderr}`).toMatch(/approval|ENOENT|not authorized|dirty or untracked/i); expect(readFileSync(resolve(repositoryRoot, "assets/evidence/t015-forensic-approval-v1.json"))).toBeTruthy(); });
+});

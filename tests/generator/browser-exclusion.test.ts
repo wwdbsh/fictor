@@ -16,7 +16,10 @@ function filesUnder(directory: string): string[] {
 }
 
 describe("generated catalog browser exclusion", () => {
-  it("keeps generated data and Node-only tooling out of the production bundle", () => {
+  // 60s timeout: this test spawns a real `npm run build`, which loses to
+  // vitest's default 5s budget under full-suite parallel load (the T015 v4
+  // asset suites add ~60s of concurrent work). Standalone it runs in ~1-2s.
+  it("keeps generated data and Node-only tooling out of the production bundle", { timeout: 60_000 }, () => {
     const build = spawnSync("npm", ["run", "build"], {
       cwd: repositoryRoot,
       encoding: "utf8",

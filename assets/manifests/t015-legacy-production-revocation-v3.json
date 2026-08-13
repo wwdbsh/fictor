@@ -1,0 +1,18 @@
+{
+  "schema_version": 3,
+  "artifact_version": "t015-legacy-production-revocation-v3",
+  "task_key": "T015",
+  "revoked_routes": [
+    "canonical-shard-1-v1-controller:ops",
+    "canonical-shard-1-v1-continuation-v2-controller:recovery"
+  ],
+  "reason_codes": [
+    "PINNED_V1_PROVIDER_RESPONSE_SIGNAL",
+    "PINNED_V2_SECURE_DOWNLOAD_FAILED"
+  ],
+  "replacement_route": "canonical-shard-1-recovery-v3-controller",
+  "legacy_paid_init_or_prepare_allowed": false,
+  "legacy_journal_absence_reauthorizes": false,
+  "legacy_approvals_inherited": false,
+  "secret_free": true
+}

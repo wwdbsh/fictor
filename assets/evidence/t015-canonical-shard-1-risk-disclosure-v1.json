@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t015-canonical-shard-1-risk-disclosure-v1",
+  "issue_number": 17,
+  "issue_contract_sha256": "9b1e9fa39c72101fd653d4c11696bf022aa5c6c1c899871863c90895239f451e",
+  "secret_free": true,
+  "disclosure_text_ko": "승인 요청 범위는 Issue #17의 T015 core CANONICAL slice 0..331 정확히 332장뿐이며 초기 유료 상한은 498.00 credits, 자동 유료 재시도 예산은 0입니다. 각 요청은 nano_banana_2, use_unlim=false, count=1, 3:4, 1k와 revision 1의 로컬 MEDIA_ONLY 참조로 제한됩니다. 2026-08-12 약 02:38Z의 비유료 관찰에서 모델 제공자는 Google, 허용 해상도는 1k/2k/4k, media role은 image, 비율 3:4, 모델 supports_unlim은 true지만 계정 unlim.available은 false, batch 계약 최대치는 12, get_cost credits_exact는 1.50, Plus 계정 balance는 861.90이었습니다. 332장 예상 차감은 되돌릴 수 없는 498.00 credits이고 예상 잔액은 363.90입니다. 계정에 적용되는 Terms/Privacy, Google supplemental terms 및 provider 조건, 학습 사용과 opt-out, reference 입력 권리, 공개 기본값·게시·attribution, 정확한 credit 만료 시각과 시간대는 아직 해결되지 않았습니다. 제출이 모호하거나 부분 응답이어도 credit이 차감될 수 있으며 절대로 자동 재제출하지 않습니다. 첫 유료 batch는 provider가 보고하는 nano_banana_flash 모델 canary이며 model drift가 있으면 즉시 중단하고 batch 2를 열지 않습니다. provider optional signal, 알 수 없는 필드, 중복·부분·index 불일치, 가격·balance 불일치, 파일 충돌도 모두 fail-stop입니다. signed URL과 provider raw error는 일시적으로만 처리하고 journal·evidence·stdout에 남기지 않습니다. 결과 PNG는 provider-native bytes를 crop/resize 없이 최대 5000ppm의 3:4 오차만 허용해 public 및 별도 backup에 원자적으로 저장합니다. public+backup 용량은 약 1.2GB로 추정됩니다. T016, CANONICAL index 332(333번째) 이후, materials, hearts, world 자산은 승인 범위에서 제외됩니다. 과거의 일반적 승인 표현이나 T011/T013/T014 승인은 이 실행 승인이 아니며, 승인 의사는 위험 고지 제시 뒤 정확히 “위 위험을 확인했고 T015 CANONICAL 0..331 정확히 332장과 초기 498.00 credits 상한, 자동 유료 재시도 0을 승인합니다.”라는 문구로만 기록합니다.",
+  "disclosure_text_sha256": "94c6502453a57d52019a10d60678a6694fb3399efcf1c610a1f12dd51ac4bafd",
+  "scope": {
+    "category": "CANONICAL",
+    "slice": "0..331",
+    "asset_count": 332,
+    "initial_credit_cap_decimal": "498.00",
+    "automatic_paid_retry_reserve_decimal": "0.00"
+  }
+}

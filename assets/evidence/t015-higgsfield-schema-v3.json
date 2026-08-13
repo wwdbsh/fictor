@@ -1,0 +1,25 @@
+{
+  "schema_version": 3,
+  "evidence_version": "t015-higgsfield-schema-v3",
+  "source": "pinned T015 v1/v2 observations and local transport correction",
+  "secret_free": true,
+  "jobs_wait": {
+    "expected_type": "image",
+    "type_required": true,
+    "retryable_presence_only_for_status": "lookup_failed",
+    "retryable_value_type": "boolean",
+    "unknown_optional_signals_fail_stop": true
+  },
+  "secure_download": {
+    "resolver_mapped_ipv6_allowed": false,
+    "resolver_public_ipv4_allowed": true,
+    "transport_ipv4_mapped_peer_allowed_only_for_exact_pinned_ipv4_tail": true,
+    "redirects_revalidated_and_rebound": true,
+    "url_or_host_diagnostics_persisted": false
+  },
+  "recovery": {
+    "exact_existing_jobs": 12,
+    "paid_submit_path_present": false,
+    "reconcile_local_backup_crash_windows": true
+  }
+}

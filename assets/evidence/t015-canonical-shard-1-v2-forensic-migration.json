@@ -1,0 +1,36 @@
+{
+  "schema_version": 3,
+  "evidence_version": "t015-canonical-shard-1-v2-forensic-migration",
+  "secret_free": true,
+  "immutable_sources": {
+    "operations_v1": {
+      "path": "assets/runs/t015-canonical-shard-1/operations-v1.json",
+      "sha256": "81d7ab7abdadbf86ee420953690550b62621910907fd9bb11cd8ccb19cf0d6f5"
+    },
+    "operations_v2": {
+      "path": "assets/runs/t015-canonical-shard-1/operations-v2.json",
+      "sha256": "ff85d69888cc023c0cbd7f54e043239fdd47b28a7393870f96e87f58b3663fee"
+    },
+    "v2_plan": {
+      "path": "assets/manifests/canonical-shard-1-v2.plan.json",
+      "sha256": "49809ecf7f10fb590014b023b2c9328415fedae36be83bb883a4e3c090d45e4b"
+    }
+  },
+  "observed": {
+    "asset_slice": "0..11",
+    "asset_count": 12,
+    "exact_job_id_list_sha256": "485a7c875f1893444d8eca01912f68dec30d8b7643976b86b6cb9856885fc9d3",
+    "completed_count": 12,
+    "type_image_count": 12,
+    "v1_failure_code": "PROVIDER_RESPONSE_SIGNAL",
+    "v2_failure_code": "RECOVERY_FAILED",
+    "v2_failure_stage": "SECURE_DOWNLOAD",
+    "v2_recovery_count": 0,
+    "paid_retry_count": 0
+  },
+  "policy": {
+    "mutate_v1_or_v2_journals": false,
+    "exact_existing_job_ids_only": true,
+    "paid_submit_path_present": false
+  }
+}

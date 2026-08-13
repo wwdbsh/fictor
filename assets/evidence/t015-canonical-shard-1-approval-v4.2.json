@@ -1,0 +1,122 @@
+{
+  "schema_version": 4,
+  "evidence_version": "t015-canonical-shard-1-approval-v4",
+  "secret_free": true,
+  "decision": "APPROVE_T015_V4_PAID_CANONICAL_12_331_320_ASSETS_480_CREDITS",
+  "source": "controller approval attestation",
+  "exact_user_quote": "위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
+  "approved_at": "2026-08-13T07:55:50.000Z",
+  "disclosed_at": "2026-08-13T05:20:07.000Z",
+  "plan_sha256": "16bf4c3f79baa13873531ffbd9c6f029de6c17b6b6d7596af56b4ffe9ca8185a",
+  "disclosure_presentation_evidence_sha256": "2530884b6e342de7e3f38a8e89eb9a6676a5fbd84913dd2f6ebf7e64f6bf4b4c",
+  "risk_disclosure_evidence_sha256": "82caea51a37903d62357cc52922040cff6881767c607e4aceb61ee4dbde89997",
+  "risk_disclosure_text_sha256": "1cf830f1c7a61441a19963e96d8eb94cc185f218c69afebaaba367e3385b8cdc",
+  "provider_schema_evidence_sha256": "0ce87031a018b768ccd0ce137b493b4865a08c7b88296e8e93a26ed726b81f5c",
+  "forensics_evidence_sha256": "3c01a0749cda3ffacb56e198446603a4910efc1a26051d0acd22481cac0d877f",
+  "operations_v3_journal_sha256": "91ca710c6c02e72e89bd28876f7884b8793f1a6f60087655bcb217545fd64d0a",
+  "v3_approval_sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef",
+  "controller_disclosure_attestation_sha256": "9f1b1f91ebf4be0e0121a6ba548679da31c7bb4cb7ac75299ab0467ee705a053",
+  "controller_approval_attestation_path": "assets/evidence/t015-controller-approval-attestation-v4.2.json",
+  "controller_approval_attestation_sha256": "63c71f4461a2415f6e3be584b446f6800677b8d8112c1c55f0fc0dd2a1656de7",
+  "implementation_binding_sha256": "5fcd243b45cd30885677c08585180d3c9915444240f928c5d39af6c2b66201f6",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/canonical-shard-1-production-v4-controller.ts",
+      "sha256": "c46f17374a2df92689e3223581d8c595f92debb009aa506249db07ca42a905a1"
+    },
+    "preparation": {
+      "path": "scripts/assets/canonical-shard-1-production-v4-cli.ts",
+      "sha256": "f7c475bcc7c85b80a476f3ebeea890ea2d9c126da61d79c812dfd587e65d7f5d"
+    },
+    "production": {
+      "path": "scripts/assets/canonical-shard-1-production-v4-ops.ts",
+      "sha256": "bf383569faa33aeedf79e952e8e5d3a26c4eaa8027393c7e2872b0cd153350e3"
+    },
+    "contract": {
+      "path": "scripts/assets/canonical-shard-1-production-v4.ts",
+      "sha256": "604e814686fd594ab0e623665a561fe6ba1803097dba3f40b5bc4463c6f045cc"
+    },
+    "v3_contract": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3.ts",
+      "sha256": "cc0a51bf7d199310c8902b69e591f2c540607c0b520dd299f0ac04612498c725"
+    },
+    "v3_ops": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3-ops.ts",
+      "sha256": "5b5ace84713504f5b76f2ea5d6ab88ccab3709e9fa016064c5e5eeb00f906d2b"
+    },
+    "v2_plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1-continuation-v2.ts",
+      "sha256": "f34f8fa936abf233ad55eab1fb5310709bface62a876d6c78544554dbc525cfb"
+    },
+    "legacy_plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1.ts",
+      "sha256": "9d347f0ac264d129943f82e3c3b34a3ee915b4ef124e455203fc75d1ec1328f2"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    },
+    "package_json": {
+      "path": "package.json",
+      "sha256": "a1e0807b75b2a18c3d927f107993c1d683daae49949ed2ecd0478d89252c3b1b"
+    },
+    "package_lock": {
+      "path": "package-lock.json",
+      "sha256": "13471a5f8fefa27551d342f9c0d45863cad31677557f528d7039524ff4abe6c4"
+    },
+    "legacy_production_revocation": {
+      "path": "assets/manifests/t015-legacy-production-revocation-v3.json",
+      "sha256": "848999db0e77f0efee38d379316018727817cc37e13a112d47d3623ebbaad536"
+    },
+    "v3_approval": {
+      "path": "assets/evidence/t015-canonical-shard-1-approval-v3.json",
+      "sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef"
+    }
+  },
+  "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
+  "legacy_balance_disclosure": {
+    "balance_observation_present": true,
+    "observed_balance_decimal": "791.40",
+    "observed_balance_units": 79140,
+    "provider_observed_at": "2026-08-13T05:20:07.000Z",
+    "historical_pre_submit_balance_decimal": "861.90",
+    "implied_legacy_delta_decimal": "70.50",
+    "implied_legacy_delta_units": 7050,
+    "expected_legacy_delta_decimal": "18.00",
+    "legacy_delta_mismatch": true,
+    "legacy_provider_balance_delta_verified": false,
+    "legacy_delta_disclosure_incomplete": false
+  },
+  "scope": {
+    "category": "CANONICAL",
+    "paid_slice": "12..331",
+    "paid_asset_count": 320,
+    "paid_batch_count": 27,
+    "paid_batch_sizes": "12x26+8",
+    "batch_max": 12,
+    "unit_cost_decimal": "1.50",
+    "additional_credit_cap_decimal": "480.00",
+    "additional_credit_cap_units": 48000,
+    "legacy_cap_committed_decimal": "18.00",
+    "legacy_cap_committed_units": 1800,
+    "total_credit_cap_decimal": "498.00",
+    "total_credit_cap_units": 49800,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "t016_or_other_assets_allowed": false
+  },
+  "prior_t015_v1_v2_or_v3_approval_inherited": false,
+  "acknowledges_prior_approvals_not_inherited": true,
+  "committed_clean_runtime_binding_required": true,
+  "automatic_paid_retry_count": 0
+}

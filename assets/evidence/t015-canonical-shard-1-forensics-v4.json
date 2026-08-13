@@ -1,0 +1,48 @@
+{
+  "schema_version": 4,
+  "evidence_version": "t015-canonical-shard-1-forensics-v4",
+  "secret_free": true,
+  "immutable_sources": {
+    "operations_v1": {
+      "path": "assets/runs/t015-canonical-shard-1/operations-v1.json",
+      "sha256": "81d7ab7abdadbf86ee420953690550b62621910907fd9bb11cd8ccb19cf0d6f5"
+    },
+    "operations_v2": {
+      "path": "assets/runs/t015-canonical-shard-1/operations-v2.json",
+      "sha256": "ff85d69888cc023c0cbd7f54e043239fdd47b28a7393870f96e87f58b3663fee"
+    },
+    "operations_v3": {
+      "path": "assets/runs/t015-canonical-shard-1/operations-v3.json",
+      "sha256": "91ca710c6c02e72e89bd28876f7884b8793f1a6f60087655bcb217545fd64d0a"
+    },
+    "v2_plan": {
+      "path": "assets/evidence/t015-forensic-canonical-shard-1-v2.plan.json",
+      "sha256": "49809ecf7f10fb590014b023b2c9328415fedae36be83bb883a4e3c090d45e4b"
+    },
+    "v3_approval": {
+      "path": "assets/evidence/t015-canonical-shard-1-approval-v3.json",
+      "sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef"
+    }
+  },
+  "observed": {
+    "v3_run_state": "HOLD_FOR_FUTURE_PAID_IMPLEMENTATION",
+    "v3_recovered_slice": "0..11",
+    "v3_recovery_count": 12,
+    "v3_failure_count": 2,
+    "recovered_dimensions": [
+      "896x1200"
+    ],
+    "recovered_aspect_error_ppm_max": 4445,
+    "aspect_tolerance_ppm": 5000,
+    "legacy_cap_committed_decimal": "18.00",
+    "legacy_provider_balance_delta_verified": false,
+    "paid_retry_count": 0
+  },
+  "policy": {
+    "mutate_v1_v2_or_v3_journals": false,
+    "paid_resubmit_of_legacy_jobs": false,
+    "automatic_paid_retry_allowed": false,
+    "batch_scoped_fail_stop": true,
+    "operator_gated_resume_never_resubmits": true
+  }
+}

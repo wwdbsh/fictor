@@ -1,0 +1,55 @@
+{
+  "schema_version": 3,
+  "manifest_version": "t015-implementation-binding-v3",
+  "issue_contract_sha256": "9b1e9fa39c72101fd653d4c11696bf022aa5c6c1c899871863c90895239f451e",
+  "files": {
+    "controller": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3-controller.ts",
+      "sha256": "88524f356b3babcfc18daa3789e78f7467fc4a2f078d873875861c5f9c5b0ca2"
+    },
+    "preparation": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3-cli.ts",
+      "sha256": "1a8e9e751890620fdf2873655e532abc4a67a5c01412cf65e127ba7508cf6b70"
+    },
+    "recovery": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3-ops.ts",
+      "sha256": "5b5ace84713504f5b76f2ea5d6ab88ccab3709e9fa016064c5e5eeb00f906d2b"
+    },
+    "contract": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3.ts",
+      "sha256": "cc0a51bf7d199310c8902b69e591f2c540607c0b520dd299f0ac04612498c725"
+    },
+    "v2_plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1-continuation-v2.ts",
+      "sha256": "f34f8fa936abf233ad55eab1fb5310709bface62a876d6c78544554dbc525cfb"
+    },
+    "legacy_plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1.ts",
+      "sha256": "9d347f0ac264d129943f82e3c3b34a3ee915b4ef124e455203fc75d1ec1328f2"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    },
+    "package_json": {
+      "path": "package.json",
+      "sha256": "a1e0807b75b2a18c3d927f107993c1d683daae49949ed2ecd0478d89252c3b1b"
+    },
+    "package_lock": {
+      "path": "package-lock.json",
+      "sha256": "13471a5f8fefa27551d342f9c0d45863cad31677557f528d7039524ff4abe6c4"
+    },
+    "legacy_production_revocation": {
+      "path": "assets/manifests/t015-legacy-production-revocation-v3.json",
+      "sha256": "848999db0e77f0efee38d379316018727817cc37e13a112d47d3623ebbaad536"
+    }
+  }
+}

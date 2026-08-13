@@ -1,0 +1,39 @@
+{
+  "schema_version": 3,
+  "evidence_version": "t015-controller-approval-attestation-v3",
+  "attester": "USER_CREATED_CONTROL_PLANE_MAIN_SESSION",
+  "goal_slug": "ship-fictor-track1-2026",
+  "task_key": "T015",
+  "issue_number": 17,
+  "issue_contract_sha256": "9b1e9fa39c72101fd653d4c11696bf022aa5c6c1c899871863c90895239f451e",
+  "event_sequence": {
+    "assistant_disclosure_presented_at": "2026-08-12T09:19:45.586Z",
+    "exact_user_reply_ko": "위 재복구 위험을 확인했고 T015 기존 12개 job ID의 무과금 v3 복구와 CANONICAL 12..331 정확히 320장의 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
+    "exact_user_reply_received_at": "2026-08-13T02:10:14.000Z",
+    "exact_scoped_approval_received_after_disclosure": true
+  },
+  "bindings": {
+    "plan_sha256": "1c4567290db85fd813e7affaf315190a678244dc5131ad784a62d5506d7b90b2",
+    "disclosure_presentation_evidence_sha256": "e8443bc329182a60a2629fe6657469d9d7eea77729a1bb1d9a53dd97e3777dc1",
+    "risk_disclosure_evidence_sha256": "ea470b370db6dcd521f71ac352b186f5b29253d22a5d0b556dbf4cdbfde00ce7",
+    "risk_disclosure_text_sha256": "bc94585a68132155bdb87acef3aa88d84203d943c536cd6d8b3fe5136d35ef47",
+    "provider_schema_evidence_sha256": "30be6510c331e98fcbbcc202b7c276a20bbb811d4096bc73b7b9810d2d923793",
+    "v2_forensics_sha256": "64db335ee201a1279defb251795a424db55022d1c2554832b905bf00be40946b",
+    "failed_v2_journal_sha256": "ff85d69888cc023c0cbd7f54e043239fdd47b28a7393870f96e87f58b3663fee",
+    "implementation_binding_sha256": "e3956e15491594473ba87cb00d8bd5ec6cfa1fde786f5019ddbebfd9cc231ff6"
+  },
+  "scope": {
+    "category": "CANONICAL",
+    "recovery_slice": "0..11",
+    "recovery_asset_count": 12,
+    "recovery_paid_submit_allowed": false,
+    "future_paid_slice": "12..331",
+    "future_paid_asset_count": 320,
+    "future_additional_credit_cap_decimal": "480.00",
+    "legacy_cap_committed_decimal": "18.00",
+    "total_credit_cap_decimal": "498.00",
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "t016_or_other_assets_allowed": false
+  },
+  "secret_free": true
+}

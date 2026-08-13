@@ -1,0 +1,121 @@
+{
+  "schema_version": 4,
+  "evidence_version": "t015-canonical-shard-1-disclosure-presentation-v4",
+  "secret_free": true,
+  "pending_packet_sha256": "5126ae374691c52d391dd1f62cfb67f8c6d065a60cf745132300bad8bd29c177",
+  "plan_sha256": "94652a5a58c231b96e018bdc99eb639f83a904fb356450e926c75a22561b713f",
+  "risk_disclosure_evidence_sha256": "441cad7f8dc559941671f27e52bd27bade8b3e37a238b7e9e9378d0ea6b77cda",
+  "risk_disclosure_text_sha256": "c2e868a6d523b139970b4cc1d19bd359aebc0f2ffa90eeb029eb365fa81ad260",
+  "risk_disclosure_text_ko": "T015 v4는 CANONICAL 12..331 정확히 320장을 27개 배치(각 최대 12장, 12x26+8)로 배치당 단 한 번씩 유료 생성합니다. 추가 상한은 480.00 credits(정확 단가 1.50 x 320장)이고, 이미 사용 처리된 legacy 18.00을 더한 누적 상한은 498.00이며 자동 유료 재시도 예산은 0입니다.\n(i) 배치마다 제출 응답을 잃을 수 있는 모호 제출(ambiguous submission) 구간이 정확히 1회씩, 총 27회 존재합니다. 각 구간에서 최대 18.00 credits(12장 x 1.50)가 실제로 차감되고도 응답을 받지 못하면 그 배치의 job ID를 전혀 열거할 수 없고, 따라서 이미 지불한 이미지를 영구히 회수하지 못할 수 있습니다.\n(ii) 각 배치는 단 한 번만 제출합니다. 유료 envelope이 한 번이라도 밖으로 나간 배치는 모호 제출이든 부분 응답이든 즉시 fail-stop하고 어떤 경우에도 재제출하지 않습니다.\n(iii) fail-stop은 실행 전체가 아니라 배치 단위로 적용됩니다. 다음 배치로 넘어가려면 operator가 정확한 재개 문구를 입력해야 합니다. 재개는 두 갈래뿐입니다. 지출이 0인 배치(유료 envelope이 나가기 전 preflight 단계 실패)는 재개 뒤 PLANNED로 되돌려 같은 배치를 처음부터 다시 실행할 수 있고, 이때도 이전 실패 기록은 저널에 그대로 보존됩니다. 이미 지출이 발생했을 수 있는 배치는 절대 재실행하지 않고, operator가 정확히 “T015 v4 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.”로 손실을 확인해야만 다음 배치가 열립니다. 확인된 손실은 480.00 상한에서 그대로 차감되어 남은 배치의 예산을 줄이며, 손실된 index의 이미지는 이 승인으로는 다시 생성하지 않습니다. 다시 만들려면 별도의 새 고지와 새 승인이 필요합니다. 손실이 하나라도 확인된 실행은 정확히 480.00으로 닫히지 않고 CLOSED_WITH_LOSSES 상태로 종료되며, 최종 audit은 회수한 자산 수와 확인된 손실 금액을 함께 보고합니다.\n(iv) v3에서 복구한 PNG 12장은 모두 896x1200으로 관찰되었고 3:4 대비 종횡비 오차는 약 4444ppm(저널 기록 반올림값 4445ppm), 허용 오차는 5000ppm입니다. provider가 해상도를 조금만 바꿔도 이미 과금된 배치가 종횡비 검증에서 실패할 수 있으며 그 지출은 돌아오지 않습니다.\n(v) legacy 18.00 balance delta는 아직 provider로 검증되지 않았습니다. 이 고지에는 새로 관찰한 balance와 제출 전 기록값 861.90에서 그 값을 뺀 함의 legacy delta를 함께 싣고, 함의 delta가 18.00이 아니면 legacy_delta_mismatch로 표시해 전면에 드러냅니다.\n(vi) credits는 2026-08-17에 만료됩니다. 정확한 만료 시각(hour)은 알 수 없습니다.\n(vii) 복구 개시와 재개에 쓰는 operator 문구는 agent가 스스로 입력할 수 있으므로 사용자 동의를 대신하지 않습니다. 사고와 오작동을 막는 게이트일 뿐입니다.\n(viii) 모든 요청은 use_unlim:false를 문자 그대로 포함하며 이 값은 각 자산의 canonical_request_sha256 안에 고정되어 있습니다.\n(ix) v3 승인은 상속되지 않습니다. v4 유료 실행은 이 고지 뒤에 받은 새 정확 승인 문구를 요구합니다.\n(x) 모델 canary: 배치 canonical-shard-1-002의 provider-reported model이 nano_banana_flash로 확인되지 않으면 배치 canonical-shard-1-003은 열리지 않습니다. 다만 드리프트로 멈추더라도 그 canary 배치에 이미 지출된 credits는 회수되지 않습니다.\nsigned URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. operations-v1, operations-v2, operations-v3 저널과 v3 승인 증거는 불변 포렌식으로 바이트 고정합니다. T016, index 332 이후, materials, hearts, world 자산은 제외됩니다. 새 승인은 정확히 “위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.”로만 기록합니다.",
+  "provider_schema_evidence_sha256": "0ce87031a018b768ccd0ce137b493b4865a08c7b88296e8e93a26ed726b81f5c",
+  "forensics_evidence_sha256": "3c01a0749cda3ffacb56e198446603a4910efc1a26051d0acd22481cac0d877f",
+  "operations_v3_journal_sha256": "91ca710c6c02e72e89bd28876f7884b8793f1a6f60087655bcb217545fd64d0a",
+  "v3_approval_sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef",
+  "controller_disclosure_attestation_sha256": "8214326d6c9d2271bb4ad162bcb520ba61d47490e6f3744bb465b33a853d43a1",
+  "implementation_binding_sha256": "67d1db5556ee872f3fac02e74230ec935bc38d1ba92fba76537a7c5b39f24b93",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/canonical-shard-1-production-v4-controller.ts",
+      "sha256": "c46f17374a2df92689e3223581d8c595f92debb009aa506249db07ca42a905a1"
+    },
+    "preparation": {
+      "path": "scripts/assets/canonical-shard-1-production-v4-cli.ts",
+      "sha256": "f7c475bcc7c85b80a476f3ebeea890ea2d9c126da61d79c812dfd587e65d7f5d"
+    },
+    "production": {
+      "path": "scripts/assets/canonical-shard-1-production-v4-ops.ts",
+      "sha256": "3960cb1de231ef4d4c27621ee2da4be50b4a6e86d0ccbfbc29115f63cb0f468d"
+    },
+    "contract": {
+      "path": "scripts/assets/canonical-shard-1-production-v4.ts",
+      "sha256": "06b16169e803bab791bbc538b0f64379d7513b662030c75b7a76c75187d02c7c"
+    },
+    "v3_contract": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3.ts",
+      "sha256": "cc0a51bf7d199310c8902b69e591f2c540607c0b520dd299f0ac04612498c725"
+    },
+    "v3_ops": {
+      "path": "scripts/assets/canonical-shard-1-recovery-v3-ops.ts",
+      "sha256": "5b5ace84713504f5b76f2ea5d6ab88ccab3709e9fa016064c5e5eeb00f906d2b"
+    },
+    "v2_plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1-continuation-v2.ts",
+      "sha256": "f34f8fa936abf233ad55eab1fb5310709bface62a876d6c78544554dbc525cfb"
+    },
+    "legacy_plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1.ts",
+      "sha256": "9d347f0ac264d129943f82e3c3b34a3ee915b4ef124e455203fc75d1ec1328f2"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    },
+    "package_json": {
+      "path": "package.json",
+      "sha256": "a1e0807b75b2a18c3d927f107993c1d683daae49949ed2ecd0478d89252c3b1b"
+    },
+    "package_lock": {
+      "path": "package-lock.json",
+      "sha256": "13471a5f8fefa27551d342f9c0d45863cad31677557f528d7039524ff4abe6c4"
+    },
+    "legacy_production_revocation": {
+      "path": "assets/manifests/t015-legacy-production-revocation-v3.json",
+      "sha256": "848999db0e77f0efee38d379316018727817cc37e13a112d47d3623ebbaad536"
+    },
+    "v3_approval": {
+      "path": "assets/evidence/t015-canonical-shard-1-approval-v3.json",
+      "sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef"
+    }
+  },
+  "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
+  "disclosed_at": "2026-08-13T04:23:46.000Z",
+  "source": "current user conversation",
+  "legacy_balance_disclosure": {
+    "balance_observation_present": true,
+    "observed_balance_decimal": "843.90",
+    "observed_balance_units": 84390,
+    "provider_observed_at": "2026-08-13T04:23:46.000Z",
+    "historical_pre_submit_balance_decimal": "861.90",
+    "implied_legacy_delta_decimal": "18.00",
+    "implied_legacy_delta_units": 1800,
+    "expected_legacy_delta_decimal": "18.00",
+    "legacy_delta_mismatch": false,
+    "legacy_provider_balance_delta_verified": false,
+    "legacy_delta_disclosure_incomplete": false
+  },
+  "scope": {
+    "category": "CANONICAL",
+    "paid_slice": "12..331",
+    "paid_asset_count": 320,
+    "paid_batch_count": 27,
+    "paid_batch_sizes": "12x26+8",
+    "batch_max": 12,
+    "unit_cost_decimal": "1.50",
+    "additional_credit_cap_decimal": "480.00",
+    "additional_credit_cap_units": 48000,
+    "legacy_cap_committed_decimal": "18.00",
+    "legacy_cap_committed_units": 1800,
+    "total_credit_cap_decimal": "498.00",
+    "total_credit_cap_units": 49800,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "t016_or_other_assets_allowed": false
+  },
+  "exact_approval_phrase_required": "위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
+  "recovery_operator_phrase": "T015 v4 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T015 v4 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "prior_t015_v1_v2_or_v3_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "authorized": false
+}

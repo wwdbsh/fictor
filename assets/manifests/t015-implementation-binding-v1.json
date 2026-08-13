@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "manifest_version": "t015-implementation-binding-v1",
+  "issue_contract_sha256": "9b1e9fa39c72101fd653d4c11696bf022aa5c6c1c899871863c90895239f451e",
+  "files": {
+    "controller": {
+      "path": "scripts/assets/canonical-shard-1-v1-controller.ts",
+      "sha256": "03109ed82183c84f485e483d979983322ed2e2dd0a921d27a9c94062a041f576"
+    },
+    "plan_builder": {
+      "path": "scripts/assets/canonical-shard-1-v1.ts",
+      "sha256": "9d347f0ac264d129943f82e3c3b34a3ee915b4ef124e455203fc75d1ec1328f2"
+    },
+    "ops": {
+      "path": "scripts/assets/canonical-shard-1-v1-ops-cli.ts",
+      "sha256": "efbb729758b3e3229609f4127e5ddccec4cd8ed50a67742ae92d2909781c467d"
+    },
+    "cli": {
+      "path": "scripts/assets/canonical-shard-1-v1-cli.ts",
+      "sha256": "c4f61239ee3645bc59dc61e2b0fbc065e464cb639f283d8cf40e6ebaacedd9fb"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    },
+    "package_json": {
+      "path": "package.json",
+      "sha256": "a1e0807b75b2a18c3d927f107993c1d683daae49949ed2ecd0478d89252c3b1b"
+    },
+    "package_lock": {
+      "path": "package-lock.json",
+      "sha256": "13471a5f8fefa27551d342f9c0d45863cad31677557f528d7039524ff4abe6c4"
+    }
+  }
+}
