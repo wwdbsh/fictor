@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t020-world-art-approval-v1",
+  "secret_free": true,
+  "decision": "APPROVE_T020_WORLD_ART_EXACTLY_54_ASSETS_81_00_CREDIT_CAP",
+  "source": "controller approval attestation",
+  "exact_user_quote": "T020 세계 아트 54장 생성을 승인한다. 한도 81.00 크레딧.",
+  "approved_at": "2026-08-13T22:14:35.000Z",
+  "disclosed_at": "2026-08-13T15:08:45.000Z",
+  "plan_sha256": "b3e86fbbc593b87fdf6411102f2df25fbd7c55079121d01b2011e083289db419",
+  "disclosure_presentation_evidence_sha256": "d516f3fc5ddacd08fe9a57c6bf54d41550a212a98e03f655c145f8e28563edfe",
+  "risk_disclosure_evidence_sha256": "792e51a62e547d04195e748936a6c2e16fa750b9fd4807c0a46bc7cbd5bb9e3f",
+  "risk_disclosure_text_sha256": "42931881ab890a3af2b6e506786cd066e72d879df021f354a7956b4c62399969",
+  "provider_schema_evidence_sha256": "d39f7f5a242eb19e0cd98d71508014709f4ea5e74df51e0e57b21aa379ed56f8",
+  "forensics_evidence_sha256": "a47d037eeb575bc7e5e15532bc0d271d308b1ffd56fdfc2687510c860214c8a5",
+  "controller_disclosure_attestation_sha256": "91315c588fbc01149976b2dde9ef9a9b671bdce4b055fb2140a14cc55dff2a32",
+  "controller_approval_attestation_path": "assets/evidence/t020-world-art-controller-approval-attestation-v1.json",
+  "controller_approval_attestation_sha256": "ec6bf4ba43825f3f847c52e81f04e166df264318b9042c94bdc21f70cc377361",
+  "implementation_binding_sha256": "65e3a4c509729f2058375576bc3dfa66528d789be3f6101bc66c02dc74c89c10",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
+      "sha256": "fd7a888e97073ab46279b2ddd3e68fb2129024b0ba10adf48ce43e5e9ea75240"
+    },
+    "preparation": {
+      "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
+      "sha256": "932e1faeb6c291a2cf37a5a1cba1fec10c6183f6a4a4b712609b1557c7b3b778"
+    },
+    "production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "master_style_sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d",
+  "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
+  "balance_disclosure": {
+    "balance_observation_present": true,
+    "observed_balance_decimal": "363.90",
+    "observed_balance_units": 36390,
+    "provider_observed_at": "2026-08-13T15:08:38.000Z",
+    "total_credit_cap_decimal": "81.00",
+    "projected_remainder_decimal": "282.90",
+    "covers_total_cap": true,
+    "balance_disclosure_incomplete": false
+  },
+  "scope": {
+    "task_key": "T020",
+    "categories": [
+      "ENEMY",
+      "ELITE",
+      "BACKGROUND"
+    ],
+    "asset_count": 54,
+    "enemy_asset_count": 36,
+    "background_asset_count": 18,
+    "batch_count": 5,
+    "batch_sizes": [
+      6,
+      12,
+      12,
+      12,
+      12
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "enemy_aspect_ratio": "3:4",
+    "background_aspect_ratio": "16:9",
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "81.00",
+    "total_credit_cap_units": 8100,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 5,
+    "model_canary_batch_id": "world-art-001",
+    "model_canary_applies_to_every_batch": true,
+    "aspect_canary_batch_id": "world-art-001",
+    "aspect_canary_exposure_decimal": "9.00",
+    "aspect_tolerance_ppm": 5000,
+    "aspect_16_9_request_and_price_validated": true,
+    "aspect_16_9_delivered_geometry_validated": false,
+    "provider_contract_drift_codes": [
+      "MODEL_DRIFT",
+      "ASPECT_MISMATCH"
+    ],
+    "provider_contract_drift_blocks_all_later_batches": true,
+    "provider_contract_drift_is_a_bookable_loss": true,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "boss_world_art_allowed": false,
+    "event_art_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "prior_task_approval_inherited": false,
+  "acknowledges_prior_approvals_not_inherited": true,
+  "committed_clean_runtime_binding_required": true,
+  "automatic_paid_retry_count": 0
+}

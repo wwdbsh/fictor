@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "artifact_version": "t020-world-art-disclosure-presentation-v1-pending",
+  "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
+  "secret_free": true,
+  "plan_sha256": "b3e86fbbc593b87fdf6411102f2df25fbd7c55079121d01b2011e083289db419",
+  "risk_disclosure_evidence_sha256": "792e51a62e547d04195e748936a6c2e16fa750b9fd4807c0a46bc7cbd5bb9e3f",
+  "risk_disclosure_text_sha256": "42931881ab890a3af2b6e506786cd066e72d879df021f354a7956b4c62399969",
+  "provider_schema_evidence_sha256": "d39f7f5a242eb19e0cd98d71508014709f4ea5e74df51e0e57b21aa379ed56f8",
+  "forensics_evidence_sha256": "a47d037eeb575bc7e5e15532bc0d271d308b1ffd56fdfc2687510c860214c8a5",
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "master_style_sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d",
+  "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
+  "implementation_binding_sha256": "65e3a4c509729f2058375576bc3dfa66528d789be3f6101bc66c02dc74c89c10",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
+      "sha256": "fd7a888e97073ab46279b2ddd3e68fb2129024b0ba10adf48ce43e5e9ea75240"
+    },
+    "preparation": {
+      "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
+      "sha256": "932e1faeb6c291a2cf37a5a1cba1fec10c6183f6a4a4b712609b1557c7b3b778"
+    },
+    "production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "exact_approval_phrase_required": "T020 세계 아트 54장 생성을 승인한다. 한도 81.00 크레딧.",
+  "recovery_operator_phrase": "T020 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T020 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "loss_acknowledgment_operator_phrase": "T020 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "approval_attestation_is_agent_writable": true,
+  "human_approval_gate_is_procedural": true,
+  "prior_task_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "scope": {
+    "task_key": "T020",
+    "categories": [
+      "ENEMY",
+      "ELITE",
+      "BACKGROUND"
+    ],
+    "asset_count": 54,
+    "enemy_asset_count": 36,
+    "background_asset_count": 18,
+    "batch_count": 5,
+    "batch_sizes": [
+      6,
+      12,
+      12,
+      12,
+      12
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "enemy_aspect_ratio": "3:4",
+    "background_aspect_ratio": "16:9",
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "81.00",
+    "total_credit_cap_units": 8100,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 5,
+    "model_canary_batch_id": "world-art-001",
+    "model_canary_applies_to_every_batch": true,
+    "aspect_canary_batch_id": "world-art-001",
+    "aspect_canary_exposure_decimal": "9.00",
+    "aspect_tolerance_ppm": 5000,
+    "aspect_16_9_request_and_price_validated": true,
+    "aspect_16_9_delivered_geometry_validated": false,
+    "provider_contract_drift_codes": [
+      "MODEL_DRIFT",
+      "ASPECT_MISMATCH"
+    ],
+    "provider_contract_drift_blocks_all_later_batches": true,
+    "provider_contract_drift_is_a_bookable_loss": true,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "boss_world_art_allowed": false,
+    "event_art_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "authorized": false
+}

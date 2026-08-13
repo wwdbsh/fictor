@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "manifest_version": "t020-world-art-implementation-binding-v1",
+  "issue_number": 22,
+  "issue_contract_sha256": "0612a8cc46a3e9db8b8c8ad82e132c15484d77c18205ff5530507f55a794aea9",
+  "files": {
+    "controller": {
+      "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
+      "sha256": "fd7a888e97073ab46279b2ddd3e68fb2129024b0ba10adf48ce43e5e9ea75240"
+    },
+    "preparation": {
+      "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
+      "sha256": "932e1faeb6c291a2cf37a5a1cba1fec10c6183f6a4a4b712609b1557c7b3b778"
+    },
+    "production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  }
+}

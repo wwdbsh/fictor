@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t020-world-art-controller-disclosure-attestation-v1",
+  "attester": "USER_CREATED_CONTROL_PLANE_MAIN_SESSION",
+  "goal_slug": "ship-fictor-track1-2026",
+  "task_key": "T020",
+  "issue_number": 22,
+  "issue_contract_sha256": "0612a8cc46a3e9db8b8c8ad82e132c15484d77c18205ff5530507f55a794aea9",
+  "event_sequence": {
+    "assistant_disclosure_presented_at": "2026-08-13T15:08:45.000Z",
+    "assistant_disclosure_text_sha256": "42931881ab890a3af2b6e506786cd066e72d879df021f354a7956b4c62399969",
+    "assistant_disclosure_was_presented_in_current_conversation": true,
+    "exact_scoped_approval_received_after_disclosure": false
+  },
+  "bindings": {
+    "plan_sha256": "b3e86fbbc593b87fdf6411102f2df25fbd7c55079121d01b2011e083289db419",
+    "pending_disclosure_packet_sha256": "77799e922ea3eb0a20a0ffd53aa39886fea5fbc18345124666017956b37a4c11",
+    "risk_disclosure_evidence_sha256": "792e51a62e547d04195e748936a6c2e16fa750b9fd4807c0a46bc7cbd5bb9e3f",
+    "risk_disclosure_text_sha256": "42931881ab890a3af2b6e506786cd066e72d879df021f354a7956b4c62399969",
+    "provider_schema_evidence_sha256": "d39f7f5a242eb19e0cd98d71508014709f4ea5e74df51e0e57b21aa379ed56f8",
+    "forensics_evidence_sha256": "a47d037eeb575bc7e5e15532bc0d271d308b1ffd56fdfc2687510c860214c8a5",
+    "implementation_binding_sha256": "65e3a4c509729f2058375576bc3dfa66528d789be3f6101bc66c02dc74c89c10"
+  },
+  "scope": {
+    "task_key": "T020",
+    "categories": [
+      "ENEMY",
+      "ELITE",
+      "BACKGROUND"
+    ],
+    "asset_count": 54,
+    "enemy_asset_count": 36,
+    "background_asset_count": 18,
+    "batch_count": 5,
+    "batch_sizes": [
+      6,
+      12,
+      12,
+      12,
+      12
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "enemy_aspect_ratio": "3:4",
+    "background_aspect_ratio": "16:9",
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "81.00",
+    "total_credit_cap_units": 8100,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 5,
+    "model_canary_batch_id": "world-art-001",
+    "model_canary_applies_to_every_batch": true,
+    "aspect_canary_batch_id": "world-art-001",
+    "aspect_canary_exposure_decimal": "9.00",
+    "aspect_tolerance_ppm": 5000,
+    "aspect_16_9_request_and_price_validated": true,
+    "aspect_16_9_delivered_geometry_validated": false,
+    "provider_contract_drift_codes": [
+      "MODEL_DRIFT",
+      "ASPECT_MISMATCH"
+    ],
+    "provider_contract_drift_blocks_all_later_batches": true,
+    "provider_contract_drift_is_a_bookable_loss": true,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "boss_world_art_allowed": false,
+    "event_art_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "secret_free": true
+}
