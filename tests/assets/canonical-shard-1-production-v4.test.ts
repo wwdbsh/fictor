@@ -138,7 +138,7 @@ describe("T015 v4 plan identity", () => {
     expect(plan.legacy_recovery.assets).toHaveLength(12);
   });
 
-  test("discloses every required v4 risk and stays unauthorized before the fresh exact approval", () => {
+  test("discloses every required v4 risk and records the fresh v4.3 authorization", () => {
     for (const fragment of ["27", "18.00", "재제출", "896x1200", "4444ppm", "5000ppm", "861.90", "legacy_delta_mismatch", "2026-08-17", "use_unlim:false", "nano_banana_flash", "CLOSED_WITH_LOSSES", T015_V4_CANARY_BLOCKED_BATCH_ID, T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, T015_V4_3_EXACT_APPROVAL_PHRASE]) expect(T015_V4_RISK_TEXT).toContain(fragment);
     // v4.2 must disclose both mid-run defects, the migration, 004's expected discharge, the
     // index that stays ungenerated under this approval, and the spend already committed.
@@ -150,8 +150,12 @@ describe("T015 v4 plan identity", () => {
     expect(T015_V4_3_EXACT_APPROVAL_PHRASE).not.toBe(T015_V4_EXACT_APPROVAL_PHRASE);
     expect(T015_V4_RISK_TEXT).not.toContain(T015_V4_EXACT_APPROVAL_PHRASE);
     const checked = checkT015V4Preparation(repositoryRoot);
-    expect(checked.authorized).toBe(false);
-    expect(isT015V4Authorized(repositoryRoot, checked.plan)).toBe(false);
+    // The fresh v4.3 approval was controller-attested and committed on 2026-08-13
+    // (assets/evidence/t015-canonical-shard-1-approval-v4.3.json), so the live gate is
+    // authorized; the frozen pending packet stays authorized:false as the immutable
+    // pre-approval record.
+    expect(checked.authorized).toBe(true);
+    expect(isT015V4Authorized(repositoryRoot, checked.plan)).toBe(true);
     expect(JSON.parse(readFileSync(resolve(repositoryRoot, T015_V4_PENDING_PATH), "utf8"))).toMatchObject({ authorized: false, exact_approval_phrase_required: T015_V4_3_EXACT_APPROVAL_PHRASE, prior_t015_v1_v2_or_v3_approval_inherited: false });
   });
 
