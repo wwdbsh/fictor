@@ -114,7 +114,21 @@
     "canary_batch_id": "world-art-001",
     "canary_exposure_decimal": "9.00"
   },
+  "observed_unpaid_16_9_cost_probe": {
+    "source": "OPERATOR_OBSERVED",
+    "tool": "generate_image",
+    "get_cost": true,
+    "model": "nano_banana_2",
+    "aspect_ratio": "16:9",
+    "resolution_defaulted": "1k",
+    "credits": 1,
+    "credits_exact": 1.5,
+    "same_price_as_3_4": true,
+    "request_shape_accepted": true,
+    "delivered_dimensions_observed": false,
+    "observed_at_utc_date": "2026-08-13"
+  },
   "unvalidated": {
-    "aspect_16_9_never_observed_from_this_provider": true
+    "aspect_16_9_delivered_dimensions_never_observed": true
   }
 }

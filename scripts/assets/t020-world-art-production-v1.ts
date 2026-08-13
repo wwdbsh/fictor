@@ -132,7 +132,7 @@ export const T020_V1_RISK_TEXT = `T020은 세계 아트 정확히 54장(배경 1
 (i) 배치마다 제출 응답을 잃을 수 있는 모호 제출(ambiguous submission) 구간이 정확히 1회씩, 총 5회 존재합니다. 각 구간에서 최대 18.00 credits(12장 x 1.50)가 실제로 차감되고도 응답을 받지 못하면 그 배치의 job ID를 전혀 열거할 수 없고, 따라서 이미 지불한 이미지를 영구히 회수하지 못할 수 있습니다.
 (ii) 각 배치는 단 한 번만 제출합니다. 유료 envelope이 한 번이라도 밖으로 나간 배치는 모호 제출이든 부분 응답이든 즉시 fail-stop하고 어떤 경우에도 재제출하지 않습니다.
 (iii) fail-stop은 실행 전체가 아니라 배치 단위로 적용됩니다. 다음 배치로 넘어가려면 operator가 정확한 재개 문구를 입력해야 합니다. 재개는 두 갈래뿐입니다. 지출이 0인 배치(유료 envelope이 나가기 전 preflight 단계 실패)는 재개 뒤 PLANNED로 되돌려 같은 배치를 처음부터 다시 실행할 수 있고, 이때도 이전 실패 기록은 저널에 그대로 보존됩니다. 이미 지출이 발생했을 수 있는 배치는 절대 재실행하지 않고, operator가 정확히 “${T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE}”로 손실을 확인해야만 다음 배치가 열립니다. 확인된 손실은 81.00 상한에서 그대로 차감되어 남은 배치의 예산을 줄이며, 손실된 자산의 이미지는 이 승인으로는 다시 생성하지 않습니다. 다시 만들려면 별도의 새 고지와 새 승인이 필요합니다. 손실이 하나라도 확인된 실행은 정확히 81.00으로 닫히지 않고 CLOSED_WITH_LOSSES 상태로 종료됩니다.
-(iv) 종횡비 위험과 그 배치 순서 - 이 실행은 서로 다른 두 종횡비를 요청합니다. 배경 18장은 16:9이고 적 36장은 3:4입니다. 3:4는 T015에서 실측 검증된 값입니다(해상도 1k에서 관찰 896x1200, 오차 4445ppm, 허용 5000ppm이므로 여유가 크지 않습니다). 반면 16:9는 이 provider에게 유료·무료 어느 쪽으로도 한 번도 관찰된 적이 없는 유일한 미검증 변수입니다. 저장 시 검증은 절대 화소수가 아니라 오직 가로:세로 비율만 봅니다. 1k 기준 약 1,075,200화소에서 정확한 16:9(예: 1344x756, 1408x792, 1280x720)는 오차 0ppm으로 통과하지만, 7:4(1344x768)는 15625ppm, 4:3(1024x768)은 250000ppm으로 허용치를 넘어 실패합니다. 그리고 그렇게 실패한 이미지도 provider는 이미 과금했으므로 그 지출은 돌아오지 않습니다. 그래서 배치 1을 배경 6장(9.00 credits)으로 두어 이 미검증 변수를 가능한 최소 노출로 먼저 확인합니다. 배치 1이 허용치를 벗어난 이미지를 내려주면 이후 모든 배치는 열리지 않으며, 이 승인의 어떤 operator 문구로도 다시 열 수 없습니다. 계속하려면 별도의 새 고지와 새 승인이 필요합니다.
+(iv) 종횡비 위험과 그 배치 순서 - 이 실행은 서로 다른 두 종횡비를 요청합니다. 배경 18장은 16:9이고 적 36장은 3:4입니다. 3:4는 T015에서 실측 검증된 값입니다(해상도 1k에서 관찰 896x1200, 오차 4445ppm, 허용 5000ppm이므로 여유가 크지 않습니다). 반면 16:9는 아직 실제 이미지를 받아본 적이 없는 유일한 변수입니다. 2026-08-13(UTC) 무과금 get_cost 관찰에서 16:9 요청 형식이 수용되고 단가가 3:4와 동일한 credits_exact 1.50임을 확인했습니다(해상도는 1k로 기본 적용). 따라서 요청이 거부되거나 더 비싸게 청구될 위험은 해소되었고, 남은 미검증 변수는 provider가 실제로 내려주는 화소 비율 하나뿐입니다. 이 관찰은 operator가 제시한 것이며 이 도구가 직접 호출해 검증한 것이 아닙니다. 저장 시 검증은 절대 화소수가 아니라 오직 가로:세로 비율만 봅니다. 1k 기준 약 1,075,200화소에서 정확한 16:9(예: 1344x756, 1408x792, 1280x720)는 오차 0ppm으로 통과하지만, 7:4(1344x768)는 15625ppm, 4:3(1024x768)은 250000ppm으로 허용치를 넘어 실패합니다. 그리고 그렇게 실패한 이미지도 provider는 이미 과금했으므로 그 지출은 돌아오지 않습니다. 그래서 배치 1을 배경 6장(9.00 credits)으로 두어 이 미검증 변수를 가능한 최소 노출로 먼저 확인합니다. 배치 1이 허용치를 벗어난 이미지를 내려주면 이후 모든 배치는 열리지 않으며, 이 승인의 어떤 operator 문구로도 다시 열 수 없습니다. 계속하려면 별도의 새 고지와 새 승인이 필요합니다.
 (v) 저장 경로 - 각 자산은 고정된 core manifest의 path 필드를 그대로 씁니다. 배경은 ${T020_V1_LOCAL_ROOT}/backgrounds/, 적과 엘리트는 ${T020_V1_LOCAL_ROOT}/enemies/에 저장되고 같은 상대 경로로 ${T020_V1_BACKUP_ROOT} 아래에 백업됩니다. 두 사본은 저장 직후 sha256이 서로 같아야 하며 다르면 fail-stop입니다.
 (vi) 과금은 provider가 보고하는 credits_exact(1.50)만 사용합니다. 화면 표시값 credits(1.00)는 기록만 하고 상한 계산에 절대 쓰지 않습니다.
 (vii) credits는 2026-08-17에 만료됩니다. 정확한 만료 시각(hour)은 알 수 없습니다.
@@ -220,7 +220,10 @@ export function buildT020Forensics(root: string) {
     },
     observed: {
       prior_paid_spend_units: 0, prior_journal_present: false, legacy_recovery_present: false,
-      aspect_3_4_provider_validated: true, aspect_16_9_provider_validated: false,
+      aspect_3_4_provider_validated: true,
+      // Split deliberately: the unpaid probe settled the request shape and the price, and
+      // settled nothing about the pixels the provider will actually hand back.
+      aspect_16_9_request_and_price_validated: true, aspect_16_9_delivered_geometry_validated: false,
       aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM, paid_retry_count: 0,
     },
     policy: {
@@ -245,7 +248,8 @@ export function t020ApprovalScope() {
     max_batch_exposure_decimal: decimalT020(T020_V1_MAX_BATCH_EXPOSURE_UNITS), ambiguous_submission_windows: T020_V1_BATCH_COUNT,
     model_canary_batch_id: T020_V1_CANARY_BATCH_ID, model_canary_applies_to_every_batch: true,
     aspect_canary_batch_id: T020_V1_CANARY_BATCH_ID, aspect_canary_exposure_decimal: decimalT020(T020_V1_CANARY_EXPOSURE_UNITS),
-    aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM, aspect_16_9_provider_validated: false,
+    aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM,
+    aspect_16_9_request_and_price_validated: true, aspect_16_9_delivered_geometry_validated: false,
     provider_contract_drift_codes: ["MODEL_DRIFT", "ASPECT_MISMATCH"], provider_contract_drift_blocks_all_later_batches: true,
     provider_contract_drift_is_a_bookable_loss: true,
     credit_expiry_date: T020_V1_CREDIT_EXPIRY_DATE, credit_expiry_hour_known: false,
@@ -264,7 +268,16 @@ export function buildT020Schema() {
     secure_download: { resolver_mapped_ipv6_allowed: false, resolver_public_ipv4_allowed: true, transport_peer_pin_required: true, fresh_connection_per_request: true, auto_select_family: false, remote_address_captured_at_response_headers: true, url_or_host_diagnostics_persisted: false },
     model_canary: { canary_batch_id: T020_V1_CANARY_BATCH_ID, applies_to_every_batch: true, blocks_next_batch_until_previous_model_verified: true, blocks_batch_id_on_drift: T020_V1_CANARY_BLOCKED_BATCH_ID, drift_still_costs_batch_spend: true },
     aspect_expectation: T020_V1_ASPECT_EXPECTATION,
-    unvalidated: { aspect_16_9_never_observed_from_this_provider: true },
+    /* Operator-supplied observation relayed into the evidence chain. This tool made no
+       provider call: it settles the request shape and the price at 16:9, and says nothing
+       about the dimensions the provider will actually deliver. */
+    observed_unpaid_16_9_cost_probe: {
+      source: "OPERATOR_OBSERVED", tool: "generate_image", get_cost: true, model: T020_V1_REQUESTED_MODEL,
+      aspect_ratio: "16:9", resolution_defaulted: "1k", credits: 1, credits_exact: 1.5,
+      same_price_as_3_4: true, request_shape_accepted: true, delivered_dimensions_observed: false,
+      observed_at_utc_date: "2026-08-13",
+    },
+    unvalidated: { aspect_16_9_delivered_dimensions_never_observed: true },
   } as const;
 }
 

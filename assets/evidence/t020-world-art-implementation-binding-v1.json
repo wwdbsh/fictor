@@ -18,7 +18,7 @@
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v1.ts",
-      "sha256": "ac8f45f308a765e27fa5159905837e64b697bf5297fb10dd40433594984d74cc"
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
     },
     "filesystem": {
       "path": "scripts/assets/filesystem.ts",

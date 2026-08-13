@@ -21,7 +21,8 @@
     "prior_journal_present": false,
     "legacy_recovery_present": false,
     "aspect_3_4_provider_validated": true,
-    "aspect_16_9_provider_validated": false,
+    "aspect_16_9_request_and_price_validated": true,
+    "aspect_16_9_delivered_geometry_validated": false,
     "aspect_tolerance_ppm": 5000,
     "paid_retry_count": 0
   },

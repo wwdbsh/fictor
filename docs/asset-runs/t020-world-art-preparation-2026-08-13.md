@@ -40,9 +40,9 @@ manifest 순서. ID 목록 sha256 `8ed8dae20fbbc3edaee02163edf435f0829ccf3bb8cf7
 ## 2. 파생 plan
 
 - 경로: `assets/manifests/t020-world-art-v1.plan.json`
-- **plan sha256: `6fe3b6f0beebe3d8181b4c52599a32618bf6d6939d1790474e7a5b1ea1a9eccb`**
-- pending 공시 패킷 sha256: `ac6246a85849491518200aa3542637f39896afc439ec596cb7d65da055e4d8ac`
-- 구현 바인딩 sha256: `be13a88ec079fe43d05cf0543dc158aa5d9db64cb1ab23b3e4b4f1cadfdc32a0` (7개 파일)
+- **plan sha256: `b3e86fbbc593b87fdf6411102f2df25fbd7c55079121d01b2011e083289db419`**
+- pending 공시 패킷 sha256: `77799e922ea3eb0a20a0ffd53aa39886fea5fbc18345124666017956b37a4c11`
+- 구현 바인딩 sha256: `65e3a4c509729f2058375576bc3dfa66528d789be3f6101bc66c02dc74c89c10` (7개 파일)
 
 파생은 완전 결정론적이다. `Date.now()`/`Math.random()`을 쓰지 않고, plan 바이트 안에
 타임스탬프가 존재하지 않는다. 같은 입력이면 항상 같은 sha가 나온다(회귀 테스트로 고정).
@@ -66,9 +66,16 @@ envelope이고, 저장·검증 경로가 PNG마다 그 자산의 종횡비로 �
 (chunking의 부산물이 아니다). 배치 1은 배경 6장이므로 노출이 9.00뿐이고, 모델 canary와
 16:9 종횡비 canary를 겸한다.
 
-**왜 16:9를 먼저 두는가.** 16:9는 이 provider에게 유료·무료 어느 쪽으로도 관찰된 적이 없는
-유일한 미검증 변수다. 허용치를 벗어난 이미지도 provider는 이미 과금하므로, 이 변수는
-plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다.
+**왜 16:9를 먼저 두는가.** 16:9로 provider가 실제로 내려주는 화소 비율은 아직 한 번도 본 적이
+없다. 허용치를 벗어난 이미지도 provider는 이미 과금하므로, 이 변수는 plan이 허용하는 최소
+노출(9.00)에서 먼저 확인한다.
+
+**2026-08-13(UTC) 무과금 get_cost 관찰로 절반은 해소되었다.** operator가 `generate_image`를
+`get_cost:true`로 호출해 model `nano_banana_2`, `aspect_ratio` 16:9 요청이 수용되고 단가가
+3:4와 동일한 `credits_exact` 1.50임을 확인했다(해상도는 1k로 기본 적용). 즉 "요청이 거부되거나
+더 비싸게 청구된다"는 위험은 사라졌고, 남은 미검증 변수는 **전달 화소 비율 하나뿐**이다.
+이 관찰은 operator가 제시한 것이며 이 도구가 직접 호출한 것이 아니므로 증거에도
+`OPERATOR_OBSERVED`로 표시했다. 배치 1의 canary 역할은 그대로다.
 
 **기각된 대안 (A): `[12,12,12,12,6]` 적 먼저.** 같은 배치 크기 다중집합을 쓰면서 적(3:4)
 36장을 배치 1~3에, 배경(16:9) 18장을 배치 4~5에 두는 안이다. 이 안에서는 canary가 이미
@@ -83,8 +90,9 @@ plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다.
 5000ppm을 넘으면 실패시키며, 절대 화소 크기는 요구하지도 단언하지도 않는다.
 
 - 3:4 실측 기준점: T015 회수 PNG 896×1200 (1k), 오차 4445ppm — 허용 5000ppm에 여유가 크지 않다.
-- 16:9 가정(미검증): 같은 약 1,075,200화소 예산에서 정확 비율(1344×756, 1408×792, 1280×720)은
-  0ppm으로 통과.
+- 16:9 전달 화소(미관찰): 같은 약 1,075,200화소 예산에서 정확 비율(1344×756, 1408×792,
+  1280×720)은 0ppm으로 통과. 단가와 요청 수용은 무과금 get_cost로 확인됐고, 전달 화소는 아직
+  관찰된 적이 없다.
 - 실패 예: 7:4 (1344×768) = 15625ppm, 4:3 (1024×768) = 250000ppm — 둘 다 허용치 초과.
 
 ### 두 canary는 서로 다른 증거를 본다
@@ -223,7 +231,7 @@ presentation, approval, `assets/runs/t020-world-art/operations-v1.json`.
 
 ```
 npx tsx …-controller.ts preparation binding-gen   → 7 files pinned
-npx tsx …-controller.ts preparation gen           → plan sha 6fe3b6f0…
+npx tsx …-controller.ts preparation gen           → plan sha b3e86fbb…
 npx tsx …-controller.ts preparation check         → authorized:false
 npx tsx …-controller.ts preparation dry-run       → 제출 0, 쓰기 0,
     54 asset id, 배치 [6,12,12,12,12], 상한 8100 units,

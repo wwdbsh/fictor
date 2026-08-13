@@ -3,15 +3,15 @@
   "artifact_version": "t020-world-art-disclosure-presentation-v1-pending",
   "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
   "secret_free": true,
-  "plan_sha256": "6fe3b6f0beebe3d8181b4c52599a32618bf6d6939d1790474e7a5b1ea1a9eccb",
-  "risk_disclosure_evidence_sha256": "db12d9b76665afc51906974486f0f51b07e7ee3d0e1472b382473f0ab5104401",
-  "risk_disclosure_text_sha256": "6297866bd377da88820331b1e548cda1d56e18376cdc334731e7c4ed2171871a",
-  "provider_schema_evidence_sha256": "14f964da57b77d13efd48d89b978ca1db21b65e16c48eaca30c8977b4fbcdb7d",
-  "forensics_evidence_sha256": "7fc0941ee3a3cf330d07709a5671824e2fe3047aed33cff503acdee2ebfc9dc1",
+  "plan_sha256": "b3e86fbbc593b87fdf6411102f2df25fbd7c55079121d01b2011e083289db419",
+  "risk_disclosure_evidence_sha256": "792e51a62e547d04195e748936a6c2e16fa750b9fd4807c0a46bc7cbd5bb9e3f",
+  "risk_disclosure_text_sha256": "42931881ab890a3af2b6e506786cd066e72d879df021f354a7956b4c62399969",
+  "provider_schema_evidence_sha256": "d39f7f5a242eb19e0cd98d71508014709f4ea5e74df51e0e57b21aa379ed56f8",
+  "forensics_evidence_sha256": "a47d037eeb575bc7e5e15532bc0d271d308b1ffd56fdfc2687510c860214c8a5",
   "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
   "master_style_sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d",
   "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
-  "implementation_binding_sha256": "be13a88ec079fe43d05cf0543dc158aa5d9db64cb1ab23b3e4b4f1cadfdc32a0",
+  "implementation_binding_sha256": "65e3a4c509729f2058375576bc3dfa66528d789be3f6101bc66c02dc74c89c10",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
@@ -27,7 +27,7 @@
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v1.ts",
-      "sha256": "ac8f45f308a765e27fa5159905837e64b697bf5297fb10dd40433594984d74cc"
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
     },
     "filesystem": {
       "path": "scripts/assets/filesystem.ts",
@@ -87,7 +87,8 @@
     "aspect_canary_batch_id": "world-art-001",
     "aspect_canary_exposure_decimal": "9.00",
     "aspect_tolerance_ppm": 5000,
-    "aspect_16_9_provider_validated": false,
+    "aspect_16_9_request_and_price_validated": true,
+    "aspect_16_9_delivered_geometry_validated": false,
     "provider_contract_drift_codes": [
       "MODEL_DRIFT",
       "ASPECT_MISMATCH"

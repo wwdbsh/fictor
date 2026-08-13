@@ -43,20 +43,20 @@
     },
     "risk_disclosure": {
       "path": "assets/evidence/t020-world-art-risk-disclosure-v1.json",
-      "sha256": "db12d9b76665afc51906974486f0f51b07e7ee3d0e1472b382473f0ab5104401",
-      "text_sha256": "6297866bd377da88820331b1e548cda1d56e18376cdc334731e7c4ed2171871a"
+      "sha256": "792e51a62e547d04195e748936a6c2e16fa750b9fd4807c0a46bc7cbd5bb9e3f",
+      "text_sha256": "42931881ab890a3af2b6e506786cd066e72d879df021f354a7956b4c62399969"
     },
     "provider_schema": {
       "path": "assets/evidence/t020-world-art-higgsfield-schema-v1.json",
-      "sha256": "14f964da57b77d13efd48d89b978ca1db21b65e16c48eaca30c8977b4fbcdb7d"
+      "sha256": "d39f7f5a242eb19e0cd98d71508014709f4ea5e74df51e0e57b21aa379ed56f8"
     },
     "forensics": {
       "path": "assets/evidence/t020-world-art-forensics-v1.json",
-      "sha256": "7fc0941ee3a3cf330d07709a5671824e2fe3047aed33cff503acdee2ebfc9dc1"
+      "sha256": "a47d037eeb575bc7e5e15532bc0d271d308b1ffd56fdfc2687510c860214c8a5"
     },
     "implementation_binding": {
       "path": "assets/evidence/t020-world-art-implementation-binding-v1.json",
-      "sha256": "be13a88ec079fe43d05cf0543dc158aa5d9db64cb1ab23b3e4b4f1cadfdc32a0",
+      "sha256": "65e3a4c509729f2058375576bc3dfa66528d789be3f6101bc66c02dc74c89c10",
       "files": {
         "controller": {
           "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
@@ -72,7 +72,7 @@
         },
         "contract": {
           "path": "scripts/assets/t020-world-art-production-v1.ts",
-          "sha256": "ac8f45f308a765e27fa5159905837e64b697bf5297fb10dd40433594984d74cc"
+          "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
         },
         "filesystem": {
           "path": "scripts/assets/filesystem.ts",
