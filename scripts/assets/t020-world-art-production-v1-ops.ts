@@ -31,7 +31,7 @@ const LOCK_STALE_MS = 15 * 60 * 1000;
 
 export type T020BatchState = "PLANNED" | "PREFLIGHT_REQUESTED" | "PREFLIGHT_VERIFIED" | "SUBMITTING" | "SUBMITTED" | "RECOVERY_OPEN" | "RECOVERING" | "RECOVERED" | "COMPLETE" | "FAIL_STOP";
 export type T020RunState = "ACTIVE" | "FAIL_STOP" | "COMPLETE" | "CLOSED_WITH_LOSSES";
-export type T020TerminalCode = "PRICE_CHANGED" | "BALANCE_CHANGED" | "AMBIGUOUS_SUBMISSION" | "PARTIAL_OR_MISMATCHED_BATCH_RESPONSE" | "PROVIDER_RESPONSE_SIGNAL" | "UNKNOWN_PROVIDER_FIELD" | "GENERATION_FAILED" | "MODEL_DRIFT" | "RECOVERY_FAILED" | "FILE_CONFLICT";
+export type T020TerminalCode = "PRICE_CHANGED" | "BALANCE_CHANGED" | "AMBIGUOUS_SUBMISSION" | "PARTIAL_OR_MISMATCHED_BATCH_RESPONSE" | "PROVIDER_RESPONSE_SIGNAL" | "UNKNOWN_PROVIDER_FIELD" | "GENERATION_FAILED" | "MODEL_DRIFT" | "ASPECT_MISMATCH" | "RECOVERY_FAILED" | "FILE_CONFLICT";
 type SubmitStatus = "pending" | "waiting" | "queued" | "in_progress" | "ip_detect" | "completed" | "failed" | "canceled" | "nsfw" | "ip_detected" | "submission_failed";
 type WaitStatus = "pending" | "waiting" | "queued" | "in_progress" | "ip_detect" | "completed" | "failed" | "canceled" | "nsfw" | "ip_detected" | "lookup_failed";
 const SUBMIT_STATUSES: readonly SubmitStatus[] = ["pending", "waiting", "queued", "in_progress", "ip_detect", "completed", "failed", "canceled", "nsfw", "ip_detected", "submission_failed"];
@@ -40,8 +40,22 @@ const ACTIVE_WAIT_STATUSES: readonly WaitStatus[] = ["pending", "waiting", "queu
 const FAILED_WAIT_STATUSES: readonly WaitStatus[] = ["failed", "canceled", "nsfw", "ip_detected"];
 const TERMINAL_SUBMIT_FAILURES: readonly SubmitStatus[] = ["failed", "canceled", "nsfw", "ip_detected", "submission_failed"];
 const JOB_OPTIONAL_KEYS = ["adjustments", "error", "warning", "preset_recommendation"] as const;
-/** Only these terminal codes can leave provider credits spent with nothing to show for them. */
-export const T020_LOSS_CODES: readonly T020TerminalCode[] = ["AMBIGUOUS_SUBMISSION", "GENERATION_FAILED", "MODEL_DRIFT", "BALANCE_CHANGED"];
+/**
+ * Only these terminal codes can leave provider credits spent with nothing to show for them.
+ * ASPECT_MISMATCH belongs here rather than under RECOVERY_FAILED: a PNG outside the aspect
+ * tolerance was generated, billed, and is unusable, which is a real loss the ledger must be
+ * able to book. RECOVERY_FAILED stays reserved for "the poll could not be read", which a
+ * later successful re-poll supersedes at no cost.
+ */
+export const T020_LOSS_CODES: readonly T020TerminalCode[] = ["AMBIGUOUS_SUBMISSION", "GENERATION_FAILED", "MODEL_DRIFT", "ASPECT_MISMATCH", "BALANCE_CHANGED"];
+/**
+ * Drift in the provider's own contract, as opposed to a one-off failure: the model it ran is
+ * not the approved one, or the geometry it returned is outside tolerance. Either means the
+ * thing that was approved is not the thing being bought, so no later batch may be submitted
+ * under this approval — not even after the operator discharges the loss and resumes. The
+ * loss is still bookable, so the run can close honestly as CLOSED_WITH_LOSSES.
+ */
+export const T020_CONTRACT_DRIFT_CODES: readonly T020TerminalCode[] = ["MODEL_DRIFT", "ASPECT_MISMATCH"];
 /**
  * A RECOVERY_FAILED terminal books no spend of its own: it records that a poll could not be
  * read, and a later successful re-poll of the same job ids supersedes it. Such a terminal may
@@ -294,10 +308,21 @@ function neverReopen(record: T020BatchRecord): boolean { return record.paid_requ
 function maxExposureUnits(record: T020BatchRecord): number { return (record.submission ? record.submission.jobs.length : record.asset_ids.length) * T020_V1_UNIT_COST_UNITS; }
 function acknowledgedLossUnits(journal: T020Journal): number { return journal.batches.reduce((sum, record) => sum + record.discharges.reduce((batchSum, discharge) => batchSum + discharge.acknowledged_loss_units, 0), 0); }
 function capUsedUnits(journal: T020Journal): number { return journal.batches.reduce((sum, record) => sum + (record.balance_after?.delta_units ?? 0) + record.discharges.reduce((batchSum, discharge) => batchSum + discharge.observed_delta_units, 0), 0); }
+/**
+ * Every batch is its own model-identity canary: a batch is model-verified only once a single
+ * poll shows all of its jobs completed and reporting the expected provider model.
+ */
+export function t020BatchModelVerified(record: T020BatchRecord): boolean {
+  if (!record.submission) return false;
+  return record.job_polls.some((poll) => poll.jobs.length === record.submission!.jobs.length && poll.jobs.length > 0 && poll.jobs.every(({ status, model }) => status === "completed" && model === T020_V1_EXPECTED_MODEL));
+}
 export function t020CanaryVerified(journal: T020Journal): boolean {
   const canary = journal.batches.find(({ batch_id }) => batch_id === T020_V1_CANARY_BATCH_ID);
-  if (!canary?.submission) return false;
-  return canary.job_polls.some((poll) => poll.jobs.length === canary.submission!.jobs.length && poll.jobs.length > 0 && poll.jobs.every(({ status, model }) => status === "completed" && model === T020_V1_EXPECTED_MODEL));
+  return canary !== undefined && t020BatchModelVerified(canary);
+}
+/** Every batch that observed provider-contract drift, with the code that proved it. */
+export function t020ContractDriftBatches(journal: T020Journal): Array<{ batch_id: string; code: T020TerminalCode }> {
+  return journal.batches.flatMap((record) => record.terminals.filter(({ code }) => T020_CONTRACT_DRIFT_CODES.includes(code)).map(({ code }) => ({ batch_id: record.batch_id, code })));
 }
 // The latest observed provider balance before a batch: an earlier batch's balance-after, a
 // post-loss observation, or — for the very first batch — the absolute anchor taken at init.
@@ -513,7 +538,28 @@ function assertOpenForWork(journal: T020Journal, index: number): void {
   if (journal.batches.slice(index + 1).some(({ state }) => state !== "PLANNED")) throw new Error("T020 batches must progress exactly in order");
   if (neverReopen(journal.batches[index])) throw new Error("T020 batches whose paid envelope escaped are never reopened or resubmitted");
 }
-function assertCanary(journal: T020Journal, id: string): void { if (id === T020_V1_CANARY_BLOCKED_BATCH_ID && !t020CanaryVerified(journal)) throw new Error(`T020 batch ${T020_V1_CANARY_BLOCKED_BATCH_ID} is blocked until the ${T020_V1_CANARY_BATCH_ID} model canary reports ${T020_V1_EXPECTED_MODEL}`); }
+/**
+ * Two independent gates guard every batch after the first, and they read different evidence
+ * so a batch-1 failure stays diagnosable: model identity is read off the `model` field, and
+ * aspect is read off the delivered pixel dimensions.
+ *
+ * The model gate is clearable — a batch the operator explicitly discharged never produced a
+ * model observation, and the discharge plus resume phrases are the recorded way past it.
+ * The aspect gate is NOT clearable: an out-of-tolerance delivery was billed and means the
+ * provider's geometry contract changed, so it needs a new disclosure and a new approval.
+ */
+function assertCanary(journal: T020Journal, index: number): void {
+  const drift = t020ContractDriftBatches(journal);
+  if (drift.length > 0) throw new Error(`T020 batch ${journal.batches[index].batch_id} is permanently blocked by provider-contract drift (${drift.map(({ batch_id, code }) => `${batch_id}:${code}`).join(", ")}); no operator phrase in this approval reopens it and a new disclosure and approval are required`);
+  if (index === 0) return;
+  // No drift on record, so the only remaining question is whether the previous batch actually
+  // proved the model. A batch the operator discharged never produced a model observation at
+  // all (an ambiguous submission enumerates nothing), and that discharge is the recorded,
+  // phrase-gated way past it.
+  const previous = journal.batches[index - 1];
+  if (t020BatchModelVerified(previous) || lossDischarged(previous)) return;
+  throw new Error(`T020 batch ${journal.batches[index].batch_id} is blocked until batch ${previous.batch_id} reports ${T020_V1_EXPECTED_MODEL} on every completed job`);
+}
 function loadJson(root: string, relativePath: string): unknown { const absolute = safeResolve(root, relativePath); const info = lstatSync(absolute); if (info.isSymbolicLink() || !info.isFile()) throw new Error("T020 provider input must be a regular file"); return JSON.parse(readFileSync(absolute, "utf8")); }
 function persistFail(context: T020Context, journal: T020Journal, record: T020BatchRecord, code: T020TerminalCode, at: string, facts: Record<string, unknown>): never {
   // Terminals are append-only forensics; the first entry stays authoritative forever.
@@ -624,8 +670,12 @@ function ingest(context: T020Context, journal: T020Journal, record: T020BatchRec
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     const conflict = ["EXISTING_FILE_CONFLICT", "SYMLINK_TRAVERSAL", "BACKUP_VERIFY_FAILED", "LOCAL_HASH_CHANGED"].includes(message);
-    const reason = message === "ASPECT_MISMATCH" ? "PNG_DIMENSION_MISMATCH" : conflict ? "FILE_CONFLICT" : "PNG_OR_ATOMIC_STORE_FAILED";
-    persistFail(context, journal, record, conflict ? "FILE_CONFLICT" : "RECOVERY_FAILED", at, { asset_id: job.asset_id, reason, actual_width: dimensions?.width ?? null, actual_height: dimensions?.height ?? null, expected_aspect_ratio: aspect, aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM });
+    const mismatch = message === "ASPECT_MISMATCH";
+    const reason = mismatch ? "PNG_DIMENSION_MISMATCH" : conflict ? "FILE_CONFLICT" : "PNG_OR_ATOMIC_STORE_FAILED";
+    // An out-of-tolerance PNG gets its own terminal code: it was billed and is unusable, so
+    // it is a loss the ledger can book and a contract drift that stops every later batch.
+    const code: T020TerminalCode = mismatch ? "ASPECT_MISMATCH" : conflict ? "FILE_CONFLICT" : "RECOVERY_FAILED";
+    persistFail(context, journal, record, code, at, { asset_id: job.asset_id, reason, actual_width: dimensions?.width ?? null, actual_height: dimensions?.height ?? null, expected_aspect_ratio: aspect, aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM });
   }
   record.recoveries.push({ asset_id: job.asset_id, provider_job_index: job.index, provider_job_id: job.job_id, source: "JOBS_HANDOFF_STDIN", observed_at: at, local_relative_path: asset.path, backup_relative_path: asset.path, aspect_ratio: aspect, sha256: local.sha256, size_bytes: local.size, actual_width: local.width, actual_height: local.height, aspect_error_ppm: local.aspect_error_ppm, provider_native_unmodified: true });
   if (record.state === "RECOVERY_OPEN") transition(record, "RECOVERING", at);
@@ -657,7 +707,7 @@ export function runT020OpsInternal(args: readonly string[], root: string, plan: 
 
     if (command === "preflight-request") {
       const id = option(args, "--batch"); const at = timestamp(option(args, "--observed-at")); const { record, index } = recordOf(journal, id);
-      assertOpenForWork(journal, index); assertCanary(journal, id); assertWallClock(at, now, record.transitions.at(-1)?.observed_at);
+      assertOpenForWork(journal, index); assertCanary(journal, index); assertWallClock(at, now, record.transitions.at(-1)?.observed_at);
       if (record.state !== "PLANNED") throw new Error("T020 batch is not PLANNED");
       const request = preflightEnvelopeOf(plan, id);
       // Deep copy: the journal must never alias the memoised plan index.
@@ -669,7 +719,7 @@ export function runT020OpsInternal(args: readonly string[], root: string, plan: 
     if (command === "preflight-result") {
       const id = option(args, "--batch"); const { record, index } = recordOf(journal, id);
       const costRelative = operatorPath(args, "--cost-file"); const balanceRelative = operatorPath(args, "--balance-file");
-      assertOpenForWork(journal, index); assertCanary(journal, id);
+      assertOpenForWork(journal, index); assertCanary(journal, index);
       if (record.state !== "PREFLIGHT_REQUESTED" || !record.preflight) throw new Error("T020 durable preflight request required");
       // --observed-at is the durable stamp for any fail-stop raised while grading this preflight.
       const fallbackAt = timestamp(option(args, "--observed-at"));
@@ -731,7 +781,7 @@ export function runT020OpsInternal(args: readonly string[], root: string, plan: 
 
     if (command === "prepare") {
       const id = option(args, "--batch"); const at = timestamp(option(args, "--observed-at")); const { record, index } = recordOf(journal, id);
-      assertOpenForWork(journal, index); assertCanary(journal, id);
+      assertOpenForWork(journal, index); assertCanary(journal, index);
       assertWallClock(at, now, record.preflight?.balance?.provider_observed_at, FRESHNESS_MS);
       if (record.state !== "PREFLIGHT_VERIFIED" || !record.preflight?.costs || record.preflight.costs.length !== record.asset_ids.length || !record.preflight.balance || Date.parse(at) < Date.parse(record.preflight.balance.provider_observed_at) || Date.parse(at) - Date.parse(record.preflight.balance.provider_observed_at) > FRESHNESS_MS) throw new Error("fresh per-request T020 preflight required");
       const envelope = paidEnvelope(plan, id);
@@ -902,11 +952,14 @@ export function statusT020(journal: T020Journal): Record<string, unknown> {
   const failed = journal.fail_stop_batch_id === null ? undefined : journal.batches.find(({ batch_id }) => batch_id === journal.fail_stop_batch_id);
   const canaryReachable = t020CanaryVerified(journal) || (canary !== undefined && t020BatchCanDeliverAllAssets(canary));
   const failStopClearableWithoutLoss = failed === undefined || zeroSpend(failed) || (unrecoveredConfirmed(failed) === 0 && failed.balance_after !== undefined);
-  const reachable = journal.batches.every((record) => t020BatchCanDeliverAllAssets(record)) && journal.run_state !== "CLOSED_WITH_LOSSES" && losses === 0 && canaryReachable && failStopClearableWithoutLoss;
+  // Contract drift is unclearable under this approval, so it kills reachability outright.
+  const drift = t020ContractDriftBatches(journal);
+  const reachable = journal.batches.every((record) => t020BatchCanDeliverAllAssets(record)) && journal.run_state !== "CLOSED_WITH_LOSSES" && losses === 0 && canaryReachable && failStopClearableWithoutLoss && drift.length === 0;
   return {
     command: "status", run_state: journal.run_state, fail_stop_batch_id: journal.fail_stop_batch_id,
     batches: journal.batches.map((record) => ({
       batch_id: record.batch_id, aspect_ratio: record.aspect_ratio, state: record.state, recovered: record.recoveries.length,
+      model_verified: t020BatchModelVerified(record),
       terminal_code: record.terminals.length > 0 ? record.terminals[0].code : null, active_terminal_code: t020ActiveTerminals(record).at(-1)?.code ?? null,
       disposition: record.state === "COMPLETE" ? "COMPLETE" : unstarted(record) ? "UNSTARTED" : latestResume(journal, record)?.disposition ?? (hasActiveTerminal(record) ? "UNRESOLVED_FAIL_STOP" : "IN_PROGRESS"),
       discharge_possible: hasActiveTerminal(record) && (zeroSpend(record) ? "ZERO_SPEND_RESET" : T020_LOSS_CODES.includes(t020ActiveTerminals(record).at(-1)!.code) ? "LOSS_ACKNOWLEDGMENT" : "NONE"),
@@ -917,7 +970,10 @@ export function statusT020(journal: T020Journal): Record<string, unknown> {
     total_delta_units: capUsed, total_delta_decimal: decimal(capUsed), acknowledged_loss_units: losses, acknowledged_loss_decimal: decimal(losses),
     unaccounted_max_exposure_units: unaccounted, unaccounted_max_exposure_decimal: decimal(unaccounted),
     total_credit_cap_units: T020_V1_TOTAL_CAP_UNITS, total_credit_cap_decimal: decimal(T020_V1_TOTAL_CAP_UNITS),
-    paid_retry_count: 0, resumes: journal.resumes.length, model_canary_verified: t020CanaryVerified(journal), full_run_completion_reachable: reachable,
+    paid_retry_count: 0, resumes: journal.resumes.length, model_canary_verified: t020CanaryVerified(journal),
+    model_verified_batches: journal.batches.filter((record) => t020BatchModelVerified(record)).length,
+    contract_drift: drift, contract_drift_blocks_all_later_batches: drift.length > 0,
+    full_run_completion_reachable: reachable,
   };
 }
 
@@ -1071,6 +1127,8 @@ export function auditT020(context: T020Context, journal: T020Journal, observedAt
     closes_at_exact_cap: capUsed === T020_V1_TOTAL_CAP_UNITS, acknowledged_loss_units: losses, acknowledged_loss_decimal: decimal(losses),
     total_credit_cap_units: T020_V1_TOTAL_CAP_UNITS, within_total_cap: capUsed <= T020_V1_TOTAL_CAP_UNITS,
     batch_dispositions: journal.batches.map((record) => ({ batch_id: record.batch_id, aspect_ratio: record.aspect_ratio, state: record.state, recovered: record.recoveries.length, disposition: record.state === "COMPLETE" ? "COMPLETE" : unstarted(record) ? "UNSTARTED" : latestResume(journal, record)?.disposition ?? "UNRESOLVED", acknowledged_loss_decimal: decimal(record.discharges.reduce((sum, discharge) => sum + discharge.acknowledged_loss_units, 0)) })),
+    model_verified_batches: journal.batches.filter((record) => t020BatchModelVerified(record)).length,
+    contract_drift: t020ContractDriftBatches(journal),
     paid_retry_count: 0, local_backup_verified: true, boss_world_art_generated: false, event_art_generated: false,
     out_of_scope_backup_paths_absent: scope.all_absent, out_of_scope_checked_count: scope.checked_count,
     contact_segments: segments.length, contact_index_eager_full_image_load: false,

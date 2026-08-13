@@ -16,7 +16,7 @@ import {
 } from "../../scripts/assets/t020-world-art-production-v1";
 import {
   acquireT020Lock, auditT020, buildInitialT020Journal, downloadT020, isPublicT020ResolvedAddress, runT020JobsHandoffInternal,
-  runT020OpsInternal, statusT020, t020CanaryVerified, t020GetCostRequest, t020LostAssets, transportPeerMatchesT020Pin,
+  runT020OpsInternal, statusT020, t020BatchModelVerified, t020CanaryVerified, t020ContractDriftBatches, t020GetCostRequest, t020LostAssets, transportPeerMatchesT020Pin,
   validateT020Journal, type T020Dependencies, type T020Journal,
 } from "../../scripts/assets/t020-world-art-production-v1-ops";
 import { dryRunT020 } from "../../scripts/assets/t020-world-art-production-v1-cli";
@@ -129,6 +129,8 @@ describe("T020 manifest discovery and selection", () => {
     expect(new Set(assets.map(({ path }) => path)).size).toBe(T020_V1_ASSET_COUNT);
     expect(sha256T020(`${assets.map(({ id }) => id).join("\n")}\n`)).toBe(T020_V1_ID_LIST_SHA256);
     expect(assets.filter(({ group }) => group === "ENEMY")).toHaveLength(T020_V1_ENEMY_ASSET_COUNT);
+    expect(assets[0].id).toBe("background__still__depth_01");
+    expect(assets.at(-1)!.id).toBe("elite__join__still");
     expect(assets.filter(({ group }) => group === "BACKGROUND")).toHaveLength(T020_V1_BACKGROUND_ASSET_COUNT);
     expect(assets.filter(({ aspect_ratio }) => aspect_ratio === "3:4")).toHaveLength(36);
     expect(assets.filter(({ aspect_ratio }) => aspect_ratio === "16:9")).toHaveLength(18);
@@ -153,7 +155,7 @@ describe("T020 manifest discovery and selection", () => {
       expect(asset.effective_prompt).toContain(T020_NO_COPY_BOUNDARY);
       expect(asset.canonical_request_sha256).toBe(sha256T020(canonicalJsonT020(asset.request)));
     }
-    expect(crossCheckT020EffectivePrompts(repositoryRoot, cachedPlan, [0, 35, 36, 53])).toBe(4);
+    expect(crossCheckT020EffectivePrompts(repositoryRoot, cachedPlan, [0, 17, 18, 53])).toBe(4);
   });
 
   test("the master-style manifest is still the pinned MEDIA_ONLY reference", () => {
@@ -215,7 +217,9 @@ describe("T020 batch partitioning", () => {
     for (const batch of cachedPlan.batches) {
       expect(new Set(batch.asset_ids.map((id) => aspects.get(id)))).toEqual(new Set([batch.aspect_ratio]));
     }
-    expect(cachedPlan.batches.map(({ aspect_ratio }) => aspect_ratio)).toEqual(["3:4", "3:4", "3:4", "16:9", "16:9"]);
+    expect(cachedPlan.batches.map(({ aspect_ratio }) => aspect_ratio)).toEqual(["16:9", "16:9", "3:4", "3:4", "3:4"]);
+    // The novel 16:9 aspect is probed first, at the smallest exposure the plan allows.
+    expect(cachedPlan.batches[0]).toMatchObject({ size: 6, aspect_ratio: "16:9", group: "BACKGROUND" });
   });
 
   test("batch 1 is the canary and batch 2 is the batch it gates", () => {
@@ -225,7 +229,7 @@ describe("T020 batch partitioning", () => {
   });
 
   test("a partitioner fed a group that no longer divides into the approved sizes fails loudly", () => {
-    expect(() => buildT020Batches(cachedPlan.assets.slice(0, 40))).toThrow(/batch sizes changed|batch partition/);
+    expect(() => buildT020Batches(cachedPlan.assets.slice(0, 40))).toThrow(/group ENEMY has 22 assets, expected 36/);
   });
 });
 
@@ -378,7 +382,8 @@ describe("T020 jobs_wait topology and retryable validation", () => {
     ops(prepared, ["acknowledge-loss", "--batch", id, "--observed-at", at(45), "--operator-phrase", T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", after]);
     ops(prepared, ["resume", "--observed-at", at(46), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE]);
     expect(journalOf(prepared).run_state).toBe("ACTIVE");
-    expect(() => ops(prepared, ["preflight-request", "--batch", T020_V1_CANARY_BLOCKED_BATCH_ID, "--observed-at", at(50)])).toThrow(/blocked until/);
+    expect(() => ops(prepared, ["preflight-request", "--batch", T020_V1_CANARY_BLOCKED_BATCH_ID, "--observed-at", at(50)])).toThrow(/permanently blocked by provider-contract drift/);
+    expect(t020ContractDriftBatches(journalOf(prepared))).toEqual([{ batch_id: id, code: "MODEL_DRIFT" }]);
   });
 
   test("an unknown optional field on a submitted job fail-stops the batch", () => {
@@ -421,7 +426,7 @@ describe("T020 paid discipline", () => {
     expect(journalOf(prepared).batches[0].state).toBe("PREFLIGHT_VERIFIED");
     const envelope = ops(prepared, ["prepare", "--batch", id, "--observed-at", at(40)]) as { requests: unknown[]; aspect_ratio: string };
     expect(envelope.requests).toHaveLength(prepared.plan.batches[0].size);
-    expect(envelope.aspect_ratio).toBe("3:4");
+    expect(envelope.aspect_ratio).toBe("16:9");
     expect(journalOf(prepared).batches[0].state).toBe("SUBMITTING");
   });
 
@@ -515,30 +520,86 @@ describe("T020 no-clobber dual save", () => {
     expect(record.state).toBe("COMPLETE");
     expect(record.recoveries).toHaveLength(prepared.plan.batches[0].size);
     for (const recovery of record.recoveries) {
-      expect(recovery.aspect_ratio).toBe("3:4");
+      // Batch 1 is the 16:9 background canary, stored under the manifest's own path prefix.
+      expect(recovery.aspect_ratio).toBe("16:9");
       const local = readFileSync(resolve(prepared.root, "public/assets", recovery.local_relative_path));
       const backup = readFileSync(resolve(prepared.root, "assets/backups/t020-world-art", recovery.backup_relative_path));
       expect(sha256T020(local)).toBe(recovery.sha256);
       expect(sha256T020(backup)).toBe(recovery.sha256);
-      expect(recovery.local_relative_path.startsWith("enemies/")).toBe(true);
+      expect(recovery.local_relative_path.startsWith("backgrounds/")).toBe(true);
     }
   });
 
-  test("a 3:4 PNG delivered for a 16:9 background is refused and never stored", async () => {
+  test("enemy batches store under the manifest's enemies/ prefix at 3:4", async () => {
     const prepared = fixture();
-    let previous = START_UNITS;
-    for (let index = 0; index < 3; index += 1) previous = await runBatch(prepared, index, previous, index * 1000);
-    const id = prepared.plan.batches[3].id;
-    submitting(prepared, 3, previous, 4000);
-    const response = json(prepared.root, "submit-3.json", submissionResponse(prepared.plan, 3));
-    ops(prepared, ["response", "--batch", id, "--observed-at", at(4041), "--file", response]);
-    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(4042), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    let balance = START_UNITS;
+    for (let index = 0; index < 3; index += 1) balance = await runBatch(prepared, index, balance, index * 1000);
+    const record = journalOf(prepared).batches[2];
+    expect(record.state).toBe("COMPLETE");
+    for (const recovery of record.recoveries) {
+      expect(recovery.aspect_ratio).toBe("3:4");
+      expect(recovery.local_relative_path.startsWith("enemies/")).toBe(true);
+    }
+  }, 60_000);
+});
+
+describe("T020 aspect canary", () => {
+  test("an out-of-tolerance 16:9 delivery on batch 1 is refused, never stored, and blocks every later batch", async () => {
+    const prepared = fixture();
+    const id = prepared.plan.batches[0].id;
+    expect(prepared.plan.batches[0]).toMatchObject({ size: 6, aspect_ratio: "16:9" });
+    submitting(prepared, 0, START_UNITS, 0);
+    const response = json(prepared.root, "submit-0.json", submissionResponse(prepared.plan, 0));
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", response]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    // The provider returns a 3:4 plate for a 16:9 request: billed, and outside tolerance.
     const wrongAspect: T020Dependencies = { resolve: async () => [{ address: "18.65.3.2", family: 4 }], fetch: async () => ({ status: 200, headers: { "content-type": "image/png" }, bytes: png(3, 4, 99), remoteAddress: "::ffff:18.65.3.2" }) };
-    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(4043)], JSON.stringify(waitResponse(prepared.plan, 3)), prepared.root, prepared.plan, presentation, approval, wrongAspect)).rejects.toThrow(/RECOVERY_FAILED/);
-    const terminal = journalOf(prepared).batches[3].terminals.at(-1)!;
-    expect(terminal.facts).toMatchObject({ reason: "PNG_DIMENSION_MISMATCH", expected_aspect_ratio: "16:9" });
-    expect(journalOf(prepared).batches[3].recoveries).toHaveLength(0);
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, wrongAspect)).rejects.toThrow(/ASPECT_MISMATCH/);
+    const record = journalOf(prepared).batches[0];
+    expect(record.terminals.at(-1)!.code).toBe("ASPECT_MISMATCH");
+    expect(record.terminals.at(-1)!.facts).toMatchObject({ reason: "PNG_DIMENSION_MISMATCH", expected_aspect_ratio: "16:9", aspect_tolerance_ppm: 5_000 });
+    expect(record.recoveries).toHaveLength(0);
+    expect(t020ContractDriftBatches(journalOf(prepared))).toEqual([{ batch_id: id, code: "ASPECT_MISMATCH" }]);
+    // Discharging and resuming clears the fail-stop but NOT the aspect gate: no operator
+    // phrase in this approval reopens the run once the geometry contract has moved.
+    const lostUnits = prepared.plan.batches[0].size * T020_V1_UNIT_COST_UNITS;
+    const after = json(prepared.root, "loss-balance.json", { credits: (START_UNITS - lostUnits) / 100, provider_observed_at: at(44) });
+    ops(prepared, ["acknowledge-loss", "--batch", id, "--observed-at", at(45), "--operator-phrase", T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", after]);
+    ops(prepared, ["resume", "--observed-at", at(46), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE]);
+    expect(journalOf(prepared).run_state).toBe("ACTIVE");
+    expect(() => ops(prepared, ["preflight-request", "--batch", prepared.plan.batches[1].id, "--observed-at", at(50)])).toThrow(/permanently blocked/);
+    const status = statusT020(journalOf(prepared));
+    expect(status.contract_drift_blocks_all_later_batches).toBe(true);
+    expect(status.full_run_completion_reachable).toBe(false);
+    // The canary costs 9.00, not the 54.00 an enemies-first order would have risked first.
+    expect(decimalT020(lostUnits)).toBe("9.00");
   });
+});
+
+describe("T020 per-batch model canary", () => {
+  test("every batch is model-verified, and the next batch is gated on the one before it", async () => {
+    const prepared = fixture();
+    let balance = START_UNITS;
+    for (let index = 0; index < 3; index += 1) balance = await runBatch(prepared, index, balance, index * 1000);
+    const journal = journalOf(prepared);
+    for (let index = 0; index < 3; index += 1) expect(t020BatchModelVerified(journal.batches[index]), journal.batches[index].batch_id).toBe(true);
+    expect(t020BatchModelVerified(journal.batches[3])).toBe(false);
+    expect(statusT020(journal).model_verified_batches).toBe(3);
+  }, 60_000);
+
+  test("model drift on a later batch fail-stops that batch too, not just the first", async () => {
+    const prepared = fixture();
+    const balance = await runBatch(prepared, 0, START_UNITS, 0);
+    const id = prepared.plan.batches[1].id;
+    submitting(prepared, 1, balance, 1000);
+    const response = json(prepared.root, "submit-1.json", submissionResponse(prepared.plan, 1));
+    ops(prepared, ["response", "--batch", id, "--observed-at", at(1041), "--file", response]);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(1042), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    await expect(runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(1043)], JSON.stringify(waitResponse(prepared.plan, 1, undefined, "some_other_model")), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, 1))).rejects.toThrow(/MODEL_DRIFT/);
+    const terminal = journalOf(prepared).batches[1].terminals.at(-1)!;
+    expect(terminal.code).toBe("MODEL_DRIFT");
+    expect(terminal.facts).toMatchObject({ expected_model: T020_V1_EXPECTED_MODEL, observed_model: "some_other_model", spend_not_recovered: true });
+  }, 60_000);
 });
 
 describe("T020 journal durability", () => {
@@ -562,7 +623,7 @@ describe("T020 journal durability", () => {
 
   test("a journal whose batch aspect disagrees with the plan is rejected", () => {
     const journal = buildInitialT020Journal(cachedPlan, presentation, approval, { credits: 200, normalized_decimal: "200.00", provider_observed_at: at(0) });
-    journal.batches[0].aspect_ratio = "16:9";
+    journal.batches[0].aspect_ratio = "3:4";
     expect(() => validateT020Journal(journal, cachedPlan, presentation, approval)).toThrow(/batch binding changed/);
   });
 

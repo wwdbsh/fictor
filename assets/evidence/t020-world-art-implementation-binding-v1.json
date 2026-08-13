@@ -10,15 +10,15 @@
     },
     "preparation": {
       "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
-      "sha256": "09c04466ad22b7635596c9948027c130afcbbfa3d9e64eb515140e7a3f7b4d6d"
+      "sha256": "2757f6136c639b1bf48811378b20ad884af649dd8cfc04d63ac6476aa7c7b39d"
     },
     "production": {
       "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
-      "sha256": "333772df1af37b93ed3f0659d66a447909d1c1f86c8dcd4849ef51263ac7b07d"
+      "sha256": "8958b14153abb82a46e38e998c2c4dc3cbb21517964865393d2024313b20031c"
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v1.ts",
-      "sha256": "dbcbba8ca678313091015c8b7f73e5291c7d1b80bb176df5ec7d820300772579"
+      "sha256": "6100b3724053276326a581c5ddeb753026cb38888326481030a311d4e46fec9b"
     },
     "filesystem": {
       "path": "scripts/assets/filesystem.ts",

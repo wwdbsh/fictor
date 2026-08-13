@@ -49,29 +49,67 @@ export const T020_V1_UNIT_COST_UNITS = 150 as const;
 export const T020_V1_TOTAL_CAP_UNITS = 8_100 as const;
 export const T020_V1_EXPECTED_MODEL = "nano_banana_flash" as const;
 export const T020_V1_REQUESTED_MODEL = "nano_banana_2" as const;
+/** Batch 1 is both the model-identity canary and the 16:9 aspect canary, at 9.00 exposure. */
 export const T020_V1_CANARY_BATCH_ID = "world-art-001" as const;
 export const T020_V1_CANARY_BLOCKED_BATCH_ID = "world-art-002" as const;
+export const T020_V1_CANARY_EXPOSURE_UNITS = 900 as const;
 export const T020_V1_ASPECT_TOLERANCE_PPM = 5000 as const;
 export const T020_V1_CREDIT_EXPIRY_DATE = "2026-08-17" as const;
 /** The maximum credits a single ambiguous submission window can consume without recovery. */
 export const T020_V1_MAX_BATCH_EXPOSURE_UNITS = 1_800 as const;
 
+/**
+ * What "in tolerance" means, stated before any spend.
+ *
+ * The stored-PNG check is RATIO ONLY: `inspectPng` compares width:height against the asset's
+ * declared aspect and fails past `T020_V1_ASPECT_TOLERANCE_PPM`. No absolute pixel dimension
+ * is required or asserted, so the numbers below are an expectation to compare observations
+ * against, never a pass/fail gate on their own.
+ *
+ * 3:4 is anchored on a real observation: T015 recovered 896x1200 PNGs at resolution "1k",
+ * a 4445 ppm deviation, inside the 5000 ppm tolerance with very little headroom.
+ * 16:9 has never been observed from this provider at any resolution. At the same ~1.08 MP
+ * budget an exact-ratio return (1344x756, 1408x792, 1280x720) scores 0 ppm and passes;
+ * a near-miss such as 7:4 (1344x768) scores 15625 ppm and a 4:3 return (1024x768) scores
+ * 250000 ppm, and both fail — after the provider has already billed the batch.
+ */
+export const T020_V1_ASPECT_EXPECTATION = {
+  criterion: "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
+  tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM,
+  resolution: "1k",
+  observed_3_4: { width: 896, height: 1200, aspect_error_ppm: 4445, pixel_count: 1_075_200, source: "T015 recovered PNGs", provider_validated: true },
+  assumed_16_9: { assumed_pixel_budget: 1_075_200, exact_ratio_examples: ["1344x756", "1408x792", "1280x720"], exact_ratio_aspect_error_ppm: 0, provider_validated: false, assumption_only: true },
+  out_of_tolerance_examples_16_9: [{ dimensions: "1344x768", ratio: "7:4", aspect_error_ppm: 15_625 }, { dimensions: "1024x768", ratio: "4:3", aspect_error_ppm: 250_000 }],
+  /* An out-of-tolerance delivery is billed and unrecoverable, so it stops the run hard: no
+     operator phrase in this approval reopens the following batches. */
+  out_of_tolerance_blocks_all_later_batches: true,
+  out_of_tolerance_terminal_code: "ASPECT_MISMATCH",
+  out_of_tolerance_is_a_bookable_loss: true,
+  canary_batch_id: T020_V1_CANARY_BATCH_ID,
+  canary_exposure_decimal: "9.00",
+} as const;
+
 /* ---------------------------------------------------------------- selection */
 
 /**
  * Batches must be aspect-homogeneous because a batch is a single provider envelope and the
- * ingest/verify path checks one aspect per stored PNG. The 3:4 group (ENEMY+ELITE, 36) is
- * ordered ahead of the 16:9 group (BACKGROUND, 18) so the batch sizes land on exactly
- * [12,12,12,12,6] with no batch straddling an aspect boundary.
+ * ingest/verify path checks one aspect per stored PNG.
+ *
+ * The 16:9 group (BACKGROUND, 18) is ordered first and its short batch is emitted first, so
+ * the run opens with 6 backgrounds — 9.00 credits. 16:9 is the only variable this provider
+ * has never been observed on, and an out-of-tolerance delivery is billed either way, so it
+ * is probed at the smallest exposure the plan allows rather than after 54.00 credits of 3:4
+ * work. Batch sizes are declared per group rather than derived by chunking, so the layout is
+ * explicit and validated instead of being an accident of iteration order.
  */
 export const T020_V1_GROUPS = [
-  { key: "ENEMY", categories: ["ENEMY", "ELITE"], aspect_ratio: "3:4", path_prefix: "enemies/", asset_count: T020_V1_ENEMY_ASSET_COUNT },
-  { key: "BACKGROUND", categories: ["BACKGROUND"], aspect_ratio: "16:9", path_prefix: "backgrounds/", asset_count: T020_V1_BACKGROUND_ASSET_COUNT },
+  { key: "BACKGROUND", categories: ["BACKGROUND"], aspect_ratio: "16:9", path_prefix: "backgrounds/", asset_count: T020_V1_BACKGROUND_ASSET_COUNT, batch_sizes: [6, 12] },
+  { key: "ENEMY", categories: ["ENEMY", "ELITE"], aspect_ratio: "3:4", path_prefix: "enemies/", asset_count: T020_V1_ENEMY_ASSET_COUNT, batch_sizes: [12, 12, 12] },
 ] as const;
-export const T020_V1_BATCH_SIZES = [12, 12, 12, 12, 6] as const;
-export const T020_V1_ID_LIST_SHA256 = "86e01cf9775b46da778a2d7f1d9cb0918c9acbe981ccf54f974a5f2c24447bf9" as const;
-export const T020_V1_FIRST_ID = "enemy__still__swarm" as const;
-export const T020_V1_LAST_ID = "background__join__depth_03" as const;
+export const T020_V1_BATCH_SIZES = [6, 12, 12, 12, 12] as const;
+export const T020_V1_ID_LIST_SHA256 = "8ed8dae20fbbc3edaee02163edf435f0829ccf3bb8cf78c99abc095be38b0ab7" as const;
+export const T020_V1_FIRST_ID = "background__still__depth_01" as const;
+export const T020_V1_LAST_ID = "elite__join__still" as const;
 
 /* ----------------------------------------------------------------- prompts */
 
@@ -90,18 +128,19 @@ export const T020_V1_RECOVERY_OPERATOR_PHRASE = "T020 이 배치의 확정 job I
 export const T020_V1_RESUME_OPERATOR_PHRASE = "T020 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다." as const;
 export const T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE = "T020 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다." as const;
 
-export const T020_V1_RISK_TEXT = `T020은 세계 아트 정확히 54장(적 36장 = ENEMY 30 + ELITE 6, 배경 18장)을 5개 배치([12,12,12,12,6])로 배치당 단 한 번씩 유료 생성합니다. 상한은 정확히 81.00 credits(정확 단가 1.50 x 54장)이고 자동 유료 재시도 예산은 0이며, 이전 T011/T013/T015 승인은 하나도 상속되지 않습니다.
+export const T020_V1_RISK_TEXT = `T020은 세계 아트 정확히 54장(배경 18장, 적 36장 = ENEMY 30 + ELITE 6)을 5개 배치([6,12,12,12,12])로 배치당 단 한 번씩 유료 생성합니다. 상한은 정확히 81.00 credits(정확 단가 1.50 x 54장)이고 자동 유료 재시도 예산은 0이며, 이전 T011/T013/T015 승인은 하나도 상속되지 않습니다.
 (i) 배치마다 제출 응답을 잃을 수 있는 모호 제출(ambiguous submission) 구간이 정확히 1회씩, 총 5회 존재합니다. 각 구간에서 최대 18.00 credits(12장 x 1.50)가 실제로 차감되고도 응답을 받지 못하면 그 배치의 job ID를 전혀 열거할 수 없고, 따라서 이미 지불한 이미지를 영구히 회수하지 못할 수 있습니다.
 (ii) 각 배치는 단 한 번만 제출합니다. 유료 envelope이 한 번이라도 밖으로 나간 배치는 모호 제출이든 부분 응답이든 즉시 fail-stop하고 어떤 경우에도 재제출하지 않습니다.
 (iii) fail-stop은 실행 전체가 아니라 배치 단위로 적용됩니다. 다음 배치로 넘어가려면 operator가 정확한 재개 문구를 입력해야 합니다. 재개는 두 갈래뿐입니다. 지출이 0인 배치(유료 envelope이 나가기 전 preflight 단계 실패)는 재개 뒤 PLANNED로 되돌려 같은 배치를 처음부터 다시 실행할 수 있고, 이때도 이전 실패 기록은 저널에 그대로 보존됩니다. 이미 지출이 발생했을 수 있는 배치는 절대 재실행하지 않고, operator가 정확히 “${T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE}”로 손실을 확인해야만 다음 배치가 열립니다. 확인된 손실은 81.00 상한에서 그대로 차감되어 남은 배치의 예산을 줄이며, 손실된 자산의 이미지는 이 승인으로는 다시 생성하지 않습니다. 다시 만들려면 별도의 새 고지와 새 승인이 필요합니다. 손실이 하나라도 확인된 실행은 정확히 81.00으로 닫히지 않고 CLOSED_WITH_LOSSES 상태로 종료됩니다.
-(iv) 종횡비 위험 - 이 실행은 서로 다른 두 종횡비를 요청합니다. 적 36장은 3:4이고 배경 18장은 16:9입니다. 3:4는 T015에서 실측 검증된 값입니다(관찰 896x1200, 오차 약 4445ppm, 허용 5000ppm). 그러나 16:9는 이 provider에게 한 번도 유료·무료로 확인된 적이 없습니다. provider가 16:9를 다른 화소비로 반환하면 이미 과금된 배경 배치가 종횡비 검증에서 실패하고 그 지출은 돌아오지 않습니다. 배치는 종횡비별로 분리되어 하나의 배치가 두 종횡비를 섞지 않으며, 16:9 배치는 4번째와 5번째입니다. 즉 16:9 위험이 드러나는 시점에는 이미 최대 54.00 credits가 3:4 배치에 지출된 뒤입니다.
+(iv) 종횡비 위험과 그 배치 순서 - 이 실행은 서로 다른 두 종횡비를 요청합니다. 배경 18장은 16:9이고 적 36장은 3:4입니다. 3:4는 T015에서 실측 검증된 값입니다(해상도 1k에서 관찰 896x1200, 오차 4445ppm, 허용 5000ppm이므로 여유가 크지 않습니다). 반면 16:9는 이 provider에게 유료·무료 어느 쪽으로도 한 번도 관찰된 적이 없는 유일한 미검증 변수입니다. 저장 시 검증은 절대 화소수가 아니라 오직 가로:세로 비율만 봅니다. 1k 기준 약 1,075,200화소에서 정확한 16:9(예: 1344x756, 1408x792, 1280x720)는 오차 0ppm으로 통과하지만, 7:4(1344x768)는 15625ppm, 4:3(1024x768)은 250000ppm으로 허용치를 넘어 실패합니다. 그리고 그렇게 실패한 이미지도 provider는 이미 과금했으므로 그 지출은 돌아오지 않습니다. 그래서 배치 1을 배경 6장(9.00 credits)으로 두어 이 미검증 변수를 가능한 최소 노출로 먼저 확인합니다. 배치 1이 허용치를 벗어난 이미지를 내려주면 이후 모든 배치는 열리지 않으며, 이 승인의 어떤 operator 문구로도 다시 열 수 없습니다. 계속하려면 별도의 새 고지와 새 승인이 필요합니다.
 (v) 저장 경로 - 각 자산은 고정된 core manifest의 path 필드를 그대로 씁니다. 배경은 ${T020_V1_LOCAL_ROOT}/backgrounds/, 적과 엘리트는 ${T020_V1_LOCAL_ROOT}/enemies/에 저장되고 같은 상대 경로로 ${T020_V1_BACKUP_ROOT} 아래에 백업됩니다. 두 사본은 저장 직후 sha256이 서로 같아야 하며 다르면 fail-stop입니다.
 (vi) 과금은 provider가 보고하는 credits_exact(1.50)만 사용합니다. 화면 표시값 credits(1.00)는 기록만 하고 상한 계산에 절대 쓰지 않습니다.
 (vii) credits는 2026-08-17에 만료됩니다. 정확한 만료 시각(hour)은 알 수 없습니다.
 (viii) 복구 개시와 재개에 쓰는 operator 문구는 agent가 스스로 입력할 수 있으므로 사용자 동의를 대신하지 않습니다. 사고와 오작동을 막는 게이트일 뿐입니다.
 (ix) 모든 요청은 use_unlim:false를 문자 그대로 포함하며 이 값은 각 자산의 canonical_request_sha256 안에 고정되어 있습니다.
-(x) 모델 canary: 배치 ${T020_V1_CANARY_BATCH_ID}의 provider-reported model이 ${T020_V1_EXPECTED_MODEL}로 확인되지 않으면 배치 ${T020_V1_CANARY_BLOCKED_BATCH_ID}은 열리지 않습니다. 다만 드리프트로 멈추더라도 그 canary 배치에 이미 지출된 credits는 회수되지 않습니다.
-(xi) 범위 밖 - 보스는 신의 심장 카드 아트를 재사용하므로 별도 세계 아트를 만들지 않습니다. 이벤트 아트 20장은 T021의 범위이며 이 승인에 포함되지 않습니다. MATERIAL, CANONICAL, HEART, HEART_FORGE 자산도 전부 제외됩니다.
+(x) 모델 canary는 배치 1회성이 아니라 모든 배치에 적용됩니다. 모든 배치의 모든 완료 job은 provider-reported model이 ${T020_V1_EXPECTED_MODEL}이어야 하며, 하나라도 다르면 그 배치는 즉시 fail-stop하고 다음 배치는 직전 배치가 모델 확인을 통과할 때까지 열리지 않습니다. 첫 배치 ${T020_V1_CANARY_BATCH_ID}은 모델 canary와 16:9 종횡비 canary를 겸합니다. 두 검사는 서로 다른 증거를 보므로 배치 1이 실패해도 원인을 구분할 수 있습니다. 모델 문제는 model 필드로(MODEL_DRIFT), 종횡비 문제는 실제 전달된 화소 크기로(ASPECT_MISMATCH) 나타납니다.
+(xi) provider 계약 드리프트는 영구 정지입니다. MODEL_DRIFT와 ASPECT_MISMATCH는 둘 다 "승인한 것과 다른 것을 사고 있다"는 증거이므로, 어느 배치에서 한 번이라도 관찰되면 이후 모든 배치가 열리지 않습니다. 손실을 확인하고 재개 문구를 입력해도 열리지 않으며, 계속하려면 별도의 새 고지와 새 승인이 필요합니다. 다만 이 두 코드는 손실 코드이기도 하므로 이미 지출된 금액은 저널에 정직하게 기록되고 실행은 CLOSED_WITH_LOSSES로 닫힙니다. 어느 쪽으로 멈추든 그 배치에 이미 지출된 credits는 회수되지 않습니다.
+(xii) 범위 밖 - 보스는 신의 심장 카드 아트를 재사용하므로 별도 세계 아트를 만들지 않습니다. 이벤트 아트 20장은 T021의 범위이며 이 승인에 포함되지 않습니다. MATERIAL, CANONICAL, HEART, HEART_FORGE 자산도 전부 제외됩니다.
 signed URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. 승인은 정확히 “${T020_V1_EXACT_APPROVAL_PHRASE}”라는 문구로만 기록합니다.` as const;
 
 /* --------------------------------------------------------------- primitives */
@@ -204,6 +243,11 @@ export function t020ApprovalScope() {
     total_credit_cap_decimal: decimalT020(T020_V1_TOTAL_CAP_UNITS), total_credit_cap_units: T020_V1_TOTAL_CAP_UNITS,
     legacy_committed_units: 0, automatic_paid_retry_reserve_decimal: "0.00", automatic_paid_retry_count: 0,
     max_batch_exposure_decimal: decimalT020(T020_V1_MAX_BATCH_EXPOSURE_UNITS), ambiguous_submission_windows: T020_V1_BATCH_COUNT,
+    model_canary_batch_id: T020_V1_CANARY_BATCH_ID, model_canary_applies_to_every_batch: true,
+    aspect_canary_batch_id: T020_V1_CANARY_BATCH_ID, aspect_canary_exposure_decimal: decimalT020(T020_V1_CANARY_EXPOSURE_UNITS),
+    aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM, aspect_16_9_provider_validated: false,
+    provider_contract_drift_codes: ["MODEL_DRIFT", "ASPECT_MISMATCH"], provider_contract_drift_blocks_all_later_batches: true,
+    provider_contract_drift_is_a_bookable_loss: true,
     credit_expiry_date: T020_V1_CREDIT_EXPIRY_DATE, credit_expiry_hour_known: false,
     boss_world_art_allowed: false, event_art_allowed: false, other_categories_allowed: false, prior_task_approval_inherited: false,
   } as const;
@@ -218,7 +262,8 @@ export function buildT020Schema() {
     cost: { display_credits_decimal: "1.00", exact_credits_decimal: "1.50", integer_units_per_image: T020_V1_UNIT_COST_UNITS, billing_uses_credits_exact_only: true, freshness_ms: 600_000, strictly_monotonic_observations: true },
     jobs_wait: { expected_type: "image", summary_required_keys: ["active", "completed", "errors", "failed", "total"], summary_compared_by_value: true, retryable_presence_only_for_status: "lookup_failed", optional_model_or_result_url_on_non_completed: true, download_only_when_completed: true },
     secure_download: { resolver_mapped_ipv6_allowed: false, resolver_public_ipv4_allowed: true, transport_peer_pin_required: true, fresh_connection_per_request: true, auto_select_family: false, remote_address_captured_at_response_headers: true, url_or_host_diagnostics_persisted: false },
-    model_canary: { canary_batch_id: T020_V1_CANARY_BATCH_ID, blocks_batch_id_on_drift: T020_V1_CANARY_BLOCKED_BATCH_ID, drift_still_costs_canary_batch_spend: true },
+    model_canary: { canary_batch_id: T020_V1_CANARY_BATCH_ID, applies_to_every_batch: true, blocks_next_batch_until_previous_model_verified: true, blocks_batch_id_on_drift: T020_V1_CANARY_BLOCKED_BATCH_ID, drift_still_costs_batch_spend: true },
+    aspect_expectation: T020_V1_ASPECT_EXPECTATION,
     unvalidated: { aspect_16_9_never_observed_from_this_provider: true },
   } as const;
 }
@@ -270,14 +315,19 @@ export function buildT020Assets(root: string): T020Asset[] {
   });
 }
 
-/** Partitions the selection into aspect-homogeneous batches of at most 12. */
+/** Partitions the selection into aspect-homogeneous batches using each group's declared sizes. */
 export function buildT020Batches(assets: readonly T020Asset[]): T020Batch[] {
   const batches: T020Batch[] = [];
   for (const group of T020_V1_GROUPS) {
     const members = assets.filter(({ group: key }) => key === group.key);
-    for (let offset = 0; offset < members.length; offset += T020_V1_BATCH_MAX) {
-      const slice = members.slice(offset, offset + T020_V1_BATCH_MAX);
+    if (group.batch_sizes.reduce((sum, size) => sum + size, 0) !== group.asset_count) throw new Error(`T020 group ${group.key} batch sizes do not cover its asset count`);
+    if (group.batch_sizes.some((size) => size < 1 || size > T020_V1_BATCH_MAX)) throw new Error(`T020 group ${group.key} declares a batch outside 1..${T020_V1_BATCH_MAX}`);
+    if (members.length !== group.asset_count) throw new Error(`T020 group ${group.key} has ${members.length} assets, expected ${group.asset_count}`);
+    let offset = 0;
+    for (const size of group.batch_sizes) {
+      const slice = members.slice(offset, offset + size);
       batches.push({ id: `world-art-${String(batches.length + 1).padStart(3, "0")}`, index: batches.length, group: group.key, aspect_ratio: group.aspect_ratio, asset_ids: slice.map(({ id }) => id), size: slice.length });
+      offset += size;
     }
   }
   if (batches.length !== T020_V1_BATCH_COUNT) throw new Error(`T020 batch partition produced ${batches.length} batches, expected ${T020_V1_BATCH_COUNT}`);
@@ -317,7 +367,7 @@ export function buildT020Plan(root: string) {
       boss_world_art_allowed: false, event_art_allowed: false, other_categories_allowed: false,
     },
     selection: {
-      expression: "core.assets grouped as [ENEMY+ELITE (3:4), BACKGROUND (16:9)], manifest order within each group",
+      expression: "core.assets grouped as [BACKGROUND (16:9), ENEMY+ELITE (3:4)], manifest order within each group",
       id_list_encoding: "UTF-8_IDS_JOINED_BY_NEWLINE_WITH_TRAILING_NEWLINE", id_list_sha256: T020_V1_ID_LIST_SHA256,
       first_id: T020_V1_FIRST_ID, last_id: T020_V1_LAST_ID, unique_ids: true, unique_paths: true,
     },
@@ -354,10 +404,17 @@ export function buildT020Plan(root: string) {
     recovery_policy: {
       local_root: T020_V1_LOCAL_ROOT, backup_root: T020_V1_BACKUP_ROOT, provider_native_unmodified: true, crop_or_resize_allowed: false,
       aspect_tolerance_ppm: T020_V1_ASPECT_TOLERANCE_PPM, aspect_ratio_source: "PER_ASSET_FROM_PINNED_CORE_MANIFEST",
+      aspect_expectation: T020_V1_ASPECT_EXPECTATION,
       production_jobs_wait_input: "STDIN_ONLY", signed_urls_or_raw_errors_persisted: false,
     },
     immutable_forensics: forensics.immutable_sources,
-    model_canary: { canary_batch_id: T020_V1_CANARY_BATCH_ID, expected_provider_reported_model: T020_V1_EXPECTED_MODEL, blocks_batch_id_on_drift: T020_V1_CANARY_BLOCKED_BATCH_ID, drift_still_costs_canary_batch_spend: true },
+    model_canary: {
+      canary_batch_id: T020_V1_CANARY_BATCH_ID, expected_provider_reported_model: T020_V1_EXPECTED_MODEL,
+      // Every batch is its own model canary; the gate is always "the batch before this one".
+      applies_to_every_batch: true, blocks_next_batch_until_previous_model_verified: true,
+      blocks_batch_id_on_drift: T020_V1_CANARY_BLOCKED_BATCH_ID, drift_still_costs_batch_spend: true,
+      canary_exposure_decimal: decimalT020(T020_V1_CANARY_EXPOSURE_UNITS), doubles_as_aspect_canary: true,
+    },
     approval_gate: {
       pending_disclosure_packet_path: T020_V1_PENDING_PATH, disclosure_presentation_path: T020_V1_PRESENTATION_PATH,
       controller_disclosure_attestation_path: T020_V1_CONTROLLER_DISCLOSURE_PATH, controller_approval_attestation_path: T020_V1_CONTROLLER_APPROVAL_PATH,

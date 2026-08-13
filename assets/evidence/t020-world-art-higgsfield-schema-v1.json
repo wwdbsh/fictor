@@ -68,8 +68,51 @@
   },
   "model_canary": {
     "canary_batch_id": "world-art-001",
+    "applies_to_every_batch": true,
+    "blocks_next_batch_until_previous_model_verified": true,
     "blocks_batch_id_on_drift": "world-art-002",
-    "drift_still_costs_canary_batch_spend": true
+    "drift_still_costs_batch_spend": true
+  },
+  "aspect_expectation": {
+    "criterion": "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
+    "tolerance_ppm": 5000,
+    "resolution": "1k",
+    "observed_3_4": {
+      "width": 896,
+      "height": 1200,
+      "aspect_error_ppm": 4445,
+      "pixel_count": 1075200,
+      "source": "T015 recovered PNGs",
+      "provider_validated": true
+    },
+    "assumed_16_9": {
+      "assumed_pixel_budget": 1075200,
+      "exact_ratio_examples": [
+        "1344x756",
+        "1408x792",
+        "1280x720"
+      ],
+      "exact_ratio_aspect_error_ppm": 0,
+      "provider_validated": false,
+      "assumption_only": true
+    },
+    "out_of_tolerance_examples_16_9": [
+      {
+        "dimensions": "1344x768",
+        "ratio": "7:4",
+        "aspect_error_ppm": 15625
+      },
+      {
+        "dimensions": "1024x768",
+        "ratio": "4:3",
+        "aspect_error_ppm": 250000
+      }
+    ],
+    "out_of_tolerance_blocks_all_later_batches": true,
+    "out_of_tolerance_terminal_code": "ASPECT_MISMATCH",
+    "out_of_tolerance_is_a_bookable_loss": true,
+    "canary_batch_id": "world-art-001",
+    "canary_exposure_decimal": "9.00"
   },
   "unvalidated": {
     "aspect_16_9_never_observed_from_this_provider": true

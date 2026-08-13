@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { atomicWriteJson, safeResolve } from "./filesystem";
 import {
-  T020_V1_APPROVAL_PATH, T020_V1_ASSET_COUNT, T020_V1_BACKGROUND_ASSET_COUNT, T020_V1_BATCH_COUNT, T020_V1_BINDING_PATH, T020_V1_CANARY_BATCH_ID,
+  T020_V1_APPROVAL_PATH, T020_V1_ASSET_COUNT, T020_V1_BACKGROUND_ASSET_COUNT, T020_V1_BATCH_COUNT, T020_V1_BINDING_PATH, T020_V1_CANARY_BATCH_ID, T020_V1_CANARY_EXPOSURE_UNITS,
   T020_V1_CONTROLLER_APPROVAL_PATH, T020_V1_CONTROLLER_DISCLOSURE_PATH, T020_V1_ENEMY_ASSET_COUNT, T020_V1_EXACT_APPROVAL_PHRASE, T020_V1_EXPECTED_MODEL,
   T020_V1_FORENSICS_PATH, T020_V1_PENDING_PATH, T020_V1_PLAN_PATH, T020_V1_PRESENTATION_PATH, T020_V1_RISK_PATH, T020_V1_SCHEMA_PATH, T020_V1_TOTAL_CAP_UNITS,
   buildT020Approval, buildT020Binding, buildT020ControllerApproval, buildT020ControllerDisclosure, buildT020Forensics, buildT020Pending, buildT020Plan,
@@ -78,7 +78,8 @@ function loadBalance(root: string, path: string | undefined): T020BalanceObserva
 export function dryRunT020(root = repositoryRoot): Record<string, unknown> {
   const checked = checkT020Preparation(root);
   const plan = checked.plan;
-  const sample = [0, 1, T020_V1_ENEMY_ASSET_COUNT - 1, T020_V1_ENEMY_ASSET_COUNT, T020_V1_ASSET_COUNT - 1];
+  // Samples straddle the aspect-group boundary so both aspects are cross-checked.
+  const sample = [0, 1, T020_V1_BACKGROUND_ASSET_COUNT - 1, T020_V1_BACKGROUND_ASSET_COUNT, T020_V1_ASSET_COUNT - 1];
   const crossChecked = crossCheckT020EffectivePrompts(root, plan, sample);
   const batches = plan.batches.map((batch) => ({ batch_id: batch.id, group: batch.group, aspect_ratio: batch.aspect_ratio, size: batch.size, credit_units: batch.size * 150, credit_decimal: decimalT020(batch.size * 150), first_asset_id: batch.asset_ids[0], last_asset_id: batch.asset_ids.at(-1) }));
   const plannedUnits = plan.batches.reduce((sum, batch) => sum + batch.size * 150, 0);
@@ -95,6 +96,8 @@ export function dryRunT020(root = repositoryRoot): Record<string, unknown> {
     batches_are_aspect_homogeneous: true, batch_max: 12,
     unit_cost_units: 150, planned_spend_units: plannedUnits, total_credit_cap_units: T020_V1_TOTAL_CAP_UNITS, total_credit_cap_decimal: decimalT020(T020_V1_TOTAL_CAP_UNITS),
     canary_batch_id: T020_V1_CANARY_BATCH_ID, expected_provider_reported_model: T020_V1_EXPECTED_MODEL,
+    model_canary_applies_to_every_batch: true, canary_exposure_decimal: decimalT020(T020_V1_CANARY_EXPOSURE_UNITS),
+    aspect_canary_batch_id: T020_V1_CANARY_BATCH_ID, aspect_expectation: plan.recovery_policy.aspect_expectation,
     effective_prompts_cross_checked: crossChecked,
     disclosure_chain_status: checked.authorized ? "approved" : "pending approval",
     exact_approval_phrase_required: T020_V1_EXACT_APPROVAL_PHRASE,

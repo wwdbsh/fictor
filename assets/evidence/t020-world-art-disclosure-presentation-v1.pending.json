@@ -3,15 +3,15 @@
   "artifact_version": "t020-world-art-disclosure-presentation-v1-pending",
   "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
   "secret_free": true,
-  "plan_sha256": "c334249e3211b847b92b32e6c133f73c345bf3f476951fa5875fa2f07899584f",
-  "risk_disclosure_evidence_sha256": "49db50d54461e038db082d29182006a714f8ae7683873d99aab1ca8ccb94f900",
-  "risk_disclosure_text_sha256": "7d38f23719dd7345687ae62940cd30ad9671695eb3b768ba4b6af40b7844235e",
-  "provider_schema_evidence_sha256": "86fefa8a18c81bb6f2e298435155795dcdad857eb9dd06c3fd797a46742c2bb7",
+  "plan_sha256": "b471dcae615508ebe28cf514489bff59f06517391bb94fb2b9ed43f3cb65c78d",
+  "risk_disclosure_evidence_sha256": "117489742c11814aae365e1dfb7d5d333d1916116cfa93d23e35626fb6fdd3a7",
+  "risk_disclosure_text_sha256": "0ae0ee255303b243040030b346b7b0eeff0db5e8f263cc92b0e3deb1dd07b578",
+  "provider_schema_evidence_sha256": "14f964da57b77d13efd48d89b978ca1db21b65e16c48eaca30c8977b4fbcdb7d",
   "forensics_evidence_sha256": "7fc0941ee3a3cf330d07709a5671824e2fe3047aed33cff503acdee2ebfc9dc1",
   "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
   "master_style_sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d",
   "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
-  "implementation_binding_sha256": "a09d19193bb0cbcf89b65922343b8070fc83ec005237530a8cda7be3b512bd20",
+  "implementation_binding_sha256": "5eb84a311c017d947be758060a4ba0650a7096f52a832c2213d56a02e910d094",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
@@ -19,15 +19,15 @@
     },
     "preparation": {
       "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
-      "sha256": "09c04466ad22b7635596c9948027c130afcbbfa3d9e64eb515140e7a3f7b4d6d"
+      "sha256": "2757f6136c639b1bf48811378b20ad884af649dd8cfc04d63ac6476aa7c7b39d"
     },
     "production": {
       "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
-      "sha256": "333772df1af37b93ed3f0659d66a447909d1c1f86c8dcd4849ef51263ac7b07d"
+      "sha256": "8958b14153abb82a46e38e998c2c4dc3cbb21517964865393d2024313b20031c"
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v1.ts",
-      "sha256": "dbcbba8ca678313091015c8b7f73e5291c7d1b80bb176df5ec7d820300772579"
+      "sha256": "6100b3724053276326a581c5ddeb753026cb38888326481030a311d4e46fec9b"
     },
     "filesystem": {
       "path": "scripts/assets/filesystem.ts",
@@ -61,11 +61,11 @@
     "background_asset_count": 18,
     "batch_count": 5,
     "batch_sizes": [
+      6,
       12,
       12,
       12,
-      12,
-      6
+      12
     ],
     "batch_max": 12,
     "aspect_homogeneous_batches": true,
@@ -80,6 +80,18 @@
     "automatic_paid_retry_count": 0,
     "max_batch_exposure_decimal": "18.00",
     "ambiguous_submission_windows": 5,
+    "model_canary_batch_id": "world-art-001",
+    "model_canary_applies_to_every_batch": true,
+    "aspect_canary_batch_id": "world-art-001",
+    "aspect_canary_exposure_decimal": "9.00",
+    "aspect_tolerance_ppm": 5000,
+    "aspect_16_9_provider_validated": false,
+    "provider_contract_drift_codes": [
+      "MODEL_DRIFT",
+      "ASPECT_MISMATCH"
+    ],
+    "provider_contract_drift_blocks_all_later_batches": true,
+    "provider_contract_drift_is_a_bookable_loss": true,
     "credit_expiry_date": "2026-08-17",
     "credit_expiry_hour_known": false,
     "boss_world_art_allowed": false,

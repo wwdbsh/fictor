@@ -20,15 +20,19 @@ manifest에서 실제로 관찰된 category 값과 수치는 다음과 같다.
 범위 밖: `EVENT`(20, T021), `HEART`(6), `HEART_FORGE`(36), `MATERIAL`(52), `CANONICAL`(1326).
 보스는 신의 심장 카드 아트를 재사용하므로 별도 세계 아트를 만들지 않는다.
 
-선택은 결정론적이다: `[ENEMY+ELITE (3:4), BACKGROUND (16:9)]` 그룹 순서, 그룹 안에서는
-manifest 순서. ID 목록 sha256 `86e01cf9775b46da778a2d7f1d9cb0918c9acbe981ccf54f974a5f2c24447bf9`
-(첫 `enemy__still__swarm`, 끝 `background__join__depth_03`)로 고정된다.
+선택은 결정론적이다: `[BACKGROUND (16:9), ENEMY+ELITE (3:4)]` 그룹 순서, 그룹 안에서는
+manifest 순서. ID 목록 sha256 `8ed8dae20fbbc3edaee02163edf435f0829ccf3bb8cf78c99abc095be38b0ab7`
+(첫 `background__still__depth_01`, 끝 `elite__join__still`)로 고정된다.
 
 ### 저장 경로에 대한 결정 (기록해 둘 것)
 
-작업 계약의 `touches`에는 `public/assets/grounds/`가 적혀 있으나 고정 manifest의 `path`
-필드는 배경 18장 전부에 대해 `backgrounds/<id>.png`이다. T020 수용 기준이 "manifest와
-일치한다"이므로 **manifest의 `path`를 그대로 쓴다**. 결과 경로는
+**touches 예고와 실제 경로의 차이:** 작업 계약 `tasks.json`의 `touches`에는
+`public/assets/grounds/`가 적혀 있으나 실제 산출 경로는 `public/assets/backgrounds/`이다
+(`touches`는 착수 전 "건드릴 만한 표면" 예고이지 경로 계약이 아니며, 이 차이는 orchestrator
+판정으로 승인되었다).
+
+고정 manifest의 `path` 필드는 배경 18장 전부에 대해 `backgrounds/<id>.png`이다. T020 수용
+기준이 "manifest와 일치한다"이므로 **manifest의 `path`를 그대로 쓴다**. 결과 경로는
 `public/assets/backgrounds/`, `public/assets/enemies/`이고 백업은
 `assets/backups/t020-world-art/` 아래 동일한 상대 경로다. `grounds/`로 바꾸려면
 고정 manifest와 의도적으로 어긋나는 것이므로 새 공시가 필요하다.
@@ -36,9 +40,9 @@ manifest 순서. ID 목록 sha256 `86e01cf9775b46da778a2d7f1d9cb0918c9acbe981ccf
 ## 2. 파생 plan
 
 - 경로: `assets/manifests/t020-world-art-v1.plan.json`
-- **plan sha256: `c334249e3211b847b92b32e6c133f73c345bf3f476951fa5875fa2f07899584f`**
-- pending 공시 패킷 sha256: `fa64907c27a852522b48c5d88d7408c0cc1fcedcc979171187d80c9875567e8d`
-- 구현 바인딩 sha256: `a09d19193bb0cbcf89b65922343b8070fc83ec005237530a8cda7be3b512bd20` (7개 파일)
+- **plan sha256: `b471dcae615508ebe28cf514489bff59f06517391bb94fb2b9ed43f3cb65c78d`**
+- pending 공시 패킷 sha256: `38539dd73e98e25fc75be42fcadccdf980ac12595f9d66a4dfff06c37d83ae6a`
+- 구현 바인딩 sha256: `5eb84a311c017d947be758060a4ba0650a7096f52a832c2213d56a02e910d094` (7개 파일)
 
 파생은 완전 결정론적이다. `Date.now()`/`Math.random()`을 쓰지 않고, plan 바이트 안에
 타임스탬프가 존재하지 않는다. 같은 입력이면 항상 같은 sha가 나온다(회귀 테스트로 고정).
@@ -52,21 +56,47 @@ envelope이고, 저장·검증 경로가 PNG마다 그 자산의 종횡비로 �
 
 | # | batch_id | group | aspect | size | credits |
 |---|---|---|---|---|---|
-| 1 | `world-art-001` | ENEMY | 3:4 | 12 | 18.00 |
-| 2 | `world-art-002` | ENEMY | 3:4 | 12 | 18.00 |
+| 1 | `world-art-001` | BACKGROUND | 16:9 | 6 | 9.00 |
+| 2 | `world-art-002` | BACKGROUND | 16:9 | 12 | 18.00 |
 | 3 | `world-art-003` | ENEMY | 3:4 | 12 | 18.00 |
-| 4 | `world-art-004` | BACKGROUND | 16:9 | 12 | 18.00 |
-| 5 | `world-art-005` | BACKGROUND | 16:9 | 6 | 9.00 |
+| 4 | `world-art-004` | ENEMY | 3:4 | 12 | 18.00 |
+| 5 | `world-art-005` | ENEMY | 3:4 | 12 | 18.00 |
 
-`[12,12,12,12,6]`, 합계 54, 각 배치 ≤ 12. 3:4 그룹을 앞에 두어야 승인된 배치 크기 순서를
-그대로 지키면서 종횡비 경계를 가로지르는 배치가 생기지 않는다. 배치 1이 모델 canary이고,
-canary가 `nano_banana_flash`를 확인하기 전에는 배치 2가 열리지 않는다.
+`[6,12,12,12,12]`, 합계 54, 각 배치 ≤ 12. 배치 크기는 그룹마다 명시 선언하고 검증한다
+(chunking의 부산물이 아니다). 배치 1은 배경 6장이므로 노출이 9.00뿐이고, 모델 canary와
+16:9 종횡비 canary를 겸한다.
 
-**미검증 위험(공시됨):** 16:9는 이 provider에게 유료·무료 어느 쪽으로도 관찰된 적이 없다.
-3:4는 T015에서 실측되었다(896×1200, 오차 약 4445ppm, 허용 5000ppm). 위 순서에서는 16:9
-위험이 배치 4에서 드러나며, 그 시점에 이미 최대 54.00 credits가 3:4 배치에 지출된 뒤다.
-이 절충은 risk 공시문 (iv)에 명시되어 있다. 16:9를 먼저 소량으로 검증하려면 배치 순서를
-`[6,12,12,12,12]`(배경 6장 먼저)로 바꿔야 하며, 이는 plan sha가 바뀌는 변경이다.
+**왜 16:9를 먼저 두는가.** 16:9는 이 provider에게 유료·무료 어느 쪽으로도 관찰된 적이 없는
+유일한 미검증 변수다. 허용치를 벗어난 이미지도 provider는 이미 과금하므로, 이 변수는
+plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다. 적(3:4)을 먼저 돌리면 같은 위험이
+배치 4에서, 이미 54.00을 쓴 뒤에 드러난다.
+
+### 종횡비 허용 기준 (지출 전에 명시)
+
+저장 검증은 **비율만** 본다. `inspectPng`가 가로:세로를 자산 선언 종횡비와 비교해
+5000ppm을 넘으면 실패시키며, 절대 화소 크기는 요구하지도 단언하지도 않는다.
+
+- 3:4 실측 기준점: T015 회수 PNG 896×1200 (1k), 오차 4445ppm — 허용 5000ppm에 여유가 크지 않다.
+- 16:9 가정(미검증): 같은 약 1,075,200화소 예산에서 정확 비율(1344×756, 1408×792, 1280×720)은
+  0ppm으로 통과.
+- 실패 예: 7:4 (1344×768) = 15625ppm, 4:3 (1024×768) = 250000ppm — 둘 다 허용치 초과.
+
+### 두 canary는 서로 다른 증거를 본다
+
+- **모델 identity**: 모든 배치의 모든 완료 job이 `model === nano_banana_flash`여야 한다.
+  배치 1회성이 아니라 **모든 배치**에 적용되고, 다음 배치는 직전 배치가 모델 확인을
+  통과해야 열린다. 위반 코드 `MODEL_DRIFT`.
+- **종횡비**: 실제 전달된 화소 크기로 판정한다. 위반 코드 `ASPECT_MISMATCH`.
+
+두 검사가 읽는 증거가 다르므로 배치 1이 실패해도 원인을 구분할 수 있다.
+
+**provider 계약 드리프트 = 영구 정지.** `MODEL_DRIFT`와 `ASPECT_MISMATCH`는 "승인한 것과
+다른 것을 사고 있다"는 증거이므로, 한 번이라도 관찰되면 이후 모든 배치가 열리지 않는다.
+손실 확인·재개 문구로도 열리지 않으며 새 고지와 새 승인이 필요하다. 동시에 두 코드는 손실
+코드이기도 하므로 이미 지출된 금액은 저널에 정직하게 기록되고 실행은 CLOSED_WITH_LOSSES로
+닫힌다. (`ASPECT_MISMATCH`를 `RECOVERY_FAILED`에서 분리한 이유가 이것이다.
+`RECOVERY_FAILED`는 "polling을 읽지 못했다"는 무과금·재시도 가능 코드이므로 손실을 기록할
+수 없고, 그대로 두면 종횡비 실패 시 실행을 닫을 방법이 사라진다.)
 
 ## 4. 경제 계약
 
@@ -131,13 +161,13 @@ presentation, approval, `assets/runs/t020-world-art/operations-v1.json`.
 
 ```
 npx tsx …-controller.ts preparation binding-gen   → 7 files pinned
-npx tsx …-controller.ts preparation gen           → plan sha c334249e…
+npx tsx …-controller.ts preparation gen           → plan sha b471dcae…
 npx tsx …-controller.ts preparation check         → authorized:false
 npx tsx …-controller.ts preparation dry-run       → 제출 0, 쓰기 0,
-    54 asset id, 배치 [12,12,12,12,6], 상한 8100 units,
+    54 asset id, 배치 [6,12,12,12,12], 상한 8100 units,
     disclosure_chain_status "pending approval"
 npm run typecheck / npm run build                 → 통과
-npm test                                          → 338 passed (신규 51)
+npm test                                          → 341 passed (신규 54)
 ```
 
 ## 8. 다음 단계 (아직 하지 않음)
