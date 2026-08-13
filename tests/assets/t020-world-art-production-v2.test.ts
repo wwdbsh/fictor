@@ -356,8 +356,11 @@ describe("T020 v2 preparation CLI", () => {
       legacy_asset_count: 6, legacy_credit_units: 0, legacy_must_precede_any_paid_batch: true, legacy_expiry_falls_back_to_paid: false,
       paid_asset_count: 48, batch_count: 4, planned_spend_units: 7_200, new_credit_cap_units: 7_200,
       v1_sunk_decimal: "9.00", combined_on_full_success_decimal: "81.00", net_monetary_loss_target_decimal: "0.00",
-      disclosure_chain_status: "pending approval", authorized: false,
     });
+    // v2 has since been approved and run to completion, so `authorized` is a fact about the
+    // repository, not a fixed expectation. The invariant is that the reported chain status and
+    // the boolean always agree — a dry-run may never claim one and mean the other.
+    expect(result.disclosure_chain_status).toBe(result.authorized ? "approved" : "pending approval");
     expect(result.aspect_tolerance_ppm).toEqual({ "3:4": 5_000, "16:9": 12_500 });
     expect(result.aspect_ratio_counts).toEqual({ "16:9": 12, "3:4": 36 });
     expect(result.legacy_job_ids).toHaveLength(6);
@@ -391,12 +394,16 @@ describe("T020 v2 production entry gates", () => {
     expect(isT020V2Authorized(root, cachedPlan)).toBe(false);
   });
 
-  test("the real root is refused too, because v2 has not been approved yet", async () => {
-    const { productionContextT020V2 } = await import("../../scripts/assets/t020-world-art-production-v2-ops");
-    // This is the live state: the plan and binding are committed and re-derive byte-exact, but
-    // no v2 approval exists, so every production command — including read-only status — stops.
-    expect(isT020V2Authorized(repositoryRoot, cachedPlan)).toBe(false);
-    expect(() => productionContextT020V2("status", () => new Date(), repositoryRoot)).toThrow(/exact scoped approval is missing/);
+  test("a root missing only the approval file is refused, whatever the rest of the chain says", () => {
+    // The gate's job is to distinguish "approved" from "not approved" — not to encode which of
+    // those the repository happens to be in today. v2 has since been approved and run, so the
+    // discriminating test is a root that carries no approval at all.
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-noapproval-"));
+    mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
+    copyFileSync(resolve(repositoryRoot, "assets/evidence/t020-world-art-disclosure-presentation-v2.json"), resolve(root, "assets/evidence/t020-world-art-disclosure-presentation-v2.json"));
+    expect(isT020V2Authorized(root, cachedPlan)).toBe(false);
+    // And the real root, now that the user has approved, reports the other answer honestly.
+    expect(isT020V2Authorized(repositoryRoot, cachedPlan)).toBe(true);
   });
 
   test("the committed-clean gate is reached once an approval exists", async () => {
