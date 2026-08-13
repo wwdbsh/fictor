@@ -40,9 +40,9 @@ manifest 순서. ID 목록 sha256 `8ed8dae20fbbc3edaee02163edf435f0829ccf3bb8cf7
 ## 2. 파생 plan
 
 - 경로: `assets/manifests/t020-world-art-v1.plan.json`
-- **plan sha256: `3ff66685ad5c1c96ff061055677212fb051edffda43483a19d3433c2fc4ab5ed`**
-- pending 공시 패킷 sha256: `c97bf01afc54672f185e114fda1483f4eed9ff7444c03f1fea463beadff3b3ee`
-- 구현 바인딩 sha256: `5b5d0af60654f43dc2da53ec80e6ad28fe3cf2412a50f3e3a64ce36fac91a8f3` (7개 파일)
+- **plan sha256: `6fe3b6f0beebe3d8181b4c52599a32618bf6d6939d1790474e7a5b1ea1a9eccb`**
+- pending 공시 패킷 sha256: `ac6246a85849491518200aa3542637f39896afc439ec596cb7d65da055e4d8ac`
+- 구현 바인딩 sha256: `be13a88ec079fe43d05cf0543dc158aa5d9db64cb1ab23b3e4b4f1cadfdc32a0` (7개 파일)
 
 파생은 완전 결정론적이다. `Date.now()`/`Math.random()`을 쓰지 않고, plan 바이트 안에
 타임스탬프가 존재하지 않는다. 같은 입력이면 항상 같은 sha가 나온다(회귀 테스트로 고정).
@@ -123,6 +123,14 @@ plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다.
   `FILE_CONFLICT` 같은 코드가 방면도 재개도 불가능한 흡수 상태를 만든다. 저널 검증기도
   같은 규칙을 쓰므로 명령이 쓴 저널을 읽기에서 거부하는 일이 없다.
 - 지출이 0인 배치는 방면 대상이 아니라 `reset` 대상이다(무비용 재실행).
+- **`COMPLETE`도 코드 이름이 아니라 사실로 판정한다.** 계획된 자산이 전부 양쪽 저장소에 있고
+  provider가 정확히 그만큼만 과금했으면 완료다. terminal은 포렌식으로 그대로 남는다.
+  "활성 terminal이 없을 것"을 조건으로 두면, 문서화된 선택 키 `warning` 하나로 발생하는
+  `PROVIDER_RESPONSE_SIGNAL`처럼 회수에는 아무 지장이 없는 terminal이 완벽한 배치의 완료를
+  영구히 막고, 그 뒤 `balance-after`를 기록하면 방면 경로마저 닫혀 실행이 마감 불가능해진다.
+- `status`의 `discharge_possible`은 명령이 실제로 쓰는 술어(`t020Dischargeable`)에서 파생한다.
+  이전에는 코드 이름 목록을 참조해 방면이 가능한 상황에서도 `NONE`을 보고했고, 그것이
+  operator를 정확히 잘못된 명령으로 안내했다.
 
 ## 4. 경제 계약
 
@@ -182,8 +190,14 @@ plan이 허용하는 최소 노출(9.00)에서 먼저 확인한다.
 ### 러너 락
 
 `jobs-handoff`는 다운로드 전체 구간에서 락을 쥔다. 같은 호스트에서 보유 프로세스가 죽은 것이
-확인되면(PID 검사) 락을 즉시 회수한다. 다른 호스트가 쥔 락은 PID를 신뢰할 수 없으므로 기존의
-15분 staleness 창을 그대로 기다린다.
+확인되고(PID 검사) 생성 후 60초가 지났으면 회수한다. 다른 호스트가 쥔 락은 PID를 신뢰할 수
+없으므로 기존의 15분 staleness 창을 그대로 기다린다.
+
+**남은 한계(단일 호스트 가정):** `hostname()`은 네임스페이스 고유 식별자가 아니다. 같은
+저장소를 네트워크 파일시스템으로 공유하는 두 컨테이너가 hostname이 같고 PID 네임스페이스가
+분리돼 있으면, 서로를 죽은 것으로 판정해 락을 동시에 쥘 수 있다. 60초 유예는 이 창을 좁힐 뿐
+없애지 못한다. 두 보유자는 같은 배치에 유료 envelope을 두 번 내보낼 수 있으므로, **이 도구는
+단일 호스트에서만 실행한다**는 것이 운영 전제다.
 
 T015 v4에 있었으나 T020에서 **제거한** 기계장치: legacy 회수 체인, legacy 기사용 상한,
 `excluded_first_id`, 저널 이관(`migrate`) 명령, 상실 지수 재생성(remediation) 배치.
@@ -209,13 +223,13 @@ presentation, approval, `assets/runs/t020-world-art/operations-v1.json`.
 
 ```
 npx tsx …-controller.ts preparation binding-gen   → 7 files pinned
-npx tsx …-controller.ts preparation gen           → plan sha 3ff66685…
+npx tsx …-controller.ts preparation gen           → plan sha 6fe3b6f0…
 npx tsx …-controller.ts preparation check         → authorized:false
 npx tsx …-controller.ts preparation dry-run       → 제출 0, 쓰기 0,
     54 asset id, 배치 [6,12,12,12,12], 상한 8100 units,
     disclosure_chain_status "pending approval"
 npm run typecheck / npm run build                 → 통과
-npm test                                          → 357 passed (신규 70)
+npm test                                          → 362 passed (신규 75)
 ```
 
 ## 8. 다음 단계 (아직 하지 않음)

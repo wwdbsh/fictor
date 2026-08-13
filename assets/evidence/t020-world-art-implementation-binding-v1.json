@@ -10,11 +10,11 @@
     },
     "preparation": {
       "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
-      "sha256": "42583d97d916fc9ee3b4a325cb2cf5860b663ebd44496858bf708f089325734c"
+      "sha256": "932e1faeb6c291a2cf37a5a1cba1fec10c6183f6a4a4b712609b1557c7b3b778"
     },
     "production": {
       "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
-      "sha256": "bd8816ce8b86867889504f92ceb3e42db9939a78a31fc32e1a8e369c836953d9"
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v1.ts",

@@ -115,55 +115,55 @@ function assertNoLiveJournal(root: string, command: string): void {
   if (existsSync(resolve(root, T020_V1_JOURNAL_PATH))) throw new Error(`T020 ${command} is refused while a run journal exists at ${T020_V1_JOURNAL_PATH}; re-deriving the plan or binding mid-run would orphan the journal's header hashes`);
 }
 
-export function runT020Preparation(args: readonly string[]): Record<string, unknown> {
+export function runT020Preparation(args: readonly string[], root: string = repositoryRoot): Record<string, unknown> {
   const command = args[0];
   if (command === "binding-gen") {
     if (args.length !== 1) throw new Error("usage: t020-world-art binding-gen");
-    assertNoLiveJournal(repositoryRoot, command);
-    const binding = buildT020Binding(repositoryRoot);
-    atomicWriteJson(repositoryRoot, T020_V1_BINDING_PATH, binding);
+    assertNoLiveJournal(root, command);
+    const binding = buildT020Binding(root);
+    atomicWriteJson(root, T020_V1_BINDING_PATH, binding);
     return { command, binding_sha256: sha256T020(renderT020CanonicalJson(binding)), files: Object.keys(binding.files).length };
   }
   if (command === "gen") {
     if (args.length !== 1) throw new Error("usage: t020-world-art gen");
-    assertNoLiveJournal(repositoryRoot, command);
-    atomicWriteJson(repositoryRoot, T020_V1_RISK_PATH, buildT020Risk());
-    atomicWriteJson(repositoryRoot, T020_V1_SCHEMA_PATH, buildT020Schema());
-    atomicWriteJson(repositoryRoot, T020_V1_FORENSICS_PATH, buildT020Forensics(repositoryRoot));
-    const plan = buildT020Plan(repositoryRoot);
-    atomicWriteJson(repositoryRoot, T020_V1_PLAN_PATH, plan);
-    atomicWriteJson(repositoryRoot, T020_V1_PENDING_PATH, buildT020Pending(repositoryRoot, plan));
-    return summary(command, checkT020Preparation());
+    assertNoLiveJournal(root, command);
+    atomicWriteJson(root, T020_V1_RISK_PATH, buildT020Risk());
+    atomicWriteJson(root, T020_V1_SCHEMA_PATH, buildT020Schema());
+    atomicWriteJson(root, T020_V1_FORENSICS_PATH, buildT020Forensics(root));
+    const plan = buildT020Plan(root);
+    atomicWriteJson(root, T020_V1_PLAN_PATH, plan);
+    atomicWriteJson(root, T020_V1_PENDING_PATH, buildT020Pending(root, plan));
+    return summary(command, checkT020Preparation(root));
   }
-  if (command === "check") { if (args.length !== 1) throw new Error("usage: t020-world-art check"); return summary(command, checkT020Preparation()); }
-  if (command === "dry-run") { if (args.length !== 1) throw new Error("usage: t020-world-art dry-run"); return dryRunT020(); }
+  if (command === "check") { if (args.length !== 1) throw new Error("usage: t020-world-art check"); return summary(command, checkT020Preparation(root)); }
+  if (command === "dry-run") { if (args.length !== 1) throw new Error("usage: t020-world-art dry-run"); return dryRunT020(root); }
   if (command === "disclosure-build") {
     const disclosedAt = option(args, "--disclosed-at");
     const balancePath = optional(args, "--balance-file");
     if (args.length !== (balancePath === undefined ? 3 : 5) || args[1] !== "--disclosed-at") throw new Error("usage: t020-world-art disclosure-build --disclosed-at <timestamp> [--balance-file <path>]");
-    const checked = checkT020Preparation();
-    const controller = buildT020ControllerDisclosure(repositoryRoot, checked.plan, disclosedAt);
-    validateT020ControllerDisclosure(controller, repositoryRoot, checked.plan);
-    writeT020NoClobber(repositoryRoot, T020_V1_CONTROLLER_DISCLOSURE_PATH, controller);
-    const presentation = buildT020Presentation(repositoryRoot, checked.plan, loadBalance(repositoryRoot, balancePath));
-    validateT020Presentation(presentation, repositoryRoot, checked.plan);
-    writeT020NoClobber(repositoryRoot, T020_V1_PRESENTATION_PATH, presentation);
+    const checked = checkT020Preparation(root);
+    const controller = buildT020ControllerDisclosure(root, checked.plan, disclosedAt);
+    validateT020ControllerDisclosure(controller, root, checked.plan);
+    writeT020NoClobber(root, T020_V1_CONTROLLER_DISCLOSURE_PATH, controller);
+    const presentation = buildT020Presentation(root, checked.plan, loadBalance(root, balancePath));
+    validateT020Presentation(presentation, root, checked.plan);
+    writeT020NoClobber(root, T020_V1_PRESENTATION_PATH, presentation);
     const disclosure = presentation.balance_disclosure as Record<string, unknown>;
     return { command, presentation_sha256: sha256T020(renderT020CanonicalJson(presentation)), balance_observation_present: disclosure.balance_observation_present === true, observed_balance_decimal: disclosure.observed_balance_decimal ?? null, covers_total_cap: disclosure.covers_total_cap ?? null, authorized: false };
   }
   if (command === "approval-build") {
     if (args.length !== 3 || args[1] !== "--approved-at") throw new Error("usage: t020-world-art approval-build --approved-at <timestamp>");
-    const checked = checkT020Preparation();
-    const presentation = JSON.parse(readFileSync(resolve(repositoryRoot, T020_V1_PRESENTATION_PATH), "utf8")) as T020Presentation;
-    validateT020Presentation(presentation, repositoryRoot, checked.plan);
+    const checked = checkT020Preparation(root);
+    const presentation = JSON.parse(readFileSync(resolve(root, T020_V1_PRESENTATION_PATH), "utf8")) as T020Presentation;
+    validateT020Presentation(presentation, root, checked.plan);
     const approvedAt = option(args, "--approved-at");
     const now = new Date(approvedAt);
-    const controller = buildT020ControllerApproval(repositoryRoot, checked.plan, presentation, approvedAt, now);
-    validateT020ControllerApproval(controller, repositoryRoot, checked.plan, presentation, now);
-    writeT020NoClobber(repositoryRoot, T020_V1_CONTROLLER_APPROVAL_PATH, controller);
-    const approval = buildT020Approval(repositoryRoot, checked.plan, presentation, now);
-    validateT020Approval(approval, repositoryRoot, checked.plan, presentation, now);
-    writeT020NoClobber(repositoryRoot, T020_V1_APPROVAL_PATH, approval);
+    const controller = buildT020ControllerApproval(root, checked.plan, presentation, approvedAt, now);
+    validateT020ControllerApproval(controller, root, checked.plan, presentation, now);
+    writeT020NoClobber(root, T020_V1_CONTROLLER_APPROVAL_PATH, controller);
+    const approval = buildT020Approval(root, checked.plan, presentation, now);
+    validateT020Approval(approval, root, checked.plan, presentation, now);
+    writeT020NoClobber(root, T020_V1_APPROVAL_PATH, approval);
     return { command, approval_sha256: sha256T020(renderT020CanonicalJson(approval)), authorized: true };
   }
   throw new Error("usage: t020-world-art <binding-gen|gen|check|dry-run|disclosure-build|approval-build>");

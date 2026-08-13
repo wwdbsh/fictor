@@ -17,7 +17,7 @@ import {
 } from "../../scripts/assets/t020-world-art-production-v1";
 import {
   acquireT020Lock, auditT020, buildInitialT020Journal, downloadT020, isPublicT020ResolvedAddress, runT020JobsHandoffInternal,
-  runT020OpsInternal, statusT020, t020BatchModelVerified, t020CanaryVerified, t020ContractDriftBatches, t020GetCostRequest, t020LostAssets, transportPeerMatchesT020Pin,
+  T020_SPEND_LOSS_CODES, runT020OpsInternal, statusT020, t020BatchModelVerified, t020CanaryVerified, t020ContractDriftBatches, t020GetCostRequest, t020LostAssets, transportPeerMatchesT020Pin,
   validateT020Journal, type T020Dependencies, type T020Journal,
 } from "../../scripts/assets/t020-world-art-production-v1-ops";
 import { dryRunT020 } from "../../scripts/assets/t020-world-art-production-v1-cli";
@@ -930,6 +930,18 @@ describe("T020 production entry gates", () => {
     expect(isT020Authorized(repositoryRoot, cachedPlan)).toBe(false);
   });
 
+  test("gen and binding-gen refuse to re-derive once a run journal exists", async () => {
+    const { runT020Preparation } = await import("../../scripts/assets/t020-world-art-production-v1-cli");
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-journal-"));
+    mkdirSync(resolve(root, "assets/runs/t020-world-art"), { recursive: true });
+    writeFileSync(resolve(root, T020_V1_JOURNAL_PATH), "{}\n");
+    // The guard must fire before either writer touches the plan or the binding, since
+    // re-deriving mid-run would orphan the header hashes of a journal with spend on record.
+    expect(() => runT020Preparation(["gen"], root)).toThrow(/refused while a run journal exists/);
+    expect(() => runT020Preparation(["binding-gen"], root)).toThrow(/refused while a run journal exists/);
+    expect(existsSync(resolve(root, "assets/manifests/t020-world-art-v1.plan.json"))).toBe(false);
+  });
+
   test("the committed-clean gate rejects a root whose binding scope is not tracked", async () => {
     const { assertT020CommittedClean } = await import("../../scripts/assets/t020-world-art-production-v1-ops");
     const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-dirty-"));
@@ -952,21 +964,18 @@ describe("T020 production entry gates", () => {
     git("add", ...tracked);
     git("commit", "-q", "-m", "t020 binding scope");
     expect(() => assertT020CommittedClean(root)).not.toThrow();
-    // An uncommitted edit inside the pinned scope must stop production, since the approval
-    // binds these exact bytes. (A whitespace-only edit still changes the sha.)
-    const contract = resolve(root, "scripts/assets/t020-world-art-production-v1.ts");
-    writeFileSync(contract, `${readFileSync(contract, "utf8")}\n`);
-    expect(() => assertT020CommittedClean(root)).toThrow(/binding changed|committed-clean|dirty/);
+    // Dirty the plan file: in the committed-clean scope but NOT sha-pinned by the binding, so
+    // this reaches the `git diff --quiet` branch rather than failing earlier on a hash.
+    const plan = resolve(root, "assets/manifests/t020-world-art-v1.plan.json");
+    writeFileSync(plan, `${readFileSync(plan, "utf8")} `);
+    expect(() => assertT020CommittedClean(root)).toThrow(/not committed-clean/);
+    git("checkout", "--", "assets/manifests/t020-world-art-v1.plan.json");
+    expect(() => assertT020CommittedClean(root)).not.toThrow();
+    // Untracking an in-scope path reaches the `ls-files --error-unmatch` branch.
+    git("rm", "--cached", "-q", "assets/manifests/t020-world-art-v1.plan.json");
+    expect(() => assertT020CommittedClean(root)).toThrow(/not committed-clean/);
   });
 
-  test("gen and binding-gen refuse to re-derive once a run journal exists", async () => {
-    const { runT020Preparation } = await import("../../scripts/assets/t020-world-art-production-v1-cli");
-    // Guarded on the real journal path; no journal exists here, so the guard is inert and
-    // the commands are reachable. Proving the guard fires needs the real root, which this
-    // suite must not write to, so the reachable half is asserted instead.
-    expect(existsSync(resolve(repositoryRoot, T020_V1_JOURNAL_PATH))).toBe(false);
-    expect(() => runT020Preparation(["check"])).not.toThrow();
-  });
 });
 
 describe("T020 init idempotency and lock reclamation", () => {
@@ -978,18 +987,121 @@ describe("T020 init idempotency and lock reclamation", () => {
     expect(journalOf(prepared).initial_balance).toEqual(anchor);
   });
 
-  test("a lock whose holder process is gone is reclaimed at once, not after 15 minutes", () => {
+  test("a dead same-host holder is reclaimed after the grace floor instead of the full 15 minutes", () => {
     const prepared = fixture();
     const lock = acquireT020Lock(prepared.root);
-    // Rewrite the holder as a dead PID on this host, as a SIGKILL mid-download would leave it.
-    writeFileSync(resolve(lock.path, "holder.json"), JSON.stringify({ pid: 2 ** 22, host: hostname(), created_at_ms: Date.now(), token: "stale" }));
-    const reclaimed = acquireT020Lock(prepared.root);
-    reclaimed.release();
+    const deadHolder = (ageMs: number) => JSON.stringify({ pid: 2 ** 22, host: hostname(), created_at_ms: Date.now() - ageMs, token: "stale" });
+    // Inside the grace floor the lock is still respected: `hostname()` is not a
+    // namespace-unique identity, so an instant steal could let two holders coexist.
+    writeFileSync(resolve(lock.path, "holder.json"), deadHolder(0));
+    expect(() => acquireT020Lock(prepared.root)).toThrow(/RUNNER_LOCKED/);
+    // Past the floor — but far short of the 15-minute staleness window — it is reclaimed, so a
+    // SIGKILL mid-download no longer freezes recovery for a quarter of an hour.
+    writeFileSync(resolve(lock.path, "holder.json"), deadHolder(90_000));
+    acquireT020Lock(prepared.root).release();
   });
 
   test("a live holder is never stolen", () => {
     const prepared = fixture();
     const lock = acquireT020Lock(prepared.root);
     try { expect(() => acquireT020Lock(prepared.root)).toThrow(/RUNNER_LOCKED/); } finally { lock.release(); }
+  });
+});
+
+describe("T020 COMPLETE is decided by delivery and money, not by terminal history", () => {
+  /**
+   * The round-2 probe. The provider decorates one submitted job with `warning` — a documented
+   * optional key — so the batch fail-stops with PROVIDER_RESPONSE_SIGNAL while every asset
+   * remains retrievable. Nothing supersedes that terminal, so gating COMPLETE on "no active
+   * terminal" left a fully delivered, exactly billed batch stranded forever.
+   */
+  async function signalledButFullyDeliverable(prepared: Prepared): Promise<string> {
+    const id = prepared.plan.batches[0].id;
+    submitting(prepared, 0, START_UNITS, 0);
+    const payload = submissionResponse(prepared.plan, 0) as { jobs: Array<Record<string, unknown>> };
+    payload.jobs[0].warning = "slow queue";
+    expect(() => ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", json(prepared.root, "submit-0.json", payload)])).toThrow(/PROVIDER_RESPONSE_SIGNAL/);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    await runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(waitResponse(prepared.plan, 0)), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, 0));
+    const record = journalOf(prepared).batches[0];
+    expect(record.terminals.map(({ code }) => code)).toEqual(["PROVIDER_RESPONSE_SIGNAL"]);
+    expect(record.recoveries).toHaveLength(prepared.plan.batches[0].size);
+    return id;
+  }
+
+  test("a PROVIDER_RESPONSE_SIGNAL batch that delivered everything still reaches COMPLETE", async () => {
+    const prepared = fixture();
+    const id = await signalledButFullyDeliverable(prepared);
+    const afterUnits = START_UNITS - 6 * T020_V1_UNIT_COST_UNITS;
+    const result = ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(47), "--file", json(prepared.root, "after-0.json", { credits: afterUnits / 100, provider_observed_at: at(46) })]);
+    expect(result).toMatchObject({ state: "COMPLETE", fully_delivered: true, delta_decimal: "9.00" });
+    // The terminal stays in the journal as forensics; it simply no longer bars completion.
+    expect(journalOf(prepared).batches[0].terminals).toHaveLength(1);
+  });
+
+  test("and the whole run then closes and audits at exactly 81.00", async () => {
+    const prepared = fixture();
+    const id = await signalledButFullyDeliverable(prepared);
+    let balance = START_UNITS - 6 * T020_V1_UNIT_COST_UNITS;
+    ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(47), "--file", json(prepared.root, "after-0.json", { credits: balance / 100, provider_observed_at: at(46) })]);
+    ops(prepared, ["resume", "--observed-at", at(48), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE]);
+    for (let index = 1; index < T020_V1_BATCH_COUNT; index += 1) balance = await runBatch(prepared, index, balance, index * 1000);
+    expect(balance).toBe(START_UNITS - T020_V1_TOTAL_CAP_UNITS);
+    const audit = auditT020({ root: prepared.root, plan: prepared.plan, presentation, approval }, journalOf(prepared), at(9_000));
+    expect(audit).toMatchObject({ run_state: "COMPLETE", exact_closure: true, assets_recovered: T020_V1_ASSET_COUNT, assets_lost: 0, closes_at_exact_cap: true, acknowledged_loss_units: 0 });
+    expect(journalOf(prepared).run_state).toBe("COMPLETE");
+  }, 120_000);
+
+  test("a run whose LAST batch fail-stops and then fully delivers still closes", async () => {
+    // The resume that clears the fail-stop leaves run_state ACTIVE with every batch COMPLETE;
+    // audit promotes it rather than stranding a finished run.
+    const prepared = fixture();
+    let balance = START_UNITS;
+    for (let index = 0; index < T020_V1_BATCH_COUNT - 1; index += 1) balance = await runBatch(prepared, index, balance, index * 1000);
+    const last = T020_V1_BATCH_COUNT - 1;
+    const id = prepared.plan.batches[last].id;
+    const base = last * 1000;
+    submitting(prepared, last, balance, base);
+    const payload = submissionResponse(prepared.plan, last) as { jobs: Array<Record<string, unknown>> };
+    payload.jobs[0].warning = "slow queue";
+    expect(() => ops(prepared, ["response", "--batch", id, "--observed-at", at(base + 41), "--file", json(prepared.root, `submit-${last}.json`, payload)])).toThrow(/PROVIDER_RESPONSE_SIGNAL/);
+    ops(prepared, ["recovery-open", "--batch", id, "--observed-at", at(base + 42), "--operator-phrase", T020_V1_RECOVERY_OPERATOR_PHRASE]);
+    await runT020JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(base + 43)], JSON.stringify(waitResponse(prepared.plan, last)), prepared.root, prepared.plan, presentation, approval, deps(prepared.plan, last));
+    balance -= prepared.plan.batches[last].size * T020_V1_UNIT_COST_UNITS;
+    ops(prepared, ["balance-after", "--batch", id, "--observed-at", at(base + 45), "--file", json(prepared.root, `after-${last}.json`, { credits: balance / 100, provider_observed_at: at(base + 44) })]);
+    // Every batch is COMPLETE, but the run is still FAIL_STOP until the operator resumes.
+    expect(journalOf(prepared).run_state).toBe("FAIL_STOP");
+    expect(journalOf(prepared).batches.every(({ state }) => state === "COMPLETE")).toBe(true);
+    ops(prepared, ["resume", "--observed-at", at(base + 46), "--operator-phrase", T020_V1_RESUME_OPERATOR_PHRASE]);
+    expect(journalOf(prepared).run_state).toBe("ACTIVE");
+    const audit = auditT020({ root: prepared.root, plan: prepared.plan, presentation, approval }, journalOf(prepared), at(9_000));
+    expect(audit).toMatchObject({ run_state: "COMPLETE", exact_closure: true, assets_recovered: T020_V1_ASSET_COUNT, closes_at_exact_cap: true });
+  }, 120_000);
+
+  test("status reports discharge availability from the predicate the command applies", async () => {
+    const prepared = fixture();
+    const id = prepared.plan.batches[0].id;
+    submitting(prepared, 0, START_UNITS, 0);
+    const payload = submissionResponse(prepared.plan, 0) as { jobs: Array<Record<string, unknown>> };
+    payload.jobs[0].warning = "slow queue";
+    expect(() => ops(prepared, ["response", "--batch", id, "--observed-at", at(41), "--file", json(prepared.root, "submit-0.json", payload)])).toThrow(/PROVIDER_RESPONSE_SIGNAL/);
+    // PROVIDER_RESPONSE_SIGNAL is not a "spend loss code" by name, but the envelope escaped,
+    // so discharge IS available and status must say so — reporting NONE here previously
+    // signposted the operator towards balance-after, the one action that foreclosed the exit.
+    const batch = (statusT020(journalOf(prepared)).batches as Array<Record<string, unknown>>)[0];
+    expect(batch.discharge_possible).toBe("LOSS_ACKNOWLEDGMENT");
+    expect(T020_SPEND_LOSS_CODES).not.toContain("PROVIDER_RESPONSE_SIGNAL");
+    const after = json(prepared.root, "loss-balance.json", { credits: (START_UNITS - 900) / 100, provider_observed_at: at(44) });
+    expect(ops(prepared, ["acknowledge-loss", "--batch", id, "--observed-at", at(45), "--operator-phrase", T020_V1_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", after])).toMatchObject({ terminal_code: "PROVIDER_RESPONSE_SIGNAL" });
+  });
+
+  test("a zero-spend failure still reports the reset route, not a discharge", () => {
+    const prepared = fixture();
+    const id = prepared.plan.batches[0].id;
+    ops(prepared, ["preflight-request", "--batch", id, "--observed-at", at(0)]);
+    const items = costItems(prepared.plan, 0, 0).map((item) => ({ ...item, cost: { credits: 1, credits_exact: 1 } }));
+    expect(() => ops(prepared, ["preflight-result", "--batch", id, "--observed-at", at(21), "--cost-file", json(prepared.root, "cost.json", { costs: items }), "--balance-file", json(prepared.root, "balance.json", { credits: START_UNITS / 100, provider_observed_at: at(20) })])).toThrow(/PRICE_CHANGED/);
+    const batch = (statusT020(journalOf(prepared)).batches as Array<Record<string, unknown>>)[0];
+    expect(batch.discharge_possible).toBe("ZERO_SPEND_RESET");
   });
 });

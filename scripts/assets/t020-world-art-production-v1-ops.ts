@@ -29,6 +29,8 @@ const MAX_REDIRECTS = 3;
 /** Node 22: execFileSync without an explicit maxBuffer raises ENOBUFS on large manifests. */
 const GIT_MAX_BUFFER = 64 * 1024 * 1024;
 const LOCK_STALE_MS = 15 * 60 * 1000;
+/** Floor before a same-host holder with a dead PID may be reclaimed. */
+const RECLAIM_GRACE_MS = 60 * 1000;
 
 export type T020BatchState = "PLANNED" | "PREFLIGHT_REQUESTED" | "PREFLIGHT_VERIFIED" | "SUBMITTING" | "SUBMITTED" | "RECOVERY_OPEN" | "RECOVERING" | "RECOVERED" | "COMPLETE" | "FAIL_STOP";
 export type T020RunState = "ACTIVE" | "FAIL_STOP" | "COMPLETE" | "CLOSED_WITH_LOSSES";
@@ -47,12 +49,13 @@ const LOCAL_STORE_CONFLICT_MESSAGES: readonly string[] = ["EXISTING_FILE_CONFLIC
 const PROVIDER_PAYLOAD_MESSAGES: readonly string[] = ["INVALID_PNG", "FILE_TOO_LARGE", "EMPTY_FILE"];
 /**
  * Terminal codes that typically leave provider credits spent with nothing to show for them.
- * This list is DESCRIPTIVE — it drives reporting only. Dischargeability is decided by
- * `t020Dischargeable`, which asks whether a paid envelope escaped for the batch rather than
- * what the terminal happens to be called. Gating discharge on this list was a wedge: any
- * terminal raised after `prepare` leaves real spend, whatever its name.
+ * PURELY DOCUMENTARY: nothing branches on this list. Both of the questions it used to answer
+ * are now answered by facts instead — `t020Dischargeable` asks whether a paid envelope escaped,
+ * and COMPLETE asks whether the assets landed and the money matched. Every attempt to decide
+ * either question from a terminal's name produced a wedge, because the name describes how a
+ * batch stopped, not what it cost or delivered.
  */
-export const T020_LOSS_CODES: readonly T020TerminalCode[] = ["AMBIGUOUS_SUBMISSION", "GENERATION_FAILED", "MODEL_DRIFT", "ASPECT_MISMATCH", "PAYLOAD_UNUSABLE", "BALANCE_CHANGED"];
+export const T020_SPEND_LOSS_CODES: readonly T020TerminalCode[] = ["AMBIGUOUS_SUBMISSION", "GENERATION_FAILED", "MODEL_DRIFT", "ASPECT_MISMATCH", "PAYLOAD_UNUSABLE", "BALANCE_CHANGED"];
 /**
  * Drift in the provider's own contract, as opposed to a one-off failure: the model it ran is
  * not the approved one, or the geometry it returned is outside tolerance. Either means the
@@ -239,10 +242,13 @@ function lockDirIsStale(holderPath: string, directory: string, staleAfterMs: num
     // live process, so those still wait out the full staleness window.
     const sameHost = data.host === hostname();
     if (!sameHost) return typeof data.created_at_ms === "number" ? Date.now() - data.created_at_ms > staleAfterMs : stale;
-    // A SIGKILL mid-download used to cost a 15-minute wait before any recovery command could
-    // run. A holder that is provably gone on this host is reclaimed immediately instead.
     if (processAlive(data.pid)) return false;
-    return true;
+    // A SIGKILL mid-download used to cost a 15-minute wait before any recovery command could
+    // run. A holder provably gone on this host is reclaimed after a short floor instead —
+    // never with no floor at all: `hostname()` is not a namespace-unique identity, so two
+    // containers sharing this repo could otherwise each judge the other dead and both take
+    // the lock, and two holders can both hand out a paid envelope for the same batch.
+    return typeof data.created_at_ms === "number" ? Date.now() - data.created_at_ms > RECLAIM_GRACE_MS : stale;
   } catch { /* an unreadable holder can only be reclaimed once the directory is stale */ }
   return stale;
 }
@@ -411,9 +417,9 @@ function assertStateConsistency(record: T020BatchRecord): void {
     (state === "SUBMITTING" && (!record.paid_request || record.submission)) ||
     (state === "SUBMITTED" && !record.submission) ||
     (["RECOVERY_OPEN", "RECOVERING", "RECOVERED"].includes(state) && (!record.submission || record.recovery_gates.length === 0)) ||
-    (state === "COMPLETE" && (!record.balance_after || hasActiveTerminal(record) || record.recoveries.length !== record.asset_ids.length)) ||
+    (state === "COMPLETE" && (!record.balance_after || record.recoveries.length !== record.asset_ids.length || record.balance_after.delta_units !== record.asset_ids.length * T020_V1_UNIT_COST_UNITS)) ||
     (record.balance_after !== undefined && !["RECOVERED", "COMPLETE"].includes(state)) ||
-    (hasActiveTerminal(record) && !["FAIL_STOP", "RECOVERY_OPEN", "RECOVERING", "RECOVERED"].includes(state)) ||
+    (hasActiveTerminal(record) && !["FAIL_STOP", "RECOVERY_OPEN", "RECOVERING", "RECOVERED", "COMPLETE"].includes(state)) ||
     (record.recoveries.length > 0 && record.recovery_gates.length === 0) ||
     (lossDischarged(record) && record.balance_after !== undefined);
   if (bad) throw new Error(`T020 batch state evidence changed: ${record.batch_id}`);
@@ -926,9 +932,23 @@ export function runT020OpsInternal(args: readonly string[], root: string, plan: 
       // acknowledge-loss can reconcile against what the provider actually reported.
       if (delta !== expected) persistFail(context, journal, record, "BALANCE_CHANGED", at, { stage: "BALANCE_AFTER_DELTA", expected_delta_decimal: decimal(expected), observed_delta_units: delta, observed_delta_decimal: decimal(delta), observed_balance_decimal: after.decimal, observed_balance_credits: after.value, provider_observed_at: at });
       record.balance_after = { credits: after.value, normalized_decimal: after.decimal, observed_at: at, provider_observed_at: observation.provider_observed_at, delta_decimal: decimal(delta), delta_units: delta, charged_job_count: chargedJobs };
-      if (!hasActiveTerminal(record)) { transition(record, "COMPLETE", at); if (journal.batches.every(({ state }) => state === "COMPLETE")) journal.run_state = "COMPLETE"; }
+      // COMPLETE is a statement about facts, not about history. A batch is complete when every
+      // planned asset is on disk in both roots and the provider charged exactly for them; the
+      // terminals that happened along the way stay in the journal as forensics either way.
+      //
+      // Gating on "no active terminal" meant any non-supersedable terminal on an otherwise
+      // perfect batch — a documented optional `warning` key raising PROVIDER_RESPONSE_SIGNAL is
+      // enough — barred COMPLETE forever, and recording balance-after then foreclosed discharge
+      // too. Delivery and money are the only things COMPLETE actually claims.
+      const fullyDelivered = record.recoveries.length === record.asset_ids.length && delta === record.asset_ids.length * T020_V1_UNIT_COST_UNITS;
+      if (fullyDelivered) {
+        transition(record, "COMPLETE", at);
+        // A fail-stop still needs its operator-gated resume: that is what clears
+        // fail_stop_batch_id, and a run may not close itself out from under one.
+        if (journal.run_state === "ACTIVE" && journal.fail_stop_batch_id === null && journal.batches.every(({ state }) => state === "COMPLETE")) journal.run_state = "COMPLETE";
+      }
       writeJournal(context, journal);
-      return { command, batch_id: id, state: record.state, run_state: journal.run_state, delta_units: delta, delta_decimal: decimal(delta), charged_job_count: chargedJobs };
+      return { command, batch_id: id, state: record.state, run_state: journal.run_state, delta_units: delta, delta_decimal: decimal(delta), charged_job_count: chargedJobs, fully_delivered: fullyDelivered, terminals_preserved: record.terminals.length };
     }
 
     if (command === "acknowledge-loss") {
@@ -1014,7 +1034,9 @@ export function statusT020(journal: T020Journal): Record<string, unknown> {
       model_verified: t020BatchModelVerified(record),
       terminal_code: record.terminals.length > 0 ? record.terminals[0].code : null, active_terminal_code: t020ActiveTerminals(record).at(-1)?.code ?? null,
       disposition: record.state === "COMPLETE" ? "COMPLETE" : unstarted(record) ? "UNSTARTED" : latestResume(journal, record)?.disposition ?? (hasActiveTerminal(record) ? "UNRESOLVED_FAIL_STOP" : "IN_PROGRESS"),
-      discharge_possible: hasActiveTerminal(record) && (zeroSpend(record) ? "ZERO_SPEND_RESET" : T020_LOSS_CODES.includes(t020ActiveTerminals(record).at(-1)!.code) ? "LOSS_ACKNOWLEDGMENT" : "NONE"),
+      // Reported from the predicate the command actually applies, so status can never tell an
+      // operator that discharge is unavailable when acknowledge-loss would have succeeded.
+      discharge_possible: zeroSpend(record) && hasActiveTerminal(record) ? "ZERO_SPEND_RESET" : t020Dischargeable(record) ? "LOSS_ACKNOWLEDGMENT" : "NONE",
       rerunnable: !neverReopen(record), can_deliver_all_assets: t020BatchCanDeliverAllAssets(record),
       acknowledged_loss_decimal: decimal(record.discharges.reduce((sum, discharge) => sum + discharge.acknowledged_loss_units, 0)),
     })),
@@ -1145,9 +1167,18 @@ export function auditT020(context: T020Context, journal: T020Journal, observedAt
   const { root, plan } = context;
   const losses = acknowledgedLossUnits(journal);
   const discharged = journal.batches.filter((record) => lossDischarged(record));
-  if (journal.run_state === "ACTIVE" && closable(journal) && discharged.length > 0) {
-    journal.run_state = "CLOSED_WITH_LOSSES";
-    writeJournal(context, journal);
+  if (journal.run_state === "ACTIVE" && closable(journal)) {
+    // A batch that fail-stopped and then delivered everything reaches COMPLETE, but the run
+    // that resumed past it is left ACTIVE; promote it here rather than stranding a finished
+    // run. The exact-closure conditions are checked first so the write can never be rejected.
+    const delivered = journal.batches.reduce((sum, record) => sum + record.recoveries.length, 0);
+    if (journal.batches.every(({ state }) => state === "COMPLETE") && losses === 0 && delivered === T020_V1_ASSET_COUNT && capUsedUnits(journal) === T020_V1_TOTAL_CAP_UNITS) {
+      journal.run_state = "COMPLETE";
+      writeJournal(context, journal);
+    } else if (discharged.length > 0) {
+      journal.run_state = "CLOSED_WITH_LOSSES";
+      writeJournal(context, journal);
+    }
   }
   if (journal.run_state !== "COMPLETE" && journal.run_state !== "CLOSED_WITH_LOSSES") throw new Error("T020 audit requires every batch settled or unstarted: COMPLETE, or discharged and closed with losses");
   const exact = journal.run_state === "COMPLETE";
