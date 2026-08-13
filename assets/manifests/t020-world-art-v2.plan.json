@@ -56,7 +56,7 @@
     },
     "implementation_binding": {
       "path": "assets/evidence/t020-world-art-implementation-binding-v2.json",
-      "sha256": "dd385738fdfc47d4c36a29767f9b94d2c2a6c86560032aa8a7f608380b560afb",
+      "sha256": "042f70996a28163aec1065a26953a570c307a76c658ce7c3c24eaa00c8c88c13",
       "files": {
         "controller": {
           "path": "scripts/assets/t020-world-art-production-v2-controller.ts",
@@ -64,7 +64,7 @@
         },
         "preparation": {
           "path": "scripts/assets/t020-world-art-production-v2-cli.ts",
-          "sha256": "8cdbcf21cacfa53e968d00635cd93ad1e49fc421b5c66d3c0881e07a45b1e100"
+          "sha256": "58a93068177c782348d3fff33721d7ee8535bc86752b37915f637da8e4fd6c68"
         },
         "production": {
           "path": "scripts/assets/t020-world-art-production-v2-ops.ts",

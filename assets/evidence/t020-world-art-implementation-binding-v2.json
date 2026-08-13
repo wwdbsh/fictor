@@ -10,7 +10,7 @@
     },
     "preparation": {
       "path": "scripts/assets/t020-world-art-production-v2-cli.ts",
-      "sha256": "8cdbcf21cacfa53e968d00635cd93ad1e49fc421b5c66d3c0881e07a45b1e100"
+      "sha256": "58a93068177c782348d3fff33721d7ee8535bc86752b37915f637da8e4fd6c68"
     },
     "production": {
       "path": "scripts/assets/t020-world-art-production-v2-ops.ts",

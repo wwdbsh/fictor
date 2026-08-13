@@ -1,0 +1,117 @@
+{
+  "schema_version": 2,
+  "evidence_version": "t020-world-art-disclosure-presentation-v2",
+  "secret_free": true,
+  "pending_packet_sha256": "c0c54d40acf8fe9b9184edef428989c67e25de0381f45c686b2ab4ec330933cc",
+  "plan_sha256": "3531f237aa1b6292211135b33adbbf43aa199a6d78de89a9816ce77691ce4f47",
+  "risk_disclosure_evidence_sha256": "05046b55438eb95ba033ebf862bdfb2af91e776ac1c6118088d781def7da06c0",
+  "risk_disclosure_text_sha256": "f380b211ac0d07ff492fc8099cdb2c4ef2e70e6368abb6859f1c52783be0e208",
+  "risk_disclosure_text_ko": "T020 v2는 v1 배치 1이 전달 화소 비율 때문에 정지한 뒤의 후속 실행입니다. 전체 범위는 v1과 같은 세계 아트 54장이고, 그중 6장(배경 16:9)은 v1에서 이미 과금되어 job ID가 남아 있으므로 추가 비용 0으로 회수합니다. 나머지 48장(배경 12장 + 적 36장)만 새로 생성하며 신규 상한은 정확히 72.00 credits(1.50 x 48장)입니다. 자동 유료 재시도 예산은 0이고, v1 승인은 상속되지 않습니다.\n(i) v1에서 무슨 일이 있었는지 - v1 배치 world-art-001은 6장 모두 제출·완료되었고 provider가 보고한 model은 전부 nano_banana_flash로 정상이었습니다. 실패 원인은 모델이 아니라 전달된 화소 크기였습니다. 요청은 16:9였으나 provider는 1376x768을 내려주었고, 이는 정확한 16:9 대비 7813ppm 오차로 v1의 허용치 5000ppm을 넘었습니다. 규율대로 이미지는 한 장도 저장하지 않고 정지했으며, 9.00 credits는 실제로 차감되어 v1 저널에 손실로 확정 기록되고 실행은 CLOSED_WITH_LOSSES로 마감되었습니다.\n(ii) 원인 진단 - provider는 출력 크기를 32픽셀 격자에 맞춥니다(1376 = 43x32, 768 = 24x32). 높이 h = 32k인 16:9에서 이상적 너비는 512k/9이고 실제로는 가장 가까운 격자점이 오므로 비율 오차는 0.25/k로 제한됩니다. 1MP 부근(k >= 22)의 최악값은 약 11364ppm이고, h=800(k=25)은 정확히 10000ppm에 떨어집니다. 3:4의 관찰값 4445ppm도 같은 현상이며 단지 5000 안쪽이었을 뿐입니다. 즉 이것은 결함이 아니라 provider의 크기 정책이고, v1의 허용치가 그 정책을 담기에 좁았던 것입니다.\n(iii) v2의 허용치 - 16:9는 12500ppm, 3:4는 5000ppm 그대로입니다. 12500은 위 격자 메커니즘의 최악값을 여유 있게 덮으면서도 실제 비율이 다른 전달은 그대로 거부합니다(7:4은 15625ppm, 4:3은 250000ppm). 한 가지 경계를 분명히 밝힙니다. provider가 반올림 대신 내림을 택했다면 1344x768이 왔을 것이고 그 값은 15625ppm으로 진짜 7:4 전달과 화소만으로는 구별되지 않습니다. v2는 반올림 양자화는 받아들이고 내림은 거부합니다. provider가 정책을 바꾸면 조용히 통과시키지 않고 새 고지와 새 승인을 요구하겠다는 뜻입니다.\n(iv) 무비용 복구가 먼저입니다 - 유료 배치를 하나라도 열기 전에, v1에서 이미 과금된 6장을 그 job ID로 회수합니다. 이 단계는 credits를 전혀 쓰지 않으며, 동시에 새 허용치가 실제 전달물에서 통하는지 확인하는 검문 역할을 합니다. 6장이 새 허용치에서도 통과하지 못하면 유료 배치는 열리지 않습니다. 다만 provider의 result URL은 저장하지 않는 규율이므로, 회수는 실행 시점에 job ID를 다시 조회해 얻는 새 응답으로 수행합니다.\n(v) job ID 만료 가능성 - 위 6개 job이 실행 시점에 더 이상 조회되지 않으면 무비용 회수는 불가능합니다. 그 경우 v2는 자동으로 유료 재생성으로 넘어가지 않고 정지합니다. 6장을 다시 만들려면 신규 상한이 72.00이 아니라 81.00이 되어야 하고, 그것은 이 승인의 범위가 아니므로 별도의 새 고지와 새 승인이 필요합니다.\n(vi) 유료 부분의 규율은 v1과 동일합니다 - 48장을 4개 배치(각 12장)로 나누고 배치당 단 한 번만 제출합니다. 배치마다 모호 제출 구간이 정확히 1회씩 총 4회 있고 각 구간의 최대 노출은 18.00입니다. 모호·부분 제출은 절대 자동 재제출하지 않으며 fail-stop은 배치 단위입니다. 지출이 0인 배치만 되돌려 재실행할 수 있고, 지출이 발생한 배치는 operator가 정확히 “T020 v2 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.”로 손실을 확인해야만 다음 배치가 열립니다.\n(vii) 과금은 provider가 보고하는 credits_exact(1.50)만 사용합니다. 화면 표시값 credits(1.00)는 기록만 하고 상한 계산에 쓰지 않습니다.\n(viii) 모델 canary는 모든 배치에 적용됩니다. 완료된 job의 provider-reported model이 nano_banana_flash가 아니면 그 배치는 즉시 정지하고 다음 배치는 열리지 않습니다. MODEL_DRIFT와 ASPECT_MISMATCH는 provider 계약 드리프트로 취급되어 한 번이라도 관찰되면 이후 모든 배치가 영구히 열리지 않으며, 손실 확인과 재개 문구로도 열 수 없습니다. 다만 두 코드 모두 손실 코드이므로 이미 쓴 금액은 저널에 정직하게 기록되고 실행은 CLOSED_WITH_LOSSES로 닫힙니다.\n(ix) 승인 증거의 한계는 v1과 같습니다. operator 문구와 승인 attestation 파일은 모두 agent가 쓸 수 있고 “정확한 사용자 발화”는 코드 상수에서 나옵니다. 실제 인적 게이트는 절차적이며, 사용자가 이 고지를 본 뒤 이 세션에서 정확한 승인 문구를 직접 입력해야 하고 그 사실은 대화 기록으로만 확인됩니다.\n(x) 금액 정리 - v1에서 이미 확정 손실로 기록된 9.00은 되돌릴 수 없습니다. v2가 그 6장을 무비용으로 회수하면 그 9.00은 손실이 아니라 실제로 받은 이미지의 대가가 되어 순 금전 손실은 0이 됩니다. v2가 전부 성공하면 T020 전체 지출은 9.00 + 72.00 = 81.00으로 원래 승인했던 총액과 같고 54장을 모두 확보합니다.\n(xi) 저장 경로와 범위는 v1과 같습니다. 배경은 public/assets/backgrounds/, 적과 엘리트는 public/assets/enemies/이고 백업은 assets/backups/t020-world-art 아래 같은 상대 경로입니다. 보스는 신의 심장 카드 아트를 재사용하므로 별도 세계 아트를 만들지 않고, 이벤트 아트 20장은 T021의 범위입니다.\n(xii) v1 저널은 한 바이트도 고치지 않습니다. 마감된 v1 저널의 바이트 사본을 증거로 커밋하고 sha256으로 고정해 v2의 불변 포렌식에 싣습니다.\nsigned URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. 승인은 정확히 “T020 세계 아트 v2 실행을 승인한다. 신규 한도 72.00 크레딧, 기존 6장 무비용 복구 포함.”라는 문구로만 기록합니다.",
+  "provider_schema_evidence_sha256": "513c84d5569084f49748b777d2f133b74ad5ab1332797dd0f67ff1f73dd8e343",
+  "forensics_evidence_sha256": "882909454d6c968e1c2cd0f739abf28fee1df68a9841f324dbfd179f01cbc316",
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "v1_journal_forensic_sha256": "2f017a34afb7aadef6d0bd2ff93e30bc02e7c916fb36066225e78ce6b6e51636",
+  "controller_disclosure_attestation_sha256": "170fefdaf9a432c25c55cf70aab0dfd319114ded1a9ca6ec30eb7d8f2a011cc4",
+  "implementation_binding_sha256": "042f70996a28163aec1065a26953a570c307a76c658ce7c3c24eaa00c8c88c13",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t020-world-art-production-v2-controller.ts",
+      "sha256": "79cf6915f3a46dbf2bf2e831780ca4b6648202b77e9f2219f887fdeebb1ac0f2"
+    },
+    "preparation": {
+      "path": "scripts/assets/t020-world-art-production-v2-cli.ts",
+      "sha256": "58a93068177c782348d3fff33721d7ee8535bc86752b37915f637da8e4fd6c68"
+    },
+    "production": {
+      "path": "scripts/assets/t020-world-art-production-v2-ops.ts",
+      "sha256": "301cf2089e4d7816e1c7d77f2f316da9aeeae1a662309c2808e4a346d55ecc33"
+    },
+    "contract": {
+      "path": "scripts/assets/t020-world-art-production-v2.ts",
+      "sha256": "3a61069d18433177cca4fa76886c7e769d3ebecb01ffc640aadb59b4a36223c8"
+    },
+    "v1_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "v1_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "disclosed_at": "2026-08-13T23:00:32.000Z",
+  "source": "current user conversation",
+  "balance_disclosure": {
+    "balance_observation_present": true,
+    "observed_balance_decimal": "354.90",
+    "observed_balance_units": 35490,
+    "provider_observed_at": "2026-08-13T22:59:44.000Z",
+    "new_credit_cap_decimal": "72.00",
+    "projected_remainder_decimal": "282.90",
+    "covers_new_cap": true,
+    "balance_disclosure_incomplete": false
+  },
+  "scope": {
+    "task_key": "T020",
+    "revision": "v2",
+    "total_asset_count": 54,
+    "legacy_recovered_asset_count": 6,
+    "legacy_recovery_credit_units": 0,
+    "paid_asset_count": 48,
+    "paid_batch_count": 4,
+    "paid_batch_sizes": [
+      12,
+      12,
+      12,
+      12
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "new_credit_cap_decimal": "72.00",
+    "new_credit_cap_units": 7200,
+    "v1_sunk_decimal": "9.00",
+    "v1_sunk_units": 900,
+    "combined_t020_spend_on_full_success_decimal": "81.00",
+    "net_monetary_loss_target_decimal": "0.00",
+    "aspect_tolerance_ppm_3_4": 5000,
+    "aspect_tolerance_ppm_16_9": 12500,
+    "provider_dimension_grid_px": 32,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 4,
+    "model_canary_applies_to_every_batch": true,
+    "contract_drift_blocks_all_later_batches": true,
+    "legacy_job_expiry_falls_back_to_paid": false,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "boss_world_art_allowed": false,
+    "event_art_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "exact_approval_phrase_required": "T020 세계 아트 v2 실행을 승인한다. 신규 한도 72.00 크레딧, 기존 6장 무비용 복구 포함.",
+  "legacy_recovery_operator_phrase": "T020 v2 기존 6장의 확정 job ID만 무비용으로 복구하고 새 유료 제출은 하지 않습니다.",
+  "recovery_operator_phrase": "T020 v2 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T020 v2 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "loss_acknowledgment_operator_phrase": "T020 v2 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "approval_attestation_is_agent_writable": true,
+  "human_approval_gate_is_procedural": true,
+  "v1_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "authorized": false
+}

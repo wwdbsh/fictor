@@ -143,7 +143,7 @@ export function runT020V2Preparation(args: readonly string[], root: string = rep
     validateT020V2Presentation(presentation, root, checked.plan);
     writeT020V2NoClobber(root, T020_V2_PRESENTATION_PATH, presentation);
     const disclosure = presentation.balance_disclosure as Record<string, unknown>;
-    return { command, presentation_sha256: sha256T020(renderT020CanonicalJson(presentation)), balance_observation_present: disclosure.balance_observation_present === true, observed_balance_decimal: disclosure.observed_balance_decimal ?? null, covers_total_cap: disclosure.covers_total_cap ?? null, authorized: false };
+    return { command, presentation_sha256: sha256T020(renderT020CanonicalJson(presentation)), balance_observation_present: disclosure.balance_observation_present === true, observed_balance_decimal: disclosure.observed_balance_decimal ?? null, covers_new_cap: disclosure.covers_new_cap ?? null, projected_remainder_decimal: disclosure.projected_remainder_decimal ?? null, authorized: false };
   }
   if (command === "approval-build") {
     if (args.length !== 3 || args[1] !== "--approved-at") throw new Error("usage: t020-world-art-v2 approval-build --approved-at <timestamp>");
