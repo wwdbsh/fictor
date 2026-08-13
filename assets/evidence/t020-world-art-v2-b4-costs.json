@@ -1,0 +1,112 @@
+{
+ "costs": [
+  {
+   "index": 42,
+   "request_sha256": "26294dd01cbfc8a95880008b494bc378080bfa0bdb1922653e3d6bf2849c1286",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:22:46.000Z"
+  },
+  {
+   "index": 43,
+   "request_sha256": "f4c1e8f0115732818cf37c1e334bbba37d899b6f365e7b71f733ab65790f4e46",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:22:48.000Z"
+  },
+  {
+   "index": 44,
+   "request_sha256": "d6806c4826b7fa641e89d1b40b3833f6e22d330d2c67cf9ee5b582461c5da5e8",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:22:51.000Z"
+  },
+  {
+   "index": 45,
+   "request_sha256": "8740cf2a20c1010e04ec41191a47980d6ae0150013812228e1145ec58a5dc7b5",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:22:53.000Z"
+  },
+  {
+   "index": 46,
+   "request_sha256": "164f72986b088129592b504655a25e708d2834bdb3817a8278c8468bea9073ca",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:22:55.000Z"
+  },
+  {
+   "index": 47,
+   "request_sha256": "ef35804d4434d32924b4fcbd484650d859ecdaeeec661f6969442bcc2c194f69",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:22:57.000Z"
+  },
+  {
+   "index": 48,
+   "request_sha256": "e5cab0e5dd3c7dc591d6fe10cc2c4c760c383f27ec38199a8c3078ee71e93911",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:23:03.000Z"
+  },
+  {
+   "index": 49,
+   "request_sha256": "152ec71fd40ddbf8528cbd0f086191feff715e005d61019c3d86585a13c8c5a7",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:23:05.000Z"
+  },
+  {
+   "index": 50,
+   "request_sha256": "9d6f7a19b3eaf83f3df690aac1cd7f081479b3ec73899633479a0c71990a6ed6",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:23:07.000Z"
+  },
+  {
+   "index": 51,
+   "request_sha256": "4e17c12cdfc329955e1bc0cc3f05f773a6c4246919492ffb5991a6ee14be1488",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:23:09.000Z"
+  },
+  {
+   "index": 52,
+   "request_sha256": "0f8e83e86262fafe609824a7d2835203ffd672147b22a73608a8c9d21789424a",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:23:12.000Z"
+  },
+  {
+   "index": 53,
+   "request_sha256": "51b1724d46ef672e5ac73933b821b90b7d2ab1b3b22cfdbde5751f454340492f",
+   "cost": {
+    "credits": 1,
+    "credits_exact": 1.5
+   },
+   "provider_observed_at": "2026-08-13T23:23:14.000Z"
+  }
+ ]
+}
