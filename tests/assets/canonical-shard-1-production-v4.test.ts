@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
@@ -7,13 +7,14 @@ import { beforeAll, describe, expect, test } from "vitest";
 import {
   T015_V4_ADDITIONAL_CAP_UNITS, T015_V4_BINDING_PATH, T015_V4_CANARY_BATCH_ID, T015_V4_CANARY_BLOCKED_BATCH_ID, T015_V4_CORE_PLAN_PATH,
   T015_V4_EXACT_APPROVAL_PHRASE, T015_V4_JOURNAL_PATH, T015_V4_LEGACY_COMMITTED_UNITS, T015_V4_LEGACY_JOURNAL_PATH, T015_V4_LOCK_PATH,
-  T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, T015_V4_MIGRATION_FAIL_STOP_BATCH_ID, T015_V4_PENDING_PATH,
+  T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, T015_V4_MIGRATION_FAIL_STOP_BATCH_ID, T015_V4_PAID_BATCH_COUNT, T015_V4_PENDING_PATH,
+  T015_V4_3_EXACT_APPROVAL_PHRASE, T015_V4_3_REMEDIATION_ASSET_COUNT, T015_V4_3_REMEDIATION_BATCH_ID, T015_V4_3_REMEDIATION_INDICES, T015_V4_ORIGINAL_JOURNAL_PATH,
   T015_V4_RECOVERY_OPERATOR_PHRASE, T015_V4_RESUME_OPERATOR_PHRASE, T015_V4_RISK_TEXT, T015_V4_TOTAL_CAP_UNITS,
   buildT015V4Plan, canonicalJsonT015, crossCheckT015V4EffectivePrompts, isT015V4Authorized, loadPinnedT015V2Plan, parseT015V4BalanceFile, renderT015CanonicalJson,
   sha256T015V4, t015V4LegacyDelta, type T015V4Approval, type T015V4Plan, type T015V4Presentation,
 } from "../../scripts/assets/canonical-shard-1-production-v4";
 import {
-  acquireT015V4Lock, auditT015V4, buildInitialT015V4Journal, downloadT015V4, runT015V4JobsHandoffInternal, runT015V4OpsInternal, statusT015V4, t015V4CanaryVerified, t015V4GetCostRequest, validateT015V4Journal,
+  acquireT015V4Lock, auditT015V4, buildInitialT015V4Journal, downloadT015V4, runT015V4JobsHandoffInternal, runT015V4OpsInternal, statusT015V4, t015V4CanaryVerified, t015V4GetCostRequest, t015V4LostIndices, validateT015V4Journal,
   type T015V4Context, type T015V4Dependencies, type T015V4Journal,
 } from "../../scripts/assets/canonical-shard-1-production-v4-ops";
 import { checkT015V4Preparation } from "../../scripts/assets/canonical-shard-1-production-v4-cli";
@@ -120,11 +121,14 @@ describe("T015 v4 plan identity", () => {
 
   test("keeps batch ids canonical-shard-1-002..028 with 12x26+8 sizes and a 480.00/498.00 budget", () => {
     const plan = buildT015V4Plan(repositoryRoot);
-    expect(plan.batches).toHaveLength(27);
-    expect(plan.batches.map(({ id }) => id)).toEqual(Array.from({ length: 27 }, (_, index) => `canonical-shard-1-${String(index + 2).padStart(3, "0")}`));
+    expect(plan.batches).toHaveLength(28);
+    expect(plan.batches.slice(0, 27).map(({ id }) => id)).toEqual(Array.from({ length: 27 }, (_, index) => `canonical-shard-1-${String(index + 2).padStart(3, "0")}`));
     expect(plan.batches.slice(0, 26).every(({ size }) => size === 12)).toBe(true);
-    expect(plan.batches.at(-1)!.size).toBe(8);
-    expect(plan.batches.reduce((sum, batch) => sum + batch.size, 0)).toBe(320);
+    expect(plan.batches[26].size).toBe(8);
+    expect(plan.batches.slice(0, 27).reduce((sum, batch) => sum + batch.size, 0)).toBe(320);
+    // The 28th batch is the v4.3 one-shot remediation of the seven lost indices.
+    expect(plan.batches.at(-1)).toMatchObject({ id: T015_V4_3_REMEDIATION_BATCH_ID, size: 7 });
+    expect(plan.remediation).toMatchObject({ indices: [...T015_V4_3_REMEDIATION_INDICES], credit_decimal: "10.50", one_shot: true, retry_or_regeneration_allowed: false });
     expect(plan.budget.additional_credit_cap_units).toBe(48_000);
     expect(plan.budget.legacy_committed_units).toBe(1_800);
     expect(plan.budget.total_credit_cap_units).toBe(49_800);
@@ -135,14 +139,20 @@ describe("T015 v4 plan identity", () => {
   });
 
   test("discloses every required v4 risk and stays unauthorized before the fresh exact approval", () => {
-    for (const fragment of ["27", "18.00", "재제출", "896x1200", "4444ppm", "5000ppm", "861.90", "legacy_delta_mismatch", "2026-08-17", "use_unlim:false", "nano_banana_flash", "CLOSED_WITH_LOSSES", T015_V4_CANARY_BLOCKED_BATCH_ID, T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, T015_V4_EXACT_APPROVAL_PHRASE]) expect(T015_V4_RISK_TEXT).toContain(fragment);
+    for (const fragment of ["27", "18.00", "재제출", "896x1200", "4444ppm", "5000ppm", "861.90", "legacy_delta_mismatch", "2026-08-17", "use_unlim:false", "nano_banana_flash", "CLOSED_WITH_LOSSES", T015_V4_CANARY_BLOCKED_BATCH_ID, T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, T015_V4_3_EXACT_APPROVAL_PHRASE]) expect(T015_V4_RISK_TEXT).toContain(fragment);
     // v4.2 must disclose both mid-run defects, the migration, 004's expected discharge, the
     // index that stays ungenerated under this approval, and the spend already committed.
     for (const fragment of ["RECOVERY_FAILED", "result_url", "migrate", T015_V4_LEGACY_JOURNAL_PATH, T015_V4_JOURNAL_PATH, T015_V4_MIGRATION_FAIL_STOP_BATCH_ID, "16.50", "0.00", "index 42", "480.00 중 52.50"]) expect(T015_V4_RISK_TEXT).toContain(fragment);
+    // v4.3 must disclose the zero-loss closure gap, the seven indices, the 10.50 budget, and
+    // that a failure inside the remediation batch is final under this approval.
+    for (const fragment of ["313/320", "469.50", "10.50", T015_V4_3_REMEDIATION_BATCH_ID, "CLOSED_WITH_LOSSES", "재생성의 재생성은 없습니다", "최종 상실", "49(005)", "116(010)", "204(018)", "225와 227(019)", "263(022)"]) expect(T015_V4_RISK_TEXT).toContain(fragment);
+    // The v4.3 scope authorises regeneration, which the v4 phrase never did.
+    expect(T015_V4_3_EXACT_APPROVAL_PHRASE).not.toBe(T015_V4_EXACT_APPROVAL_PHRASE);
+    expect(T015_V4_RISK_TEXT).not.toContain(T015_V4_EXACT_APPROVAL_PHRASE);
     const checked = checkT015V4Preparation(repositoryRoot);
     expect(checked.authorized).toBe(false);
     expect(isT015V4Authorized(repositoryRoot, checked.plan)).toBe(false);
-    expect(JSON.parse(readFileSync(resolve(repositoryRoot, T015_V4_PENDING_PATH), "utf8"))).toMatchObject({ authorized: false, exact_approval_phrase_required: T015_V4_EXACT_APPROVAL_PHRASE, prior_t015_v1_v2_or_v3_approval_inherited: false });
+    expect(JSON.parse(readFileSync(resolve(repositoryRoot, T015_V4_PENDING_PATH), "utf8"))).toMatchObject({ authorized: false, exact_approval_phrase_required: T015_V4_3_EXACT_APPROVAL_PHRASE, prior_t015_v1_v2_or_v3_approval_inherited: false });
   });
 
   test("F1 regression trap: package.json bytes still match the v1 and v3 implementation bindings", () => {
@@ -606,18 +616,18 @@ describe("T015 v4 final audit", () => {
   test("closes 320 paid plus 12 pinned v3 assets at exactly 480.00 + 18.00 = 498.00", async () => {
     const prepared = fixture();
     let balance = START_UNITS;
-    for (let index = 0; index < prepared.plan.batches.length; index += 1) balance = await completeBatch(prepared, index, balance);
+    for (let index = 0; index < T015_V4_PAID_BATCH_COUNT; index += 1) balance = await completeBatch(prepared, index, balance);
     expect(balance).toBe(START_UNITS - T015_V4_ADDITIONAL_CAP_UNITS);
     const journal = journalOf(prepared);
     expect(journal.run_state).toBe("COMPLETE");
     copyLegacyAssets(prepared);
     const audit = auditT015V4(contextOf(prepared), journal, at(200_000));
     expect(audit).toMatchObject({
-      run_state: "COMPLETE", exact_closure: true, paid_assets_recovered: 320, paid_assets_lost: 0, legacy_assets: 12, total_assets_present: 332, total_assets_planned: 332, batches: 27,
+      run_state: "COMPLETE", exact_closure: true, paid_assets_recovered: 320, paid_assets_lost: 0, legacy_assets: 12, total_assets_present: 332, total_assets_planned: 332, batches: 28, paid_batches: 27, lost_indices: [], all_paid_assets_delivered: true, closes_at_exact_cap: true,
       total_delta_units: T015_V4_ADDITIONAL_CAP_UNITS, total_delta_decimal: "480.00", acknowledged_loss_units: 0, acknowledged_loss_decimal: "0.00",
       cumulative_units: T015_V4_ADDITIONAL_CAP_UNITS + T015_V4_LEGACY_COMMITTED_UNITS, cumulative_decimal: "498.00", within_additional_cap: true, within_total_cap: true,
       paid_retry_count: 0, local_backup_verified: true, v3_recoveries_hash_matched: 12,
-      excluded_canonical_paths_absent: true, excluded_checked_count: 994, contact_segments: 28, contact_index_eager_full_image_load: false, regenerated_lost_indices: false,
+      excluded_canonical_paths_absent: true, excluded_checked_count: 994, contact_segments: 29, contact_index_eager_full_image_load: false, regenerated_lost_indices: false,
     });
     expect(T015_V4_ADDITIONAL_CAP_UNITS + T015_V4_LEGACY_COMMITTED_UNITS).toBe(T015_V4_TOTAL_CAP_UNITS);
     expect(readFileSync(resolve(prepared.root, "docs/asset-runs/contact-sheets/t015-canonical-shard-1-v4.html"), "utf8")).not.toMatch(/<img\b/i);
@@ -633,13 +643,13 @@ describe("T015 v4 final audit", () => {
     balance -= lost.size * 150;
     ops(prepared, ["acknowledge-loss", "--batch", lost.id, "--operator-phrase", T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", json(prepared.root, "loss.json", { credits: balance / 100, provider_observed_at: at(3_700) }), "--observed-at", at(3_710)]);
     ops(prepared, ["resume", "--operator-phrase", T015_V4_RESUME_OPERATOR_PHRASE, "--observed-at", at(3_720)]);
-    for (let index = 2; index < prepared.plan.batches.length; index += 1) balance = await completeBatch(prepared, index, balance);
+    for (let index = 2; index < T015_V4_PAID_BATCH_COUNT; index += 1) balance = await completeBatch(prepared, index, balance);
     copyLegacyAssets(prepared);
     const audit = auditT015V4(contextOf(prepared), journalOf(prepared), at(200_000));
     expect(audit).toMatchObject({
       run_state: "CLOSED_WITH_LOSSES", exact_closure: false, paid_assets_recovered: 308, paid_assets_lost: 12, legacy_assets: 12, total_assets_present: 320,
       total_delta_units: T015_V4_ADDITIONAL_CAP_UNITS, total_delta_decimal: "480.00", acknowledged_loss_units: 1_800, acknowledged_loss_decimal: "18.00",
-      cumulative_decimal: "498.00", within_additional_cap: true, within_total_cap: true, contact_segments: 28, regenerated_lost_indices: false,
+      cumulative_decimal: "498.00", within_additional_cap: true, within_total_cap: true, contact_segments: 29, regenerated_lost_indices: false,
     });
     expect((audit.batch_dispositions as Array<Record<string, unknown>>)[1]).toMatchObject({ batch_id: lost.id, disposition: "DISCHARGED_LOSS", recovered: 0, acknowledged_loss_decimal: "18.00" });
     expect(journalOf(prepared).run_state).toBe("CLOSED_WITH_LOSSES");
@@ -660,7 +670,7 @@ describe("T015 v4 closure after a mid-run stop", () => {
     const audit = auditT015V4(contextOf(prepared), journalOf(prepared), at(200_000));
     expect(audit).toMatchObject({
       run_state: "CLOSED_WITH_LOSSES", exact_closure: false, paid_assets_recovered: 12, paid_assets_lost: 308, legacy_assets: 12,
-      unstarted_batches: 25, total_delta_decimal: "36.00", acknowledged_loss_decimal: "18.00", cumulative_decimal: "54.00", within_additional_cap: true, within_total_cap: true,
+      unstarted_batches: 26, total_delta_decimal: "36.00", acknowledged_loss_decimal: "18.00", cumulative_decimal: "54.00", within_additional_cap: true, within_total_cap: true,
     });
     expect((audit.batch_dispositions as Array<Record<string, unknown>>)[2]).toMatchObject({ disposition: "UNSTARTED", recovered: 0 });
     expect(journalOf(prepared).run_state).toBe("CLOSED_WITH_LOSSES");
@@ -685,8 +695,6 @@ function copyLegacyAssets(prepared: Prepared): void {
 }
 
 /* -------------------------------------------------- v4.2 defect regressions */
-
-const LEGACY_PINS = { plan_sha256: sha256T015V4("t015-v4.1-plan"), disclosure_presentation_evidence_sha256: sha256T015V4("t015-v4.1-presentation"), approval_evidence_sha256: sha256T015V4("t015-v4.1-approval") };
 
 /**
  * Reproduces canonical-shard-1-004: a first poll the reader could not accept (zero-cost
@@ -803,89 +811,280 @@ describe("T015 v4.2 jobs_wait topology tolerance", () => {
   });
 });
 
-describe("T015 v4.2 journal migration", () => {
-  /** Moves the fixture journal to the superseded path and stamps it with the old header hashes. */
-  function supersede(prepared: Prepared): T015V4Journal {
-    const source = { ...journalOf(prepared), ...LEGACY_PINS };
-    writeFileSync(resolve(prepared.root, T015_V4_LEGACY_JOURNAL_PATH), renderT015CanonicalJson(source), { mode: 0o600 });
-    rmSync(resolve(prepared.root, T015_V4_JOURNAL_PATH));
-    return source;
+
+/* ------------------------------------------- v4.3 remediation and closure */
+
+const LEGACY_PINS = { plan_sha256: sha256T015V4("t015-v4.2-plan"), disclosure_presentation_evidence_sha256: sha256T015V4("t015-v4.2-presentation"), approval_evidence_sha256: sha256T015V4("t015-v4.2-approval") };
+const V4_PIN = { operations_v4_path: T015_V4_ORIGINAL_JOURNAL_PATH, operations_v4_sha256: sha256T015V4("t015-v4.1-journal"), migrated_at: at(-30) };
+
+/** Which offset inside which paid batch holds each disclosed lost index. Derived, not typed in. */
+function lossPlan(plan: T015V4Plan): Map<number, number[]> {
+  const byBatch = new Map<number, number[]>();
+  for (const index of T015_V4_3_REMEDIATION_INDICES) {
+    const batchIndex = plan.batches.findIndex((batch, position) => position < T015_V4_PAID_BATCH_COUNT && batch.asset_ids.includes(plan.assets.find((asset) => asset.index === index)!.id));
+    const offset = plan.batches[batchIndex].asset_ids.indexOf(plan.assets.find((asset) => asset.index === index)!.id);
+    byBatch.set(batchIndex, [...(byBatch.get(batchIndex) ?? []), offset]);
   }
-  function migrate(prepared: Prepared, observedAt: string): Record<string, unknown> {
-    return ops(prepared, ["migrate", "--observed-at", observedAt, "--legacy-plan-sha256", LEGACY_PINS.plan_sha256, "--legacy-presentation-sha256", LEGACY_PINS.disclosure_presentation_evidence_sha256, "--legacy-approval-sha256", LEGACY_PINS.approval_evidence_sha256]);
+  return byBatch;
+}
+
+/** Runs one batch that loses the given offsets, then discharges it at zero monetary loss. */
+async function loseBatch(prepared: Prepared, batchIndex: number, beforeUnits: number, offsets: readonly number[]): Promise<number> {
+  const batch = prepared.plan.batches[batchIndex];
+  const base = batchIndex * 3_600;
+  preflight(prepared, batchIndex, beforeUnits, base);
+  ops(prepared, ["prepare", "--batch", batch.id, "--observed-at", at(base + 40)]);
+  ops(prepared, ["response", "--batch", batch.id, "--file", json(prepared.root, `submit-${batch.id}.json`, submissionResponse(prepared.plan, batchIndex)), "--observed-at", at(base + 50)]);
+  ops(prepared, ["recovery-open", "--batch", batch.id, "--operator-phrase", T015_V4_RECOVERY_OPERATOR_PHRASE, "--observed-at", at(base + 60)]);
+  const statuses = batch.asset_ids.map((_, offset) => (offsets.includes(offset) ? "failed" : "completed"));
+  const payload = waitResponse(prepared.plan, batchIndex, statuses) as unknown as Record<string, unknown>;
+  // The live provider decorates failed jobs with a model; keep that in the fixture.
+  for (const offset of offsets) (payload.jobs as Array<Record<string, unknown>>)[offset].model = "nano_banana_flash";
+  await expect(runT015V4JobsHandoffInternal(["jobs-handoff", "--batch", batch.id, "--observed-at", at(base + 70)], JSON.stringify(payload), prepared.root, prepared.plan, presentation, approval, deps())).rejects.toThrow(/GENERATION_FAILED/);
+  // The provider never charged the failed generations, so the discharge books 0.00.
+  const after = beforeUnits - (batch.size - offsets.length) * 150;
+  ops(prepared, ["acknowledge-loss", "--batch", batch.id, "--operator-phrase", T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", json(prepared.root, `loss-${batch.id}.json`, { credits: after / 100, provider_observed_at: at(base + 80) }), "--observed-at", at(base + 90)]);
+  ops(prepared, ["resume", "--operator-phrase", T015_V4_RESUME_OPERATOR_PHRASE, "--observed-at", at(base + 100)]);
+  return after;
+}
+
+/**
+ * The live run's shape: 27 paid batches settled, six of them discharged at zero monetary
+ * loss, exactly the seven disclosed indices unrecovered, 313/320 delivered for 469.50.
+ * Built once and copied per test — driving it costs about twenty seconds.
+ */
+let settledRoot: string | undefined;
+async function settledRun(): Promise<Prepared> {
+  if (settledRoot === undefined) {
+    const built = fixture();
+    const losses = lossPlan(built.plan);
+    let balance = START_UNITS;
+    for (let index = 0; index < T015_V4_PAID_BATCH_COUNT; index += 1) {
+      const offsets = losses.get(index);
+      balance = offsets ? await loseBatch(built, index, balance, offsets) : await completeBatch(built, index, balance);
+    }
+    copyLegacyAssets(built);
+    settledRoot = built.root;
   }
-  /** 002 and 003 COMPLETE, 004 wedged exactly as the live run left it. */
-  async function liveShapedRun(): Promise<Prepared> {
+  const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v43-"));
+  cpSync(settledRoot, root, { recursive: true });
+  return { root, plan: cachedPlan };
+}
+
+/** Turns a settled v4.3-shaped root back into a v4.2-generation source journal. */
+function supersede(prepared: Prepared): T015V4Journal {
+  const current = journalOf(prepared);
+  const source = {
+    ...current, ...LEGACY_PINS,
+    immutable_forensics: { ...current.immutable_forensics, ...V4_PIN },
+    batches: current.batches.filter(({ batch_id }) => batch_id !== T015_V4_3_REMEDIATION_BATCH_ID),
+  };
+  writeFileSync(resolve(prepared.root, T015_V4_LEGACY_JOURNAL_PATH), renderT015CanonicalJson(source), { mode: 0o600 });
+  rmSync(resolve(prepared.root, T015_V4_JOURNAL_PATH));
+  return source as T015V4Journal;
+}
+function migrate(prepared: Prepared, observedAt: string): Record<string, unknown> {
+  return ops(prepared, ["migrate", "--observed-at", observedAt, "--legacy-plan-sha256", LEGACY_PINS.plan_sha256, "--legacy-presentation-sha256", LEGACY_PINS.disclosure_presentation_evidence_sha256, "--legacy-approval-sha256", LEGACY_PINS.approval_evidence_sha256]);
+}
+/** Drives the remediation batch, failing the given offsets. Returns the post-batch balance. */
+async function runRemediation(prepared: Prepared, beforeUnits: number, failedOffsets: readonly number[] = []): Promise<number> {
+  const batchIndex = prepared.plan.batches.length - 1;
+  const batch = prepared.plan.batches[batchIndex];
+  const base = 100_800;
+  preflight(prepared, batchIndex, beforeUnits, base);
+  ops(prepared, ["prepare", "--batch", batch.id, "--observed-at", at(base + 40)]);
+  ops(prepared, ["response", "--batch", batch.id, "--file", json(prepared.root, "submit-r01.json", submissionResponse(prepared.plan, batchIndex)), "--observed-at", at(base + 50)]);
+  ops(prepared, ["recovery-open", "--batch", batch.id, "--operator-phrase", T015_V4_RECOVERY_OPERATOR_PHRASE, "--observed-at", at(base + 60)]);
+  const statuses = batch.asset_ids.map((_, offset) => (failedOffsets.includes(offset) ? "failed" : "completed"));
+  const payload = JSON.stringify(waitResponse(prepared.plan, batchIndex, statuses));
+  const handoff = runT015V4JobsHandoffInternal(["jobs-handoff", "--batch", batch.id, "--observed-at", at(base + 70)], payload, prepared.root, prepared.plan, presentation, approval, deps());
+  const after = beforeUnits - (batch.size - failedOffsets.length) * 150;
+  if (failedOffsets.length > 0) {
+    await expect(handoff).rejects.toThrow(/GENERATION_FAILED/);
+    ops(prepared, ["acknowledge-loss", "--batch", batch.id, "--operator-phrase", T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", json(prepared.root, "loss-r01.json", { credits: after / 100, provider_observed_at: at(base + 80) }), "--observed-at", at(base + 90)]);
+    ops(prepared, ["resume", "--operator-phrase", T015_V4_RESUME_OPERATOR_PHRASE, "--observed-at", at(base + 100)]);
+    return after;
+  }
+  await handoff;
+  ops(prepared, ["balance-after", "--batch", batch.id, "--file", json(prepared.root, "after-r01.json", { credits: after / 100 }), "--observed-at", at(base + 80)]);
+  return after;
+}
+
+describe("T015 v4.3 derived loss ledger", () => {
+  test("derives exactly the seven disclosed indices from the settled journal", async () => {
+    const prepared = await settledRun();
+    const lost = t015V4LostIndices(journalOf(prepared));
+    expect(lost.map(({ index }) => index)).toEqual([...T015_V4_3_REMEDIATION_INDICES]);
+    expect(lost).toHaveLength(T015_V4_3_REMEDIATION_ASSET_COUNT);
+    // Each lost index is attributed to the batch that paid for it and never delivered it.
+    const byIndex = new Map(lost.map((entry) => [entry.index, entry.batch_id]));
+    expect(byIndex.get(42)).toBe("canonical-shard-1-004");
+    expect(byIndex.get(263)).toBe("canonical-shard-1-022");
+    expect(new Set(lost.map(({ batch_id }) => batch_id)).size).toBe(6);
+    // The plan's remediation batch is exactly those assets, with unchanged request hashes.
+    expect(prepared.plan.batches.at(-1)!.asset_ids).toEqual(lost.map(({ asset_id }) => asset_id));
+    for (const { asset_id } of lost) expect(prepared.plan.assets.find((asset) => asset.id === asset_id)!.canonical_request_sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(statusT015V4(journalOf(prepared))).toMatchObject({ run_state: "ACTIVE", recovered_assets: 313, total_delta_decimal: "469.50", acknowledged_loss_decimal: "0.00" });
+  }, 300_000);
+
+  test("a recovered index leaves the ledger and an undischarged batch never enters it", async () => {
     const prepared = fixture();
     await completeBatch(prepared, 0, START_UNITS);
-    await completeBatch(prepared, 1, 48_200);
-    await supersededRecoveryFailure(prepared, 2, 46_400, 7_200);
-    return prepared;
-  }
+    expect(t015V4LostIndices(journalOf(prepared))).toEqual([]);
+    submitting(prepared, 1, 48_200, 3_600);
+    // Submitted but not yet discharged: nothing is lost until a discharge books it.
+    expect(t015V4LostIndices(journalOf(prepared))).toEqual([]);
+  });
+});
 
-  test("imports every record verbatim under the new header and pins the superseded journal", async () => {
-    const prepared = await liveShapedRun();
+describe("T015 v4.3 zero-loss closure", () => {
+  test("D3 regression: a run with discharged batches and 0.00 monetary loss can close", async () => {
+    const prepared = await settledRun();
+    const journal = journalOf(prepared);
+    expect(journal.run_state).toBe("ACTIVE");
+    // The gap: every discharge booked 0.00 because the provider never charged the failures.
+    expect(journal.batches.filter((record) => record.discharges.some(({ kind }) => kind === "LOSS_ACKNOWLEDGED"))).toHaveLength(6);
+    expect(journal.batches.flatMap(({ discharges }) => discharges).every(({ acknowledged_loss_units }) => acknowledged_loss_units === 0)).toBe(true);
+    // Closure is still refused while the approved remediation batch is owed.
+    expect(() => auditT015V4(contextOf(prepared), journalOf(prepared), at(200_000))).toThrow(/will not close the run while the approved remediation batch/);
+    // Abandoning the remediation is not silently possible, but discharging it is: once r01
+    // has run, the same zero-loss run closes.
+    await runRemediation(prepared, 3_050);
+    const audit = auditT015V4(contextOf(prepared), journalOf(prepared), at(200_000));
+    expect(audit).toMatchObject({ run_state: "CLOSED_WITH_LOSSES", exact_closure: false, acknowledged_loss_units: 0, acknowledged_loss_decimal: "0.00", discharged_batches: 6 });
+    expect(journalOf(prepared).run_state).toBe("CLOSED_WITH_LOSSES");
+  }, 300_000);
+
+  test("the validator accepts a zero-loss CLOSED_WITH_LOSSES journal and still rejects one with nothing discharged", async () => {
+    const prepared = await settledRun();
+    await runRemediation(prepared, 3_050);
+    auditT015V4(contextOf(prepared), journalOf(prepared), at(200_000));
+    const closed = journalOf(prepared);
+    expect(() => validateT015V4Journal(closed, prepared.plan, presentation, approval)).not.toThrow();
+    // Strip the discharges and the same state is no longer a legal closure.
+    const crafted = journalOf(prepared);
+    for (const record of crafted.batches) record.discharges = record.discharges.filter(({ kind }) => kind !== "LOSS_ACKNOWLEDGED");
+    expect(() => validateT015V4Journal(crafted, prepared.plan, presentation, approval)).toThrow(/T015 v4/);
+  }, 300_000);
+});
+
+describe("T015 v4.3 remediation batch", () => {
+  test("regenerates all seven indices and closes at exactly 480.00 + 18.00 = 498.00", async () => {
+    const prepared = await settledRun();
+    const before = statusT015V4(journalOf(prepared));
+    expect(before).toMatchObject({ total_delta_units: 46_950, recovered_assets: 313 });
+    const balance = await runRemediation(prepared, 3_050);
+    expect(balance).toBe(2_000);
+    const journal = journalOf(prepared);
+    const record = journal.batches.at(-1)!;
+    expect(record).toMatchObject({ batch_id: T015_V4_3_REMEDIATION_BATCH_ID, state: "COMPLETE" });
+    expect(record.recoveries).toHaveLength(7);
+    expect(record.balance_after).toMatchObject({ delta_units: 1_050, delta_decimal: "10.50", charged_job_count: 7 });
+    // Exactly one submission of exactly seven requests, no paid retry.
+    expect(record.submission!.jobs).toHaveLength(7);
+    expect(journal.paid_retry_count).toBe(0);
+    expect(t015V4LostIndices(journal)).toEqual([]);
+    const audit = auditT015V4(contextOf(prepared), journalOf(prepared), at(200_000));
+    expect(audit).toMatchObject({
+      run_state: "CLOSED_WITH_LOSSES", paid_assets_recovered: 320, paid_assets_lost: 0, all_paid_assets_delivered: true, lost_indices: [],
+      total_delta_units: T015_V4_ADDITIONAL_CAP_UNITS, total_delta_decimal: "480.00", cumulative_units: T015_V4_TOTAL_CAP_UNITS, cumulative_decimal: "498.00",
+      closes_at_exact_cap: true, within_additional_cap: true, within_total_cap: true, acknowledged_loss_decimal: "0.00",
+      remediation_batch_id: T015_V4_3_REMEDIATION_BATCH_ID, remediation_state: "COMPLETE", remediation_recovered: 7, total_assets_present: 332,
+      regenerated_lost_indices: true, regenerated_index_count: 7,
+    });
+    expect(statusT015V4(journalOf(prepared))).toMatchObject({ recovered_assets: 320, remaining_assets: 0, total_delta_decimal: "480.00" });
+  }, 300_000);
+
+  test("a failure inside the remediation batch is final: the index stays lost and the run still closes", async () => {
+    const prepared = await settledRun();
+    // Offset 3 is index 204; it fails again and is never regenerated under this approval.
+    const balance = await runRemediation(prepared, 3_050, [3]);
+    expect(balance).toBe(2_150);
+    const journal = journalOf(prepared);
+    expect(journal.batches.at(-1)!.recoveries).toHaveLength(6);
+    expect(t015V4LostIndices(journal).map(({ index }) => index)).toEqual([204]);
+    const audit = auditT015V4(contextOf(prepared), journalOf(prepared), at(200_000));
+    expect(audit).toMatchObject({
+      run_state: "CLOSED_WITH_LOSSES", paid_assets_recovered: 319, paid_assets_lost: 1, all_paid_assets_delivered: false, lost_indices: [204],
+      total_delta_units: 47_850, total_delta_decimal: "478.50", closes_at_exact_cap: false, acknowledged_loss_decimal: "0.00",
+      remediation_batch_id: T015_V4_3_REMEDIATION_BATCH_ID, remediation_recovered: 6, discharged_batches: 7, regenerated_lost_indices: true, regenerated_index_count: 6,
+    });
+    expect((audit.lost_index_detail as Array<Record<string, unknown>>)[0]).toMatchObject({ index: 204, batch_id: T015_V4_3_REMEDIATION_BATCH_ID });
+    // No second regeneration: the discharged remediation batch can never reopen.
+    expect(() => ops(prepared, ["preflight-request", "--batch", T015_V4_3_REMEDIATION_BATCH_ID, "--observed-at", at(200_100)])).toThrow(/T015 v4/);
+  }, 300_000);
+
+  test("the remediation batch is refused until every paid batch has settled", async () => {
+    const prepared = fixture();
+    await completeBatch(prepared, 0, START_UNITS);
+    expect(() => ops(prepared, ["preflight-request", "--batch", T015_V4_3_REMEDIATION_BATCH_ID, "--observed-at", at(3_600)])).toThrow(/must progress exactly in order/);
+  });
+});
+
+describe("T015 v4.3 journal migration", () => {
+  test("imports every record verbatim, appends r01, and chains both migration pins", async () => {
+    const prepared = await settledRun();
     const before = statusT015V4(journalOf(prepared));
     const source = supersede(prepared);
+    expect(source.batches).toHaveLength(T015_V4_PAID_BATCH_COUNT);
     const sourceSha = sha256T015V4(readFileSync(resolve(prepared.root, T015_V4_LEGACY_JOURNAL_PATH)));
-    const result = migrate(prepared, at(11_000));
-    expect(result).toMatchObject({ command: "migrate", source_path: T015_V4_LEGACY_JOURNAL_PATH, source_sha256: sourceSha, source_mutated: false, target_path: T015_V4_JOURNAL_PATH, run_state: "FAIL_STOP", fail_stop_batch_id: T015_V4_MIGRATION_FAIL_STOP_BATCH_ID, complete_batches: 2, recovered_assets: 35, resubmitted: false, regenerated: false });
+    const result = migrate(prepared, at(150_000));
+    expect(result).toMatchObject({
+      command: "migrate", source_path: T015_V4_LEGACY_JOURNAL_PATH, source_sha256: sourceSha, source_mutated: false, target_path: T015_V4_JOURNAL_PATH,
+      batches: 28, complete_batches: 21, recovered_assets: 313, remediation_batch_id: T015_V4_3_REMEDIATION_BATCH_ID,
+      remediation_indices: [...T015_V4_3_REMEDIATION_INDICES], remediation_credit_decimal: "10.50", remaining_cap_units: 1_050,
+      cap_used_decimal: "469.50", resubmitted: false, regenerated: false,
+    });
     const migrated = journalOf(prepared);
     const expectedHeader = buildInitialT015V4Journal(prepared.plan, presentation, approval, migrated.initial_balance);
     expect(migrated.plan_sha256).toBe(expectedHeader.plan_sha256);
     expect(migrated.plan_sha256).not.toBe(LEGACY_PINS.plan_sha256);
-    expect(migrated.disclosure_presentation_evidence_sha256).toBe(expectedHeader.disclosure_presentation_evidence_sha256);
-    expect(migrated.approval_evidence_sha256).toBe(expectedHeader.approval_evidence_sha256);
-    expect(migrated.immutable_forensics).toMatchObject({ operations_v4_path: T015_V4_LEGACY_JOURNAL_PATH, operations_v4_sha256: sourceSha, migrated_at: at(11_000) });
-    // Byte-for-byte record import: balances, terminals, recoveries, submissions, preflights.
-    expect(canonicalJsonT015(migrated.batches)).toBe(canonicalJsonT015(source.batches));
+    // Both migration pins survive: the v4.1 one carried forward, the v4.2 one added.
+    expect(migrated.immutable_forensics).toMatchObject({ ...V4_PIN, operations_v4_2_path: T015_V4_LEGACY_JOURNAL_PATH, operations_v4_2_sha256: sourceSha, migrated_v4_3_at: at(150_000) });
+    expect(canonicalJsonT015(migrated.batches.slice(0, T015_V4_PAID_BATCH_COUNT))).toBe(canonicalJsonT015(source.batches));
     expect(canonicalJsonT015(migrated.resumes)).toBe(canonicalJsonT015(source.resumes));
-    expect(migrated.initial_balance).toEqual(source.initial_balance);
-    expect(migrated.batches[0].balance_after).toMatchObject({ delta_units: 1_800, charged_job_count: 12 });
-    expect(migrated.batches[2].terminals.map(({ code }) => code)).toEqual(["RECOVERY_FAILED", "GENERATION_FAILED"]);
-    // Spend accounting is continuous across the migration: 18.00 + 18.00 booked so far.
-    expect(statusT015V4(migrated)).toMatchObject({ total_delta_units: before.total_delta_units, recovered_assets: 35, acknowledged_loss_units: 0 });
-    // The superseded journal is left exactly as it was found.
+    expect(migrated.batches.at(-1)).toMatchObject({ batch_id: T015_V4_3_REMEDIATION_BATCH_ID, state: "PLANNED", transitions: [], terminals: [], discharges: [], recoveries: [] });
+    expect(statusT015V4(migrated)).toMatchObject({ total_delta_units: before.total_delta_units, recovered_assets: 313 });
     expect(sha256T015V4(readFileSync(resolve(prepared.root, T015_V4_LEGACY_JOURNAL_PATH)))).toBe(sourceSha);
-  });
+  }, 300_000);
 
   test("refuses to clobber an existing target", async () => {
-    const clobber = await liveShapedRun();
-    supersede(clobber);
-    migrate(clobber, at(11_000));
-    expect(() => migrate(clobber, at(11_100))).toThrow(/refuses to clobber/);
-  });
+    const prepared = await settledRun();
+    supersede(prepared);
+    migrate(prepared, at(150_000));
+    expect(() => migrate(prepared, at(150_100))).toThrow(/refuses to clobber/);
+  }, 300_000);
 
-  test("refuses a tampered source record and a source whose pinned header does not match", async () => {
-    const tampered = await liveShapedRun();
-    const source = { ...journalOf(tampered), ...LEGACY_PINS };
+  test("refuses a tampered source, a mismatched pin, and a source that is not the migrated v4.2 journal", async () => {
+    const tampered = await settledRun();
+    const source = { ...journalOf(tampered), ...LEGACY_PINS, immutable_forensics: { ...journalOf(tampered).immutable_forensics, ...V4_PIN }, batches: journalOf(tampered).batches.filter(({ batch_id }) => batch_id !== T015_V4_3_REMEDIATION_BATCH_ID) };
     source.batches[0].balance_after!.delta_units = 1_650;
     writeFileSync(resolve(tampered.root, T015_V4_LEGACY_JOURNAL_PATH), renderT015CanonicalJson(source), { mode: 0o600 });
     rmSync(resolve(tampered.root, T015_V4_JOURNAL_PATH));
-    expect(() => migrate(tampered, at(11_000))).toThrow(/credit delta changed/);
+    expect(() => migrate(tampered, at(150_000))).toThrow(/credit delta changed/);
     expect(existsSync(resolve(tampered.root, T015_V4_JOURNAL_PATH))).toBe(false);
 
-    const unpinned = await liveShapedRun();
+    const unpinned = await settledRun();
     supersede(unpinned);
-    expect(() => ops(unpinned, ["migrate", "--observed-at", at(11_000), "--legacy-plan-sha256", sha256T015V4("wrong"), "--legacy-presentation-sha256", LEGACY_PINS.disclosure_presentation_evidence_sha256, "--legacy-approval-sha256", LEGACY_PINS.approval_evidence_sha256])).toThrow(/journal header changed/);
-  });
+    expect(() => ops(unpinned, ["migrate", "--observed-at", at(150_000), "--legacy-plan-sha256", sha256T015V4("wrong"), "--legacy-presentation-sha256", LEGACY_PINS.disclosure_presentation_evidence_sha256, "--legacy-approval-sha256", LEGACY_PINS.approval_evidence_sha256])).toThrow(/journal header changed/);
 
-  test("post-migrate the run discharges 004, resumes, and opens 005 on the discharge balance", async () => {
-    const prepared = await liveShapedRun();
+    const unmigrated = await settledRun();
+    const naive = journalOf(unmigrated);
+    const withoutPin = { ...naive, ...LEGACY_PINS, batches: naive.batches.filter(({ batch_id }) => batch_id !== T015_V4_3_REMEDIATION_BATCH_ID) };
+    writeFileSync(resolve(unmigrated.root, T015_V4_LEGACY_JOURNAL_PATH), renderT015CanonicalJson(withoutPin), { mode: 0o600 });
+    rmSync(resolve(unmigrated.root, T015_V4_JOURNAL_PATH));
+    expect(() => migrate(unmigrated, at(150_000))).toThrow(/must itself be the migrated v4.2 journal/);
+  }, 300_000);
+
+  test("refuses a source whose derived losses are not the disclosed remediation scope", async () => {
+    const prepared = fixture();
+    await completeBatch(prepared, 0, START_UNITS);
+    const lost = prepared.plan.batches[1];
+    submitting(prepared, 1, 48_200, 3_600);
+    expect(() => ops(prepared, ["ambiguous", "--batch", lost.id, "--reason", "TIMEOUT", "--observed-at", at(3_650)])).toThrow(/AMBIGUOUS_SUBMISSION/);
+    ops(prepared, ["acknowledge-loss", "--batch", lost.id, "--operator-phrase", T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", json(prepared.root, "loss.json", { credits: 464, provider_observed_at: at(3_700) }), "--observed-at", at(3_710)]);
+    ops(prepared, ["resume", "--operator-phrase", T015_V4_RESUME_OPERATOR_PHRASE, "--observed-at", at(3_720)]);
     supersede(prepared);
-    migrate(prepared, at(11_000));
-    const failing = prepared.plan.batches[2];
-    const acknowledged = ops(prepared, ["acknowledge-loss", "--batch", failing.id, "--operator-phrase", T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, "--balance-file", json(prepared.root, "loss.json", { credits: (46_400 - 1_650) / 100, provider_observed_at: at(11_020) }), "--observed-at", at(11_030)]);
-    expect(acknowledged).toMatchObject({ terminal_code: "GENERATION_FAILED", observed_delta_decimal: "16.50", recovered_decimal: "16.50", acknowledged_loss_decimal: "0.00", cap_used_decimal: "52.50", new_balance_anchor_decimal: "447.50" });
-    expect(ops(prepared, ["resume", "--operator-phrase", T015_V4_RESUME_OPERATOR_PHRASE, "--observed-at", at(11_040)])).toMatchObject({ run_state: "ACTIVE", disposition: "DISCHARGED_LOSS", rerunnable: false });
-    // Nothing imported by the migration is re-runnable: the two COMPLETE batches are behind
-    // the order gate and the discharged batch is refused by the never-reopen gate itself.
-    for (const closed of [prepared.plan.batches[0], prepared.plan.batches[1]]) expect(() => ops(prepared, ["preflight-request", "--batch", closed.id, "--observed-at", at(11_050)])).toThrow(/must progress exactly in order/);
-    expect(() => ops(prepared, ["preflight-request", "--batch", failing.id, "--observed-at", at(11_050)])).toThrow(/never reopened or resubmitted/);
-    expect(() => ops(prepared, ["reset", "--batch", failing.id, "--observed-at", at(11_050)])).toThrow(/never reopened or resubmitted/);
-    preflight(prepared, 3, 44_750, 14_400);
-    expect(journalOf(prepared).batches[3].state).toBe("PREFLIGHT_VERIFIED");
-    expect(journalOf(prepared).batches[3].preflight!.balance!.normalized_decimal).toBe("447.50");
-    expect(statusT015V4(journalOf(prepared))).toMatchObject({ total_delta_units: 5_250, total_delta_decimal: "52.50", acknowledged_loss_units: 0, recovered_assets: 35 });
-  });
+    expect(() => migrate(prepared, at(150_000))).toThrow(/do not match the disclosed remediation scope/);
+  }, 300_000);
 });

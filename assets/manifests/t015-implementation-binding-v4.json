@@ -13,11 +13,11 @@
     },
     "production": {
       "path": "scripts/assets/canonical-shard-1-production-v4-ops.ts",
-      "sha256": "bf383569faa33aeedf79e952e8e5d3a26c4eaa8027393c7e2872b0cd153350e3"
+      "sha256": "b46264d90dbc56abe818a9db4b3e3beafb6d938e6cc304747622b701aee82dfd"
     },
     "contract": {
       "path": "scripts/assets/canonical-shard-1-production-v4.ts",
-      "sha256": "604e814686fd594ab0e623665a561fe6ba1803097dba3f40b5bc4463c6f045cc"
+      "sha256": "e6076b002e9896d5680b2e42b380c6f29282a2f1f47da9abbd83641c860a9899"
     },
     "v3_contract": {
       "path": "scripts/assets/canonical-shard-1-recovery-v3.ts",

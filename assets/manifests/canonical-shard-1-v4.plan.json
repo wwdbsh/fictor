@@ -47,8 +47,8 @@
     },
     "risk_disclosure": {
       "path": "assets/evidence/t015-canonical-shard-1-risk-disclosure-v4.json",
-      "sha256": "82caea51a37903d62357cc52922040cff6881767c607e4aceb61ee4dbde89997",
-      "text_sha256": "1cf830f1c7a61441a19963e96d8eb94cc185f218c69afebaaba367e3385b8cdc"
+      "sha256": "0a0d83a4805ea265a1c4b481271f2c60885be0e99d0bce319f507ebbfae19527",
+      "text_sha256": "15c4fdd7e65b06a39c152e3d4997a81c3b2fe7cc2c3ce434755fc2149254bb8d"
     },
     "provider_schema": {
       "path": "assets/evidence/t015-canonical-shard-1-higgsfield-schema-v4.json",
@@ -60,7 +60,7 @@
     },
     "implementation_binding": {
       "path": "assets/manifests/t015-implementation-binding-v4.json",
-      "sha256": "5fcd243b45cd30885677c08585180d3c9915444240f928c5d39af6c2b66201f6",
+      "sha256": "3882c529b6e9787071d30fa5e337a37c6d568f8f7804f818ff2fb808c0b7d8ed",
       "files": {
         "controller": {
           "path": "scripts/assets/canonical-shard-1-production-v4-controller.ts",
@@ -72,11 +72,11 @@
         },
         "production": {
           "path": "scripts/assets/canonical-shard-1-production-v4-ops.ts",
-          "sha256": "bf383569faa33aeedf79e952e8e5d3a26c4eaa8027393c7e2872b0cd153350e3"
+          "sha256": "b46264d90dbc56abe818a9db4b3e3beafb6d938e6cc304747622b701aee82dfd"
         },
         "contract": {
           "path": "scripts/assets/canonical-shard-1-production-v4.ts",
-          "sha256": "604e814686fd594ab0e623665a561fe6ba1803097dba3f40b5bc4463c6f045cc"
+          "sha256": "e6076b002e9896d5680b2e42b380c6f29282a2f1f47da9abbd83641c860a9899"
         },
         "v3_contract": {
           "path": "scripts/assets/canonical-shard-1-recovery-v3.ts",
@@ -349,14 +349,43 @@
     "blocks_batch_id_on_drift": "canonical-shard-1-003",
     "drift_still_costs_canary_batch_spend": true
   },
+  "remediation": {
+    "batch_id": "canonical-shard-1-r01",
+    "asset_count": 7,
+    "indices": [
+      42,
+      49,
+      116,
+      204,
+      225,
+      227,
+      263
+    ],
+    "asset_ids": [
+      "forge__burn_01__tool_07",
+      "forge__burn_01__wash_04",
+      "forge__burn_03__ore_rot",
+      "forge__burn_05__odd_02",
+      "forge__burn_05__still_01",
+      "forge__burn_05__still_03",
+      "forge__join_01__rot_03"
+    ],
+    "credit_decimal": "10.50",
+    "credit_units": 1050,
+    "within_existing_additional_cap": true,
+    "derived_from_journal_discharged_batches": true,
+    "one_shot": true,
+    "retry_or_regeneration_allowed": false,
+    "failures_are_final_under_this_approval": true
+  },
   "approval_gate": {
-    "pending_disclosure_packet_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.pending.json",
-    "disclosure_presentation_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.json",
-    "controller_disclosure_attestation_path": "assets/evidence/t015-controller-disclosure-attestation-v4.2.json",
-    "controller_approval_attestation_path": "assets/evidence/t015-controller-approval-attestation-v4.2.json",
-    "approval_path": "assets/evidence/t015-canonical-shard-1-approval-v4.2.json",
+    "pending_disclosure_packet_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.3.pending.json",
+    "disclosure_presentation_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.3.json",
+    "controller_disclosure_attestation_path": "assets/evidence/t015-controller-disclosure-attestation-v4.3.json",
+    "controller_approval_attestation_path": "assets/evidence/t015-controller-approval-attestation-v4.3.json",
+    "approval_path": "assets/evidence/t015-canonical-shard-1-approval-v4.3.json",
     "status": "MISSING_NOT_AUTHORIZED",
-    "exact_phrase": "위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
+    "exact_phrase": "위 위험을 확인했고 T015 상실 7개 지수의 1회 한정 재생성과 추가 10.50 credits(총 추가 480.00, 누적 상한 498.00 정확히), 자동 유료 재시도 0, 무손실 방면 마감 규칙 개정을 승인합니다.",
     "prior_t015_v1_v2_or_v3_approval_inherited": false,
     "committed_clean_runtime_binding_required": true
   },
@@ -9511,6 +9540,20 @@
         "forge__join_02__wash_01"
       ],
       "size": 8
+    },
+    {
+      "id": "canonical-shard-1-r01",
+      "index": 29,
+      "asset_ids": [
+        "forge__burn_01__tool_07",
+        "forge__burn_01__wash_04",
+        "forge__burn_03__ore_rot",
+        "forge__burn_05__odd_02",
+        "forge__burn_05__still_01",
+        "forge__burn_05__still_03",
+        "forge__join_01__rot_03"
+      ],
+      "size": 7
     }
   ]
 }

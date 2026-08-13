@@ -18,17 +18,19 @@ export const T015_V4_FORENSICS_PATH = "assets/evidence/t015-canonical-shard-1-fo
    -v4 disclosure, approval, and journal stay on disk as immutable history of the live run.
    The regenerable artifacts (risk, schema, forensics, plan) keep their -v4 paths and are
    rewritten in place; only the no-clobber chain and the journal are re-versioned. */
-export const T015_V4_PENDING_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.pending.json" as const;
-export const T015_V4_PRESENTATION_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.json" as const;
-export const T015_V4_APPROVAL_PATH = "assets/evidence/t015-canonical-shard-1-approval-v4.2.json" as const;
-export const T015_V4_CONTROLLER_DISCLOSURE_PATH = "assets/evidence/t015-controller-disclosure-attestation-v4.2.json" as const;
-export const T015_V4_CONTROLLER_APPROVAL_PATH = "assets/evidence/t015-controller-approval-attestation-v4.2.json" as const;
-export const T015_V4_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-2.json" as const;
-export const T015_V4_LOCK_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-2.lock" as const;
+export const T015_V4_PENDING_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.3.pending.json" as const;
+export const T015_V4_PRESENTATION_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.3.json" as const;
+export const T015_V4_APPROVAL_PATH = "assets/evidence/t015-canonical-shard-1-approval-v4.3.json" as const;
+export const T015_V4_CONTROLLER_DISCLOSURE_PATH = "assets/evidence/t015-controller-disclosure-attestation-v4.3.json" as const;
+export const T015_V4_CONTROLLER_APPROVAL_PATH = "assets/evidence/t015-controller-approval-attestation-v4.3.json" as const;
+export const T015_V4_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-3.json" as const;
+export const T015_V4_LOCK_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-3.lock" as const;
 /* Read (never written) by `production migrate`, which is the only command that touches the
-   superseded v4.1 journal. */
-export const T015_V4_LEGACY_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4.json" as const;
-export const T015_V4_LEGACY_LOCK_PATH = "assets/runs/t015-canonical-shard-1/operations-v4.lock" as const;
+   superseded v4.2 journal. The v4.1 path is retained because the v4.2 journal's forensics
+   pin it, and that pin is carried forward verbatim into v4.3. */
+export const T015_V4_LEGACY_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-2.json" as const;
+export const T015_V4_LEGACY_LOCK_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-2.lock" as const;
+export const T015_V4_ORIGINAL_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4.json" as const;
 export const T015_V3_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v3.json" as const;
 export const T015_V4_LOCAL_ROOT = "public/assets" as const;
 export const T015_V4_BACKUP_ROOT = "assets/backups/t015-canonical-shard-1" as const;
@@ -51,6 +53,16 @@ export const T015_V4_CANARY_BATCH_ID = "canonical-shard-1-002" as const;
 export const T015_V4_CANARY_BLOCKED_BATCH_ID = "canonical-shard-1-003" as const;
 /* The batch that was in FAIL_STOP when the v4.1 defects were found; disclosed by name. */
 export const T015_V4_MIGRATION_FAIL_STOP_BATCH_ID = "canonical-shard-1-004" as const;
+
+/* v4.3 bounded remediation. The seven indices below are the disclosed approval scope; the
+   journal is the authority and `migrate` refuses unless the set derived from the settled
+   discharged batches matches this list exactly. Each index costs the same 1.50 and is drawn
+   from the same pinned plan asset, so its canonical_request_sha256 is unchanged. */
+export const T015_V4_3_REMEDIATION_BATCH_ID = "canonical-shard-1-r01" as const;
+export const T015_V4_3_REMEDIATION_INDICES = [42, 49, 116, 204, 225, 227, 263] as const;
+export const T015_V4_3_REMEDIATION_ASSET_COUNT = 7 as const;
+export const T015_V4_3_REMEDIATION_CREDIT_UNITS = 1_050 as const;
+export const T015_V4_3_TOTAL_BATCH_COUNT = 28 as const;
 export const T015_V4_CREDIT_EXPIRY_DATE = "2026-08-17" as const;
 export const T015_V4_ASPECT_TOLERANCE_PPM = 5000 as const;
 export const T015_V4_OBSERVED_RECOVERY_WIDTH = 896 as const;
@@ -58,6 +70,9 @@ export const T015_V4_OBSERVED_RECOVERY_HEIGHT = 1200 as const;
 export const T015_V4_OBSERVED_RECOVERY_ASPECT_ERROR_PPM = 4445 as const;
 
 export const T015_V4_EXACT_APPROVAL_PHRASE = "위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다." as const;
+/* v4.3 authorises something v4/v4.2 never did — regeneration of already-paid indices — so it
+   carries its own exact phrase and is never satisfied by the v4 phrase above. */
+export const T015_V4_3_EXACT_APPROVAL_PHRASE = "위 위험을 확인했고 T015 상실 7개 지수의 1회 한정 재생성과 추가 10.50 credits(총 추가 480.00, 누적 상한 498.00 정확히), 자동 유료 재시도 0, 무손실 방면 마감 규칙 개정을 승인합니다." as const;
 export const T015_V4_RECOVERY_OPERATOR_PHRASE = "T015 v4 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다." as const;
 export const T015_V4_RESUME_OPERATOR_PHRASE = "T015 v4 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다." as const;
 export const T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE = "T015 v4 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다." as const;
@@ -76,7 +91,10 @@ export const T015_V4_RISK_TEXT = `T015 v4는 CANONICAL 12..331 정확히 320장�
 (xi) v4.2 개정 사유 - 실행 도중 발견된 결함 2건입니다. 결함 1: LOSS_ACKNOWLEDGED discharge 검증이 그 discharge가 덮는 모든 terminal을 손실 코드로 요구했습니다. 배치 ${T015_V4_MIGRATION_FAIL_STOP_BATCH_ID}의 이력에는 나중에 같은 job ID를 다시 조회해 성공적으로 대체된 무비용 RECOVERY_FAILED terminal이 남아 있어 손실 확인 자체가 거부되었고, 그 결과 resume도 막혀 실행 전체가 멈췄습니다. v4.2는 discharge가 덮는 terminal로 손실 코드와 무비용으로 대체된 RECOVERY_FAILED를 함께 허용하되 최소 하나는 실제 손실 코드여야 하고, 마지막 활성 terminal이 손실 코드여야 한다는 기존 조건은 그대로 둡니다. 결함 2: provider의 jobs_wait가 완료되지 않은 job에도 model 필드를 실어 보냈고(관찰: status "failed", model "${T015_V4_EXPECTED_MODEL}", result_url 없음) topology 검증이 이를 거부해 RECOVERY_FAILED가 났습니다. operator가 그 필드를 손으로 제거해 진행한 사실을 함께 고지합니다. v4.2는 완료되지 않은 job의 선택적 model/result_url을 타입만 검증해 받아들이고, 완료되지 않은 job에서는 어떤 경우에도 내려받지 않으며, 완료된 job은 여전히 model과 result_url을 모두 요구합니다.
 (xii) 저널 이관 - 기존 저널 ${T015_V4_LEGACY_JOURNAL_PATH}는 한 바이트도 고치지 않고 그대로 두고, 단 한 번만 실행되는 migrate 명령이 ${T015_V4_JOURNAL_PATH}를 새로 씁니다. 새 저널은 이 고지에서 나온 새 plan/presentation/approval sha를 헤더로 갖고, 기존 배치 기록(002·003의 COMPLETE와 balance_after, 004의 terminal·복구·제출·preflight)을 전부 그대로 가져오며, 원본 경로와 이관 시점의 원본 바이트 sha256과 이관 시각을 불변 포렌식에 함께 기록합니다. 대상 저널이 이미 있거나 원본이 레코드 검증에 실패하면 이관을 거부합니다.
 (xiii) 이관 뒤 배치 ${T015_V4_MIGRATION_FAIL_STOP_BATCH_ID}는 관찰 delta 16.50, 회수 16.50, 확인 손실 0.00으로 discharge됩니다. 금액은 discharge 시점에 새로 측정한 balance로 다시 확정하므로 이 수치는 현재 관찰값이며 확정값이 아닙니다. 실패한 index 42 한 장은 이 승인으로는 다시 생성하지 않습니다. 다시 만들려면 별도의 새 고지와 새 승인이 필요합니다. 현재까지의 지출은 480.00 중 52.50(002 18.00 + 003 18.00 + 004 16.50)입니다.
-signed URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. operations-v1, operations-v2, operations-v3 저널과 v3 승인 증거는 불변 포렌식으로 바이트 고정합니다. T016, index 332 이후, materials, hearts, world 자산은 제외됩니다. 새 승인은 정확히 “${T015_V4_EXACT_APPROVAL_PHRASE}”로만 기록합니다.` as const;
+(xiv) v4.3 마감 규칙 개정 - 27개 배치가 모두 정착했지만 실행을 닫을 수 없는 결함이 남아 있었습니다. audit의 승격 조건과 validator의 CLOSED_WITH_LOSSES 조건이 모두 "확인된 손실 > 0"을 요구했는데, 이 실행의 모든 discharge는 손실 0.00으로 기록되었습니다. provider가 실패한 생성에 과금하지 않아 관찰 delta가 회수 금액과 정확히 같았기 때문입니다. 즉 배치를 discharge하고도 금전 손실이 0이면 실행이 COMPLETE도 CLOSED_WITH_LOSSES도 될 수 없었습니다. v4.3은 두 조건을 "모든 배치가 정착 또는 미착수이고 discharge된 배치가 최소 하나"로 바꿉니다. 금전 손실은 0이어도 됩니다. 320장 전부를 정확히 480.00으로 회수한 경우의 COMPLETE 경로는 그대로입니다.
+(xv) v4.3 상실 지수 1회 한정 재생성 - 현재까지 313/320장을 회수했고 지출은 469.50입니다. 회수하지 못한 지수는 정확히 7개이며, 모두 해당 배치에서 생성이 실패했고 provider가 과금하지 않았습니다: index 42(배치 canonical-shard-1-004), 49(005), 116(010), 204(018), 225와 227(019), 263(022). 이 7개를 단일 재생성 배치 ${T015_V4_3_REMEDIATION_BATCH_ID}로 정확히 한 번 제출합니다. 요청 파라미터는 고정된 plan 자산에서 그대로 가져오므로 canonical_request_sha256이 바뀌지 않습니다. 비용은 정확히 10.50(7 x 1.50)이고 기존 480.00 상한 안에서 집행됩니다. 7개가 모두 성공하면 추가 지출 합계는 정확히 480.00, 누적은 정확히 498.00이 되고 320장이 모두 확보됩니다.
+(xvi) ${T015_V4_3_REMEDIATION_BATCH_ID}에도 같은 규율이 그대로 적용됩니다. preflight로 요청별 정확 단가와 balance를 확인하고, 제출은 단 한 번이며, 자동 유료 재시도는 0입니다. ${T015_V4_3_REMEDIATION_BATCH_ID} 안에서 실패한 지수는 이 승인으로는 최종 상실로 확정되며 다시 생성하지 않습니다. 재생성의 재생성은 없습니다. 다시 시도하려면 별도의 새 고지와 새 승인이 필요합니다. 모호 제출이 일어나면 최대 10.50이 회수되지 않은 채 소멸할 수 있습니다.
+signed URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. operations-v1, operations-v2, operations-v3 저널과 v3 승인 증거는 불변 포렌식으로 바이트 고정하고, operations-v4와 operations-v4-2 저널도 경로와 바이트 sha256으로 고정해 이관 이력을 남깁니다. T016, index 332 이후, materials, hearts, world 자산은 제외됩니다. v4와 v4.2 승인은 재생성을 승인하지 않았으므로 상속되지 않습니다. 새 승인은 정확히 “${T015_V4_3_EXACT_APPROVAL_PHRASE}”로만 기록합니다.` as const;
 
 export const T015_V4_RUNTIME_FILES = {
   controller: "scripts/assets/canonical-shard-1-production-v4-controller.ts",
@@ -153,6 +171,10 @@ export function t015V4ApprovalScope() {
     legacy_cap_committed_decimal: decimalT015V4(T015_V4_LEGACY_COMMITTED_UNITS), legacy_cap_committed_units: T015_V4_LEGACY_COMMITTED_UNITS,
     total_credit_cap_decimal: decimalT015V4(T015_V4_TOTAL_CAP_UNITS), total_credit_cap_units: T015_V4_TOTAL_CAP_UNITS,
     automatic_paid_retry_reserve_decimal: "0.00", automatic_paid_retry_count: 0, credit_expiry_date: T015_V4_CREDIT_EXPIRY_DATE, credit_expiry_hour_known: false, t016_or_other_assets_allowed: false,
+    remediation_batch_id: T015_V4_3_REMEDIATION_BATCH_ID, remediation_asset_count: T015_V4_3_REMEDIATION_ASSET_COUNT, remediation_indices: [...T015_V4_3_REMEDIATION_INDICES],
+    remediation_credit_decimal: decimalT015V4(T015_V4_3_REMEDIATION_CREDIT_UNITS), remediation_credit_units: T015_V4_3_REMEDIATION_CREDIT_UNITS,
+    remediation_is_one_shot: true, remediation_retry_or_regeneration_allowed: false, remediation_within_existing_additional_cap: true,
+    zero_monetary_loss_closure_allowed: true,
   } as const;
 }
 export function buildT015V4Risk() { return { schema_version: 4, evidence_version: "t015-canonical-shard-1-risk-disclosure-v4", issue_number: 17, issue_contract_sha256: T015_CONTRACT_SHA256, secret_free: true, disclosure_text_ko: T015_V4_RISK_TEXT, disclosure_text_sha256: sha256T015V4(T015_V4_RISK_TEXT), scope: t015V4ApprovalScope() } as const; }
@@ -196,6 +218,17 @@ export function buildT015V4Plan(root: string) {
   const batches = base.batches.map(({ id, index, asset_ids, size }) => ({ id, index, asset_ids: [...asset_ids], size }));
   const ids = new Set(assets.map(({ id }) => id));
   if (assets.length !== T015_V4_PAID_ASSET_COUNT || assets.some((asset, offset) => asset.index !== T015_V4_PAID_SLICE_START + offset || asset.request.index !== asset.index || asset.request.params.use_unlim !== false) || batches[0].id !== T015_V4_CANARY_BATCH_ID || batches.at(-1)!.id !== "canonical-shard-1-028" || batches.some((batch) => batch.asset_ids.length !== batch.size || batch.asset_ids.some((assetId) => !ids.has(assetId)))) throw new Error("T015 v4 paid slice invariants changed");
+  // The single v4.3 remediation batch. Its assets are the disclosed lost indices, taken from
+  // the same pinned plan objects the original batches used, so nothing about the request
+  // changes on the way back out to the provider.
+  const remediationAssets = T015_V4_3_REMEDIATION_INDICES.map((index) => {
+    const asset = assets[index - T015_V4_PAID_SLICE_START];
+    if (!asset || asset.index !== index) throw new Error("T015 v4.3 remediation index is outside the paid slice");
+    return asset;
+  });
+  if (new Set(remediationAssets.map(({ id }) => id)).size !== T015_V4_3_REMEDIATION_ASSET_COUNT) throw new Error("T015 v4.3 remediation indices are not distinct");
+  batches.push({ id: T015_V4_3_REMEDIATION_BATCH_ID, index: batches.length + 2, asset_ids: remediationAssets.map(({ id }) => id), size: T015_V4_3_REMEDIATION_ASSET_COUNT });
+  if (batches.length !== T015_V4_3_TOTAL_BATCH_COUNT) throw new Error("T015 v4.3 batch count changed");
   const legacyAssets = base.assets.slice(0, T015_V4_PAID_SLICE_START).map((asset) => {
     const recovery = v3.value.legacy_recovery.recoveries.find(({ asset_id }) => asset_id === asset.id);
     if (!recovery || recovery.local_relative_path !== asset.path || recovery.provider_job_index !== asset.index) throw new Error("T015 v4 legacy recovery binding changed");
@@ -228,7 +261,12 @@ export function buildT015V4Plan(root: string) {
     immutable_forensics: forensics.immutable_sources,
     legacy_recovery: { slice: "0..11", asset_count: 12, source_journal_path: T015_V3_JOURNAL_PATH, source_journal_sha256: forensics.immutable_sources.operations_v3.sha256, paid_resubmit_allowed: false, assets: legacyAssets },
     model_canary: { canary_batch_id: T015_V4_CANARY_BATCH_ID, expected_provider_reported_model: T015_V4_EXPECTED_MODEL, blocks_batch_id_on_drift: T015_V4_CANARY_BLOCKED_BATCH_ID, drift_still_costs_canary_batch_spend: true },
-    approval_gate: { pending_disclosure_packet_path: T015_V4_PENDING_PATH, disclosure_presentation_path: T015_V4_PRESENTATION_PATH, controller_disclosure_attestation_path: T015_V4_CONTROLLER_DISCLOSURE_PATH, controller_approval_attestation_path: T015_V4_CONTROLLER_APPROVAL_PATH, approval_path: T015_V4_APPROVAL_PATH, status: "MISSING_NOT_AUTHORIZED", exact_phrase: T015_V4_EXACT_APPROVAL_PHRASE, prior_t015_v1_v2_or_v3_approval_inherited: false, committed_clean_runtime_binding_required: true },
+    remediation: {
+      batch_id: T015_V4_3_REMEDIATION_BATCH_ID, asset_count: T015_V4_3_REMEDIATION_ASSET_COUNT, indices: [...T015_V4_3_REMEDIATION_INDICES], asset_ids: remediationAssets.map(({ id }) => id),
+      credit_decimal: decimalT015V4(T015_V4_3_REMEDIATION_CREDIT_UNITS), credit_units: T015_V4_3_REMEDIATION_CREDIT_UNITS, within_existing_additional_cap: true,
+      derived_from_journal_discharged_batches: true, one_shot: true, retry_or_regeneration_allowed: false, failures_are_final_under_this_approval: true,
+    },
+    approval_gate: { pending_disclosure_packet_path: T015_V4_PENDING_PATH, disclosure_presentation_path: T015_V4_PRESENTATION_PATH, controller_disclosure_attestation_path: T015_V4_CONTROLLER_DISCLOSURE_PATH, controller_approval_attestation_path: T015_V4_CONTROLLER_APPROVAL_PATH, approval_path: T015_V4_APPROVAL_PATH, status: "MISSING_NOT_AUTHORIZED", exact_phrase: T015_V4_3_EXACT_APPROVAL_PHRASE, prior_t015_v1_v2_or_v3_approval_inherited: false, committed_clean_runtime_binding_required: true },
     assets, batches,
   } as const;
 }
@@ -283,7 +321,7 @@ export function buildT015V4Pending(root: string, plan: T015V4Plan) {
     provider_schema_evidence_sha256: sha256T015V4(renderT015CanonicalJson(schema)), forensics_evidence_sha256: sha256T015V4(renderT015CanonicalJson(forensics)),
     operations_v3_journal_sha256: forensics.immutable_sources.operations_v3.sha256, v3_approval_sha256: forensics.immutable_sources.v3_approval.sha256,
     implementation_binding_sha256: sha256T015V4(renderT015CanonicalJson(binding)), implementation_files: binding.files, t014_approval_sha256: T015_T014_APPROVAL_SHA256,
-    exact_approval_phrase_required: T015_V4_EXACT_APPROVAL_PHRASE, recovery_operator_phrase: T015_V4_RECOVERY_OPERATOR_PHRASE, resume_operator_phrase: T015_V4_RESUME_OPERATOR_PHRASE,
+    exact_approval_phrase_required: T015_V4_3_EXACT_APPROVAL_PHRASE, recovery_operator_phrase: T015_V4_RECOVERY_OPERATOR_PHRASE, resume_operator_phrase: T015_V4_RESUME_OPERATOR_PHRASE,
     operator_phrases_are_agent_satisfiable: true, prior_t015_v1_v2_or_v3_approval_inherited: false, committed_clean_runtime_binding_required: true, scope: t015V4ApprovalScope(), authorized: false,
   } as const;
 }
@@ -311,7 +349,7 @@ export function buildT015V4Presentation(root: string, plan: T015V4Plan, balance:
     controller_disclosure_attestation_sha256: controller.sha256, implementation_binding_sha256: pending.implementation_binding_sha256, implementation_files: pending.implementation_files,
     t014_approval_sha256: T015_T014_APPROVAL_SHA256, disclosed_at: controller.value.event_sequence.assistant_disclosure_presented_at, source: "current user conversation",
     legacy_balance_disclosure: legacy, scope: t015V4ApprovalScope(),
-    exact_approval_phrase_required: T015_V4_EXACT_APPROVAL_PHRASE, recovery_operator_phrase: T015_V4_RECOVERY_OPERATOR_PHRASE, resume_operator_phrase: T015_V4_RESUME_OPERATOR_PHRASE,
+    exact_approval_phrase_required: T015_V4_3_EXACT_APPROVAL_PHRASE, recovery_operator_phrase: T015_V4_RECOVERY_OPERATOR_PHRASE, resume_operator_phrase: T015_V4_RESUME_OPERATOR_PHRASE,
     operator_phrases_are_agent_satisfiable: true, prior_t015_v1_v2_or_v3_approval_inherited: false, committed_clean_runtime_binding_required: true, authorized: false,
   } as const;
 }
@@ -330,7 +368,7 @@ export function buildT015V4ControllerApproval(root: string, plan: T015V4Plan, pr
   const disclosedMs = parseT015V4EvidenceTime(presentation.disclosed_at, "T015 v4 disclosure");
   const approvedMs = parseT015V4EvidenceTime(approvedAt, "T015 v4 approval");
   if (approvedMs <= disclosedMs || approvedMs - disclosedMs > 24 * 60 * 60 * 1000 || approvedMs > now.getTime()) throw new Error("T015 v4 approval chronology is invalid");
-  return { schema_version: 4, evidence_version: "t015-controller-approval-attestation-v4", attester: "USER_CREATED_CONTROL_PLANE_MAIN_SESSION", goal_slug: "ship-fictor-track1-2026", task_key: "T015", issue_number: 17, issue_contract_sha256: T015_CONTRACT_SHA256, event_sequence: { assistant_disclosure_presented_at: presentation.disclosed_at, exact_user_reply_ko: T015_V4_EXACT_APPROVAL_PHRASE, exact_user_reply_received_at: approvedAt, exact_scoped_approval_received_after_disclosure: true }, bindings: { plan_sha256: presentation.plan_sha256, disclosure_presentation_evidence_sha256: sha256T015V4(renderT015CanonicalJson(presentation)), risk_disclosure_evidence_sha256: presentation.risk_disclosure_evidence_sha256, risk_disclosure_text_sha256: presentation.risk_disclosure_text_sha256, provider_schema_evidence_sha256: presentation.provider_schema_evidence_sha256, forensics_evidence_sha256: presentation.forensics_evidence_sha256, operations_v3_journal_sha256: presentation.operations_v3_journal_sha256, v3_approval_sha256: presentation.v3_approval_sha256, implementation_binding_sha256: presentation.implementation_binding_sha256 }, scope: t015V4ApprovalScope(), secret_free: true } as const;
+  return { schema_version: 4, evidence_version: "t015-controller-approval-attestation-v4", attester: "USER_CREATED_CONTROL_PLANE_MAIN_SESSION", goal_slug: "ship-fictor-track1-2026", task_key: "T015", issue_number: 17, issue_contract_sha256: T015_CONTRACT_SHA256, event_sequence: { assistant_disclosure_presented_at: presentation.disclosed_at, exact_user_reply_ko: T015_V4_3_EXACT_APPROVAL_PHRASE, exact_user_reply_received_at: approvedAt, exact_scoped_approval_received_after_disclosure: true }, bindings: { plan_sha256: presentation.plan_sha256, disclosure_presentation_evidence_sha256: sha256T015V4(renderT015CanonicalJson(presentation)), risk_disclosure_evidence_sha256: presentation.risk_disclosure_evidence_sha256, risk_disclosure_text_sha256: presentation.risk_disclosure_text_sha256, provider_schema_evidence_sha256: presentation.provider_schema_evidence_sha256, forensics_evidence_sha256: presentation.forensics_evidence_sha256, operations_v3_journal_sha256: presentation.operations_v3_journal_sha256, v3_approval_sha256: presentation.v3_approval_sha256, implementation_binding_sha256: presentation.implementation_binding_sha256 }, scope: t015V4ApprovalScope(), secret_free: true } as const;
 }
 export function validateT015V4ControllerApproval(value: unknown, root: string, plan: T015V4Plan, presentation: T015V4Presentation, now = new Date()): asserts value is T015V4ControllerApproval { if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("T015 v4 controller approval is invalid"); const at = (value as { event_sequence?: { exact_user_reply_received_at?: unknown } }).event_sequence?.exact_user_reply_received_at; if (typeof at !== "string") throw new Error("T015 v4 approval timestamp missing"); exactEvidence(value, buildT015V4ControllerApproval(root, plan, presentation, at, now), "T015 v4 controller approval"); }
 
@@ -341,8 +379,8 @@ export function buildT015V4Approval(root: string, plan: T015V4Plan, presentation
   validateT015V4ControllerApproval(controller.value, root, plan, presentation, now);
   const pending = buildT015V4Pending(root, plan);
   return {
-    schema_version: 4, evidence_version: "t015-canonical-shard-1-approval-v4", secret_free: true, decision: "APPROVE_T015_V4_PAID_CANONICAL_12_331_320_ASSETS_480_CREDITS", source: "controller approval attestation",
-    exact_user_quote: T015_V4_EXACT_APPROVAL_PHRASE, approved_at: controller.value.event_sequence.exact_user_reply_received_at, disclosed_at: presentation.disclosed_at,
+    schema_version: 4, evidence_version: "t015-canonical-shard-1-approval-v4", secret_free: true, decision: "APPROVE_T015_V4_3_REMEDIATION_7_LOST_INDICES_10_50_CREDITS_AND_ZERO_LOSS_CLOSURE", source: "controller approval attestation",
+    exact_user_quote: T015_V4_3_EXACT_APPROVAL_PHRASE, approved_at: controller.value.event_sequence.exact_user_reply_received_at, disclosed_at: presentation.disclosed_at,
     plan_sha256: pending.plan_sha256, disclosure_presentation_evidence_sha256: sha256T015V4(renderT015CanonicalJson(presentation)),
     risk_disclosure_evidence_sha256: pending.risk_disclosure_evidence_sha256, risk_disclosure_text_sha256: pending.risk_disclosure_text_sha256,
     provider_schema_evidence_sha256: pending.provider_schema_evidence_sha256, forensics_evidence_sha256: pending.forensics_evidence_sha256,
