@@ -1,8 +1,17 @@
 {
   "schema_version": 4,
-  "manifest_version": "t015-implementation-binding-v4",
-  "issue_contract_sha256": "9b1e9fa39c72101fd653d4c11696bf022aa5c6c1c899871863c90895239f451e",
-  "files": {
+  "artifact_version": "t015-canonical-shard-1-disclosure-presentation-v4-pending",
+  "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
+  "secret_free": true,
+  "plan_sha256": "16bf4c3f79baa13873531ffbd9c6f029de6c17b6b6d7596af56b4ffe9ca8185a",
+  "risk_disclosure_evidence_sha256": "82caea51a37903d62357cc52922040cff6881767c607e4aceb61ee4dbde89997",
+  "risk_disclosure_text_sha256": "1cf830f1c7a61441a19963e96d8eb94cc185f218c69afebaaba367e3385b8cdc",
+  "provider_schema_evidence_sha256": "0ce87031a018b768ccd0ce137b493b4865a08c7b88296e8e93a26ed726b81f5c",
+  "forensics_evidence_sha256": "3c01a0749cda3ffacb56e198446603a4910efc1a26051d0acd22481cac0d877f",
+  "operations_v3_journal_sha256": "91ca710c6c02e72e89bd28876f7884b8793f1a6f60087655bcb217545fd64d0a",
+  "v3_approval_sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef",
+  "implementation_binding_sha256": "5fcd243b45cd30885677c08585180d3c9915444240f928c5d39af6c2b66201f6",
+  "implementation_files": {
     "controller": {
       "path": "scripts/assets/canonical-shard-1-production-v4-controller.ts",
       "sha256": "c46f17374a2df92689e3223581d8c595f92debb009aa506249db07ca42a905a1"
@@ -63,5 +72,33 @@
       "path": "assets/evidence/t015-canonical-shard-1-approval-v3.json",
       "sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef"
     }
-  }
+  },
+  "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
+  "exact_approval_phrase_required": "위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
+  "recovery_operator_phrase": "T015 v4 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T015 v4 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "prior_t015_v1_v2_or_v3_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "scope": {
+    "category": "CANONICAL",
+    "paid_slice": "12..331",
+    "paid_asset_count": 320,
+    "paid_batch_count": 27,
+    "paid_batch_sizes": "12x26+8",
+    "batch_max": 12,
+    "unit_cost_decimal": "1.50",
+    "additional_credit_cap_decimal": "480.00",
+    "additional_credit_cap_units": 48000,
+    "legacy_cap_committed_decimal": "18.00",
+    "legacy_cap_committed_units": 1800,
+    "total_credit_cap_decimal": "498.00",
+    "total_credit_cap_units": 49800,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "t016_or_other_assets_allowed": false
+  },
+  "authorized": false
 }

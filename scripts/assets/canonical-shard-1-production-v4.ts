@@ -14,13 +14,21 @@ export const T015_V4_BINDING_PATH = "assets/manifests/t015-implementation-bindin
 export const T015_V4_RISK_PATH = "assets/evidence/t015-canonical-shard-1-risk-disclosure-v4.json" as const;
 export const T015_V4_SCHEMA_PATH = "assets/evidence/t015-canonical-shard-1-higgsfield-schema-v4.json" as const;
 export const T015_V4_FORENSICS_PATH = "assets/evidence/t015-canonical-shard-1-forensics-v4.json" as const;
-export const T015_V4_PENDING_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.pending.json" as const;
-export const T015_V4_PRESENTATION_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.json" as const;
-export const T015_V4_APPROVAL_PATH = "assets/evidence/t015-canonical-shard-1-approval-v4.json" as const;
-export const T015_V4_CONTROLLER_DISCLOSURE_PATH = "assets/evidence/t015-controller-disclosure-attestation-v4.json" as const;
-export const T015_V4_CONTROLLER_APPROVAL_PATH = "assets/evidence/t015-controller-approval-attestation-v4.json" as const;
-export const T015_V4_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4.json" as const;
-export const T015_V4_LOCK_PATH = "assets/runs/t015-canonical-shard-1/operations-v4.lock" as const;
+/* v4.2 revision: the attestation chain and the journal move to new paths so the committed
+   -v4 disclosure, approval, and journal stay on disk as immutable history of the live run.
+   The regenerable artifacts (risk, schema, forensics, plan) keep their -v4 paths and are
+   rewritten in place; only the no-clobber chain and the journal are re-versioned. */
+export const T015_V4_PENDING_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.pending.json" as const;
+export const T015_V4_PRESENTATION_PATH = "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.json" as const;
+export const T015_V4_APPROVAL_PATH = "assets/evidence/t015-canonical-shard-1-approval-v4.2.json" as const;
+export const T015_V4_CONTROLLER_DISCLOSURE_PATH = "assets/evidence/t015-controller-disclosure-attestation-v4.2.json" as const;
+export const T015_V4_CONTROLLER_APPROVAL_PATH = "assets/evidence/t015-controller-approval-attestation-v4.2.json" as const;
+export const T015_V4_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-2.json" as const;
+export const T015_V4_LOCK_PATH = "assets/runs/t015-canonical-shard-1/operations-v4-2.lock" as const;
+/* Read (never written) by `production migrate`, which is the only command that touches the
+   superseded v4.1 journal. */
+export const T015_V4_LEGACY_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v4.json" as const;
+export const T015_V4_LEGACY_LOCK_PATH = "assets/runs/t015-canonical-shard-1/operations-v4.lock" as const;
 export const T015_V3_JOURNAL_PATH = "assets/runs/t015-canonical-shard-1/operations-v3.json" as const;
 export const T015_V4_LOCAL_ROOT = "public/assets" as const;
 export const T015_V4_BACKUP_ROOT = "assets/backups/t015-canonical-shard-1" as const;
@@ -41,6 +49,8 @@ export const T015_V4_HISTORICAL_PRE_SUBMIT_BALANCE_UNITS = 86_190 as const;
 export const T015_V4_EXPECTED_MODEL = "nano_banana_flash" as const;
 export const T015_V4_CANARY_BATCH_ID = "canonical-shard-1-002" as const;
 export const T015_V4_CANARY_BLOCKED_BATCH_ID = "canonical-shard-1-003" as const;
+/* The batch that was in FAIL_STOP when the v4.1 defects were found; disclosed by name. */
+export const T015_V4_MIGRATION_FAIL_STOP_BATCH_ID = "canonical-shard-1-004" as const;
 export const T015_V4_CREDIT_EXPIRY_DATE = "2026-08-17" as const;
 export const T015_V4_ASPECT_TOLERANCE_PPM = 5000 as const;
 export const T015_V4_OBSERVED_RECOVERY_WIDTH = 896 as const;
@@ -63,6 +73,9 @@ export const T015_V4_RISK_TEXT = `T015 v4는 CANONICAL 12..331 정확히 320장�
 (viii) 모든 요청은 use_unlim:false를 문자 그대로 포함하며 이 값은 각 자산의 canonical_request_sha256 안에 고정되어 있습니다.
 (ix) v3 승인은 상속되지 않습니다. v4 유료 실행은 이 고지 뒤에 받은 새 정확 승인 문구를 요구합니다.
 (x) 모델 canary: 배치 ${T015_V4_CANARY_BATCH_ID}의 provider-reported model이 ${T015_V4_EXPECTED_MODEL}로 확인되지 않으면 배치 ${T015_V4_CANARY_BLOCKED_BATCH_ID}은 열리지 않습니다. 다만 드리프트로 멈추더라도 그 canary 배치에 이미 지출된 credits는 회수되지 않습니다.
+(xi) v4.2 개정 사유 - 실행 도중 발견된 결함 2건입니다. 결함 1: LOSS_ACKNOWLEDGED discharge 검증이 그 discharge가 덮는 모든 terminal을 손실 코드로 요구했습니다. 배치 ${T015_V4_MIGRATION_FAIL_STOP_BATCH_ID}의 이력에는 나중에 같은 job ID를 다시 조회해 성공적으로 대체된 무비용 RECOVERY_FAILED terminal이 남아 있어 손실 확인 자체가 거부되었고, 그 결과 resume도 막혀 실행 전체가 멈췄습니다. v4.2는 discharge가 덮는 terminal로 손실 코드와 무비용으로 대체된 RECOVERY_FAILED를 함께 허용하되 최소 하나는 실제 손실 코드여야 하고, 마지막 활성 terminal이 손실 코드여야 한다는 기존 조건은 그대로 둡니다. 결함 2: provider의 jobs_wait가 완료되지 않은 job에도 model 필드를 실어 보냈고(관찰: status "failed", model "${T015_V4_EXPECTED_MODEL}", result_url 없음) topology 검증이 이를 거부해 RECOVERY_FAILED가 났습니다. operator가 그 필드를 손으로 제거해 진행한 사실을 함께 고지합니다. v4.2는 완료되지 않은 job의 선택적 model/result_url을 타입만 검증해 받아들이고, 완료되지 않은 job에서는 어떤 경우에도 내려받지 않으며, 완료된 job은 여전히 model과 result_url을 모두 요구합니다.
+(xii) 저널 이관 - 기존 저널 ${T015_V4_LEGACY_JOURNAL_PATH}는 한 바이트도 고치지 않고 그대로 두고, 단 한 번만 실행되는 migrate 명령이 ${T015_V4_JOURNAL_PATH}를 새로 씁니다. 새 저널은 이 고지에서 나온 새 plan/presentation/approval sha를 헤더로 갖고, 기존 배치 기록(002·003의 COMPLETE와 balance_after, 004의 terminal·복구·제출·preflight)을 전부 그대로 가져오며, 원본 경로와 이관 시점의 원본 바이트 sha256과 이관 시각을 불변 포렌식에 함께 기록합니다. 대상 저널이 이미 있거나 원본이 레코드 검증에 실패하면 이관을 거부합니다.
+(xiii) 이관 뒤 배치 ${T015_V4_MIGRATION_FAIL_STOP_BATCH_ID}는 관찰 delta 16.50, 회수 16.50, 확인 손실 0.00으로 discharge됩니다. 금액은 discharge 시점에 새로 측정한 balance로 다시 확정하므로 이 수치는 현재 관찰값이며 확정값이 아닙니다. 실패한 index 42 한 장은 이 승인으로는 다시 생성하지 않습니다. 다시 만들려면 별도의 새 고지와 새 승인이 필요합니다. 현재까지의 지출은 480.00 중 52.50(002 18.00 + 003 18.00 + 004 16.50)입니다.
 signed URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. operations-v1, operations-v2, operations-v3 저널과 v3 승인 증거는 불변 포렌식으로 바이트 고정합니다. T016, index 332 이후, materials, hearts, world 자산은 제외됩니다. 새 승인은 정확히 “${T015_V4_EXACT_APPROVAL_PHRASE}”로만 기록합니다.` as const;
 
 export const T015_V4_RUNTIME_FILES = {

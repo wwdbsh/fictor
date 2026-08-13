@@ -47,8 +47,8 @@
     },
     "risk_disclosure": {
       "path": "assets/evidence/t015-canonical-shard-1-risk-disclosure-v4.json",
-      "sha256": "441cad7f8dc559941671f27e52bd27bade8b3e37a238b7e9e9378d0ea6b77cda",
-      "text_sha256": "c2e868a6d523b139970b4cc1d19bd359aebc0f2ffa90eeb029eb365fa81ad260"
+      "sha256": "82caea51a37903d62357cc52922040cff6881767c607e4aceb61ee4dbde89997",
+      "text_sha256": "1cf830f1c7a61441a19963e96d8eb94cc185f218c69afebaaba367e3385b8cdc"
     },
     "provider_schema": {
       "path": "assets/evidence/t015-canonical-shard-1-higgsfield-schema-v4.json",
@@ -60,7 +60,7 @@
     },
     "implementation_binding": {
       "path": "assets/manifests/t015-implementation-binding-v4.json",
-      "sha256": "67d1db5556ee872f3fac02e74230ec935bc38d1ba92fba76537a7c5b39f24b93",
+      "sha256": "5fcd243b45cd30885677c08585180d3c9915444240f928c5d39af6c2b66201f6",
       "files": {
         "controller": {
           "path": "scripts/assets/canonical-shard-1-production-v4-controller.ts",
@@ -72,11 +72,11 @@
         },
         "production": {
           "path": "scripts/assets/canonical-shard-1-production-v4-ops.ts",
-          "sha256": "3960cb1de231ef4d4c27621ee2da4be50b4a6e86d0ccbfbc29115f63cb0f468d"
+          "sha256": "bf383569faa33aeedf79e952e8e5d3a26c4eaa8027393c7e2872b0cd153350e3"
         },
         "contract": {
           "path": "scripts/assets/canonical-shard-1-production-v4.ts",
-          "sha256": "06b16169e803bab791bbc538b0f64379d7513b662030c75b7a76c75187d02c7c"
+          "sha256": "604e814686fd594ab0e623665a561fe6ba1803097dba3f40b5bc4463c6f045cc"
         },
         "v3_contract": {
           "path": "scripts/assets/canonical-shard-1-recovery-v3.ts",
@@ -350,11 +350,11 @@
     "drift_still_costs_canary_batch_spend": true
   },
   "approval_gate": {
-    "pending_disclosure_packet_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.pending.json",
-    "disclosure_presentation_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.json",
-    "controller_disclosure_attestation_path": "assets/evidence/t015-controller-disclosure-attestation-v4.json",
-    "controller_approval_attestation_path": "assets/evidence/t015-controller-approval-attestation-v4.json",
-    "approval_path": "assets/evidence/t015-canonical-shard-1-approval-v4.json",
+    "pending_disclosure_packet_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.pending.json",
+    "disclosure_presentation_path": "assets/evidence/t015-canonical-shard-1-disclosure-presentation-v4.2.json",
+    "controller_disclosure_attestation_path": "assets/evidence/t015-controller-disclosure-attestation-v4.2.json",
+    "controller_approval_attestation_path": "assets/evidence/t015-controller-approval-attestation-v4.2.json",
+    "approval_path": "assets/evidence/t015-canonical-shard-1-approval-v4.2.json",
     "status": "MISSING_NOT_AUTHORIZED",
     "exact_phrase": "위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
     "prior_t015_v1_v2_or_v3_approval_inherited": false,

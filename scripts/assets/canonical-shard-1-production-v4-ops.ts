@@ -13,6 +13,7 @@ import { isPublicT015V3ResolvedAddress, transportPeerMatchesT015V3Pin } from "./
 import {
   T015_V4_ADDITIONAL_CAP_UNITS, T015_V4_ASPECT_TOLERANCE_PPM, T015_V4_BACKUP_ROOT, T015_V4_BINDING_PATH, T015_V4_CANARY_BATCH_ID, T015_V4_CANARY_BLOCKED_BATCH_ID,
   T015_V4_CONTACT_INDEX_PATH, T015_V4_CONTACT_SEGMENT_ROOT, T015_V4_CORE_PLAN_PATH, T015_V4_EXPECTED_MODEL, T015_V4_JOURNAL_PATH, T015_V4_LEGACY_COMMITTED_UNITS,
+  T015_V4_LEGACY_JOURNAL_PATH, T015_V4_LEGACY_LOCK_PATH,
   T015_V4_LOCAL_ROOT, T015_V4_LOCK_PATH, T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE, T015_V4_PAID_ASSET_COUNT, T015_V4_PAID_BATCH_COUNT, T015_V4_PLAN_PATH,
   T015_V4_RECOVERY_OPERATOR_PHRASE, T015_V4_RESUME_OPERATOR_PHRASE, T015_V4_TOTAL_ASSET_COUNT, T015_V4_TOTAL_CAP_UNITS, T015_V4_UNIT_COST_UNITS,
   buildT015V4Plan, canonicalJsonT015 as canonicalJson, decimalT015V4 as decimal, isT015V4Authorized, loadT015V4Authorization, loadT015V4Binding, renderT015CanonicalJson, renderT015V4Plan,
@@ -40,6 +41,12 @@ const TERMINAL_SUBMIT_FAILURES: readonly SubmitStatus[] = ["failed", "canceled",
 const JOB_OPTIONAL_KEYS = ["adjustments", "error", "warning", "preset_recommendation"] as const;
 // Only these terminal codes can leave provider credits spent with nothing to show for them.
 export const T015_V4_LOSS_CODES: readonly T015V4TerminalCode[] = ["AMBIGUOUS_SUBMISSION", "GENERATION_FAILED", "MODEL_DRIFT", "BALANCE_CHANGED"];
+// A RECOVERY_FAILED terminal books no spend of its own: it records that a poll could not be
+// read, and a later successful re-poll of the same job ids supersedes it. Such a terminal may
+// therefore sit inside the span a single loss discharge covers, but it can never be the thing
+// being discharged — at least one covered terminal must still be a real loss code, and the
+// writer separately requires the LAST active terminal to be one.
+export const T015_V4_SUPERSEDED_TERMINAL_CODES: readonly T015V4TerminalCode[] = ["RECOVERY_FAILED"];
 const LEGAL_EDGES: Record<T015V4BatchState, readonly T015V4BatchState[]> = {
   PLANNED: ["PREFLIGHT_REQUESTED"],
   PREFLIGHT_REQUESTED: ["PREFLIGHT_VERIFIED", "PLANNED", "FAIL_STOP"],
@@ -89,6 +96,9 @@ export interface T015V4BatchRecord {
   discharges: T015V4Discharge[];
 }
 export type T015V4ResumeDisposition = "ZERO_SPEND" | "FULLY_RECOVERED_BALANCE_VERIFIED" | "DISCHARGED_LOSS";
+export interface T015V4MigrationForensics { operations_v4_path: typeof T015_V4_LEGACY_JOURNAL_PATH; operations_v4_sha256: string; migrated_at: string }
+/** The superseded header hashes a migrate accepts as pinned parameters instead of recomputing. */
+export interface T015V4PinnedHeader { plan_sha256: string; disclosure_presentation_evidence_sha256: string; approval_evidence_sha256: string }
 export interface T015V4Journal {
   schema_version: 4;
   journal_version: "t015-canonical-shard-1-operations-v4";
@@ -96,7 +106,9 @@ export interface T015V4Journal {
   plan_sha256: string;
   disclosure_presentation_evidence_sha256: string;
   approval_evidence_sha256: string;
-  immutable_forensics: T015V4Plan["immutable_forensics"];
+  // A journal written by `migrate` additionally pins the superseded operations-v4 journal by
+  // path, by its byte hash at migrate time, and by the migration timestamp.
+  immutable_forensics: T015V4Plan["immutable_forensics"] & Partial<T015V4MigrationForensics>;
   run_state: T015V4RunState;
   fail_stop_batch_id: string | null;
   initial_balance: T015V4Balance;
@@ -208,7 +220,7 @@ function lockDirIsStale(holderPath: string, directory: string, staleAfterMs: num
 // mkdir is the atomic primitive: exactly one process can create the lock directory, and a
 // stale one is taken over by an atomic rename, so two stealers can never both hold it and
 // hand out two paid envelopes. A SIGKILL leaves only a stale directory, never a wedge.
-export function acquireT015V4Lock(trustedRoot: string, relativePath = T015_V4_LOCK_PATH, staleAfterMs = LOCK_STALE_MS): T015V4Lock {
+export function acquireT015V4Lock(trustedRoot: string, relativePath: string = T015_V4_LOCK_PATH, staleAfterMs = LOCK_STALE_MS): T015V4Lock {
   const directory = safeResolve(trustedRoot, `${relativePath}.d`, true);
   const holderPath = resolve(directory, "holder.json");
   const token = randomUUID();
@@ -339,9 +351,25 @@ function assertStateConsistency(record: T015V4BatchRecord): void {
   if (bad) throw new Error(`T015 v4 batch state evidence changed: ${record.batch_id}`);
 }
 
-export function validateT015V4Journal(journal: T015V4Journal, plan: T015V4Plan, presentation: T015V4Presentation, approval: T015V4Approval, runtimeRoot?: string): void {
+// Everything outside the three migration keys must stay byte-identical to the plan's
+// immutable forensic sources; the migration keys are all-or-nothing and self-describing.
+function assertForensicsBinding(journal: T015V4Journal, expected: T015V4Journal): void {
+  const { operations_v4_path: path, operations_v4_sha256: hash, migrated_at: migratedAt, ...sources } = journal.immutable_forensics;
+  if (canonicalJson(sources) !== canonicalJson(expected.immutable_forensics)) throw new Error("T015 v4 journal header changed");
+  const present = [path, hash, migratedAt].filter((value) => value !== undefined).length;
+  if (present === 0) return;
+  if (present !== 3 || path !== T015_V4_LEGACY_JOURNAL_PATH || typeof hash !== "string" || !/^[a-f0-9]{64}$/.test(hash) || typeof migratedAt !== "string") throw new Error("T015 v4.2 migration forensics changed");
+  timestamp(migratedAt);
+}
+
+export function validateT015V4Journal(journal: T015V4Journal, plan: T015V4Plan, presentation: T015V4Presentation, approval: T015V4Approval, runtimeRoot?: string, pinnedHeader?: T015V4PinnedHeader): void {
   const expected = buildInitialT015V4Journal(plan, presentation, approval, journal.initial_balance);
-  if (journal.schema_version !== 4 || journal.journal_version !== expected.journal_version || journal.redacted !== true || journal.plan_sha256 !== expected.plan_sha256 || journal.disclosure_presentation_evidence_sha256 !== expected.disclosure_presentation_evidence_sha256 || journal.approval_evidence_sha256 !== expected.approval_evidence_sha256 || canonicalJson(journal.immutable_forensics) !== canonicalJson(expected.immutable_forensics) || journal.additional_credit_cap_units !== T015_V4_ADDITIONAL_CAP_UNITS || journal.legacy_committed_units !== T015_V4_LEGACY_COMMITTED_UNITS || journal.total_credit_cap_units !== T015_V4_TOTAL_CAP_UNITS || journal.automatic_paid_retry_reserve_decimal !== "0.00" || journal.paid_retry_count !== 0 || journal.local_root !== T015_V4_LOCAL_ROOT || journal.backup_root !== T015_V4_BACKUP_ROOT || journal.expected_provider_reported_model !== T015_V4_EXPECTED_MODEL || journal.batches.length !== T015_V4_PAID_BATCH_COUNT) throw new Error("T015 v4 journal header changed");
+  // `migrate` reads the superseded journal, whose header was bound to the evidence chain that
+  // has since been revised; those three hashes are supplied as pinned parameters there and
+  // recomputed from the live chain everywhere else.
+  const header = pinnedHeader ?? { plan_sha256: expected.plan_sha256, disclosure_presentation_evidence_sha256: expected.disclosure_presentation_evidence_sha256, approval_evidence_sha256: expected.approval_evidence_sha256 };
+  assertForensicsBinding(journal, expected);
+  if (journal.schema_version !== 4 || journal.journal_version !== expected.journal_version || journal.redacted !== true || journal.plan_sha256 !== header.plan_sha256 || journal.disclosure_presentation_evidence_sha256 !== header.disclosure_presentation_evidence_sha256 || journal.approval_evidence_sha256 !== header.approval_evidence_sha256 || journal.additional_credit_cap_units !== T015_V4_ADDITIONAL_CAP_UNITS || journal.legacy_committed_units !== T015_V4_LEGACY_COMMITTED_UNITS || journal.total_credit_cap_units !== T015_V4_TOTAL_CAP_UNITS || journal.automatic_paid_retry_reserve_decimal !== "0.00" || journal.paid_retry_count !== 0 || journal.local_root !== T015_V4_LOCAL_ROOT || journal.backup_root !== T015_V4_BACKUP_ROOT || journal.expected_provider_reported_model !== T015_V4_EXPECTED_MODEL || journal.batches.length !== T015_V4_PAID_BATCH_COUNT) throw new Error("T015 v4 journal header changed");
   assertRedactedJournal(journal);
   timestamp(journal.initial_balance.provider_observed_at);
   if (decimalsT015V4(journal.initial_balance.credits, "initial balance").decimal !== journal.initial_balance.normalized_decimal) throw new Error("T015 v4 initial balance anchor changed");
@@ -431,9 +459,12 @@ export function validateT015V4Journal(journal: T015V4Journal, plan: T015V4Plan, 
       const recoveredCeiling = record.recoveries.length * T015_V4_UNIT_COST_UNITS;
       const shapeIsBad = discharge.resubmitted !== false || discharge.terminals_discharged <= previous || discharge.terminals_discharged > record.terminals.length || discharge.acknowledged_loss_units !== discharge.observed_delta_units - discharge.recovered_units || discharge.acknowledged_loss_units < 0 || discharge.acknowledged_loss_decimal !== decimal(discharge.acknowledged_loss_units) || discharge.observed_delta_units < 0 || discharge.max_exposure_units !== maxExposureUnits(record) || discharge.observed_delta_units > discharge.max_exposure_units || discharge.recovered_units < 0 || discharge.recovered_units > recoveredCeiling;
       const zeroSpendIsBad = discharge.kind === "ZERO_SPEND_RESET" && (discharge.observed_delta_units !== 0 || discharge.recovered_units !== 0 || discharge.balance_after_loss !== null || discharge.exact_operator_phrase_sha256 !== null || !record.resets.some(({ observed_at }) => observed_at === discharge.observed_at));
-      // Every terminal this discharge covers must itself be a spend-losing code.
+      // Every terminal this discharge covers must be a spend-losing code or a zero-cost
+      // RECOVERY_FAILED that a later successful re-poll superseded, and at least one of them
+      // must be a real loss code so a discharge can never be booked against nothing.
       const covered = record.terminals.slice(previous, discharge.terminals_discharged);
-      const lossIsBad = discharge.kind === "LOSS_ACKNOWLEDGED" && (discharge.exact_operator_phrase_sha256 !== sha256(T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE) || discharge.balance_after_loss === null || decimalsT015V4(discharge.balance_after_loss.credits, "discharge balance").decimal !== discharge.balance_after_loss.normalized_decimal || record.balance_after !== undefined || covered.length === 0 || covered.some(({ code }) => !T015_V4_LOSS_CODES.includes(code)) || record.discharges.filter(({ kind }) => kind === "LOSS_ACKNOWLEDGED").length !== 1);
+      const coverageIsBad = covered.length === 0 || covered.some(({ code }) => !T015_V4_LOSS_CODES.includes(code) && !T015_V4_SUPERSEDED_TERMINAL_CODES.includes(code)) || !covered.some(({ code }) => T015_V4_LOSS_CODES.includes(code));
+      const lossIsBad = discharge.kind === "LOSS_ACKNOWLEDGED" && (discharge.exact_operator_phrase_sha256 !== sha256(T015_V4_LOSS_ACKNOWLEDGMENT_PHRASE) || discharge.balance_after_loss === null || decimalsT015V4(discharge.balance_after_loss.credits, "discharge balance").decimal !== discharge.balance_after_loss.normalized_decimal || record.balance_after !== undefined || coverageIsBad || record.discharges.filter(({ kind }) => kind === "LOSS_ACKNOWLEDGED").length !== 1);
       if (shapeIsBad || zeroSpendIsBad || lossIsBad) throw new Error(`T015 v4 discharge evidence changed: ${record.batch_id}`);
     });
     // A batch can never book more spend than its own exposure, however the journal was written.
@@ -623,6 +654,44 @@ export function runT015V4OpsInternal(args: readonly string[], root: string, plan
       const initial = buildInitialT015V4Journal(plan, presentation, approval, { credits: anchor.credits, normalized_decimal: anchor.decimal, provider_observed_at: anchor.provider_observed_at });
       writeJournal(context, initial);
       return { command, run_state: "ACTIVE", observed_at: at, batches: T015_V4_PAID_BATCH_COUNT, paid_assets: T015_V4_PAID_ASSET_COUNT, initial_balance_decimal: anchor.decimal, additional_credit_cap_units: T015_V4_ADDITIONAL_CAP_UNITS, paid_retry_count: 0 };
+    }
+
+    // One-shot v4.1 -> v4.2 journal migration. The superseded journal is opened read-only
+    // under its own lock, verified in full against its own (pinned) header, and copied
+    // verbatim: no batch record, spend, recovery, or terminal is rewritten or replayed.
+    if (command === "migrate") {
+      const at = timestamp(option(args, "--observed-at"));
+      const pinnedHeader: T015V4PinnedHeader = { plan_sha256: option(args, "--legacy-plan-sha256"), disclosure_presentation_evidence_sha256: option(args, "--legacy-presentation-sha256"), approval_evidence_sha256: option(args, "--legacy-approval-sha256") };
+      if (Object.values(pinnedHeader).some((value) => !/^[a-f0-9]{64}$/.test(value))) throw new Error("T015 v4.2 migrate requires the three superseded header hashes as sha256 hex");
+      if (existsSync(journalPath(root))) throw new Error("T015 v4.2 migrate refuses to clobber an existing journal; the migration runs exactly once");
+      const legacyLock = acquireT015V4Lock(root, T015_V4_LEGACY_LOCK_PATH);
+      let source: T015V4Journal;
+      let sourceSha256: string;
+      try {
+        const absolute = safeResolve(root, T015_V4_LEGACY_JOURNAL_PATH);
+        const info = lstatSync(absolute);
+        if (info.isSymbolicLink() || !info.isFile()) throw new Error("T015 v4.2 migrate source must be a regular file");
+        const bytes = readFileSync(absolute);
+        const text = bytes.toString("utf8");
+        source = JSON.parse(text) as T015V4Journal;
+        if (text !== renderT015CanonicalJson(source)) throw new Error("T015 v4.2 migrate source journal is not canonical");
+        validateT015V4Journal(source, plan, presentation, approval, root, pinnedHeader);
+        sourceSha256 = sha256(bytes);
+      } finally { legacyLock.release(); }
+      const floor = [...source.batches.flatMap(({ transitions }) => transitions.map(({ observed_at }) => observed_at)), ...source.resumes.map(({ observed_at }) => observed_at)].reduce<string | undefined>((latest, observed) => (latest === undefined || Date.parse(observed) > Date.parse(latest) ? observed : latest), undefined);
+      assertWallClock(at, now, floor);
+      const migrated: T015V4Journal = {
+        ...buildInitialT015V4Journal(plan, presentation, approval, source.initial_balance),
+        immutable_forensics: { ...plan.immutable_forensics, operations_v4_path: T015_V4_LEGACY_JOURNAL_PATH, operations_v4_sha256: sourceSha256, migrated_at: at },
+        run_state: source.run_state, fail_stop_batch_id: source.fail_stop_batch_id, resumes: source.resumes, batches: source.batches,
+      };
+      writeJournal(context, migrated);
+      return {
+        command, source_path: T015_V4_LEGACY_JOURNAL_PATH, source_sha256: sourceSha256, source_mutated: false, target_path: T015_V4_JOURNAL_PATH, migrated_at: at,
+        run_state: migrated.run_state, fail_stop_batch_id: migrated.fail_stop_batch_id, batches: migrated.batches.length,
+        complete_batches: migrated.batches.filter(({ state }) => state === "COMPLETE").length, recovered_assets: migrated.batches.reduce((sum, record) => sum + record.recoveries.length, 0),
+        cap_used_units: capUsedUnits(migrated), cap_used_decimal: decimal(capUsedUnits(migrated)), resubmitted: false, regenerated: false,
+      };
     }
     const journal = readJournal(context);
 
@@ -854,7 +923,7 @@ export function runT015V4OpsInternal(args: readonly string[], root: string, plan
 
     if (command === "status") return statusT015V4(journal);
     if (command === "audit") return auditT015V4(context, journal, option(args, "--observed-at"));
-    throw new Error("usage: T015 v4 production <init|preflight-request|preflight-result|reset|prepare|response|ambiguous|recovery-open|jobs-request|jobs-handoff|balance-after|acknowledge-loss|resume|status|audit>");
+    throw new Error("usage: T015 v4 production <init|migrate|preflight-request|preflight-result|reset|prepare|response|ambiguous|recovery-open|jobs-request|jobs-handoff|balance-after|acknowledge-loss|resume|status|audit>");
   } finally { lock.release(); }
 }
 
@@ -922,12 +991,18 @@ export async function runT015V4JobsHandoffInternal(args: readonly string[], stdi
       const status = job.status as WaitStatus;
       if (!expected || !WAIT_STATUSES.includes(status) || job.type !== "image" || seenIndices.has(expected.index) || seenJobIds.has(expected.job_id)) { topology = false; return; }
       seenIndices.add(expected.index); seenJobIds.add(expected.job_id);
+      // The live provider decorates non-completed jobs with `model` (and may carry a stale
+      // `result_url`). Both are tolerated there and type-checked when present; only a
+      // completed job is required to carry them, and only a completed job is ever downloaded.
+      const hasModel = "model" in job;
+      const hasUrl = "result_url" in job;
       const model = typeof job.model === "string" ? job.model : null;
       const url = typeof job.result_url === "string" ? job.result_url : null;
-      if (url) transient.set(expected.asset_id, url);
+      const completed = status === "completed";
       const hasRetryable = "retryable" in job;
-      if ((status === "completed") !== (url !== null) || (status === "completed") !== (model !== null) || (status === "lookup_failed") !== hasRetryable || (hasRetryable && typeof job.retryable !== "boolean")) topology = false;
-      redacted.push({ index: expected.index, job_id: expected.job_id, status, model, download_available: url !== null, lookup_retryable: hasRetryable && typeof job.retryable === "boolean" ? job.retryable : null });
+      if ((hasModel && model === null) || (hasUrl && url === null) || (completed && (model === null || url === null)) || (status === "lookup_failed") !== hasRetryable || (hasRetryable && typeof job.retryable !== "boolean")) topology = false;
+      if (completed && url !== null) transient.set(expected.asset_id, url);
+      redacted.push({ index: expected.index, job_id: expected.job_id, status, model, download_available: completed && url !== null, lookup_retryable: hasRetryable && typeof job.retryable === "boolean" ? job.retryable : null });
     });
     redacted.sort((a, b) => a.index - b.index);
     if (!topology || redacted.length !== record.submission.jobs.length) persistFail(context, journal, record, "RECOVERY_FAILED", at, { stage: "JOBS_WAIT_TOPOLOGY", definite_job_count: redacted.length });
