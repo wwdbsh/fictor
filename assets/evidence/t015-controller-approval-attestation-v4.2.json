@@ -1,0 +1,47 @@
+{
+  "schema_version": 4,
+  "evidence_version": "t015-controller-approval-attestation-v4",
+  "attester": "USER_CREATED_CONTROL_PLANE_MAIN_SESSION",
+  "goal_slug": "ship-fictor-track1-2026",
+  "task_key": "T015",
+  "issue_number": 17,
+  "issue_contract_sha256": "9b1e9fa39c72101fd653d4c11696bf022aa5c6c1c899871863c90895239f451e",
+  "event_sequence": {
+    "assistant_disclosure_presented_at": "2026-08-13T05:20:07.000Z",
+    "exact_user_reply_ko": "위 위험을 확인했고 T015 CANONICAL 12..331 정확히 320장의 유료 생성과 27개 배치(각 최대 12장), 추가 480.00 credits 상한(이미 사용 처리 18.00, 누적 상한 498.00), 자동 유료 재시도 0을 승인합니다.",
+    "exact_user_reply_received_at": "2026-08-13T07:55:50.000Z",
+    "exact_scoped_approval_received_after_disclosure": true
+  },
+  "bindings": {
+    "plan_sha256": "16bf4c3f79baa13873531ffbd9c6f029de6c17b6b6d7596af56b4ffe9ca8185a",
+    "disclosure_presentation_evidence_sha256": "2530884b6e342de7e3f38a8e89eb9a6676a5fbd84913dd2f6ebf7e64f6bf4b4c",
+    "risk_disclosure_evidence_sha256": "82caea51a37903d62357cc52922040cff6881767c607e4aceb61ee4dbde89997",
+    "risk_disclosure_text_sha256": "1cf830f1c7a61441a19963e96d8eb94cc185f218c69afebaaba367e3385b8cdc",
+    "provider_schema_evidence_sha256": "0ce87031a018b768ccd0ce137b493b4865a08c7b88296e8e93a26ed726b81f5c",
+    "forensics_evidence_sha256": "3c01a0749cda3ffacb56e198446603a4910efc1a26051d0acd22481cac0d877f",
+    "operations_v3_journal_sha256": "91ca710c6c02e72e89bd28876f7884b8793f1a6f60087655bcb217545fd64d0a",
+    "v3_approval_sha256": "98f42d604a25b8eae9668c2d97158659c76fcae23b2f511dd001b3eb296e78ef",
+    "implementation_binding_sha256": "5fcd243b45cd30885677c08585180d3c9915444240f928c5d39af6c2b66201f6"
+  },
+  "scope": {
+    "category": "CANONICAL",
+    "paid_slice": "12..331",
+    "paid_asset_count": 320,
+    "paid_batch_count": 27,
+    "paid_batch_sizes": "12x26+8",
+    "batch_max": 12,
+    "unit_cost_decimal": "1.50",
+    "additional_credit_cap_decimal": "480.00",
+    "additional_credit_cap_units": 48000,
+    "legacy_cap_committed_decimal": "18.00",
+    "legacy_cap_committed_units": 1800,
+    "total_credit_cap_decimal": "498.00",
+    "total_credit_cap_units": 49800,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "t016_or_other_assets_allowed": false
+  },
+  "secret_free": true
+}
