@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "artifact_version": "t020-world-art-disclosure-presentation-v1-pending",
+  "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
+  "secret_free": true,
+  "plan_sha256": "c334249e3211b847b92b32e6c133f73c345bf3f476951fa5875fa2f07899584f",
+  "risk_disclosure_evidence_sha256": "49db50d54461e038db082d29182006a714f8ae7683873d99aab1ca8ccb94f900",
+  "risk_disclosure_text_sha256": "7d38f23719dd7345687ae62940cd30ad9671695eb3b768ba4b6af40b7844235e",
+  "provider_schema_evidence_sha256": "86fefa8a18c81bb6f2e298435155795dcdad857eb9dd06c3fd797a46742c2bb7",
+  "forensics_evidence_sha256": "7fc0941ee3a3cf330d07709a5671824e2fe3047aed33cff503acdee2ebfc9dc1",
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "master_style_sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d",
+  "t014_approval_sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96",
+  "implementation_binding_sha256": "a09d19193bb0cbcf89b65922343b8070fc83ec005237530a8cda7be3b512bd20",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t020-world-art-production-v1-controller.ts",
+      "sha256": "fd7a888e97073ab46279b2ddd3e68fb2129024b0ba10adf48ce43e5e9ea75240"
+    },
+    "preparation": {
+      "path": "scripts/assets/t020-world-art-production-v1-cli.ts",
+      "sha256": "09c04466ad22b7635596c9948027c130afcbbfa3d9e64eb515140e7a3f7b4d6d"
+    },
+    "production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "333772df1af37b93ed3f0659d66a447909d1c1f86c8dcd4849ef51263ac7b07d"
+    },
+    "contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "dbcbba8ca678313091015c8b7f73e5291c7d1b80bb176df5ec7d820300772579"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "exact_approval_phrase_required": "T020 세계 아트 54장 생성을 승인한다. 한도 81.00 크레딧.",
+  "recovery_operator_phrase": "T020 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T020 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "loss_acknowledgment_operator_phrase": "T020 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "prior_task_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "scope": {
+    "task_key": "T020",
+    "categories": [
+      "ENEMY",
+      "ELITE",
+      "BACKGROUND"
+    ],
+    "asset_count": 54,
+    "enemy_asset_count": 36,
+    "background_asset_count": 18,
+    "batch_count": 5,
+    "batch_sizes": [
+      12,
+      12,
+      12,
+      12,
+      6
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "enemy_aspect_ratio": "3:4",
+    "background_aspect_ratio": "16:9",
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "81.00",
+    "total_credit_cap_units": 8100,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 5,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "boss_world_art_allowed": false,
+    "event_art_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "authorized": false
+}

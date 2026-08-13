@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t020-world-art-risk-disclosure-v1",
+  "issue_number": 22,
+  "issue_contract_sha256": "0612a8cc46a3e9db8b8c8ad82e132c15484d77c18205ff5530507f55a794aea9",
+  "secret_free": true,
+  "disclosure_text_ko": "T020은 세계 아트 정확히 54장(적 36장 = ENEMY 30 + ELITE 6, 배경 18장)을 5개 배치([12,12,12,12,6])로 배치당 단 한 번씩 유료 생성합니다. 상한은 정확히 81.00 credits(정확 단가 1.50 x 54장)이고 자동 유료 재시도 예산은 0이며, 이전 T011/T013/T015 승인은 하나도 상속되지 않습니다.\n(i) 배치마다 제출 응답을 잃을 수 있는 모호 제출(ambiguous submission) 구간이 정확히 1회씩, 총 5회 존재합니다. 각 구간에서 최대 18.00 credits(12장 x 1.50)가 실제로 차감되고도 응답을 받지 못하면 그 배치의 job ID를 전혀 열거할 수 없고, 따라서 이미 지불한 이미지를 영구히 회수하지 못할 수 있습니다.\n(ii) 각 배치는 단 한 번만 제출합니다. 유료 envelope이 한 번이라도 밖으로 나간 배치는 모호 제출이든 부분 응답이든 즉시 fail-stop하고 어떤 경우에도 재제출하지 않습니다.\n(iii) fail-stop은 실행 전체가 아니라 배치 단위로 적용됩니다. 다음 배치로 넘어가려면 operator가 정확한 재개 문구를 입력해야 합니다. 재개는 두 갈래뿐입니다. 지출이 0인 배치(유료 envelope이 나가기 전 preflight 단계 실패)는 재개 뒤 PLANNED로 되돌려 같은 배치를 처음부터 다시 실행할 수 있고, 이때도 이전 실패 기록은 저널에 그대로 보존됩니다. 이미 지출이 발생했을 수 있는 배치는 절대 재실행하지 않고, operator가 정확히 “T020 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.”로 손실을 확인해야만 다음 배치가 열립니다. 확인된 손실은 81.00 상한에서 그대로 차감되어 남은 배치의 예산을 줄이며, 손실된 자산의 이미지는 이 승인으로는 다시 생성하지 않습니다. 다시 만들려면 별도의 새 고지와 새 승인이 필요합니다. 손실이 하나라도 확인된 실행은 정확히 81.00으로 닫히지 않고 CLOSED_WITH_LOSSES 상태로 종료됩니다.\n(iv) 종횡비 위험 - 이 실행은 서로 다른 두 종횡비를 요청합니다. 적 36장은 3:4이고 배경 18장은 16:9입니다. 3:4는 T015에서 실측 검증된 값입니다(관찰 896x1200, 오차 약 4445ppm, 허용 5000ppm). 그러나 16:9는 이 provider에게 한 번도 유료·무료로 확인된 적이 없습니다. provider가 16:9를 다른 화소비로 반환하면 이미 과금된 배경 배치가 종횡비 검증에서 실패하고 그 지출은 돌아오지 않습니다. 배치는 종횡비별로 분리되어 하나의 배치가 두 종횡비를 섞지 않으며, 16:9 배치는 4번째와 5번째입니다. 즉 16:9 위험이 드러나는 시점에는 이미 최대 54.00 credits가 3:4 배치에 지출된 뒤입니다.\n(v) 저장 경로 - 각 자산은 고정된 core manifest의 path 필드를 그대로 씁니다. 배경은 public/assets/backgrounds/, 적과 엘리트는 public/assets/enemies/에 저장되고 같은 상대 경로로 assets/backups/t020-world-art 아래에 백업됩니다. 두 사본은 저장 직후 sha256이 서로 같아야 하며 다르면 fail-stop입니다.\n(vi) 과금은 provider가 보고하는 credits_exact(1.50)만 사용합니다. 화면 표시값 credits(1.00)는 기록만 하고 상한 계산에 절대 쓰지 않습니다.\n(vii) credits는 2026-08-17에 만료됩니다. 정확한 만료 시각(hour)은 알 수 없습니다.\n(viii) 복구 개시와 재개에 쓰는 operator 문구는 agent가 스스로 입력할 수 있으므로 사용자 동의를 대신하지 않습니다. 사고와 오작동을 막는 게이트일 뿐입니다.\n(ix) 모든 요청은 use_unlim:false를 문자 그대로 포함하며 이 값은 각 자산의 canonical_request_sha256 안에 고정되어 있습니다.\n(x) 모델 canary: 배치 world-art-001의 provider-reported model이 nano_banana_flash로 확인되지 않으면 배치 world-art-002은 열리지 않습니다. 다만 드리프트로 멈추더라도 그 canary 배치에 이미 지출된 credits는 회수되지 않습니다.\n(xi) 범위 밖 - 보스는 신의 심장 카드 아트를 재사용하므로 별도 세계 아트를 만들지 않습니다. 이벤트 아트 20장은 T021의 범위이며 이 승인에 포함되지 않습니다. MATERIAL, CANONICAL, HEART, HEART_FORGE 자산도 전부 제외됩니다.\nsigned URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. 승인은 정확히 “T020 세계 아트 54장 생성을 승인한다. 한도 81.00 크레딧.”라는 문구로만 기록합니다.",
+  "disclosure_text_sha256": "7d38f23719dd7345687ae62940cd30ad9671695eb3b768ba4b6af40b7844235e",
+  "scope": {
+    "task_key": "T020",
+    "categories": [
+      "ENEMY",
+      "ELITE",
+      "BACKGROUND"
+    ],
+    "asset_count": 54,
+    "enemy_asset_count": 36,
+    "background_asset_count": 18,
+    "batch_count": 5,
+    "batch_sizes": [
+      12,
+      12,
+      12,
+      12,
+      6
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "enemy_aspect_ratio": "3:4",
+    "background_aspect_ratio": "16:9",
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "81.00",
+    "total_credit_cap_units": 8100,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 5,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "boss_world_art_allowed": false,
+    "event_art_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  }
+}
