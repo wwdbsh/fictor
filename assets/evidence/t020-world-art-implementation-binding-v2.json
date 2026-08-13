@@ -14,7 +14,7 @@
     },
     "production": {
       "path": "scripts/assets/t020-world-art-production-v2-ops.ts",
-      "sha256": "11c5567aa4d781edb524beced35a0cb827af0e144928f296ea9443e0db9f0f28"
+      "sha256": "301cf2089e4d7816e1c7d77f2f316da9aeeae1a662309c2808e4a346d55ecc33"
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v2.ts",

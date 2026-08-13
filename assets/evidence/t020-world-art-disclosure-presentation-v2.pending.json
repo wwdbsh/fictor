@@ -3,14 +3,14 @@
   "artifact_version": "t020-world-art-disclosure-presentation-v2-pending",
   "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
   "secret_free": true,
-  "plan_sha256": "9952c0947707da1d5f41315ab25b0e93b13e74629f61ed646d85af53c67a7ae7",
+  "plan_sha256": "1402c3808efc679dedb869d81815bb43e049401d3e08c1ccd750cc7d47eada44",
   "risk_disclosure_evidence_sha256": "05046b55438eb95ba033ebf862bdfb2af91e776ac1c6118088d781def7da06c0",
   "risk_disclosure_text_sha256": "f380b211ac0d07ff492fc8099cdb2c4ef2e70e6368abb6859f1c52783be0e208",
   "provider_schema_evidence_sha256": "513c84d5569084f49748b777d2f133b74ad5ab1332797dd0f67ff1f73dd8e343",
   "forensics_evidence_sha256": "882909454d6c968e1c2cd0f739abf28fee1df68a9841f324dbfd179f01cbc316",
   "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
   "v1_journal_forensic_sha256": "2f017a34afb7aadef6d0bd2ff93e30bc02e7c916fb36066225e78ce6b6e51636",
-  "implementation_binding_sha256": "d45e6cfe351427dc3269c6af69ac01c692224f46b07cd557848eda2319513432",
+  "implementation_binding_sha256": "dd385738fdfc47d4c36a29767f9b94d2c2a6c86560032aa8a7f608380b560afb",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/t020-world-art-production-v2-controller.ts",
@@ -22,7 +22,7 @@
     },
     "production": {
       "path": "scripts/assets/t020-world-art-production-v2-ops.ts",
-      "sha256": "11c5567aa4d781edb524beced35a0cb827af0e144928f296ea9443e0db9f0f28"
+      "sha256": "301cf2089e4d7816e1c7d77f2f316da9aeeae1a662309c2808e4a346d55ecc33"
     },
     "contract": {
       "path": "scripts/assets/t020-world-art-production-v2.ts",

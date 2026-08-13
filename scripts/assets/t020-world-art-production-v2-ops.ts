@@ -69,7 +69,6 @@ const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 const FRESHNESS_MS = 10 * 60 * 1000;
 const MAX_STDIN_BYTES = 2 * 1024 * 1024;
 const DOWNLOAD_TIMEOUT_MS = 30_000;
-const MAX_REDIRECTS = 3;
 /** Node 22: execFileSync without an explicit maxBuffer raises ENOBUFS on large manifests. */
 const GIT_MAX_BUFFER = 64 * 1024 * 1024;
 const LOCK_STALE_MS = 15 * 60 * 1000;
@@ -1118,6 +1117,7 @@ export async function runT020V2LegacyHandoffInternal(args: readonly string[], st
     if (typeof response.all_terminal !== "boolean" || !Array.isArray(response.jobs)) throw new Error("T020 v2 legacy jobs_wait payload is invalid");
     const transient = new Map<string, string>();
     const redacted: T020V2LegacyRecovery["polls"][number]["jobs"] = [];
+    const seenIndices = new Set<number>(); const seenJobIds = new Set<string>();
     let expired = false;
     (response.jobs as unknown[]).forEach((item) => {
       if (!item || typeof item !== "object" || Array.isArray(item)) return;
@@ -1126,6 +1126,12 @@ export async function runT020V2LegacyHandoffInternal(args: readonly string[], st
       const expectedJob = legacy.jobs.find(({ index, job_id }) => index === job.index && job_id === job.job_id);
       const status = job.status as WaitStatus;
       if (!expectedJob || !WAIT_STATUSES.includes(status) || job.type !== "image") throw new Error("T020 v2 legacy poll does not match the pinned job ids");
+      // Membership and a count of six are not enough: without this, one job repeated six times
+      // satisfies both and is persisted as a poll of [0,0,0,0,0,0]. That poll is the evidence
+      // that the widened tolerance was validated against real deliveries, so it must never be
+      // able to record a shape that never happened.
+      if (seenIndices.has(expectedJob.index) || seenJobIds.has(expectedJob.job_id)) throw new Error("T020 v2 legacy poll repeats a job id or index");
+      seenIndices.add(expectedJob.index); seenJobIds.add(expectedJob.job_id);
       const model = typeof job.model === "string" ? job.model : null;
       const url = typeof job.result_url === "string" ? job.result_url : null;
       const completed = status === "completed";
@@ -1276,15 +1282,21 @@ export function auditT020V2(context: T020V2Context, journal: T020V2Journal, obse
 
 /* ------------------------------------------------------------- production */
 
-function productionContext(command: string, now = () => new Date()): T020V2Context {
-  const plan = buildT020V2Plan(repositoryRoot);
-  const bytes = readFileSync(resolve(repositoryRoot, T020_V2_PLAN_PATH), "utf8");
+/**
+ * The two gates every production command passes: a valid approval chain for this exact plan,
+ * and a committed-clean binding scope. `root` is a parameter so both can be driven in a test
+ * against a throwaway tree — otherwise nothing would catch their removal.
+ */
+export function productionContextT020V2(command: string, now = () => new Date(), root: string = repositoryRoot): T020V2Context {
+  const plan = buildT020V2Plan(root);
+  const bytes = readFileSync(resolve(root, T020_V2_PLAN_PATH), "utf8");
   if (bytes !== renderT020V2Plan(plan)) throw new Error("T020 v2 bound plan changed");
-  if (!isT020V2Authorized(repositoryRoot, plan, now())) throw new Error("T020 v2 exact scoped approval is missing; prior approvals are not inherited");
+  if (!isT020V2Authorized(root, plan, now())) throw new Error("T020 v2 exact scoped approval is missing; prior approvals are not inherited");
   // `status` mutates nothing, so a dirty working tree must not hide the run's state.
-  if (command !== "status") assertT020V2CommittedClean(repositoryRoot);
-  return { root: repositoryRoot, plan, ...loadT020V2Authorization(repositoryRoot, plan, now()) };
+  if (command !== "status") assertT020V2CommittedClean(root);
+  return { root, plan, ...loadT020V2Authorization(root, plan, now()) };
 }
-export function runT020V2Ops(args: readonly string[]): Record<string, unknown> { const now = () => new Date(); const context = productionContext(args[0] ?? "", now); return runT020V2OpsInternal(args, context.root, context.plan, context.presentation, context.approval, now); }
-export function runT020V2LegacyHandoff(args: readonly string[], stdinJson: string): Promise<Record<string, unknown>> { const now = () => new Date(); const context = productionContext("legacy-handoff", now); return runT020V2LegacyHandoffInternal(args, stdinJson, context.root, context.plan, context.presentation, context.approval, defaultDependencies, now); }
-export function runT020V2JobsHandoff(args: readonly string[], stdinJson: string): Promise<Record<string, unknown>> { const now = () => new Date(); const context = productionContext("jobs-handoff", now); return runT020V2JobsHandoffInternal(args, stdinJson, context.root, context.plan, context.presentation, context.approval, undefined, now); }
+const productionContext = productionContextT020V2;
+export function runT020V2Ops(args: readonly string[], root: string = repositoryRoot): Record<string, unknown> { const now = () => new Date(); const context = productionContext(args[0] ?? "", now, root); return runT020V2OpsInternal(args, context.root, context.plan, context.presentation, context.approval, now); }
+export function runT020V2LegacyHandoff(args: readonly string[], stdinJson: string, root: string = repositoryRoot): Promise<Record<string, unknown>> { const now = () => new Date(); const context = productionContext("legacy-handoff", now, root); return runT020V2LegacyHandoffInternal(args, stdinJson, context.root, context.plan, context.presentation, context.approval, defaultDependencies, now); }
+export function runT020V2JobsHandoff(args: readonly string[], stdinJson: string, root: string = repositoryRoot): Promise<Record<string, unknown>> { const now = () => new Date(); const context = productionContext("jobs-handoff", now, root); return runT020V2JobsHandoffInternal(args, stdinJson, context.root, context.plan, context.presentation, context.approval, undefined, now); }

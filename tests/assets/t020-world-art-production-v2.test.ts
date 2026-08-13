@@ -11,7 +11,7 @@ import {
   T020_V2_BATCH_SIZES, T020_V2_CANARY_BATCH_ID, T020_V2_EXACT_APPROVAL_PHRASE, T020_V2_EXPECTED_MODEL, T020_V2_GRID_PX,
   T020_V2_JOURNAL_PATH, T020_V2_LEGACY_ASSET_COUNT, T020_V2_LEGACY_RECOVERY_PHRASE, T020_V2_PAID_ASSET_COUNT,
   T020_V2_RECOVERY_OPERATOR_PHRASE, T020_V2_RISK_TEXT, T020_V2_TOTAL_CAP_UNITS, T020_V2_UNIT_COST_UNITS, T020_V2_V1_SUNK_UNITS,
-  buildT020V2Batches, buildT020V2PaidAssets, buildT020V2Plan, canonicalJsonT020, loadPinnedT020V1Journal, renderT020V2Plan, sha256T020,
+  buildT020V2Batches, buildT020V2PaidAssets, buildT020V2Plan, canonicalJsonT020, isT020V2Authorized, loadPinnedT020V1Journal, renderT020V2Plan, sha256T020,
   t020V2AspectTolerancePpm, t020V2PlanSha256, type T020V2Approval, type T020V2Plan, type T020V2Presentation,
 } from "../../scripts/assets/t020-world-art-production-v2";
 import {
@@ -378,5 +378,63 @@ describe("T020 v2 preparation CLI", () => {
       expect(path).toContain("v2");
     }
     expect(existsSync(resolve(repositoryRoot, "assets/evidence/t020-world-art-approval-v1.json"))).toBe(true);
+  });
+});
+
+describe("T020 v2 production entry gates", () => {
+  test("an unapproved root is refused before any command runs", async () => {
+    const { productionContextT020V2 } = await import("../../scripts/assets/t020-world-art-production-v2-ops");
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-unapproved-"));
+    mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
+    // No plan, no evidence chain: the gate must refuse rather than fall through to the command.
+    expect(() => productionContextT020V2("status", () => new Date(), root)).toThrow();
+    expect(isT020V2Authorized(root, cachedPlan)).toBe(false);
+  });
+
+  test("the real root is refused too, because v2 has not been approved yet", async () => {
+    const { productionContextT020V2 } = await import("../../scripts/assets/t020-world-art-production-v2-ops");
+    // This is the live state: the plan and binding are committed and re-derive byte-exact, but
+    // no v2 approval exists, so every production command — including read-only status — stops.
+    expect(isT020V2Authorized(repositoryRoot, cachedPlan)).toBe(false);
+    expect(() => productionContextT020V2("status", () => new Date(), repositoryRoot)).toThrow(/exact scoped approval is missing/);
+  });
+
+  test("the committed-clean gate is reached once an approval exists", async () => {
+    const { assertT020V2CommittedClean } = await import("../../scripts/assets/t020-world-art-production-v2-ops");
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-dirty-"));
+    // Nothing tracked here at all, so the binding load fails before git is consulted; the
+    // assertion is that the gate refuses, which is what productionContext relies on.
+    expect(() => assertT020V2CommittedClean(root)).toThrow();
+  });
+
+  // NOTE: v1 has no equivalent executed-path test on purpose. `runT020Ops` hard-codes its root
+  // and v1's sources are sha-pinned by an approved, closed run, so adding a parameter there
+  // would invalidate the v1 binding and its approval chain for a test-only benefit. v1's gate
+  // is covered at the predicate level instead; v2 — the version that will actually spend — has
+  // the executed-path coverage above.
+});
+
+describe("T020 v2 legacy poll integrity", () => {
+  test("a poll repeating one job six times is refused before it is persisted", async () => {
+    const p = fixture();
+    ops(p, ["legacy-open", "--observed-at", at(0), "--operator-phrase", T020_V2_LEGACY_RECOVERY_PHRASE]);
+    const payload = legacyWait(p.plan) as { jobs: Array<Record<string, unknown>>; summary: Record<string, number> };
+    // Six entries, every one a member of the pinned set, count checks out — and it is nonsense.
+    payload.jobs = [payload.jobs[0], payload.jobs[0], payload.jobs[0], payload.jobs[0], payload.jobs[0], payload.jobs[0]];
+    await expect(runT020V2LegacyHandoffInternal(["legacy-handoff", "--observed-at", at(1)], JSON.stringify(payload), p.root, p.plan, presentation, approval, deps(() => gridPng16x9(1))))
+      .rejects.toThrow(/repeats a job id or index/);
+    // The forensic record — the evidence the widened tolerance rests on — stays empty.
+    expect(journalOf(p).legacy_recovery.polls).toHaveLength(0);
+    expect(journalOf(p).legacy_recovery.recoveries).toHaveLength(0);
+  });
+
+  test("a poll missing a job is still refused on count", async () => {
+    const p = fixture();
+    ops(p, ["legacy-open", "--observed-at", at(0), "--operator-phrase", T020_V2_LEGACY_RECOVERY_PHRASE]);
+    const payload = legacyWait(p.plan) as { jobs: unknown[]; summary: Record<string, number> };
+    payload.jobs = payload.jobs.slice(1);
+    await expect(runT020V2LegacyHandoffInternal(["legacy-handoff", "--observed-at", at(1)], JSON.stringify(payload), p.root, p.plan, presentation, approval, deps(() => gridPng16x9(1))))
+      .rejects.toThrow(/must cover all six jobs/);
+    expect(journalOf(p).legacy_recovery.polls).toHaveLength(0);
   });
 });
