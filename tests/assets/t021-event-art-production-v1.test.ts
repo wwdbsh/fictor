@@ -1,0 +1,429 @@
+import { execFileSync } from "node:child_process";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
+import { deflateSync } from "node:zlib";
+import { beforeAll, describe, expect, test } from "vitest";
+
+import { t020GetCostRequest } from "../../scripts/assets/t020-world-art-production-v1-ops";
+import {
+  T021_CORE_PLAN_PATH, T021_CORE_PLAN_SHA256, T021_V1_ASPECT_TOLERANCE_PPM, T021_V1_ASSET_COUNT, T021_V1_BATCH_COUNT,
+  T021_V1_BATCH_MAX, T021_V1_BATCH_SIZES, T021_V1_CANARY_BATCH_ID, T021_V1_CANARY_BLOCKED_BATCH_ID, T021_V1_CONTACT_SEGMENT_DIR,
+  T021_V1_EVENT_TYPES, T021_V1_EXACT_APPROVAL_PHRASE, T021_V1_EXPECTED_MODEL, T021_V1_ID_LIST_SHA256, T021_V1_JOURNAL_PATH,
+  T021_V1_LOSS_ACKNOWLEDGMENT_PHRASE, T021_V1_RECOVERY_OPERATOR_PHRASE, T021_V1_RESUME_OPERATOR_PHRASE, T021_V1_RISK_TEXT,
+  T021_V1_TOTAL_CAP_UNITS, T021_V1_UNIT_COST_UNITS, buildT021Assets, buildT021Batches, buildT021Plan, canonicalJsonT021,
+  crossCheckT021EffectivePrompts, decimalT021, isT021Authorized, renderT021Plan, sha256T021, selectT021EventAssets,
+  t021AspectTolerancePpm, t021PlanSha256, type T021Approval, type T021Plan, type T021Presentation,
+} from "../../scripts/assets/t021-event-art-production-v1";
+import {
+  auditT021, productionContextT021, runT021JobsHandoffInternal, runT021OpsInternal, statusT021, t021BatchModelVerified,
+  t021ContractDriftBatches, type T021Dependencies, type T021Journal,
+} from "../../scripts/assets/t021-event-art-production-v1-ops";
+import { dryRunT021, runT021Preparation } from "../../scripts/assets/t021-event-art-production-v1-cli";
+
+const repositoryRoot = resolve(import.meta.dirname, "../..");
+const EPOCH = Date.parse("2026-08-16T00:00:00.000Z");
+const presentation = { evidence_version: "t021-test-presentation" } as unknown as T021Presentation;
+const approval = { evidence_version: "t021-test-approval" } as unknown as T021Approval;
+const START_UNITS = 28_290;
+
+function crc32(bytes: Uint8Array): number { let crc = 0xffffffff; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ 0xffffffff) >>> 0; }
+function chunk(type: string, data: Buffer): Buffer { const name = Buffer.from(type); const result = Buffer.alloc(12 + data.length); result.writeUInt32BE(data.length, 0); name.copy(result, 4); data.copy(result, 8); result.writeUInt32BE(crc32(Buffer.concat([name, data])), 8 + data.length); return result; }
+function png(width: number, height: number, fill = 0): Buffer {
+  const header = Buffer.alloc(13); header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 2;
+  const rowBytes = width * 3; const pixels = Buffer.alloc(height * (1 + rowBytes), fill);
+  for (let row = 0; row < height; row += 1) pixels[row * (1 + rowBytes)] = 0;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(pixels)), chunk("IEND", Buffer.alloc(0))]);
+}
+/** The provider's real 3:4 geometry: 896x1200, 4445 ppm off exact, inside 5000. */
+function gridPng3x4(fill: number): Buffer { return png(224, 300, fill); }
+function at(seconds: number): string { return new Date(EPOCH + seconds * 1000).toISOString(); }
+function json(root: string, name: string, value: unknown): string { writeFileSync(resolve(root, name), `${JSON.stringify(value)}\n`); return name; }
+function summaryOf(statuses: readonly string[]) { const active = ["pending", "waiting", "queued", "in_progress", "ip_detect"]; const failed = ["failed", "canceled", "nsfw", "ip_detected"]; return { active: statuses.filter((s) => active.includes(s)).length, completed: statuses.filter((s) => s === "completed").length, errors: statuses.filter((s) => s === "lookup_failed").length, failed: statuses.filter((s) => failed.includes(s)).length, total: statuses.length }; }
+
+let cachedPlan: T021Plan;
+beforeAll(() => { cachedPlan = buildT021Plan(repositoryRoot); });
+
+interface Prepared { root: string; plan: T021Plan }
+function fixture(startUnits = START_UNITS): Prepared {
+  const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-"));
+  mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
+  copyFileSync(resolve(repositoryRoot, T021_CORE_PLAN_PATH), resolve(root, T021_CORE_PLAN_PATH));
+  const anchor = json(root, "initial-balance.json", { credits: startUnits / 100, provider_observed_at: at(-120) });
+  runT021OpsInternal(["init", "--observed-at", at(-60), "--balance-file", anchor], root, cachedPlan, presentation, approval);
+  return { root, plan: cachedPlan };
+}
+function ops(p: Prepared, args: readonly string[]): Record<string, unknown> { return runT021OpsInternal(args, p.root, p.plan, presentation, approval); }
+function journalOf(p: Prepared): T021Journal { return JSON.parse(readFileSync(resolve(p.root, T021_V1_JOURNAL_PATH), "utf8")) as T021Journal; }
+function deps(bytesFor: (call: number) => Buffer): T021Dependencies {
+  let call = 0;
+  return { resolve: async () => [{ address: "18.65.3.2", family: 4 }], fetch: async () => ({ status: 200, headers: { "content-type": "image/png" }, bytes: bytesFor(call++), remoteAddress: "::ffff:18.65.3.2" }) };
+}
+function costItems(plan: T021Plan, batchIndex: number, base: number) {
+  return plan.batches[batchIndex].asset_ids.map((id, offset) => {
+    const asset = plan.assets.find((a) => a.id === id)!;
+    return { index: asset.index, request_sha256: sha256T021(canonicalJsonT021(t020GetCostRequest(asset.request))), cost: { credits: 1, credits_exact: 1.5 }, provider_observed_at: at(base + 1 + offset) };
+  });
+}
+function submission(plan: T021Plan, batchIndex: number) {
+  const ids = plan.batches[batchIndex].asset_ids;
+  return { submitted_count: ids.length, failed_count: 0, jobs: ids.map((id, offset) => ({ index: plan.assets.find((a) => a.id === id)!.index, job_id: `${plan.batches[batchIndex].id}-job-${String(offset).padStart(2, "0")}`, status: "queued" })) };
+}
+function wait(plan: T021Plan, batchIndex: number, statuses?: readonly string[], model: string = T021_V1_EXPECTED_MODEL) {
+  const ids = plan.batches[batchIndex].asset_ids;
+  const resolved = statuses ?? ids.map(() => "completed");
+  return {
+    all_terminal: true,
+    jobs: ids.map((id, offset) => {
+      const entry: Record<string, unknown> = { index: plan.assets.find((a) => a.id === id)!.index, job_id: `${plan.batches[batchIndex].id}-job-${String(offset).padStart(2, "0")}`, status: resolved[offset], type: "image" };
+      if (resolved[offset] === "completed") { entry.model = model; entry.result_url = `https://d111111abcdef8.cloudfront.net/${offset}.png`; }
+      if (resolved[offset] === "lookup_failed") entry.retryable = false;
+      return entry;
+    }),
+    summary: summaryOf(resolved),
+  };
+}
+async function runBatch(p: Prepared, index: number, before: number, base: number): Promise<number> {
+  const batch = p.plan.batches[index];
+  ops(p, ["preflight-request", "--batch", batch.id, "--observed-at", at(base)]);
+  ops(p, ["preflight-result", "--batch", batch.id, "--observed-at", at(base + batch.size + 2), "--cost-file", json(p.root, `c${index}.json`, { costs: costItems(p.plan, index, base) }), "--balance-file", json(p.root, `b${index}.json`, { credits: before / 100, provider_observed_at: at(base + batch.size + 1) })]);
+  ops(p, ["prepare", "--batch", batch.id, "--observed-at", at(base + 40)]);
+  ops(p, ["response", "--batch", batch.id, "--observed-at", at(base + 41), "--file", json(p.root, `s${index}.json`, submission(p.plan, index))]);
+  ops(p, ["recovery-open", "--batch", batch.id, "--observed-at", at(base + 42), "--operator-phrase", T021_V1_RECOVERY_OPERATOR_PHRASE]);
+  await runT021JobsHandoffInternal(["jobs-handoff", "--batch", batch.id, "--observed-at", at(base + 43)], JSON.stringify(wait(p.plan, index)), p.root, p.plan, presentation, approval, deps((call) => gridPng3x4((index * 16 + call) % 251)));
+  const after = before - batch.size * T021_V1_UNIT_COST_UNITS;
+  ops(p, ["balance-after", "--batch", batch.id, "--observed-at", at(base + 45), "--file", json(p.root, `a${index}.json`, { credits: after / 100, provider_observed_at: at(base + 44) })]);
+  return after;
+}
+
+/* ------------------------------------------------------------------------ */
+
+describe("T021 manifest discovery", () => {
+  test("the pinned manifest holds exactly 20 EVENT assets, all 3:4, under events/", () => {
+    expect(sha256T021(readFileSync(resolve(repositoryRoot, T021_CORE_PLAN_PATH)))).toBe(T021_CORE_PLAN_SHA256);
+    const selected = selectT021EventAssets(repositoryRoot);
+    expect(selected).toHaveLength(20);
+    expect(selected.every(({ aspect_ratio }) => aspect_ratio === "3:4")).toBe(true);
+    expect(selected.every(({ path }) => path.startsWith("events/") && path.endsWith(".png"))).toBe(true);
+    expect(sha256T021(`${selected.map(({ id }) => id).join("\n")}\n`)).toBe(T021_V1_ID_LIST_SHA256);
+  });
+
+  test("all six event types are represented — 6 base plates plus 14 ground variants", () => {
+    const assets = buildT021Assets(repositoryRoot);
+    expect(new Set(assets.map(({ event_type }) => event_type))).toEqual(new Set(T021_V1_EVENT_TYPES));
+    expect(assets.filter(({ ground }) => ground === null)).toHaveLength(6);
+    expect(assets.filter(({ ground }) => ground !== null)).toHaveLength(14);
+    const variants = assets.filter(({ ground }) => ground !== null).reduce<Record<string, number>>((counts, { event_type }) => ({ ...counts, [event_type]: (counts[event_type] ?? 0) + 1 }), {});
+    expect(variants).toEqual({ cache: 6, oddity: 6, collapse: 2 });
+  });
+
+  test("a manifest whose EVENT aspect changed is refused rather than assumed", () => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-aspect-"));
+    mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
+    const core = JSON.parse(readFileSync(resolve(repositoryRoot, T021_CORE_PLAN_PATH), "utf8")) as { assets: Array<Record<string, unknown>> };
+    for (const a of core.assets) if (a.category === "EVENT") a.aspect_ratio = "16:9";
+    writeFileSync(resolve(root, T021_CORE_PLAN_PATH), `${JSON.stringify(core, null, 2)}\n`);
+    // The pin fires first, which is the point: an aspect change cannot arrive unnoticed.
+    expect(() => selectT021EventAssets(root)).toThrow(/pinned source changed/);
+  });
+
+  test("out-of-scope categories never enter the plan", () => {
+    expect(cachedPlan.assets.every(({ category }) => category === "EVENT")).toBe(true);
+    expect(cachedPlan.scope.event_variant_expansion_allowed).toBe(false);
+    expect(cachedPlan.scope.style_redecision_allowed).toBe(false);
+    expect(cachedPlan.scope.manifest_id_change_allowed).toBe(false);
+  });
+
+  test("every request carries 3:4, use_unlim false, and the pinned master reference", () => {
+    for (const asset of cachedPlan.assets) {
+      expect(asset.request.params.aspect_ratio).toBe("3:4");
+      expect(asset.request.params.use_unlim).toBe(false);
+      expect(asset.request.params.count).toBe(1);
+      expect(asset.request.params.medias).toEqual([{ role: "image", value: "e0f36c95-2e1b-4e38-9931-7e10e562f209" }]);
+      expect(asset.canonical_request_sha256).toBe(sha256T021(canonicalJsonT021(asset.request)));
+    }
+    expect(crossCheckT021EffectivePrompts(repositoryRoot, cachedPlan, [0, 6, 13, 19])).toBe(4);
+  });
+});
+
+describe("T021 tolerance table", () => {
+  test("3:4 is 5000 and the 16:9 entry is retained but unused here", () => {
+    expect(t021AspectTolerancePpm("3:4")).toBe(5_000);
+    expect(t021AspectTolerancePpm("16:9")).toBe(12_500);
+    expect(T021_V1_ASPECT_TOLERANCE_PPM).toEqual({ "3:4": 5_000, "16:9": 12_500 });
+    expect(cachedPlan.assets.every(({ aspect_ratio }) => aspect_ratio === "3:4")).toBe(true);
+  });
+
+  test("the 16:9 widening is not applied to 3:4", () => {
+    const ppm = (w: number, h: number, ew: number, eh: number) => Math.ceil((Math.abs(w * eh - h * ew) * 1_000_000) / (h * ew));
+    expect(ppm(896, 1200, 3, 4)).toBe(4_445);
+    expect(ppm(896, 1200, 3, 4)).toBeLessThanOrEqual(t021AspectTolerancePpm("3:4"));
+    // A plate between the two limits proves the widening did not leak: it would pass under
+    // 16:9's 12500 and must not pass under 3:4's 5000.
+    expect(ppm(908, 1200, 3, 4)).toBe(8_889);
+    expect(ppm(908, 1200, 3, 4)).toBeLessThanOrEqual(t021AspectTolerancePpm("16:9"));
+    expect(ppm(908, 1200, 3, 4)).toBeGreaterThan(t021AspectTolerancePpm("3:4"));
+  });
+});
+
+describe("T021 batching and cap", () => {
+  test("two aspect-homogeneous batches of [12,8] covering all 20", () => {
+    expect(cachedPlan.batches.map(({ size }) => size)).toEqual([...T021_V1_BATCH_SIZES]);
+    expect(cachedPlan.batches.reduce((sum, { size }) => sum + size, 0)).toBe(T021_V1_ASSET_COUNT);
+    expect(cachedPlan.batches.every(({ size }) => size <= T021_V1_BATCH_MAX)).toBe(true);
+    expect(cachedPlan.batches.every(({ aspect_ratio }) => aspect_ratio === "3:4")).toBe(true);
+    expect(new Set(cachedPlan.batches.flatMap(({ asset_ids }) => asset_ids)).size).toBe(T021_V1_ASSET_COUNT);
+    expect(cachedPlan.batches[0].id).toBe(T021_V1_CANARY_BATCH_ID);
+    expect(cachedPlan.batches[1].id).toBe(T021_V1_CANARY_BLOCKED_BATCH_ID);
+  });
+
+  test("20 requests at 1.50 is exactly the 30.00 cap", () => {
+    expect(T021_V1_ASSET_COUNT * T021_V1_UNIT_COST_UNITS).toBe(T021_V1_TOTAL_CAP_UNITS);
+    expect(decimalT021(T021_V1_TOTAL_CAP_UNITS)).toBe("30.00");
+    expect(cachedPlan.budget.legacy_committed_units).toBe(0);
+  });
+
+  test("the cumulative budget is reported, and it shows only 3.90 of slack", () => {
+    // Issue #23 asks for cumulative budget compliance, and the honest answer is tight: a
+    // single lost batch here (up to 18.00) would leave the remaining plan unaffordable.
+    expect(cachedPlan.cumulative_budget).toMatchObject({
+      balance_at_disclosure_decimal: "282.90", this_task_cap_decimal: "30.00",
+      projected_balance_after_t021_decimal: "252.90", remaining_plan_after_t021_decimal: "249.00",
+      headroom_after_t021_decimal: "3.90", a_single_lost_batch_breaks_the_remaining_plan: true,
+      max_single_batch_exposure_decimal: "18.00",
+    });
+    expect(T021_V1_RISK_TEXT).toContain("3.90");
+    expect(T021_V1_RISK_TEXT).toContain("249.00");
+  });
+
+  test("a partitioner given the wrong count fails loudly", () => {
+    expect(() => buildT021Batches(cachedPlan.assets.slice(0, 15))).toThrow(/needs exactly 20 assets/);
+  });
+});
+
+describe("T021 plan determinism", () => {
+  test("same pinned inputs derive the same bytes, and the tracked plan matches", () => {
+    expect(renderT021Plan(buildT021Plan(repositoryRoot))).toBe(renderT021Plan(cachedPlan));
+    expect(t021PlanSha256(buildT021Plan(repositoryRoot))).toBe(t021PlanSha256(cachedPlan));
+    expect(readFileSync(resolve(repositoryRoot, "assets/manifests/t021-event-art-v1.plan.json"), "utf8")).toBe(renderT021Plan(cachedPlan));
+  });
+
+  test("derivation reads no clock and no randomness", () => {
+    const source = readFileSync(resolve(repositoryRoot, "scripts/assets/t021-event-art-production-v1.ts"), "utf8");
+    expect(source).not.toMatch(/Date\.now\(\)/);
+    expect(source).not.toMatch(/Math\.random\(\)/);
+    expect(renderT021Plan(cachedPlan)).not.toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+  });
+});
+
+describe("T021 phrase binding", () => {
+  test("the approval phrase is bound byte-exactly and the four phrases are distinct", () => {
+    expect(T021_V1_EXACT_APPROVAL_PHRASE).toBe("T021 이벤트 세계 아트 20장 생성을 승인한다. 한도 30.00 크레딧.");
+    expect(cachedPlan.approval_gate.exact_phrase).toBe(T021_V1_EXACT_APPROVAL_PHRASE);
+    expect(new Set([T021_V1_EXACT_APPROVAL_PHRASE, T021_V1_RECOVERY_OPERATOR_PHRASE, T021_V1_RESUME_OPERATOR_PHRASE, T021_V1_LOSS_ACKNOWLEDGMENT_PHRASE]).size).toBe(4);
+    expect(T021_V1_RISK_TEXT).toContain(T021_V1_EXACT_APPROVAL_PHRASE);
+  });
+
+  test("operator gates refuse a near-miss phrase", () => {
+    const p = fixture();
+    const id = p.plan.batches[0].id;
+    expect(() => ops(p, ["resume", "--observed-at", at(1), "--operator-phrase", "T021 재개"])).toThrow(/exact operator phrase/);
+    expect(() => ops(p, ["recovery-open", "--batch", id, "--observed-at", at(1), "--operator-phrase", `${T021_V1_RECOVERY_OPERATOR_PHRASE} `])).toThrow(/exact phrase/);
+  });
+});
+
+describe("T021 paid discipline", () => {
+  test("the full run closes at exactly 30.00 with all 20 assets in both roots", async () => {
+    const p = fixture();
+    let balance = START_UNITS;
+    for (let index = 0; index < T021_V1_BATCH_COUNT; index += 1) balance = await runBatch(p, index, balance, 100 + index * 1000);
+    expect(balance).toBe(START_UNITS - T021_V1_TOTAL_CAP_UNITS);
+    const journal = journalOf(p);
+    expect(journal.run_state).toBe("COMPLETE");
+    expect(statusT021(journal)).toMatchObject({ recovered_assets: 20, total_delta_units: 3_000, acknowledged_loss_units: 0, paid_retry_count: 0 });
+    for (const record of journal.batches) {
+      expect(t021BatchModelVerified(record)).toBe(true);
+      for (const recovery of record.recoveries) {
+        expect(recovery.aspect_error_ppm).toBe(4_445);
+        expect(recovery.local_relative_path.startsWith("events/")).toBe(true);
+        expect(existsSync(resolve(p.root, "public/assets", recovery.local_relative_path))).toBe(true);
+        expect(existsSync(resolve(p.root, "assets/backups/t021-event-art", recovery.backup_relative_path))).toBe(true);
+      }
+    }
+  }, 120_000);
+
+  test("audit reports the delivery split and every event type", async () => {
+    const p = fixture();
+    let balance = START_UNITS;
+    for (let index = 0; index < T021_V1_BATCH_COUNT; index += 1) balance = await runBatch(p, index, balance, 100 + index * 1000);
+    const audit = auditT021({ root: p.root, plan: p.plan, presentation, approval }, journalOf(p), at(9_000));
+    expect(audit).toMatchObject({
+      run_state: "COMPLETE", exact_closure: true, assets_recovered: 20, assets_planned: 20,
+      assets_not_delivered: 0, assets_paid_and_lost: 0, closes_at_exact_cap: true, total_delta_units: 3_000,
+    });
+    expect(audit.recovered_by_event_type).toEqual({ cache: 7, workshop: 1, collapse: 3, fictor: 1, record: 1, oddity: 7 });
+  }, 120_000);
+
+  test("init requires a balance covering the 30.00 cap", () => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-poor-"));
+    mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
+    expect(() => runT021OpsInternal(["init", "--observed-at", at(-60), "--balance-file", json(root, "b.json", { credits: 29.99, provider_observed_at: at(-120) })], root, cachedPlan, presentation, approval)).toThrow(/does not cover the 30.00 cap/);
+  });
+
+  test("a batch is submitted once and an ambiguous window is never re-run", () => {
+    const p = fixture();
+    const id = p.plan.batches[0].id;
+    ops(p, ["preflight-request", "--batch", id, "--observed-at", at(0)]);
+    ops(p, ["preflight-result", "--batch", id, "--observed-at", at(20), "--cost-file", json(p.root, "c.json", { costs: costItems(p.plan, 0, 0) }), "--balance-file", json(p.root, "b.json", { credits: START_UNITS / 100, provider_observed_at: at(19) })]);
+    ops(p, ["prepare", "--batch", id, "--observed-at", at(40)]);
+    expect(() => ops(p, ["ambiguous", "--batch", id, "--observed-at", at(41), "--reason", "TIMEOUT"])).toThrow(/AMBIGUOUS_SUBMISSION/);
+    expect(journalOf(p).run_state).toBe("FAIL_STOP");
+    const status = statusT021(journalOf(p));
+    expect((status.batches as Array<Record<string, unknown>>)[0]).toMatchObject({ rerunnable: false, discharge_possible: "LOSS_ACKNOWLEDGMENT" });
+  });
+
+  test("a display credit never substitutes for the exact 1.50 unit price", () => {
+    const p = fixture();
+    const id = p.plan.batches[0].id;
+    ops(p, ["preflight-request", "--batch", id, "--observed-at", at(0)]);
+    const items = costItems(p.plan, 0, 0).map((item) => ({ ...item, cost: { credits: 1, credits_exact: 1 } }));
+    expect(() => ops(p, ["preflight-result", "--batch", id, "--observed-at", at(20), "--cost-file", json(p.root, "c.json", { costs: items }), "--balance-file", json(p.root, "b.json", { credits: START_UNITS / 100, provider_observed_at: at(19) })])).toThrow(/PRICE_CHANGED/);
+  });
+
+  test("model drift permanently blocks the next batch", async () => {
+    const p = fixture();
+    const id = p.plan.batches[0].id;
+    ops(p, ["preflight-request", "--batch", id, "--observed-at", at(0)]);
+    ops(p, ["preflight-result", "--batch", id, "--observed-at", at(20), "--cost-file", json(p.root, "c.json", { costs: costItems(p.plan, 0, 0) }), "--balance-file", json(p.root, "b.json", { credits: START_UNITS / 100, provider_observed_at: at(19) })]);
+    ops(p, ["prepare", "--batch", id, "--observed-at", at(40)]);
+    ops(p, ["response", "--batch", id, "--observed-at", at(41), "--file", json(p.root, "s.json", submission(p.plan, 0))]);
+    ops(p, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T021_V1_RECOVERY_OPERATOR_PHRASE]);
+    await expect(runT021JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(wait(p.plan, 0, undefined, "some_other_model")), p.root, p.plan, presentation, approval, deps(() => gridPng3x4(1)))).rejects.toThrow(/MODEL_DRIFT/);
+    expect(t021ContractDriftBatches(journalOf(p))).toEqual([{ batch_id: id, code: "MODEL_DRIFT" }]);
+  });
+
+  test("an out-of-tolerance 3:4 delivery is refused and never stored", async () => {
+    const p = fixture();
+    const id = p.plan.batches[0].id;
+    ops(p, ["preflight-request", "--batch", id, "--observed-at", at(0)]);
+    ops(p, ["preflight-result", "--batch", id, "--observed-at", at(20), "--cost-file", json(p.root, "c.json", { costs: costItems(p.plan, 0, 0) }), "--balance-file", json(p.root, "b.json", { credits: START_UNITS / 100, provider_observed_at: at(19) })]);
+    ops(p, ["prepare", "--batch", id, "--observed-at", at(40)]);
+    ops(p, ["response", "--batch", id, "--observed-at", at(41), "--file", json(p.root, "s.json", submission(p.plan, 0))]);
+    ops(p, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T021_V1_RECOVERY_OPERATOR_PHRASE]);
+    await expect(runT021JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(wait(p.plan, 0)), p.root, p.plan, presentation, approval, deps(() => png(16, 9, 3)))).rejects.toThrow(/ASPECT_MISMATCH/);
+    expect(journalOf(p).batches[0].recoveries).toHaveLength(0);
+    expect(journalOf(p).batches[0].terminals.at(-1)!.facts).toMatchObject({ expected_aspect_ratio: "3:4", aspect_tolerance_ppm: 5_000 });
+  });
+});
+
+describe("T021 poll intake integrity", () => {
+  async function opened(p: Prepared): Promise<string> {
+    const id = p.plan.batches[0].id;
+    ops(p, ["preflight-request", "--batch", id, "--observed-at", at(0)]);
+    ops(p, ["preflight-result", "--batch", id, "--observed-at", at(20), "--cost-file", json(p.root, "c.json", { costs: costItems(p.plan, 0, 0) }), "--balance-file", json(p.root, "b.json", { credits: START_UNITS / 100, provider_observed_at: at(19) })]);
+    ops(p, ["prepare", "--batch", id, "--observed-at", at(40)]);
+    ops(p, ["response", "--batch", id, "--observed-at", at(41), "--file", json(p.root, "s.json", submission(p.plan, 0))]);
+    ops(p, ["recovery-open", "--batch", id, "--observed-at", at(42), "--operator-phrase", T021_V1_RECOVERY_OPERATOR_PHRASE]);
+    return id;
+  }
+
+  test("a poll repeating one job is refused", async () => {
+    const p = fixture();
+    const id = await opened(p);
+    const payload = wait(p.plan, 0) as { jobs: Array<Record<string, unknown>> };
+    payload.jobs = payload.jobs.map(() => payload.jobs[0]);
+    await expect(runT021JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(payload), p.root, p.plan, presentation, approval, deps(() => gridPng3x4(1)))).rejects.toThrow(/RECOVERY_FAILED/);
+    expect(journalOf(p).batches[0].recoveries).toHaveLength(0);
+  });
+
+  test("retryable must be present and boolean exactly when status is lookup_failed", async () => {
+    const p = fixture();
+    const id = await opened(p);
+    const payload = wait(p.plan, 0) as { jobs: Array<Record<string, unknown>> };
+    payload.jobs[0].retryable = true;
+    await expect(runT021JobsHandoffInternal(["jobs-handoff", "--batch", id, "--observed-at", at(43)], JSON.stringify(payload), p.root, p.plan, presentation, approval, deps(() => gridPng3x4(1)))).rejects.toThrow(/RECOVERY_FAILED/);
+  });
+});
+
+describe("T021 contact sheet links — the T020 v2 carry-over", () => {
+  test("index links are built from the same constant as the segment directory", () => {
+    const source = readFileSync(resolve(repositoryRoot, "scripts/assets/t021-event-art-production-v1-ops.ts"), "utf8");
+    // The v2 defect was a literal in the link template that named another version's
+    // directory. Both sides must derive from the constant, and no other version may appear.
+    expect(source).toContain("${T021_V1_CONTACT_SEGMENT_DIR}/segment-");
+    expect(source).not.toMatch(/href="t020-world-art/);
+    expect(source).not.toMatch(/href="t015-/);
+    expect(T021_V1_CONTACT_SEGMENT_DIR).toBe("t021-event-art-v1");
+  });
+
+  test("the generated index links resolve to the generated segment files", async () => {
+    const p = fixture();
+    let balance = START_UNITS;
+    for (let index = 0; index < T021_V1_BATCH_COUNT; index += 1) balance = await runBatch(p, index, balance, 100 + index * 1000);
+    auditT021({ root: p.root, plan: p.plan, presentation, approval }, journalOf(p), at(9_000));
+    const indexPath = resolve(p.root, "docs/asset-runs/contact-sheets", `${T021_V1_CONTACT_SEGMENT_DIR}.html`);
+    const index = readFileSync(indexPath, "utf8");
+    const hrefs = [...index.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    expect(hrefs).toHaveLength(T021_V1_BATCH_COUNT);
+    for (const href of hrefs) expect(existsSync(resolve(p.root, "docs/asset-runs/contact-sheets", href)), href).toBe(true);
+    // And every asset appears exactly once across the segments.
+    const srcs = hrefs.flatMap((href) => [...readFileSync(resolve(p.root, "docs/asset-runs/contact-sheets", href), "utf8").matchAll(/src="([^"]+)"/g)].map((m) => m[1]));
+    expect(new Set(srcs).size).toBe(T021_V1_ASSET_COUNT);
+    expect(index).not.toMatch(/<img\b/i);
+  }, 120_000);
+});
+
+describe("T021 entry gates and preparation", () => {
+  test("an unapproved root is refused before any production command runs", () => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-unapproved-"));
+    mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
+    expect(() => productionContextT021("status", () => new Date(), root)).toThrow();
+    expect(isT021Authorized(root, cachedPlan)).toBe(false);
+  });
+
+  test("the committed-clean gate passes on a committed scope and fails once it is dirtied", async () => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-git-"));
+    const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t021-event-art-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
+    const tracked = [...Object.values(binding.files).map(({ path }) => path), "assets/evidence/t021-event-art-implementation-binding-v1.json", "assets/manifests/t021-event-art-v1.plan.json"];
+    for (const path of tracked) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
+    const git = (...args: string[]) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
+    git("init", "-q"); git("config", "user.email", "t021@test.invalid"); git("config", "user.name", "t021 test");
+    git("add", ...tracked); git("commit", "-q", "-m", "t021 binding scope");
+    const { assertT021CommittedClean } = await import("../../scripts/assets/t021-event-art-production-v1-ops");
+    expect(() => assertT021CommittedClean(root)).not.toThrow();
+    const plan = resolve(root, "assets/manifests/t021-event-art-v1.plan.json");
+    writeFileSync(plan, `${readFileSync(plan, "utf8")} `);
+    expect(() => assertT021CommittedClean(root)).toThrow(/not committed-clean/);
+  });
+
+  test("gen and binding-gen refuse once a run journal exists", () => {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-journal-"));
+    mkdirSync(resolve(root, "assets/runs/t021-event-art"), { recursive: true });
+    writeFileSync(resolve(root, T021_V1_JOURNAL_PATH), "{}\n");
+    expect(() => runT021Preparation(["gen"], root)).toThrow(/refused while a run journal exists/);
+    expect(() => runT021Preparation(["binding-gen"], root)).toThrow(/refused while a run journal exists/);
+  });
+
+  test("dry-run derives everything without submitting or writing", () => {
+    const result = dryRunT021(repositoryRoot);
+    expect(result).toMatchObject({
+      submitted_anything: false, wrote_anything: false, asset_count: 20, batch_count: 2,
+      planned_spend_units: 3_000, total_credit_cap_units: 3_000, canary_batch_id: T021_V1_CANARY_BATCH_ID,
+    });
+    expect(result.batch_sizes).toEqual([...T021_V1_BATCH_SIZES]);
+    expect(result.aspect_ratio_counts).toEqual({ "3:4": 20 });
+    expect(result.event_types).toEqual([...T021_V1_EVENT_TYPES]);
+    expect(result.plan_sha256).toBe(t021PlanSha256(cachedPlan));
+    expect(result.disclosure_chain_status).toBe(result.authorized ? "approved" : "pending approval");
+  });
+
+  test("the binding pins the shared transport and both T020 sources, never package.json", () => {
+    const files = cachedPlan.sources.implementation_binding.files as Record<string, { path: string; sha256: string }>;
+    const paths = Object.values(files).map(({ path }) => path);
+    expect(paths).toContain("scripts/assets/provider-transport.ts");
+    expect(paths).toContain("scripts/assets/t020-world-art-production-v1.ts");
+    expect(paths).toContain("scripts/assets/t020-world-art-production-v1-ops.ts");
+    expect(paths).not.toContain("package.json");
+    for (const [key, entry] of Object.entries(files)) expect(entry.sha256, key).toBe(sha256T021(readFileSync(resolve(repositoryRoot, entry.path))));
+  });
+});

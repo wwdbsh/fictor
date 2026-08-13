@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "manifest_version": "t021-event-art-implementation-binding-v1",
+  "issue_number": 23,
+  "issue_contract_sha256": "9f83f23ac3872814a96819771f9b23a98082899b7488f86c662a388d9f61186f",
+  "files": {
+    "controller": {
+      "path": "scripts/assets/t021-event-art-production-v1-controller.ts",
+      "sha256": "7efaa6c6720338eac1488a972fc5554acdaec8c4e4e054b237a029b82881f722"
+    },
+    "preparation": {
+      "path": "scripts/assets/t021-event-art-production-v1-cli.ts",
+      "sha256": "445b31796a7d5666c009077ebbaa240f0ce3a283df6ca9e39c44b33f35231bbb"
+    },
+    "production": {
+      "path": "scripts/assets/t021-event-art-production-v1-ops.ts",
+      "sha256": "b17f09f2cda314e5ef4f6a50eaedd355ffa384c079765b7ff356d8ca74183472"
+    },
+    "contract": {
+      "path": "scripts/assets/t021-event-art-production-v1.ts",
+      "sha256": "455b9fd9c316469739b35bd00b95f3a20726e2545bf49cd8a34d9299e6ab3174"
+    },
+    "provider_transport": {
+      "path": "scripts/assets/provider-transport.ts",
+      "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+    },
+    "t020_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "t020_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  }
+}
