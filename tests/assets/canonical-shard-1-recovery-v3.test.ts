@@ -1,11 +1,11 @@
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { describe, expect, test } from "vitest";
 
-import { T015_V2_JOURNAL_PATH, T015_V2_JOURNAL_SHA256, T015_V3_EXACT_APPROVAL_PHRASE, T015_V3_PENDING_PATH, buildT015V3Forensics, buildT015V3Plan, isT015V3Authorized, sha256T015V3 } from "../../scripts/assets/canonical-shard-1-recovery-v3";
+import { T015_V2_JOURNAL_PATH, T015_V2_JOURNAL_SHA256, T015_V3_EXACT_APPROVAL_PHRASE, T015_V3_PENDING_PATH, T015_V3_PLAN_PATH, buildT015V3Forensics, buildT015V3Plan, isT015V3Authorized, sha256T015V3 } from "../../scripts/assets/canonical-shard-1-recovery-v3";
 import { T015_V3_JOURNAL_PATH, assertT015V3CommittedClean, isPublicT015V3ResolvedAddress, runT015V3JobsHandoffInternal, runT015V3OpsInternal, transportPeerMatchesT015V3Pin, type T015V3Dependencies, type T015V3Journal } from "../../scripts/assets/canonical-shard-1-recovery-v3-ops";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
@@ -38,12 +38,27 @@ describe("T015 bounded recovery v3", () => {
   test.each([{ timed_out: "false" }, { aborted: 0 }, { poll_after_seconds: Number.NaN }, { poll_after_seconds: -1 }])("rejects invalid optional top-level jobs_wait types %#", async (optional) => { const prepared = fixture(); Object.assign(prepared.response, optional); const deps: T015V3Dependencies = { resolve: async () => { throw new Error("must not fetch"); }, fetch: async () => { throw new Error("must not fetch"); } }; await expect(runT015V3JobsHandoffInternal(["jobs-handoff", "--observed-at", "2026-08-12T09:01:00.000Z"], JSON.stringify(prepared.response), prepared.root, prepared.plan, deps)).rejects.toThrow("JOBS_WAIT_TOPOLOGY"); });
 
   // Post-approval: the gate is authorized and the paid path stays locked.
-  // NOTE(v4): assertT015V3CommittedClean cannot be asserted here in either
+  // NOTE(v4): assertT015V3CommittedClean still cannot be asserted here in either
   // direction — its execFileSync("git show") lacks a maxBuffer override, so the
   // 1.1MB v3 plan manifest raises ENOBUFS and masquerades as "not
-  // committed-clean" regardless of the actual git state. ops.ts is bound by the
-  // v3 approval and must not change until the v4 disclosure cycle fixes it.
-  test("keeps the paid path locked after fresh v3 authorization at the current gate", () => { const plan = buildT015V3Plan(repositoryRoot); expect(isT015V3Authorized(repositoryRoot, plan)).toBe(true); expect(plan.approval_gate.prior_t015_v1_or_v2_approval_inherited).toBe(false); expect(plan.approval_gate.committed_clean_runtime_binding_required).toBe(true); });
+  // committed-clean" regardless of the actual git state; the characterization
+  // below pins that defect. ops.ts is hash-bound by the v3 approval and is left
+  // untouched. The corrected committed-clean check (git ls-files/diff/status
+  // only, no `git show`, explicit 64MB maxBuffer on every execFileSync) lives in
+  // assertT015V4CommittedClean and is covered by
+  // tests/assets/canonical-shard-1-production-v4.test.ts.
+  test("keeps the paid path locked after fresh v3 authorization at the current gate", () => {
+    const plan = buildT015V3Plan(repositoryRoot);
+    expect(isT015V3Authorized(repositoryRoot, plan)).toBe(true);
+    expect(plan.approval_gate.prior_t015_v1_or_v2_approval_inherited).toBe(false);
+    expect(plan.approval_gate.committed_clean_runtime_binding_required).toBe(true);
+    expect(typeof assertT015V3CommittedClean).toBe("function");
+    const show = ["show", `HEAD:${T015_V3_PLAN_PATH}`];
+    let thrown: NodeJS.ErrnoException | undefined;
+    try { execFileSync("git", show, { cwd: repositoryRoot }); } catch (error) { thrown = error as NodeJS.ErrnoException; }
+    expect(thrown?.code).toBe("ENOBUFS");
+    expect(execFileSync("git", show, { cwd: repositoryRoot, maxBuffer: 64 * 1024 * 1024 }).length).toBeGreaterThan(1024 * 1024);
+  });
 
   test("active legacy v1 production ops cannot reinitialize even when its journal path is absent", () => { const run = spawnSync("npx", ["tsx", "scripts/assets/canonical-shard-1-v1-controller.ts", "ops", "init"], { cwd: repositoryRoot, encoding: "utf8" }); expect(run.status).not.toBe(0); expect(`${run.stdout}${run.stderr}`).toMatch(/approval|ENOENT|not authorized|dirty or untracked/i); expect(readFileSync(resolve(repositoryRoot, "assets/evidence/t015-forensic-approval-v1.json"))).toBeTruthy(); });
 });

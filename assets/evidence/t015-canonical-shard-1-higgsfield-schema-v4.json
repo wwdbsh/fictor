@@ -1,0 +1,66 @@
+{
+  "schema_version": 4,
+  "evidence_version": "t015-canonical-shard-1-higgsfield-schema-v4",
+  "source": "pinned T015 v1/v2/v3 observations; no new provider probe",
+  "secret_free": true,
+  "submit": {
+    "tool": "generate_image_batch",
+    "batch_max": 12,
+    "requested_model": "nano_banana_2",
+    "expected_provider_reported_model": "nano_banana_flash",
+    "use_unlim": false,
+    "aspect_ratio": "3:4",
+    "resolution": "1k",
+    "count_per_asset": 1,
+    "response_required_keys": [
+      "submitted_count",
+      "failed_count",
+      "jobs"
+    ],
+    "job_required_keys": [
+      "index",
+      "job_id",
+      "status"
+    ],
+    "job_allowed_optional_keys": [
+      "adjustments",
+      "error",
+      "warning",
+      "preset_recommendation"
+    ],
+    "any_optional_key_fail_stops_batch": true
+  },
+  "cost": {
+    "display_credits_decimal": "1.00",
+    "exact_credits_decimal": "1.50",
+    "integer_units_per_image": 150,
+    "freshness_ms": 600000,
+    "strictly_monotonic_observations": true
+  },
+  "jobs_wait": {
+    "expected_type": "image",
+    "summary_required_keys": [
+      "active",
+      "completed",
+      "errors",
+      "failed",
+      "total"
+    ],
+    "summary_compared_by_value": true,
+    "retryable_presence_only_for_status": "lookup_failed"
+  },
+  "secure_download": {
+    "resolver_mapped_ipv6_allowed": false,
+    "resolver_public_ipv4_allowed": true,
+    "transport_peer_pin_required": true,
+    "fresh_connection_per_request": true,
+    "auto_select_family": false,
+    "remote_address_captured_at_response_headers": true,
+    "url_or_host_diagnostics_persisted": false
+  },
+  "model_canary": {
+    "canary_batch_id": "canonical-shard-1-002",
+    "blocks_batch_id_on_drift": "canonical-shard-1-003",
+    "drift_still_costs_canary_batch_spend": true
+  }
+}
