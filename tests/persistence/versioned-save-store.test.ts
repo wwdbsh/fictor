@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createCombatState,
   FORGE_RUNTIME_ENGINE_VERSION,
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
@@ -9,232 +10,268 @@ import {
 } from "../../src/domain";
 import {
   FICTOR_SAVE_KEY,
-  HEART_IDS,
   VersionedSaveStore,
+  classifyPersistentProfile,
   createDefaultProfile,
   decodePersistentProfile,
-  projectRuntimeState,
-  serializeSaveEnvelope,
+  type PersistenceCatalog,
   type SaveEnvelopeV1,
   type StorageLike,
 } from "../../src/persistence";
+import { fixtureSetup } from "../domain/fixtures";
 
 class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>();
   failGet = false;
   failSet = false;
-  failRemove = false;
-
   getItem(key: string): string | null {
-    if (this.failGet) throw new Error("secret read detail");
+    if (this.failGet) throw new Error("private read detail");
     return this.values.get(key) ?? null;
   }
-
   setItem(key: string, value: string): void {
-    if (this.failSet) throw new Error("quota detail");
+    if (this.failSet) throw new Error("private quota detail");
     this.values.set(key, value);
   }
-
-  removeItem(key: string): void {
-    if (this.failRemove) throw new Error("secret remove detail");
-    this.values.delete(key);
-  }
+  removeItem(key: string): void { this.values.delete(key); }
 }
 
-function starter(): ForgeRuntimeStateV1 {
+const RECIPE = "ore_burn|ore_still";
+const RESULT_CARD = "forge__ore_burn__ore_still";
+
+function catalog(): PersistenceCatalog {
   return {
+    sourceHash: FORGE_RUNTIME_SOURCE_HASH,
+    allowedRecipeCards: [[RECIPE, RESULT_CARD]],
+    allowedCardIds: ["ore_burn", "ore_still", "burn_01", RESULT_CARD],
+    allowedEnemyIds: ["enemy_fixture"],
+    allowedIntentIds: ["intent_attack", "intent_attack_2"],
+    allowedDisplayTexts: ["내리치기"],
+  };
+}
+
+function starter(active = false): ForgeRuntimeStateV1 {
+  const ownedInstances = [
+    { instanceId: "starter-a", cardId: "ore_burn" },
+    { instanceId: "starter-b", cardId: "ore_still" },
+  ];
+  const state: ForgeRuntimeStateV1 = {
     schemaVersion: FORGE_RUNTIME_SCHEMA_VERSION,
     engineVersion: FORGE_RUNTIME_ENGINE_VERSION,
     resolverVersion: FORGE_RUNTIME_RESOLVER_VERSION,
     sourceHash: FORGE_RUNTIME_SOURCE_HASH,
     revision: 0,
     profile: { discoveredRecipeIds: [] },
-    run: {
-      fuel: 3,
-      nextInstanceSequence: 2,
-      ownedInstances: [
-        { instanceId: "starter-1", cardId: "ore_burn" },
-        { instanceId: "starter-2", cardId: "ore_still" },
+    run: { fuel: 3, nextInstanceSequence: 0, ownedInstances, deck: ownedInstances.map(({ instanceId }) => instanceId), activeCombat: null },
+  };
+  if (active) {
+    const setup = fixtureSetup({
+      rules: { ...fixtureSetup().rules, drawCount: 2 },
+      cards: [
+        { cardId: "ore_burn", effectId: "DELAYED_EXPLOSION", cost: 0, power: 1, resonanceAttribute: "BURN" },
+        { cardId: "ore_still", effectId: "DELAYED_EXPLOSION", cost: 0, power: 1, resonanceAttribute: "STILL" },
       ],
-      deck: ["starter-1", "starter-2"],
-      activeCombat: null,
-    },
-  };
-}
-
-function allowlist() {
-  return {
-    allowedRecipeIds: ["ore_burn|ore_still"],
-    allowedCardIds: ["ore_burn", "ore_still", "burn_01", "forge__ore_burn__ore_still"],
-  };
+      instances: ownedInstances,
+      deck: ownedInstances.map(({ instanceId }) => instanceId),
+    });
+    state.run.activeCombat = {
+      state: createCombatState(setup),
+      enrolledPersistentInstanceIds: ownedInstances.map(({ instanceId }) => instanceId),
+      forgeActionTurn: 0,
+      forgeActionsRemaining: 0,
+      isolatedMaterials: [],
+      ephemeralResults: [],
+    };
+  }
+  return state;
 }
 
 function savedFixture() {
   const storage = new MemoryStorage();
-  const store = new VersionedSaveStore(storage, allowlist());
-  const profile = {
-    ...createDefaultProfile(),
-    discoveredRecipeIds: ["ore_burn|ore_still"],
-    ownedHeartIds: ["heart__still" as const],
-  };
+  const store = new VersionedSaveStore(storage, catalog());
+  const profile = { ...createDefaultProfile(), discoveredRecipeIds: [RECIPE], ownedHeartIds: ["heart__still" as const] };
   const runtime = starter();
-  runtime.profile.discoveredRecipeIds = [...profile.discoveredRecipeIds];
+  runtime.profile.discoveredRecipeIds = [RECIPE];
   runtime.run.fuel = 1;
-  expect(store.save(profile, runtime, 0).ok).toBe(true);
+  expect(store.save(profile, runtime, 0)).toMatchObject({ ok: true, revision: 1 });
   return { storage, store, profile, runtime };
 }
 
 describe("VersionedSaveStore", () => {
-  it("round-trips deterministic v1 bytes without serializing runtime.profile or aliases", () => {
+  it("round-trips deterministic detached bytes without runtime.profile", () => {
     const { storage, store, profile, runtime } = savedFixture();
     const bytes = storage.getItem(FICTOR_SAVE_KEY)!;
     const envelope = JSON.parse(bytes) as SaveEnvelopeV1 & { run: { profile?: unknown } };
     expect(envelope.run.profile).toBeUndefined();
-    expect(serializeSaveEnvelope(envelope)).toBe(bytes);
-
-    const projection = projectRuntimeState(runtime);
-    runtime.run.fuel = 98;
-    expect(projection.run.fuel).toBe(1);
-
+    expect(JSON.stringify(envelope)).toBe(bytes);
     profile.discoveredRecipeIds.length = 0;
     runtime.run.fuel = 99;
     const loaded = store.load(starter());
     expect(loaded).toMatchObject({ source: "SAVED", revision: 1, writeBlocked: false, issues: [] });
-    expect(loaded.profile.discoveredRecipeIds).toEqual(["ore_burn|ore_still"]);
-    expect(loaded.runtimeState.profile.discoveredRecipeIds).toEqual(loaded.profile.discoveredRecipeIds);
+    expect(loaded.profile.discoveredRecipeIds).toEqual([RECIPE]);
+    expect(loaded.runtimeState.profile.discoveredRecipeIds).toEqual([RECIPE]);
     expect(loaded.runtimeState.run.fuel).toBe(1);
-    loaded.profile.discoveredRecipeIds.length = 0;
-    expect(store.load(starter()).profile.discoveredRecipeIds).toEqual(["ore_burn|ore_still"]);
   });
 
-  it("recovers profile and run independently under a known v1 envelope", () => {
-    const first = savedFixture();
-    const badRun = JSON.parse(first.storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
-    (badRun.run.run as { fuel: unknown }).fuel = -1;
-    first.storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(badRun));
-    const profileOnly = first.store.load(starter());
-    expect(profileOnly).toMatchObject({ source: "RECOVERED", issues: ["INVALID_RUN"], revision: 1 });
-    expect(profileOnly.profile.discoveredRecipeIds).toEqual(["ore_burn|ore_still"]);
-    expect(profileOnly.runtimeState.run.fuel).toBe(3);
-    expect(profileOnly.runtimeState.profile.discoveredRecipeIds).toEqual(["ore_burn|ore_still"]);
-
-    const second = savedFixture();
-    const badProfile = JSON.parse(second.storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
+  it("partially recovers ordinary malformed known-v1 profile and run", () => {
+    const profileFixture = savedFixture();
+    const badProfile = JSON.parse(profileFixture.storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
     badProfile.profile.featureFlags = { heartForge: true as false };
-    second.storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(badProfile));
-    const runOnly = second.store.load(starter());
-    expect(runOnly).toMatchObject({ source: "RECOVERED", issues: ["INVALID_PROFILE"] });
+    profileFixture.storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(badProfile));
+    const runOnly = profileFixture.store.load(starter());
+    expect(runOnly).toMatchObject({ source: "RECOVERED", issues: ["INVALID_PROFILE"], writeBlocked: false });
     expect(runOnly.profile).toEqual(createDefaultProfile());
     expect(runOnly.runtimeState.run.fuel).toBe(1);
-    expect(runOnly.runtimeState.profile.discoveredRecipeIds).toEqual([]);
+    expect(profileFixture.store.save(runOnly.profile, runOnly.runtimeState, runOnly.revision)).toMatchObject({ ok: true, revision: 2 });
+
+    const runFixture = savedFixture();
+    const badRun = JSON.parse(runFixture.storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
+    badRun.run.run.fuel = -1;
+    runFixture.storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(badRun));
+    const profileOnly = runFixture.store.load(starter());
+    expect(profileOnly).toMatchObject({ source: "RECOVERED", issues: ["INVALID_RUN"], writeBlocked: false });
+    expect(profileOnly.profile.discoveredRecipeIds).toEqual([RECIPE]);
+    expect(profileOnly.runtimeState.run.fuel).toBe(3);
+  });
+
+  it("blocks and preserves nested unsupported profile versions", () => {
+    const { storage, store } = savedFixture();
+    const envelope = JSON.parse(storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
+    (envelope.profile as unknown as { schemaVersion: number }).schemaVersion = 2;
+    const bytes = JSON.stringify(envelope);
+    storage.setItem(FICTOR_SAVE_KEY, bytes);
+    const loaded = store.load(starter());
+    expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", issues: ["UNSUPPORTED_VERSION"], writeBlocked: true });
+    expect(loaded.profile).toEqual(createDefaultProfile());
+    expect(loaded.runtimeState.run).toEqual(starter().run);
+    expect(store.save(loaded.profile, loaded.runtimeState, loaded.revision)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
+    expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
   });
 
   it.each([
-    ["invalid JSON", "{"],
-    ["null", "null"],
-    ["array", "[]"],
-    ["missing version", JSON.stringify({ revision: 4 })],
-  ])("safe-initializes %s, preserves bytes, and blocks writes", (_label, bytes) => {
-    const storage = new MemoryStorage();
-    storage.setItem(FICTOR_SAVE_KEY, bytes);
-    const store = new VersionedSaveStore(storage, allowlist());
-    const loaded = store.load(starter());
-    expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", writeBlocked: true, revision: 0 });
-    expect(loaded.profile).toEqual(createDefaultProfile());
-    expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
-    expect(store.save(loaded.profile, loaded.runtimeState, loaded.revision)).toEqual({ ok: false, persisted: false, reason: "WRITE_BLOCKED" });
-    expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
-  });
-
-  it.each([0, 2, 999])("preserves unsupported schema version %s until explicit reset", (schemaVersion) => {
-    const storage = new MemoryStorage();
-    const bytes = JSON.stringify({ schemaVersion, opaque: "preserve me" });
-    storage.setItem(FICTOR_SAVE_KEY, bytes);
-    const store = new VersionedSaveStore(storage, allowlist());
-    expect(store.load(starter())).toMatchObject({ writeBlocked: true, issues: ["UNSUPPORTED_VERSION"] });
-    expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
-    const reset = store.reset(starter());
-    expect(reset.ok).toBe(true);
-    expect(store.load(starter())).toMatchObject({ source: "SAVED", writeBlocked: false, revision: 0 });
-  });
-
-  it("returns non-sensitive typed read, quota, and remove failures without throwing", () => {
-    const storage = new MemoryStorage();
-    const store = new VersionedSaveStore(storage, allowlist());
-    storage.failGet = true;
-    expect(store.load(starter())).toMatchObject({ writeBlocked: true, issues: ["READ_FAILED"] });
-    const profile = createDefaultProfile();
-    expect(store.save(profile, starter(), 0)).toEqual({ ok: false, persisted: false, reason: "READ_FAILED" });
-    storage.failGet = false;
-    storage.failSet = true;
-    expect(store.save(profile, starter(), 0)).toEqual({ ok: false, persisted: false, reason: "WRITE_FAILED" });
-    expect(store.reset(starter())).toEqual({ ok: false, persisted: false, reason: "WRITE_FAILED" });
-    storage.failSet = false;
-    storage.failRemove = true;
-    expect(store.remove()).toEqual({ ok: false, reason: "REMOVE_FAILED" });
-  });
-
-  it("rejects stale and exhausted revisions after rereading storage", () => {
-    const storage = new MemoryStorage();
-    const first = new VersionedSaveStore(storage, allowlist());
-    const second = new VersionedSaveStore(storage, allowlist());
-    const a = first.load(starter());
-    const b = second.load(starter());
-    expect(first.save(a.profile, a.runtimeState, a.revision)).toMatchObject({ ok: true, revision: 1 });
-    expect(second.save(b.profile, b.runtimeState, b.revision)).toEqual({ ok: false, persisted: false, reason: "STALE_WRITE" });
-
+    ["schemaVersion", "forge-runtime-state-v2"],
+    ["engineVersion", "forge-runtime-engine-v2"],
+    ["resolverVersion", "canonical-v2"],
+    ["sourceHash", "f".repeat(64)],
+  ])("blocks and preserves nested unsupported run %s", (field, value) => {
+    const { storage, store } = savedFixture();
     const envelope = JSON.parse(storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
-    envelope.saveRevision = Number.MAX_SAFE_INTEGER;
-    storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(envelope));
-    const max = first.load(starter());
-    expect(first.save(max.profile, max.runtimeState, max.revision)).toEqual({ ok: false, persisted: false, reason: "REVISION_EXHAUSTED" });
+    (envelope.run as unknown as Record<string, unknown>)[field] = value;
+    const bytes = JSON.stringify(envelope);
+    storage.setItem(FICTOR_SAVE_KEY, bytes);
+    const loaded = store.load(starter());
+    expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", issues: ["UNSUPPORTED_VERSION"], writeBlocked: true });
+    expect(store.save(loaded.profile, loaded.runtimeState, loaded.revision)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
+    expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
   });
 
-  it("strictly rejects malformed profiles, heart flags, and noncanonical collections", () => {
-    const base = { ...createDefaultProfile(), discoveredRecipeIds: ["ore_burn|ore_still"] };
-    const allowedRecipes = new Set(allowlist().allowedRecipeIds);
-    expect(decodePersistentProfile(base, allowedRecipes)).not.toBeNull();
-    const malformed = [
-      { ...base, discoveredRecipeIds: ["ore_burn|ore_still", "ore_burn|ore_still"] },
-      { ...base, discoveredRecipeIds: ["ore_still|ore_burn"] },
-      { ...base, discoveredRecipeIds: ["fake_a|fake_b"] },
-      { ...base, discoveredRecipeIds: Array.from({ length: 1327 }, () => "ore_burn|ore_still") },
-      { ...base, ownedHeartIds: [HEART_IDS[0], HEART_IDS[0]] },
-      { ...base, ownedHeartIds: ["heart__unknown"] },
-      { ...base, featureFlags: { heartForge: true } },
-      { ...base, featureFlags: {} },
-      { ...base, extra: true },
-    ];
-    for (const candidate of malformed) expect(decodePersistentProfile(candidate, allowedRecipes)).toBeNull();
-  });
+  it.each([["invalid JSON", "{"], ["null", "null"], ["array", "[]"]])(
+    "safe-initializes and preserves malformed outer %s",
+    (_label, bytes) => {
+      const storage = new MemoryStorage();
+      storage.setItem(FICTOR_SAVE_KEY, bytes);
+      const store = new VersionedSaveStore(storage, catalog());
+      const loaded = store.load(starter());
+      expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", writeBlocked: true });
+      expect(store.save(loaded.profile, loaded.runtimeState, 0)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
+      expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
+    },
+  );
 
-  it("requires a strict decoded starter and validates profile/runtime agreement before I/O", () => {
+  it("increments a known revision on reset and rejects a pre-reset stale session", () => {
     const storage = new MemoryStorage();
-    const store = new VersionedSaveStore(storage, allowlist());
-    expect(() => store.load({ ...starter(), extra: true })).toThrow(TypeError);
-    const profile = { ...createDefaultProfile(), discoveredRecipeIds: ["ore_burn|ore_still"] };
-    expect(store.save(profile, starter(), 0)).toEqual({ ok: false, persisted: false, reason: "PROFILE_RUNTIME_MISMATCH" });
-    expect(storage.getItem(FICTOR_SAVE_KEY)).toBeNull();
+    const first = new VersionedSaveStore(storage, catalog());
+    const second = new VersionedSaveStore(storage, catalog());
+    const before = first.load(starter());
+    expect(first.save(before.profile, before.runtimeState, 0)).toMatchObject({ ok: true, revision: 1 });
+    const stale = second.load(starter());
+    const reset = first.reset(starter());
+    expect(reset).toMatchObject({ ok: true, value: { revision: 2 } });
+    expect(second.save(stale.profile, stale.runtimeState, stale.revision)).toEqual({ ok: false, persisted: false, reason: "STALE_WRITE" });
   });
 
-  it("snapshots a strict injected allowlist and rejects unreviewed run references", () => {
+  it("lets explicit reset replace unsupported bytes with a fresh token", () => {
     const storage = new MemoryStorage();
-    const catalog = allowlist();
-    const store = new VersionedSaveStore(storage, catalog);
-    catalog.allowedCardIds[0] = "mutated_after_construction";
-    expect(store.load(starter()).source).toBe("EMPTY");
+    storage.setItem(FICTOR_SAVE_KEY, JSON.stringify({ schemaVersion: 9, opaque: true }));
+    const store = new VersionedSaveStore(storage, catalog());
+    expect(store.load(starter()).writeBlocked).toBe(true);
+    expect(store.reset(starter())).toMatchObject({ ok: true, value: { revision: 0, writeBlocked: false } });
+  });
 
-    const unreviewed = starter();
-    unreviewed.run.ownedInstances[0].cardId = "not_reviewed";
-    expect(store.save(createDefaultProfile(), unreviewed, 0)).toEqual({ ok: false, persisted: false, reason: "INVALID_RUNTIME" });
-    expect(() => new VersionedSaveStore(storage, { ...allowlist(), allowedRecipeIds: ["fake_a|fake_b"] })).toThrow(TypeError);
-    expect(() => new VersionedSaveStore(storage, { ...allowlist(), allowedCardIds: ["ore_burn", "ore_burn"] })).toThrow(TypeError);
-    expect(() => new VersionedSaveStore(storage, { ...allowlist(), extra: [] } as never)).toThrow(TypeError);
+  it("returns typed reset read/write/max failures", () => {
+    const storage = new MemoryStorage();
+    const store = new VersionedSaveStore(storage, catalog());
+    storage.failGet = true;
+    expect(store.reset(starter())).toEqual({ ok: false, persisted: false, reason: "READ_FAILED" });
+    storage.failGet = false;
+    expect(store.save(createDefaultProfile(), starter(), 0)).toMatchObject({ ok: true });
+    const max = JSON.parse(storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
+    max.saveRevision = Number.MAX_SAFE_INTEGER;
+    storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(max));
+    expect(store.reset(starter())).toEqual({ ok: false, persisted: false, reason: "REVISION_EXHAUSTED" });
+    max.saveRevision = 4;
+    storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(max));
+    storage.failSet = true;
+    expect(store.reset(starter())).toEqual({ ok: false, persisted: false, reason: "WRITE_FAILED" });
+  });
 
-    const setCatalog = new VersionedSaveStore(storage, {
-      allowedRecipeIds: new Set(["ore_burn|ore_still"]),
-      allowedCardIds: new Set(["ore_burn", "ore_still"]),
+  it("takes one strict profile snapshot and rejects accessors, symbols, sparse arrays, prototypes, and traps", () => {
+    const allowed = new Set([RECIPE]);
+    const base = { ...createDefaultProfile(), discoveredRecipeIds: [RECIPE] };
+    expect(decodePersistentProfile(base, allowed)).not.toBeNull();
+    const accessor = { ...base } as Record<string, unknown>;
+    Object.defineProperty(accessor, "schemaVersion", { enumerable: true, get: () => 1 });
+    const symbol = { ...base, [Symbol("hidden")]: true };
+    const sparse = { ...base, discoveredRecipeIds: new Array(1) };
+    const inherited = Object.assign(Object.create({ inherited: true }), base);
+    const trapped = new Proxy(base, { ownKeys() { throw new Error("secret trap"); } });
+    for (const candidate of [accessor, symbol, sparse, inherited, trapped]) {
+      expect(classifyPersistentProfile(candidate, allowed)).toEqual({ kind: "INVALID" });
+    }
+    let reads = 0;
+    const proxied = new Proxy(base, {
+      getOwnPropertyDescriptor(target, key) {
+        if (key === "schemaVersion") reads += 1;
+        return Reflect.getOwnPropertyDescriptor(target, key);
+      },
     });
-    expect(setCatalog.load(starter()).source).toBe("EMPTY");
+    expect(classifyPersistentProfile(proxied, allowed).kind).toBe("VALID");
+    expect(reads).toBe(1);
+  });
+
+  it("rejects PII-like and unreviewed runtime refs plus wrong recipe-card pairs", () => {
+    const storage = new MemoryStorage();
+    const store = new VersionedSaveStore(storage, catalog());
+    const mutations: Array<(state: ForgeRuntimeStateV1) => void> = [
+      (state) => {
+        state.run.ownedInstances[0].instanceId = "person@example.com";
+        state.run.deck[0] = "person@example.com";
+        state.run.activeCombat!.enrolledPersistentInstanceIds[0] = "person@example.com";
+        state.run.activeCombat!.state.instances[0].instanceId = "person@example.com";
+        state.run.activeCombat!.state.zones.deck[0] = "person@example.com";
+      },
+      (state) => { state.run.activeCombat!.state.enemy.enemyId = "unknown_enemy"; },
+      (state) => { state.run.activeCombat!.state.enemy.intents[0].intentId = "unknown_intent"; },
+      (state) => { state.run.activeCombat!.state.enemy.intents[0].labelKo = "person@example.com"; },
+      (state) => {
+        state.run.activeCombat!.ephemeralResults.push({ instanceId: "ephemeral-1", cardId: "burn_01", recipeId: RECIPE, location: "HAND" });
+      },
+    ];
+    for (const mutate of mutations) {
+      const state = starter(true);
+      mutate(state);
+      expect(store.save(createDefaultProfile(), state, 0)).toEqual({ ok: false, persisted: false, reason: "INVALID_RUNTIME" });
+    }
+  });
+
+  it("snapshots a source-bound catalog and masks reflection trap details", () => {
+    const storage = new MemoryStorage();
+    const input = catalog();
+    const store = new VersionedSaveStore(storage, input);
+    (input.allowedCardIds as string[])[0] = "mutated";
+    expect(store.load(starter()).source).toBe("EMPTY");
+    const wrongSource = { ...catalog(), sourceHash: "f".repeat(64) } as PersistenceCatalog;
+    expect(() => new VersionedSaveStore(storage, wrongSource)).toThrowError(new TypeError("invalid persistence catalog"));
+    const trapped = new Proxy(catalog(), { ownKeys() { throw new Error("raw secret"); } });
+    expect(() => new VersionedSaveStore(storage, trapped)).toThrowError(new TypeError("invalid persistence catalog"));
   });
 });

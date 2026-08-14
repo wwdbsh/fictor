@@ -1,4 +1,6 @@
 export {
+  classifyPersistentProfile,
+  classifyRunProjection,
   createDefaultProfile,
   decodePersistentProfile,
   decodeRunProjection,
@@ -7,7 +9,7 @@ export {
   projectRuntimeState,
   runtimeReferencesAllowed,
   serializeSaveEnvelope,
-  snapshotPersistenceAllowlist,
+  snapshotPersistenceCatalog,
 } from "./codec";
 export { VersionedSaveStore } from "./versioned-save-store";
 export {

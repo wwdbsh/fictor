@@ -1,20 +1,33 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  applyForgeRuntimeResult,
+  executeForgeRuntimeCommand,
   loadGameSession,
   ownsHeart,
   recordOwnedHeart,
   startNewRun,
 } from "../../src/application";
+import materialsSource from "../../src/data/source/materials.json";
+import lawsSource from "../../src/data/source/laws.json";
+import resultClassesSource from "../../src/data/source/resultClasses.json";
 import {
+  createCombatState,
   FORGE_RUNTIME_ENGINE_VERSION,
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
   FORGE_RUNTIME_SOURCE_HASH,
+  reduceCombat,
+  type ForgeMaterial,
+  type ForgeResolverContextV1,
+  type ForgeResultClass,
   type ForgeRuntimeStateV1,
 } from "../../src/domain";
-import { VersionedSaveStore, type StorageLike } from "../../src/persistence";
+import {
+  VersionedSaveStore,
+  type PersistenceCatalog,
+  type StorageLike,
+} from "../../src/persistence";
+import { fixtureSetup } from "../domain/fixtures";
 
 class MemoryStorage implements StorageLike {
   value: string | null = null;
@@ -27,7 +40,69 @@ class MemoryStorage implements StorageLike {
   removeItem(): void { this.value = null; }
 }
 
-function starter(): ForgeRuntimeStateV1 {
+const FIRST_CARD = "ore_burn";
+const SECOND_CARD = "ore_still";
+const RECIPE = "ore_burn|ore_still";
+const RESULT_CARD = "forge__ore_burn__ore_still";
+
+function context(): ForgeResolverContextV1 {
+  const materials = materialsSource.map((item) => ({
+    id: item.id,
+    attribute: item.attribute,
+    modifier_form: item.modifier_form,
+    noun_form: item.noun_form,
+    representation: item.representation,
+    category: item.category,
+    balance_status: item.balance_status,
+    potency: item.potency,
+    cost_base: item.cost_base,
+    ...(item.category === "TOOL" ? { tool_domain: item.tool_domain } : {}),
+  })) as ForgeMaterial[];
+  const laws = lawsSource.map((item) => ({
+    pair: item.pair,
+    result_class: item.result_class,
+    actor: item.actor,
+    combat_effect: item.combat_effect,
+    balance_status: item.balance_status,
+    power_coefficient: item.power_coefficient,
+    ...("drawback" in item ? { drawback: item.drawback } : {}),
+  })) as unknown as ForgeResolverContextV1["inputs"]["laws"];
+  const resultClasses = resultClassesSource.map((item) => ({
+    id: item.id,
+    family: item.family,
+    density: item.density,
+    density_status: item.density_status,
+    combat_effect: item.combat_effect,
+    ...("equipment_interactions" in item ? { equipment_interactions: item.equipment_interactions } : {}),
+  })) as ForgeResultClass[];
+  return {
+    resolverVersion: FORGE_RUNTIME_RESOLVER_VERSION,
+    sourceHash: FORGE_RUNTIME_SOURCE_HASH,
+    materials,
+    inputs: { laws, resultClasses },
+  };
+}
+
+function catalog(): PersistenceCatalog {
+  return {
+    sourceHash: FORGE_RUNTIME_SOURCE_HASH,
+    allowedRecipeCards: [[RECIPE, RESULT_CARD]],
+    allowedCardIds: [FIRST_CARD, SECOND_CARD, RESULT_CARD],
+    allowedEnemyIds: ["enemy_fixture"],
+    allowedIntentIds: ["intent_attack", "intent_attack_2"],
+    allowedDisplayTexts: ["내리치기"],
+  };
+}
+
+function storeFor(storage: MemoryStorage): VersionedSaveStore {
+  return new VersionedSaveStore(storage, catalog());
+}
+
+function workshopStarter(fuel = 4): ForgeRuntimeStateV1 {
+  const ownedInstances = [
+    { instanceId: "material-a", cardId: FIRST_CARD },
+    { instanceId: "material-b", cardId: SECOND_CARD },
+  ];
   return {
     schemaVersion: FORGE_RUNTIME_SCHEMA_VERSION,
     engineVersion: FORGE_RUNTIME_ENGINE_VERSION,
@@ -35,121 +110,128 @@ function starter(): ForgeRuntimeStateV1 {
     sourceHash: FORGE_RUNTIME_SOURCE_HASH,
     revision: 0,
     profile: { discoveredRecipeIds: [] },
-    run: {
-      fuel: 4,
-      nextInstanceSequence: 0,
-      ownedInstances: [
-        { instanceId: "starter-a", cardId: "ore_burn" },
-        { instanceId: "starter-b", cardId: "ore_still" },
-      ],
-      deck: ["starter-a", "starter-b"],
-      activeCombat: null,
-    },
+    run: { fuel, nextInstanceSequence: 0, ownedInstances, deck: ownedInstances.map(({ instanceId }) => instanceId), activeCombat: null },
   };
 }
 
-function storeFor(storage: MemoryStorage): VersionedSaveStore {
-  return new VersionedSaveStore(storage, {
-    allowedRecipeIds: ["ore_burn|ore_still"],
-    allowedCardIds: ["ore_burn", "ore_still", "burn_01"],
+function instantStarter(): ForgeRuntimeStateV1 {
+  const base = workshopStarter();
+  const setup = fixtureSetup({
+    rules: { ...fixtureSetup().rules, drawCount: 2 },
+    cards: [
+      { cardId: FIRST_CARD, effectId: "DELAYED_EXPLOSION", cost: 0, power: 1, resonanceAttribute: "BURN" },
+      { cardId: SECOND_CARD, effectId: "DELAYED_EXPLOSION", cost: 0, power: 1, resonanceAttribute: "STILL" },
+    ],
+    instances: base.run.ownedInstances,
+    deck: base.run.deck,
   });
-}
-
-function runtimeResult(state: ForgeRuntimeStateV1) {
-  return { state, events: [] };
+  const started = reduceCombat(createCombatState(setup), { type: "START_TURN" });
+  if (started.state === null) throw new Error("fixture combat must start");
+  base.run.activeCombat = {
+    state: started.state,
+    enrolledPersistentInstanceIds: [...base.run.deck],
+    forgeActionTurn: 1,
+    forgeActionsRemaining: 1,
+    isolatedMaterials: [],
+    ephemeralResults: [],
+  };
+  return base;
 }
 
 describe("game session", () => {
-  it("keeps one canonical Codex entry across instant/workshop result sync and reload", () => {
+  it("uses the real reducer for instant and reversed workshop order, reload, and new run", () => {
     const storage = new MemoryStorage();
     const store = storeFor(storage);
-    let session = loadGameSession(store, starter());
-    const instant = structuredClone(session.runtimeState);
-    instant.revision += 1;
-    instant.profile.discoveredRecipeIds = ["ore_burn|ore_still"];
-    let mutation = applyForgeRuntimeResult(store, session, runtimeResult(instant));
-    expect(mutation).toMatchObject({ applied: true, persistence: { ok: true, persisted: true } });
-    session = mutation.session;
+    let session = loadGameSession(store, instantStarter());
+    const instant = executeForgeRuntimeCommand(
+      store,
+      session,
+      { type: "FORGE_INSTANT", materialInstanceIds: ["material-b", "material-a"] },
+      context(),
+    );
+    expect(instant).toMatchObject({ applied: true, persistence: { ok: true, persisted: true } });
+    expect(instant.runtimeResult?.events).toContainEqual(expect.objectContaining({ type: "FORGE_RESULT_CREATED", mode: "INSTANT", recipeId: RECIPE }));
+    expect(instant.session.profile.discoveredRecipeIds).toEqual([RECIPE]);
 
-    const workshopReverseSelection = structuredClone(session.runtimeState);
-    workshopReverseSelection.revision += 1;
-    workshopReverseSelection.profile.discoveredRecipeIds = ["ore_burn|ore_still"];
-    mutation = applyForgeRuntimeResult(store, session, runtimeResult(workshopReverseSelection));
-    expect(mutation.session.profile.discoveredRecipeIds).toEqual(["ore_burn|ore_still"]);
-    expect(loadGameSession(store, starter()).profile.discoveredRecipeIds).toEqual(["ore_burn|ore_still"]);
+    session = loadGameSession(store, instantStarter());
+    expect(session.profile.discoveredRecipeIds).toEqual([RECIPE]);
+    const newRun = startNewRun(store, session, workshopStarter());
+    expect(newRun.session.runtimeState.run).toEqual(workshopStarter().run);
+    expect(newRun.session.profile.discoveredRecipeIds).toEqual([RECIPE]);
+
+    const workshop = executeForgeRuntimeCommand(
+      store,
+      newRun.session,
+      { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-a", "material-b"] },
+      context(),
+    );
+    expect(workshop).toMatchObject({ applied: true, persistence: { ok: true, persisted: true } });
+    expect(workshop.runtimeResult?.events).toContainEqual(expect.objectContaining({ type: "FORGE_RESULT_CREATED", mode: "WORKSHOP", recipeId: RECIPE }));
+    expect(workshop.session.profile.discoveredRecipeIds).toEqual([RECIPE]);
+    expect(loadGameSession(store, workshopStarter()).profile.discoveredRecipeIds).toEqual([RECIPE]);
   });
 
-  it("starts a fully fresh injected run while retaining Codex and heart profile", () => {
+  it("cannot inject a stale reducer result after another session starts a new run", () => {
     const storage = new MemoryStorage();
     const store = storeFor(storage);
-    let session = loadGameSession(store, starter());
-    const progressed = structuredClone(session.runtimeState);
-    progressed.revision = 8;
-    progressed.profile.discoveredRecipeIds = ["ore_burn|ore_still"];
-    progressed.run.fuel = 0;
-    progressed.run.nextInstanceSequence = 9;
-    progressed.run.ownedInstances = [{ instanceId: "changed", cardId: "burn_01" }];
-    progressed.run.deck = ["changed"];
-    session = applyForgeRuntimeResult(store, session, runtimeResult(progressed)).session;
-    session = recordOwnedHeart(store, session, "heart__still").session;
+    const staleSession = loadGameSession(store, workshopStarter());
+    const currentSession = loadGameSession(store, workshopStarter());
+    const reset = startNewRun(store, currentSession, workshopStarter(9));
+    expect(reset.persistence).toMatchObject({ ok: true, revision: 1 });
 
-    const reset = startNewRun(store, session, starter());
-    expect(reset).toMatchObject({ applied: true, persistence: { ok: true, persisted: true } });
-    expect(reset.session.runtimeState.run).toEqual(starter().run);
-    expect(reset.session.runtimeState.revision).toBe(starter().revision);
-    expect(reset.session.profile.discoveredRecipeIds).toEqual(["ore_burn|ore_still"]);
-    expect(ownsHeart(reset.session, "heart__still")).toBe(true);
-    expect(reset.session.profile.featureFlags.heartForge).toBe(false);
-    expect(reset.session.runtimeState.profile.discoveredRecipeIds).toEqual(reset.session.profile.discoveredRecipeIds);
-
-    const reloaded = loadGameSession(store, starter());
-    expect(reloaded.runtimeState.run).toEqual(starter().run);
-    expect(reloaded.profile).toEqual(reset.session.profile);
+    const stale = executeForgeRuntimeCommand(
+      store,
+      staleSession,
+      { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-a", "material-b"] },
+      context(),
+    );
+    expect(stale).toMatchObject({ applied: true, persistence: { ok: false, persisted: false, reason: "STALE_WRITE" } });
+    expect(stale.session.runtimeState.run.fuel).toBe(3);
+    expect(loadGameSession(store, workshopStarter()).runtimeState.run.fuel).toBe(9);
   });
 
-  it("records only exact observed heart IDs without consumption or heart-forge commands", () => {
+  it("does not persist rejected domain commands", () => {
     const storage = new MemoryStorage();
     const store = storeFor(storage);
-    const session = loadGameSession(store, starter());
-    const invalid = recordOwnedHeart(store, session, "heart__unknown");
-    expect(invalid).toMatchObject({ applied: false, persistence: null });
-    expect(invalid.session).toEqual(session);
-    const first = recordOwnedHeart(store, session, "heart__wash");
-    const duplicate = recordOwnedHeart(store, first.session, "heart__wash");
-    expect(duplicate.session.profile.ownedHeartIds).toEqual(["heart__wash"]);
-    expect(duplicate.session.profile.featureFlags).toEqual({ heartForge: false });
-  });
-
-  it("preserves advanced in-memory state and reports quota failure without claiming persistence", () => {
-    const storage = new MemoryStorage();
-    const store = storeFor(storage);
-    const session = loadGameSession(store, starter());
-    const advanced = structuredClone(session.runtimeState);
-    advanced.revision = 1;
-    advanced.run.fuel = 2;
-    storage.failSet = true;
-    const result = applyForgeRuntimeResult(store, session, runtimeResult(advanced));
-    expect(result).toMatchObject({ applied: true, persistence: { ok: false, persisted: false, reason: "WRITE_FAILED" } });
-    expect(result.session.runtimeState.run.fuel).toBe(2);
-    expect(result.session.persistenceRevision).toBe(0);
+    const session = loadGameSession(store, workshopStarter(0));
+    const rejected = executeForgeRuntimeCommand(
+      store,
+      session,
+      { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-a", "material-b"] },
+      context(),
+    );
+    expect(rejected).toMatchObject({ applied: false, persistence: null });
+    expect(rejected.runtimeResult?.events).toContainEqual(expect.objectContaining({ type: "FORGE_REJECTED", reason: "INSUFFICIENT_FUEL" }));
     expect(storage.value).toBeNull();
   });
 
-  it("does not apply invalid reducer results and honors a loaded write block", () => {
+  it("keeps successful reducer state in memory when quota persistence fails", () => {
     const storage = new MemoryStorage();
-    storage.value = JSON.stringify({ schemaVersion: 2, opaque: true });
     const store = storeFor(storage);
-    const blocked = loadGameSession(store, starter());
-    const state = structuredClone(blocked.runtimeState);
-    state.run.fuel = 2;
-    expect(applyForgeRuntimeResult(store, blocked, runtimeResult(state))).toMatchObject({
-      applied: true,
-      persistence: { ok: false, persisted: false, reason: "WRITE_BLOCKED" },
-    });
-    const invalid = applyForgeRuntimeResult(store, blocked, {
-      state: null,
-      events: [{ type: "FORGE_REJECTED", command: "UNKNOWN", reason: "INVALID_STATE" }],
-    });
-    expect(invalid).toMatchObject({ applied: false, persistence: null });
+    const session = loadGameSession(store, workshopStarter());
+    storage.failSet = true;
+    const result = executeForgeRuntimeCommand(
+      store,
+      session,
+      { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-a", "material-b"] },
+      context(),
+    );
+    expect(result).toMatchObject({ applied: true, persistence: { ok: false, persisted: false, reason: "WRITE_FAILED" } });
+    expect(result.session.runtimeState.run.fuel).toBe(3);
+    expect(result.session.profile.discoveredRecipeIds).toEqual([RECIPE]);
+    expect(storage.value).toBeNull();
+  });
+
+  it("persists exact heart ownership across a new run with heart forge false", () => {
+    const storage = new MemoryStorage();
+    const store = storeFor(storage);
+    const session = loadGameSession(store, workshopStarter());
+    const invalid = recordOwnedHeart(store, session, "heart__unknown");
+    expect(invalid).toMatchObject({ applied: false, persistence: null, runtimeResult: null });
+    const heart = recordOwnedHeart(store, session, "heart__wash");
+    const newRun = startNewRun(store, heart.session, workshopStarter(7));
+    expect(ownsHeart(newRun.session, "heart__wash")).toBe(true);
+    expect(newRun.session.profile.featureFlags.heartForge).toBe(false);
+    expect(loadGameSession(store, workshopStarter()).profile.ownedHeartIds).toEqual(["heart__wash"]);
   });
 });

@@ -1,48 +1,49 @@
 import { decodeForgeRuntimeState, type ForgeRuntimeStateV1 } from "../domain/forge-runtime";
 import {
+  classifyPersistentProfile,
+  classifyRunProjection,
   createDefaultProfile,
-  decodePersistentProfile,
-  decodeRunProjection,
   parseKnownEnvelope,
   projectRuntimeState,
   runtimeReferencesAllowed,
   serializeSaveEnvelope,
-  snapshotPersistenceAllowlist,
-  type PersistenceAllowlistSnapshot,
+  snapshotPersistenceCatalog,
+  type PersistenceCatalogSnapshot,
 } from "./codec";
 import {
   FICTOR_SAVE_KEY,
   SAVE_SCHEMA_VERSION,
+  type PersistenceCatalog,
   type PersistentProfileV1,
-  type PersistenceAllowlist,
   type SaveEnvelopeV1,
   type SaveLoadIssue,
   type SaveLoadResult,
-  type SaveRemoveResult,
   type SaveResetResult,
   type SaveWriteResult,
   type StorageLike,
 } from "./types";
 
-function decodeStarter(candidate: unknown, allowlist: PersistenceAllowlistSnapshot): ForgeRuntimeStateV1 | null {
+function decodeStarter(candidate: unknown, catalog: PersistenceCatalogSnapshot): ForgeRuntimeStateV1 | null {
   const decoded = decodeForgeRuntimeState(candidate);
-  return decoded.valid && runtimeReferencesAllowed(decoded.value, allowlist) ? decoded.value : null;
+  return decoded.valid && runtimeReferencesAllowed(decoded.value, catalog) ? decoded.value : null;
 }
 
-function hydrateStarter(starter: ForgeRuntimeStateV1, profile: PersistentProfileV1): ForgeRuntimeStateV1 {
-  const decoded = decodeForgeRuntimeState({
-    ...starter,
-    profile: { discoveredRecipeIds: [...profile.discoveredRecipeIds] },
-  });
-  if (!decoded.valid) throw new Error("validated starter could not be hydrated");
+function hydrateStarter(starter: ForgeRuntimeStateV1, profile: PersistentProfileV1, catalog: PersistenceCatalogSnapshot): ForgeRuntimeStateV1 {
+  const decoded = decodeForgeRuntimeState({ ...starter, profile: { discoveredRecipeIds: [...profile.discoveredRecipeIds] } });
+  if (!decoded.valid || !runtimeReferencesAllowed(decoded.value, catalog)) throw new Error("validated starter could not be hydrated");
   return decoded.value;
 }
 
-function safeInitialized(starter: ForgeRuntimeStateV1, issue: SaveLoadIssue, writeBlocked: boolean): SaveLoadResult {
+function safeInitialized(
+  starter: ForgeRuntimeStateV1,
+  catalog: PersistenceCatalogSnapshot,
+  issue: SaveLoadIssue,
+  writeBlocked: boolean,
+): SaveLoadResult {
   const profile = createDefaultProfile();
   return {
     profile,
-    runtimeState: hydrateStarter(starter, profile),
+    runtimeState: hydrateStarter(starter, profile, catalog),
     revision: 0,
     source: "SAFE_INITIALIZED",
     writeBlocked,
@@ -52,36 +53,37 @@ function safeInitialized(starter: ForgeRuntimeStateV1, issue: SaveLoadIssue, wri
 
 export class VersionedSaveStore {
   readonly key: string;
-  private readonly allowlist: PersistenceAllowlistSnapshot;
+  private readonly catalog: PersistenceCatalogSnapshot;
 
-  constructor(private readonly storage: StorageLike, allowlist: PersistenceAllowlist, key: string = FICTOR_SAVE_KEY) {
-    this.allowlist = snapshotPersistenceAllowlist(allowlist);
+  constructor(private readonly storage: StorageLike, catalog: PersistenceCatalog, key: string = FICTOR_SAVE_KEY) {
+    this.catalog = snapshotPersistenceCatalog(catalog);
     this.key = key;
   }
 
   decodeProfile(candidate: unknown): PersistentProfileV1 | null {
-    return decodePersistentProfile(candidate, this.allowlist.allowedRecipeIds);
+    const classified = classifyPersistentProfile(candidate, this.catalog.allowedRecipeIds);
+    return classified.kind === "VALID" ? classified.value : null;
   }
 
   decodeRuntime(candidate: unknown): ForgeRuntimeStateV1 | null {
     const decoded = decodeForgeRuntimeState(candidate);
-    return decoded.valid && runtimeReferencesAllowed(decoded.value, this.allowlist) ? decoded.value : null;
+    return decoded.valid && runtimeReferencesAllowed(decoded.value, this.catalog) ? decoded.value : null;
   }
 
   load(rawStarter: unknown): SaveLoadResult {
-    const starter = decodeStarter(rawStarter, this.allowlist);
-    if (!starter) throw new TypeError("starter template must be a valid ForgeRuntimeStateV1 snapshot");
+    const starter = decodeStarter(rawStarter, this.catalog);
+    if (!starter) throw new TypeError("starter template must be a valid allowed ForgeRuntimeStateV1 snapshot");
     let bytes: string | null;
     try {
       bytes = this.storage.getItem(this.key);
     } catch {
-      return safeInitialized(starter, "READ_FAILED", true);
+      return safeInitialized(starter, this.catalog, "READ_FAILED", true);
     }
     if (bytes === null) {
       const profile = createDefaultProfile();
       return {
         profile,
-        runtimeState: hydrateStarter(starter, profile),
+        runtimeState: hydrateStarter(starter, profile, this.catalog),
         revision: 0,
         source: "EMPTY",
         writeBlocked: false,
@@ -92,21 +94,26 @@ export class VersionedSaveStore {
     try {
       parsed = JSON.parse(bytes) as unknown;
     } catch {
-      return safeInitialized(starter, "INVALID_JSON", true);
+      return safeInitialized(starter, this.catalog, "INVALID_JSON", true);
     }
     const outer = parseKnownEnvelope(parsed);
-    if (outer.kind === "UNSUPPORTED") return safeInitialized(starter, "UNSUPPORTED_VERSION", true);
-    if (outer.kind === "INVALID") return safeInitialized(starter, "INVALID_ENVELOPE", true);
+    if (outer.kind === "UNSUPPORTED") return safeInitialized(starter, this.catalog, "UNSUPPORTED_VERSION", true);
+    if (outer.kind === "INVALID") return safeInitialized(starter, this.catalog, "INVALID_ENVELOPE", true);
+
+    const profileResult = classifyPersistentProfile(outer.profile, this.catalog.allowedRecipeIds);
+    const provisionalProfile = profileResult.kind === "VALID" ? profileResult.value : createDefaultProfile();
+    const runResult = classifyRunProjection(outer.run, provisionalProfile.discoveredRecipeIds, this.catalog);
+    if (profileResult.kind === "UNSUPPORTED" || runResult.kind === "UNSUPPORTED") {
+      return safeInitialized(starter, this.catalog, "UNSUPPORTED_VERSION", true);
+    }
 
     const issues: SaveLoadIssue[] = [];
-    const decodedProfile = decodePersistentProfile(outer.profile, this.allowlist.allowedRecipeIds);
-    const profile = decodedProfile ?? createDefaultProfile();
-    if (decodedProfile === null) issues.push("INVALID_PROFILE");
-    const savedRuntime = decodeRunProjection(outer.run, profile.discoveredRecipeIds, this.allowlist);
-    if (!savedRuntime) issues.push("INVALID_RUN");
+    if (profileResult.kind === "INVALID") issues.push("INVALID_PROFILE");
+    if (runResult.kind === "INVALID") issues.push("INVALID_RUN");
+    const profile = profileResult.kind === "VALID" ? profileResult.value : createDefaultProfile();
     return {
       profile,
-      runtimeState: savedRuntime ?? hydrateStarter(starter, profile),
+      runtimeState: runResult.kind === "VALID" ? runResult.value : hydrateStarter(starter, profile, this.catalog),
       revision: outer.saveRevision,
       source: issues.length === 0 ? "SAVED" : "RECOVERED",
       writeBlocked: false,
@@ -115,17 +122,16 @@ export class VersionedSaveStore {
   }
 
   save(rawProfile: unknown, rawRuntimeState: unknown, expectedRevision: number): SaveWriteResult {
-    const profile = decodePersistentProfile(rawProfile, this.allowlist.allowedRecipeIds);
-    if (!profile) return { ok: false, persisted: false, reason: "INVALID_PROFILE" };
-    const decodedRuntime = decodeForgeRuntimeState(rawRuntimeState);
-    if (!decodedRuntime.valid || !runtimeReferencesAllowed(decodedRuntime.value, this.allowlist)) return { ok: false, persisted: false, reason: "INVALID_RUNTIME" };
-    if (profile.discoveredRecipeIds.length !== decodedRuntime.value.profile.discoveredRecipeIds.length
-      || profile.discoveredRecipeIds.some((id, index) => id !== decodedRuntime.value.profile.discoveredRecipeIds[index])) {
+    const profileResult = classifyPersistentProfile(rawProfile, this.catalog.allowedRecipeIds);
+    if (profileResult.kind !== "VALID") return { ok: false, persisted: false, reason: "INVALID_PROFILE" };
+    const profile = profileResult.value;
+    const runtimeState = this.decodeRuntime(rawRuntimeState);
+    if (!runtimeState) return { ok: false, persisted: false, reason: "INVALID_RUNTIME" };
+    if (profile.discoveredRecipeIds.length !== runtimeState.profile.discoveredRecipeIds.length
+      || profile.discoveredRecipeIds.some((id, index) => id !== runtimeState.profile.discoveredRecipeIds[index])) {
       return { ok: false, persisted: false, reason: "PROFILE_RUNTIME_MISMATCH" };
     }
-    if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) {
-      return { ok: false, persisted: false, reason: "STALE_WRITE" };
-    }
+    if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) return { ok: false, persisted: false, reason: "STALE_WRITE" };
 
     let currentBytes: string | null;
     try {
@@ -143,6 +149,12 @@ export class VersionedSaveStore {
       }
       const outer = parseKnownEnvelope(current);
       if (outer.kind !== "KNOWN") return { ok: false, persisted: false, reason: "WRITE_BLOCKED" };
+      const currentProfile = classifyPersistentProfile(outer.profile, this.catalog.allowedRecipeIds);
+      const currentRecipes = currentProfile.kind === "VALID" ? currentProfile.value.discoveredRecipeIds : [];
+      const currentRun = classifyRunProjection(outer.run, currentRecipes, this.catalog);
+      if (currentProfile.kind === "UNSUPPORTED" || currentRun.kind === "UNSUPPORTED") {
+        return { ok: false, persisted: false, reason: "WRITE_BLOCKED" };
+      }
       currentRevision = outer.saveRevision;
     }
     if (currentRevision !== expectedRevision) return { ok: false, persisted: false, reason: "STALE_WRITE" };
@@ -152,7 +164,7 @@ export class VersionedSaveStore {
       schemaVersion: SAVE_SCHEMA_VERSION,
       saveRevision: currentRevision + 1,
       profile,
-      run: projectRuntimeState(decodedRuntime.value),
+      run: projectRuntimeState(runtimeState),
     };
     const bytes = serializeSaveEnvelope(envelope);
     try {
@@ -164,13 +176,31 @@ export class VersionedSaveStore {
   }
 
   reset(rawStarter: unknown): SaveResetResult {
-    const starter = decodeStarter(rawStarter, this.allowlist);
+    const starter = decodeStarter(rawStarter, this.catalog);
     if (!starter) return { ok: false, persisted: false, reason: "INVALID_RUNTIME" };
+    let currentBytes: string | null;
+    try {
+      currentBytes = this.storage.getItem(this.key);
+    } catch {
+      return { ok: false, persisted: false, reason: "READ_FAILED" };
+    }
+    let nextRevision = 0;
+    if (currentBytes !== null) {
+      try {
+        const outer = parseKnownEnvelope(JSON.parse(currentBytes) as unknown);
+        if (outer.kind === "KNOWN") {
+          if (outer.saveRevision === Number.MAX_SAFE_INTEGER) return { ok: false, persisted: false, reason: "REVISION_EXHAUSTED" };
+          nextRevision = outer.saveRevision + 1;
+        }
+      } catch {
+        nextRevision = 0;
+      }
+    }
     const profile = createDefaultProfile();
-    const runtimeState = hydrateStarter(starter, profile);
+    const runtimeState = hydrateStarter(starter, profile, this.catalog);
     const envelope: SaveEnvelopeV1 = {
       schemaVersion: SAVE_SCHEMA_VERSION,
-      saveRevision: 0,
+      saveRevision: nextRevision,
       profile,
       run: projectRuntimeState(runtimeState),
     };
@@ -187,20 +217,11 @@ export class VersionedSaveStore {
       value: {
         profile,
         runtimeState,
-        revision: 0,
+        revision: nextRevision,
         source: "SAVED",
         writeBlocked: false,
         issues: [],
       },
     };
-  }
-
-  remove(): SaveRemoveResult {
-    try {
-      this.storage.removeItem(this.key);
-      return { ok: true };
-    } catch {
-      return { ok: false, reason: "REMOVE_FAILED" };
-    }
   }
 }

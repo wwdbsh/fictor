@@ -1,4 +1,7 @@
-import type { ForgeRuntimeStateV1 } from "../domain/forge-runtime";
+import {
+  FORGE_RUNTIME_SOURCE_HASH,
+  type ForgeRuntimeStateV1,
+} from "../domain/forge-runtime";
 
 export const FICTOR_SAVE_KEY = "fictor.save.v1" as const;
 export const SAVE_SCHEMA_VERSION = 1 as const;
@@ -21,9 +24,13 @@ export interface StorageLike {
   removeItem(key: string): void;
 }
 
-export interface PersistenceAllowlist {
-  allowedRecipeIds: readonly string[] | ReadonlySet<string>;
+export interface PersistenceCatalog {
+  sourceHash: typeof FORGE_RUNTIME_SOURCE_HASH;
+  allowedRecipeCards: readonly (readonly [recipeId: string, cardId: string])[];
   allowedCardIds: readonly string[] | ReadonlySet<string>;
+  allowedEnemyIds: readonly string[] | ReadonlySet<string>;
+  allowedIntentIds: readonly string[] | ReadonlySet<string>;
+  allowedDisplayTexts: readonly string[] | ReadonlySet<string>;
 }
 
 export interface PersistentProfileV1 {
@@ -84,8 +91,4 @@ export type SaveWriteResult =
 
 export type SaveResetResult =
   | { ok: true; persisted: true; value: SaveLoadResult; bytes: string }
-  | { ok: false; persisted: false; reason: "INVALID_RUNTIME" | "WRITE_FAILED" };
-
-export type SaveRemoveResult =
-  | { ok: true }
-  | { ok: false; reason: "REMOVE_FAILED" };
+  | { ok: false; persisted: false; reason: "INVALID_RUNTIME" | "READ_FAILED" | "WRITE_FAILED" | "REVISION_EXHAUSTED" };

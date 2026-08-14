@@ -1,5 +1,5 @@
 export {
-  applyForgeRuntimeResult,
+  executeForgeRuntimeCommand,
   loadGameSession,
   ownsHeart,
   recordOwnedHeart,
