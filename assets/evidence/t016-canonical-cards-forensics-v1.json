@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t016-canonical-cards-forensics-v1",
+  "secret_free": true,
+  "immutable_sources": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    }
+  },
+  "observed": {
+    "prior_paid_spend_units": 0,
+    "prior_journal_present": false,
+    "legacy_recovery_present": false,
+    "aspect_3_4_provider_validated": true,
+    "aspect_3_4_observed": "896x1200",
+    "aspect_3_4_observed_error_ppm": 4445,
+    "provider_dimension_grid_px": 32,
+    "declared_aspects": [
+      "3:4"
+    ],
+    "paid_retry_count": 0
+  },
+  "policy": {
+    "paid_resubmit_allowed": false,
+    "automatic_paid_retry_allowed": false,
+    "batch_scoped_fail_stop": true,
+    "operator_gated_resume_never_resubmits": true,
+    "aspect_homogeneous_batches": true,
+    "unmade_generation_allowed": false,
+    "style_redecision_allowed": false,
+    "manifest_id_change_allowed": false,
+    "prior_task_approval_inherited": false
+  }
+}

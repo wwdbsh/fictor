@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "artifact_version": "t016-canonical-cards-disclosure-presentation-v1-pending",
+  "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
+  "secret_free": true,
+  "plan_sha256": "37506e4b889451af1b944f75edc783b8302468991f656299d4c9c962d9af3a69",
+  "risk_disclosure_evidence_sha256": "8740da8fb678ca9b1f775a6ea84e1fc8aa2a891c2591dd66b24b231e324ee5ad",
+  "risk_disclosure_text_sha256": "8752b2a20d28a01152fadfa53484bf7db901b5fb45ee3600f023cdc6cec3ad11",
+  "provider_schema_evidence_sha256": "d1907861c91d57a2357ba9a39a02e25ebf246073bc20e5024ae2a892b3196a36",
+  "forensics_evidence_sha256": "7728e83cb71c87696a02e6c77d31e179f6baa0f2de84a2ee843c815ac2b6e1b7",
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "implementation_binding_sha256": "4bf5e120d7b7d417683a42afe0cedee08511b623596031b6ef8da1e451a9371a",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-controller.ts",
+      "sha256": "baa725bc7af0be007b5c8b11d139f37a2d86c95d53b572478eea81acc36a8e24"
+    },
+    "preparation": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-cli.ts",
+      "sha256": "91f89f0c914b11a3085ed7ce13affea4289725ee4339bd20b72d67f7c9e7d6f0"
+    },
+    "production": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-ops.ts",
+      "sha256": "3cb40c920cb6a71e2fb8463032ebc9c611608b776e24c0ed34fbca6adfcf7504"
+    },
+    "contract": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1.ts",
+      "sha256": "e0999f4a74e3bfbe15da22904c0ef2a28533d0d9a76de9a48ca0ae40c9b0c65a"
+    },
+    "selection": {
+      "path": "scripts/assets/t016-canonical-selection-v1.ts",
+      "sha256": "d390ffb846fe37f41de2c7bbd1a5b22d4cf7633a099e9784c72e2e464d9cb64a"
+    },
+    "provider_transport": {
+      "path": "scripts/assets/provider-transport.ts",
+      "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+    },
+    "t020_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "t020_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "exact_approval_phrase_required": "T016 canonical 선별 카드 160장 생성을 승인한다. 한도 240.00 크레딧.",
+  "recovery_operator_phrase": "T016 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T016 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "loss_acknowledgment_operator_phrase": "T016 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "approval_attestation_is_agent_writable": true,
+  "human_approval_gate_is_procedural": true,
+  "prior_task_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "scope": {
+    "task_key": "T016",
+    "category": "CANONICAL",
+    "asset_count": 160,
+    "aspect_ratio": "3:4",
+    "selection_kind": "COVERAGE_NOT_FREQUENCY",
+    "selection_artifact_path": "assets/manifests/t016-canonical-selection-v1.json",
+    "selection_list_sha256": "d161c90456757ca5f00957b563fd80ace2b3e9a19a0fa5d03e61675e37d264f0",
+    "candidate_pool": 994,
+    "total_canonical": 1326,
+    "t015_already_made": 332,
+    "frequency_score_available": false,
+    "is_final_paid_task": true,
+    "batch_count": 14,
+    "batch_sizes": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      4
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "240.00",
+    "total_credit_cap_units": 24000,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 14,
+    "aspect_tolerance_ppm_3_4": 5000,
+    "aspect_3_4_provider_validated": true,
+    "declared_aspects": [
+      "3:4"
+    ],
+    "balance_at_disclosure_decimal": "243.90",
+    "remaining_plan_after_t016_decimal": "0.00",
+    "remaining_plan_breakdown": [],
+    "headroom_after_t016_decimal": "3.90",
+    "a_single_lost_batch_breaks_the_remaining_plan": true,
+    "model_canary_applies_to_every_batch": true,
+    "contract_drift_blocks_all_later_batches": true,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "unmade_generation_allowed": false,
+    "style_redecision_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "authorized": false
+}

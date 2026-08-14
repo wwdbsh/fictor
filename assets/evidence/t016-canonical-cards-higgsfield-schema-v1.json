@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t016-canonical-cards-higgsfield-schema-v1",
+  "source": "T015 observations plus T020 v1/v2 deliveries",
+  "secret_free": true,
+  "submit": {
+    "tool": "generate_image_batch",
+    "batch_max": 12,
+    "requested_model": "nano_banana_2",
+    "expected_provider_reported_model": "nano_banana_flash",
+    "use_unlim": false,
+    "aspect_ratio_per_asset": true,
+    "aspect_ratios": [
+      "3:4"
+    ],
+    "aspect_homogeneous_batches": true,
+    "resolution": "1k",
+    "count_per_asset": 1,
+    "response_required_keys": [
+      "submitted_count",
+      "failed_count",
+      "jobs"
+    ],
+    "job_required_keys": [
+      "index",
+      "job_id",
+      "status"
+    ],
+    "job_allowed_optional_keys": [
+      "adjustments",
+      "error",
+      "warning",
+      "preset_recommendation"
+    ],
+    "any_optional_key_fail_stops_batch": true
+  },
+  "cost": {
+    "display_credits_decimal": "1.00",
+    "exact_credits_decimal": "1.50",
+    "integer_units_per_image": 150,
+    "billing_uses_credits_exact_only": true,
+    "freshness_ms": 600000,
+    "strictly_monotonic_observations": true
+  },
+  "jobs_wait": {
+    "expected_type": "image",
+    "summary_required_keys": [
+      "active",
+      "completed",
+      "errors",
+      "failed",
+      "total"
+    ],
+    "summary_compared_by_value": true,
+    "retryable_presence_only_for_status": "lookup_failed",
+    "optional_model_or_result_url_on_non_completed": true,
+    "download_only_when_completed": true,
+    "poll_intake_enforces_index_and_job_id_uniqueness": true
+  },
+  "secure_download": {
+    "resolver_mapped_ipv6_allowed": false,
+    "resolver_public_ipv4_allowed": true,
+    "transport_peer_pin_required": true,
+    "fresh_connection_per_request": true,
+    "auto_select_family": false,
+    "remote_address_captured_at_response_headers": true,
+    "url_or_host_diagnostics_persisted": false,
+    "transport_module": "scripts/assets/provider-transport.ts"
+  },
+  "model_canary": {
+    "canary_batch_id": "canonical-selected-001",
+    "applies_to_every_batch": true,
+    "blocks_next_batch_until_previous_model_verified": true,
+    "blocks_batch_id_on_drift": "canonical-selected-002",
+    "drift_still_costs_batch_spend": true
+  },
+  "aspect_expectation": {
+    "criterion": "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
+    "tolerance_ppm_by_aspect": {
+      "3:4": 5000
+    },
+    "declared_aspects": [
+      "3:4"
+    ],
+    "undeclared_aspect_throws": true,
+    "provider_dimension_grid_px": 32,
+    "resolution": "1k",
+    "aspects_in_this_task": [
+      "3:4"
+    ],
+    "observed_3_4": {
+      "width": 896,
+      "height": 1200,
+      "aspect_error_ppm": 4445,
+      "source": "T015 and T020 deliveries",
+      "provider_validated": true
+    },
+    "t020_16_9_tolerance_deliberately_not_declared_here": {
+      "tolerance_ppm": 12500,
+      "reason": "16:9-SPECIFIC_GRID_ALLOWANCE_MUST_NOT_LEAK_INTO_3_4"
+    },
+    "out_of_tolerance_terminal_code": "ASPECT_MISMATCH",
+    "out_of_tolerance_blocks_all_later_batches": true
+  }
+}

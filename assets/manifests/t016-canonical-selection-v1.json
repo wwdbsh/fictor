@@ -1,0 +1,1678 @@
+{
+  "schema_version": 1,
+  "artifact_version": "t016-canonical-selection-v1",
+  "secret_free": true,
+  "selection_kind": "COVERAGE_NOT_FREQUENCY",
+  "frequency_score_unavailable": {
+    "requested_by_original_contract": "deterministic exposure-frequency score over the 3 playable species' starting decks and per-ground material drop pools",
+    "missing_inputs": [
+      "no species definition in src/ or docs/",
+      "no starting-deck definition",
+      "no per-ground drop pool or drop rates"
+    ],
+    "unusable_material_weights": {
+      "rarity_null": 30,
+      "rarity_total": 52,
+      "rarity_null_status": "PENDING_DEPTH_CLASSIFICATION",
+      "potency_null": 52,
+      "cost_base_null": 52,
+      "balance_status_all": "PENDING_2026_08_21"
+    },
+    "candidates_with_at_least_one_unrated_material": 763,
+    "candidates_with_two_unrated_materials": 257,
+    "date_math": {
+      "material_balance_settles": "2026-08-21",
+      "credit_expiry": "2026-08-17",
+      "waiting_forecloses_the_run": true
+    }
+  },
+  "rejected_alternatives": {
+    "manifest_order_top_160": {
+      "rejected": true,
+      "reason": "NOT_NEUTRAL_OMITS_AN_ENTIRE_GROUND",
+      "observed": "join_03/join_04/join_05 appear 44 times each; all five BURN materials and join_01 appear zero times"
+    },
+    "wait_for_real_frequency_data": {
+      "rejected": true,
+      "reason": "SETTLES_AFTER_CREDIT_EXPIRY"
+    }
+  },
+  "formula": {
+    "step_1_candidates": "CANONICAL assets in manifest order after T015's first 332; exactly 994",
+    "step_2_group": "each material maps to origin with the GROUND_ prefix removed, or its category when origin is NONE",
+    "step_3_bucket": "a candidate's bucket is its two groups sorted lexicographically and joined, so A x B and B x A are one bucket",
+    "step_4_allocation": "largest remainder on integers only: quota = 160 * bucket_size, base = floor(quota / 994), remainder = quota mod 994",
+    "step_5_tie_break": "equal remainders break by bucket order, where bucket order is the manifest index of that bucket's first candidate, ascending",
+    "step_6_within_bucket": "allocated seats are filled in manifest order, taking the first n",
+    "no_clock_no_randomness_no_float": true
+  },
+  "inputs": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "materials": {
+      "path": "src/data/source/materials.json",
+      "sha256": "c1ce53ac380f637b9947211250313db25d03503f837de219dfb1ba8d7c897931"
+    }
+  },
+  "totals": {
+    "total_canonical": 1326,
+    "t015_consumed": 332,
+    "candidates": 994,
+    "buckets": 35,
+    "buckets_with_at_least_one_seat": 34,
+    "selected": 160
+  },
+  "group_representation": {
+    "BURN": 6,
+    "JOIN": 28,
+    "ODDITY": 43,
+    "ROT": 43,
+    "SCATTER": 43,
+    "STILL": 43,
+    "TOOL": 71,
+    "WASH": 43
+  },
+  "allocation": [
+    {
+      "bucket": "JOIN x WASH",
+      "candidate_count": 28,
+      "base": 4,
+      "remainder": 504,
+      "extra_seat": false,
+      "allocated": 4,
+      "first_candidate_index": 332
+    },
+    {
+      "bucket": "JOIN x JOIN",
+      "candidate_count": 6,
+      "base": 0,
+      "remainder": 960,
+      "extra_seat": true,
+      "allocated": 1,
+      "first_candidate_index": 336
+    },
+    {
+      "bucket": "JOIN x ODDITY",
+      "candidate_count": 24,
+      "base": 3,
+      "remainder": 858,
+      "extra_seat": true,
+      "allocated": 4,
+      "first_candidate_index": 338
+    },
+    {
+      "bucket": "BURN x JOIN",
+      "candidate_count": 4,
+      "base": 0,
+      "remainder": 640,
+      "extra_seat": false,
+      "allocated": 0,
+      "first_candidate_index": 344
+    },
+    {
+      "bucket": "JOIN x ROT",
+      "candidate_count": 24,
+      "base": 3,
+      "remainder": 858,
+      "extra_seat": true,
+      "allocated": 4,
+      "first_candidate_index": 346
+    },
+    {
+      "bucket": "JOIN x SCATTER",
+      "candidate_count": 24,
+      "base": 3,
+      "remainder": 858,
+      "extra_seat": true,
+      "allocated": 4,
+      "first_candidate_index": 347
+    },
+    {
+      "bucket": "JOIN x STILL",
+      "candidate_count": 24,
+      "base": 3,
+      "remainder": 858,
+      "extra_seat": true,
+      "allocated": 4,
+      "first_candidate_index": 348
+    },
+    {
+      "bucket": "JOIN x TOOL",
+      "candidate_count": 40,
+      "base": 6,
+      "remainder": 436,
+      "extra_seat": false,
+      "allocated": 6,
+      "first_candidate_index": 365
+    },
+    {
+      "bucket": "ODDITY x ODDITY",
+      "candidate_count": 15,
+      "base": 2,
+      "remainder": 412,
+      "extra_seat": false,
+      "allocated": 2,
+      "first_candidate_index": 465
+    },
+    {
+      "bucket": "BURN x ODDITY",
+      "candidate_count": 6,
+      "base": 0,
+      "remainder": 960,
+      "extra_seat": true,
+      "allocated": 1,
+      "first_candidate_index": 470
+    },
+    {
+      "bucket": "ODDITY x ROT",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 472
+    },
+    {
+      "bucket": "ODDITY x SCATTER",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 473
+    },
+    {
+      "bucket": "ODDITY x STILL",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 474
+    },
+    {
+      "bucket": "ODDITY x WASH",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 475
+    },
+    {
+      "bucket": "ODDITY x TOOL",
+      "candidate_count": 60,
+      "base": 9,
+      "remainder": 654,
+      "extra_seat": true,
+      "allocated": 10,
+      "first_candidate_index": 491
+    },
+    {
+      "bucket": "BURN x ROT",
+      "candidate_count": 6,
+      "base": 0,
+      "remainder": 960,
+      "extra_seat": true,
+      "allocated": 1,
+      "first_candidate_index": 697
+    },
+    {
+      "bucket": "BURN x SCATTER",
+      "candidate_count": 6,
+      "base": 0,
+      "remainder": 960,
+      "extra_seat": true,
+      "allocated": 1,
+      "first_candidate_index": 698
+    },
+    {
+      "bucket": "BURN x STILL",
+      "candidate_count": 6,
+      "base": 0,
+      "remainder": 960,
+      "extra_seat": true,
+      "allocated": 1,
+      "first_candidate_index": 699
+    },
+    {
+      "bucket": "BURN x WASH",
+      "candidate_count": 6,
+      "base": 0,
+      "remainder": 960,
+      "extra_seat": true,
+      "allocated": 1,
+      "first_candidate_index": 700
+    },
+    {
+      "bucket": "BURN x TOOL",
+      "candidate_count": 10,
+      "base": 1,
+      "remainder": 606,
+      "extra_seat": false,
+      "allocated": 1,
+      "first_candidate_index": 716
+    },
+    {
+      "bucket": "ROT x SCATTER",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 765
+    },
+    {
+      "bucket": "ROT x STILL",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 766
+    },
+    {
+      "bucket": "ROT x WASH",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 767
+    },
+    {
+      "bucket": "ROT x ROT",
+      "candidate_count": 15,
+      "base": 2,
+      "remainder": 412,
+      "extra_seat": false,
+      "allocated": 2,
+      "first_candidate_index": 768
+    },
+    {
+      "bucket": "ROT x TOOL",
+      "candidate_count": 60,
+      "base": 9,
+      "remainder": 654,
+      "extra_seat": true,
+      "allocated": 10,
+      "first_candidate_index": 783
+    },
+    {
+      "bucket": "SCATTER x STILL",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 798
+    },
+    {
+      "bucket": "SCATTER x WASH",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 799
+    },
+    {
+      "bucket": "SCATTER x SCATTER",
+      "candidate_count": 15,
+      "base": 2,
+      "remainder": 412,
+      "extra_seat": false,
+      "allocated": 2,
+      "first_candidate_index": 805
+    },
+    {
+      "bucket": "SCATTER x TOOL",
+      "candidate_count": 60,
+      "base": 9,
+      "remainder": 654,
+      "extra_seat": true,
+      "allocated": 10,
+      "first_candidate_index": 815
+    },
+    {
+      "bucket": "STILL x WASH",
+      "candidate_count": 36,
+      "base": 5,
+      "remainder": 790,
+      "extra_seat": true,
+      "allocated": 6,
+      "first_candidate_index": 830
+    },
+    {
+      "bucket": "STILL x STILL",
+      "candidate_count": 15,
+      "base": 2,
+      "remainder": 412,
+      "extra_seat": false,
+      "allocated": 2,
+      "first_candidate_index": 841
+    },
+    {
+      "bucket": "STILL x TOOL",
+      "candidate_count": 60,
+      "base": 9,
+      "remainder": 654,
+      "extra_seat": true,
+      "allocated": 10,
+      "first_candidate_index": 846
+    },
+    {
+      "bucket": "TOOL x WASH",
+      "candidate_count": 60,
+      "base": 9,
+      "remainder": 654,
+      "extra_seat": true,
+      "allocated": 10,
+      "first_candidate_index": 876
+    },
+    {
+      "bucket": "WASH x WASH",
+      "candidate_count": 15,
+      "base": 2,
+      "remainder": 412,
+      "extra_seat": false,
+      "allocated": 2,
+      "first_candidate_index": 886
+    },
+    {
+      "bucket": "TOOL x TOOL",
+      "candidate_count": 45,
+      "base": 7,
+      "remainder": 242,
+      "extra_seat": false,
+      "allocated": 7,
+      "first_candidate_index": 1221
+    }
+  ],
+  "selection_list_encoding": "UTF-8_IDS_JOINED_BY_NEWLINE_WITH_TRAILING_NEWLINE",
+  "selection_list_sha256": "d161c90456757ca5f00957b563fd80ace2b3e9a19a0fa5d03e61675e37d264f0",
+  "selected": [
+    {
+      "manifest_index": 332,
+      "id": "forge__join_02__wash_02",
+      "path": "cards/forge__join_02__wash_02.png",
+      "bucket": "JOIN x WASH",
+      "left": "join_02",
+      "right": "wash_02"
+    },
+    {
+      "manifest_index": 333,
+      "id": "forge__join_02__wash_03",
+      "path": "cards/forge__join_02__wash_03.png",
+      "bucket": "JOIN x WASH",
+      "left": "join_02",
+      "right": "wash_03"
+    },
+    {
+      "manifest_index": 334,
+      "id": "forge__join_02__wash_04",
+      "path": "cards/forge__join_02__wash_04.png",
+      "bucket": "JOIN x WASH",
+      "left": "join_02",
+      "right": "wash_04"
+    },
+    {
+      "manifest_index": 335,
+      "id": "forge__join_02__wash_05",
+      "path": "cards/forge__join_02__wash_05.png",
+      "bucket": "JOIN x WASH",
+      "left": "join_02",
+      "right": "wash_05"
+    },
+    {
+      "manifest_index": 336,
+      "id": "forge__join_03__join_04",
+      "path": "cards/forge__join_03__join_04.png",
+      "bucket": "JOIN x JOIN",
+      "left": "join_03",
+      "right": "join_04"
+    },
+    {
+      "manifest_index": 338,
+      "id": "forge__join_03__odd_01",
+      "path": "cards/forge__join_03__odd_01.png",
+      "bucket": "JOIN x ODDITY",
+      "left": "join_03",
+      "right": "odd_01"
+    },
+    {
+      "manifest_index": 339,
+      "id": "forge__join_03__odd_02",
+      "path": "cards/forge__join_03__odd_02.png",
+      "bucket": "JOIN x ODDITY",
+      "left": "join_03",
+      "right": "odd_02"
+    },
+    {
+      "manifest_index": 340,
+      "id": "forge__join_03__odd_03",
+      "path": "cards/forge__join_03__odd_03.png",
+      "bucket": "JOIN x ODDITY",
+      "left": "join_03",
+      "right": "odd_03"
+    },
+    {
+      "manifest_index": 341,
+      "id": "forge__join_03__odd_04",
+      "path": "cards/forge__join_03__odd_04.png",
+      "bucket": "JOIN x ODDITY",
+      "left": "join_03",
+      "right": "odd_04"
+    },
+    {
+      "manifest_index": 346,
+      "id": "forge__join_03__ore_rot",
+      "path": "cards/forge__join_03__ore_rot.png",
+      "bucket": "JOIN x ROT",
+      "left": "join_03",
+      "right": "ore_rot"
+    },
+    {
+      "manifest_index": 347,
+      "id": "forge__join_03__ore_scatter",
+      "path": "cards/forge__join_03__ore_scatter.png",
+      "bucket": "JOIN x SCATTER",
+      "left": "join_03",
+      "right": "ore_scatter"
+    },
+    {
+      "manifest_index": 348,
+      "id": "forge__join_03__ore_still",
+      "path": "cards/forge__join_03__ore_still.png",
+      "bucket": "JOIN x STILL",
+      "left": "join_03",
+      "right": "ore_still"
+    },
+    {
+      "manifest_index": 350,
+      "id": "forge__join_03__rot_01",
+      "path": "cards/forge__join_03__rot_01.png",
+      "bucket": "JOIN x ROT",
+      "left": "join_03",
+      "right": "rot_01"
+    },
+    {
+      "manifest_index": 351,
+      "id": "forge__join_03__rot_02",
+      "path": "cards/forge__join_03__rot_02.png",
+      "bucket": "JOIN x ROT",
+      "left": "join_03",
+      "right": "rot_02"
+    },
+    {
+      "manifest_index": 352,
+      "id": "forge__join_03__rot_03",
+      "path": "cards/forge__join_03__rot_03.png",
+      "bucket": "JOIN x ROT",
+      "left": "join_03",
+      "right": "rot_03"
+    },
+    {
+      "manifest_index": 355,
+      "id": "forge__join_03__scat_01",
+      "path": "cards/forge__join_03__scat_01.png",
+      "bucket": "JOIN x SCATTER",
+      "left": "join_03",
+      "right": "scat_01"
+    },
+    {
+      "manifest_index": 356,
+      "id": "forge__join_03__scat_02",
+      "path": "cards/forge__join_03__scat_02.png",
+      "bucket": "JOIN x SCATTER",
+      "left": "join_03",
+      "right": "scat_02"
+    },
+    {
+      "manifest_index": 357,
+      "id": "forge__join_03__scat_03",
+      "path": "cards/forge__join_03__scat_03.png",
+      "bucket": "JOIN x SCATTER",
+      "left": "join_03",
+      "right": "scat_03"
+    },
+    {
+      "manifest_index": 360,
+      "id": "forge__join_03__still_01",
+      "path": "cards/forge__join_03__still_01.png",
+      "bucket": "JOIN x STILL",
+      "left": "join_03",
+      "right": "still_01"
+    },
+    {
+      "manifest_index": 361,
+      "id": "forge__join_03__still_02",
+      "path": "cards/forge__join_03__still_02.png",
+      "bucket": "JOIN x STILL",
+      "left": "join_03",
+      "right": "still_02"
+    },
+    {
+      "manifest_index": 362,
+      "id": "forge__join_03__still_03",
+      "path": "cards/forge__join_03__still_03.png",
+      "bucket": "JOIN x STILL",
+      "left": "join_03",
+      "right": "still_03"
+    },
+    {
+      "manifest_index": 365,
+      "id": "forge__join_03__tool_01",
+      "path": "cards/forge__join_03__tool_01.png",
+      "bucket": "JOIN x TOOL",
+      "left": "join_03",
+      "right": "tool_01"
+    },
+    {
+      "manifest_index": 366,
+      "id": "forge__join_03__tool_02",
+      "path": "cards/forge__join_03__tool_02.png",
+      "bucket": "JOIN x TOOL",
+      "left": "join_03",
+      "right": "tool_02"
+    },
+    {
+      "manifest_index": 367,
+      "id": "forge__join_03__tool_03",
+      "path": "cards/forge__join_03__tool_03.png",
+      "bucket": "JOIN x TOOL",
+      "left": "join_03",
+      "right": "tool_03"
+    },
+    {
+      "manifest_index": 368,
+      "id": "forge__join_03__tool_04",
+      "path": "cards/forge__join_03__tool_04.png",
+      "bucket": "JOIN x TOOL",
+      "left": "join_03",
+      "right": "tool_04"
+    },
+    {
+      "manifest_index": 369,
+      "id": "forge__join_03__tool_05",
+      "path": "cards/forge__join_03__tool_05.png",
+      "bucket": "JOIN x TOOL",
+      "left": "join_03",
+      "right": "tool_05"
+    },
+    {
+      "manifest_index": 370,
+      "id": "forge__join_03__tool_06",
+      "path": "cards/forge__join_03__tool_06.png",
+      "bucket": "JOIN x TOOL",
+      "left": "join_03",
+      "right": "tool_06"
+    },
+    {
+      "manifest_index": 465,
+      "id": "forge__odd_01__odd_02",
+      "path": "cards/forge__odd_01__odd_02.png",
+      "bucket": "ODDITY x ODDITY",
+      "left": "odd_01",
+      "right": "odd_02"
+    },
+    {
+      "manifest_index": 466,
+      "id": "forge__odd_01__odd_03",
+      "path": "cards/forge__odd_01__odd_03.png",
+      "bucket": "ODDITY x ODDITY",
+      "left": "odd_01",
+      "right": "odd_03"
+    },
+    {
+      "manifest_index": 470,
+      "id": "forge__odd_01__ore_burn",
+      "path": "cards/forge__odd_01__ore_burn.png",
+      "bucket": "BURN x ODDITY",
+      "left": "odd_01",
+      "right": "ore_burn"
+    },
+    {
+      "manifest_index": 472,
+      "id": "forge__odd_01__ore_rot",
+      "path": "cards/forge__odd_01__ore_rot.png",
+      "bucket": "ODDITY x ROT",
+      "left": "odd_01",
+      "right": "ore_rot"
+    },
+    {
+      "manifest_index": 473,
+      "id": "forge__odd_01__ore_scatter",
+      "path": "cards/forge__odd_01__ore_scatter.png",
+      "bucket": "ODDITY x SCATTER",
+      "left": "odd_01",
+      "right": "ore_scatter"
+    },
+    {
+      "manifest_index": 474,
+      "id": "forge__odd_01__ore_still",
+      "path": "cards/forge__odd_01__ore_still.png",
+      "bucket": "ODDITY x STILL",
+      "left": "odd_01",
+      "right": "ore_still"
+    },
+    {
+      "manifest_index": 475,
+      "id": "forge__odd_01__ore_wash",
+      "path": "cards/forge__odd_01__ore_wash.png",
+      "bucket": "ODDITY x WASH",
+      "left": "odd_01",
+      "right": "ore_wash"
+    },
+    {
+      "manifest_index": 476,
+      "id": "forge__odd_01__rot_01",
+      "path": "cards/forge__odd_01__rot_01.png",
+      "bucket": "ODDITY x ROT",
+      "left": "odd_01",
+      "right": "rot_01"
+    },
+    {
+      "manifest_index": 477,
+      "id": "forge__odd_01__rot_02",
+      "path": "cards/forge__odd_01__rot_02.png",
+      "bucket": "ODDITY x ROT",
+      "left": "odd_01",
+      "right": "rot_02"
+    },
+    {
+      "manifest_index": 478,
+      "id": "forge__odd_01__rot_03",
+      "path": "cards/forge__odd_01__rot_03.png",
+      "bucket": "ODDITY x ROT",
+      "left": "odd_01",
+      "right": "rot_03"
+    },
+    {
+      "manifest_index": 479,
+      "id": "forge__odd_01__rot_04",
+      "path": "cards/forge__odd_01__rot_04.png",
+      "bucket": "ODDITY x ROT",
+      "left": "odd_01",
+      "right": "rot_04"
+    },
+    {
+      "manifest_index": 480,
+      "id": "forge__odd_01__rot_05",
+      "path": "cards/forge__odd_01__rot_05.png",
+      "bucket": "ODDITY x ROT",
+      "left": "odd_01",
+      "right": "rot_05"
+    },
+    {
+      "manifest_index": 481,
+      "id": "forge__odd_01__scat_01",
+      "path": "cards/forge__odd_01__scat_01.png",
+      "bucket": "ODDITY x SCATTER",
+      "left": "odd_01",
+      "right": "scat_01"
+    },
+    {
+      "manifest_index": 482,
+      "id": "forge__odd_01__scat_02",
+      "path": "cards/forge__odd_01__scat_02.png",
+      "bucket": "ODDITY x SCATTER",
+      "left": "odd_01",
+      "right": "scat_02"
+    },
+    {
+      "manifest_index": 483,
+      "id": "forge__odd_01__scat_03",
+      "path": "cards/forge__odd_01__scat_03.png",
+      "bucket": "ODDITY x SCATTER",
+      "left": "odd_01",
+      "right": "scat_03"
+    },
+    {
+      "manifest_index": 484,
+      "id": "forge__odd_01__scat_04",
+      "path": "cards/forge__odd_01__scat_04.png",
+      "bucket": "ODDITY x SCATTER",
+      "left": "odd_01",
+      "right": "scat_04"
+    },
+    {
+      "manifest_index": 485,
+      "id": "forge__odd_01__scat_05",
+      "path": "cards/forge__odd_01__scat_05.png",
+      "bucket": "ODDITY x SCATTER",
+      "left": "odd_01",
+      "right": "scat_05"
+    },
+    {
+      "manifest_index": 486,
+      "id": "forge__odd_01__still_01",
+      "path": "cards/forge__odd_01__still_01.png",
+      "bucket": "ODDITY x STILL",
+      "left": "odd_01",
+      "right": "still_01"
+    },
+    {
+      "manifest_index": 487,
+      "id": "forge__odd_01__still_02",
+      "path": "cards/forge__odd_01__still_02.png",
+      "bucket": "ODDITY x STILL",
+      "left": "odd_01",
+      "right": "still_02"
+    },
+    {
+      "manifest_index": 488,
+      "id": "forge__odd_01__still_03",
+      "path": "cards/forge__odd_01__still_03.png",
+      "bucket": "ODDITY x STILL",
+      "left": "odd_01",
+      "right": "still_03"
+    },
+    {
+      "manifest_index": 489,
+      "id": "forge__odd_01__still_04",
+      "path": "cards/forge__odd_01__still_04.png",
+      "bucket": "ODDITY x STILL",
+      "left": "odd_01",
+      "right": "still_04"
+    },
+    {
+      "manifest_index": 490,
+      "id": "forge__odd_01__still_05",
+      "path": "cards/forge__odd_01__still_05.png",
+      "bucket": "ODDITY x STILL",
+      "left": "odd_01",
+      "right": "still_05"
+    },
+    {
+      "manifest_index": 491,
+      "id": "forge__odd_01__tool_01",
+      "path": "cards/forge__odd_01__tool_01.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_01"
+    },
+    {
+      "manifest_index": 492,
+      "id": "forge__odd_01__tool_02",
+      "path": "cards/forge__odd_01__tool_02.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_02"
+    },
+    {
+      "manifest_index": 493,
+      "id": "forge__odd_01__tool_03",
+      "path": "cards/forge__odd_01__tool_03.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_03"
+    },
+    {
+      "manifest_index": 494,
+      "id": "forge__odd_01__tool_04",
+      "path": "cards/forge__odd_01__tool_04.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_04"
+    },
+    {
+      "manifest_index": 495,
+      "id": "forge__odd_01__tool_05",
+      "path": "cards/forge__odd_01__tool_05.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_05"
+    },
+    {
+      "manifest_index": 496,
+      "id": "forge__odd_01__tool_06",
+      "path": "cards/forge__odd_01__tool_06.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_06"
+    },
+    {
+      "manifest_index": 497,
+      "id": "forge__odd_01__tool_07",
+      "path": "cards/forge__odd_01__tool_07.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_07"
+    },
+    {
+      "manifest_index": 498,
+      "id": "forge__odd_01__tool_08",
+      "path": "cards/forge__odd_01__tool_08.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_08"
+    },
+    {
+      "manifest_index": 499,
+      "id": "forge__odd_01__tool_09",
+      "path": "cards/forge__odd_01__tool_09.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_09"
+    },
+    {
+      "manifest_index": 500,
+      "id": "forge__odd_01__tool_10",
+      "path": "cards/forge__odd_01__tool_10.png",
+      "bucket": "ODDITY x TOOL",
+      "left": "odd_01",
+      "right": "tool_10"
+    },
+    {
+      "manifest_index": 501,
+      "id": "forge__odd_01__wash_01",
+      "path": "cards/forge__odd_01__wash_01.png",
+      "bucket": "ODDITY x WASH",
+      "left": "odd_01",
+      "right": "wash_01"
+    },
+    {
+      "manifest_index": 502,
+      "id": "forge__odd_01__wash_02",
+      "path": "cards/forge__odd_01__wash_02.png",
+      "bucket": "ODDITY x WASH",
+      "left": "odd_01",
+      "right": "wash_02"
+    },
+    {
+      "manifest_index": 503,
+      "id": "forge__odd_01__wash_03",
+      "path": "cards/forge__odd_01__wash_03.png",
+      "bucket": "ODDITY x WASH",
+      "left": "odd_01",
+      "right": "wash_03"
+    },
+    {
+      "manifest_index": 504,
+      "id": "forge__odd_01__wash_04",
+      "path": "cards/forge__odd_01__wash_04.png",
+      "bucket": "ODDITY x WASH",
+      "left": "odd_01",
+      "right": "wash_04"
+    },
+    {
+      "manifest_index": 505,
+      "id": "forge__odd_01__wash_05",
+      "path": "cards/forge__odd_01__wash_05.png",
+      "bucket": "ODDITY x WASH",
+      "left": "odd_01",
+      "right": "wash_05"
+    },
+    {
+      "manifest_index": 697,
+      "id": "forge__ore_burn__ore_rot",
+      "path": "cards/forge__ore_burn__ore_rot.png",
+      "bucket": "BURN x ROT",
+      "left": "ore_burn",
+      "right": "ore_rot"
+    },
+    {
+      "manifest_index": 698,
+      "id": "forge__ore_burn__ore_scatter",
+      "path": "cards/forge__ore_burn__ore_scatter.png",
+      "bucket": "BURN x SCATTER",
+      "left": "ore_burn",
+      "right": "ore_scatter"
+    },
+    {
+      "manifest_index": 699,
+      "id": "forge__ore_burn__ore_still",
+      "path": "cards/forge__ore_burn__ore_still.png",
+      "bucket": "BURN x STILL",
+      "left": "ore_burn",
+      "right": "ore_still"
+    },
+    {
+      "manifest_index": 700,
+      "id": "forge__ore_burn__ore_wash",
+      "path": "cards/forge__ore_burn__ore_wash.png",
+      "bucket": "BURN x WASH",
+      "left": "ore_burn",
+      "right": "ore_wash"
+    },
+    {
+      "manifest_index": 716,
+      "id": "forge__ore_burn__tool_01",
+      "path": "cards/forge__ore_burn__tool_01.png",
+      "bucket": "BURN x TOOL",
+      "left": "ore_burn",
+      "right": "tool_01"
+    },
+    {
+      "manifest_index": 765,
+      "id": "forge__ore_rot__ore_scatter",
+      "path": "cards/forge__ore_rot__ore_scatter.png",
+      "bucket": "ROT x SCATTER",
+      "left": "ore_rot",
+      "right": "ore_scatter"
+    },
+    {
+      "manifest_index": 766,
+      "id": "forge__ore_rot__ore_still",
+      "path": "cards/forge__ore_rot__ore_still.png",
+      "bucket": "ROT x STILL",
+      "left": "ore_rot",
+      "right": "ore_still"
+    },
+    {
+      "manifest_index": 767,
+      "id": "forge__ore_rot__ore_wash",
+      "path": "cards/forge__ore_rot__ore_wash.png",
+      "bucket": "ROT x WASH",
+      "left": "ore_rot",
+      "right": "ore_wash"
+    },
+    {
+      "manifest_index": 768,
+      "id": "forge__ore_rot__rot_01",
+      "path": "cards/forge__ore_rot__rot_01.png",
+      "bucket": "ROT x ROT",
+      "left": "ore_rot",
+      "right": "rot_01"
+    },
+    {
+      "manifest_index": 769,
+      "id": "forge__ore_rot__rot_02",
+      "path": "cards/forge__ore_rot__rot_02.png",
+      "bucket": "ROT x ROT",
+      "left": "ore_rot",
+      "right": "rot_02"
+    },
+    {
+      "manifest_index": 773,
+      "id": "forge__ore_rot__scat_01",
+      "path": "cards/forge__ore_rot__scat_01.png",
+      "bucket": "ROT x SCATTER",
+      "left": "ore_rot",
+      "right": "scat_01"
+    },
+    {
+      "manifest_index": 774,
+      "id": "forge__ore_rot__scat_02",
+      "path": "cards/forge__ore_rot__scat_02.png",
+      "bucket": "ROT x SCATTER",
+      "left": "ore_rot",
+      "right": "scat_02"
+    },
+    {
+      "manifest_index": 775,
+      "id": "forge__ore_rot__scat_03",
+      "path": "cards/forge__ore_rot__scat_03.png",
+      "bucket": "ROT x SCATTER",
+      "left": "ore_rot",
+      "right": "scat_03"
+    },
+    {
+      "manifest_index": 776,
+      "id": "forge__ore_rot__scat_04",
+      "path": "cards/forge__ore_rot__scat_04.png",
+      "bucket": "ROT x SCATTER",
+      "left": "ore_rot",
+      "right": "scat_04"
+    },
+    {
+      "manifest_index": 777,
+      "id": "forge__ore_rot__scat_05",
+      "path": "cards/forge__ore_rot__scat_05.png",
+      "bucket": "ROT x SCATTER",
+      "left": "ore_rot",
+      "right": "scat_05"
+    },
+    {
+      "manifest_index": 778,
+      "id": "forge__ore_rot__still_01",
+      "path": "cards/forge__ore_rot__still_01.png",
+      "bucket": "ROT x STILL",
+      "left": "ore_rot",
+      "right": "still_01"
+    },
+    {
+      "manifest_index": 779,
+      "id": "forge__ore_rot__still_02",
+      "path": "cards/forge__ore_rot__still_02.png",
+      "bucket": "ROT x STILL",
+      "left": "ore_rot",
+      "right": "still_02"
+    },
+    {
+      "manifest_index": 780,
+      "id": "forge__ore_rot__still_03",
+      "path": "cards/forge__ore_rot__still_03.png",
+      "bucket": "ROT x STILL",
+      "left": "ore_rot",
+      "right": "still_03"
+    },
+    {
+      "manifest_index": 781,
+      "id": "forge__ore_rot__still_04",
+      "path": "cards/forge__ore_rot__still_04.png",
+      "bucket": "ROT x STILL",
+      "left": "ore_rot",
+      "right": "still_04"
+    },
+    {
+      "manifest_index": 782,
+      "id": "forge__ore_rot__still_05",
+      "path": "cards/forge__ore_rot__still_05.png",
+      "bucket": "ROT x STILL",
+      "left": "ore_rot",
+      "right": "still_05"
+    },
+    {
+      "manifest_index": 783,
+      "id": "forge__ore_rot__tool_01",
+      "path": "cards/forge__ore_rot__tool_01.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_01"
+    },
+    {
+      "manifest_index": 784,
+      "id": "forge__ore_rot__tool_02",
+      "path": "cards/forge__ore_rot__tool_02.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_02"
+    },
+    {
+      "manifest_index": 785,
+      "id": "forge__ore_rot__tool_03",
+      "path": "cards/forge__ore_rot__tool_03.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_03"
+    },
+    {
+      "manifest_index": 786,
+      "id": "forge__ore_rot__tool_04",
+      "path": "cards/forge__ore_rot__tool_04.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_04"
+    },
+    {
+      "manifest_index": 787,
+      "id": "forge__ore_rot__tool_05",
+      "path": "cards/forge__ore_rot__tool_05.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_05"
+    },
+    {
+      "manifest_index": 788,
+      "id": "forge__ore_rot__tool_06",
+      "path": "cards/forge__ore_rot__tool_06.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_06"
+    },
+    {
+      "manifest_index": 789,
+      "id": "forge__ore_rot__tool_07",
+      "path": "cards/forge__ore_rot__tool_07.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_07"
+    },
+    {
+      "manifest_index": 790,
+      "id": "forge__ore_rot__tool_08",
+      "path": "cards/forge__ore_rot__tool_08.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_08"
+    },
+    {
+      "manifest_index": 791,
+      "id": "forge__ore_rot__tool_09",
+      "path": "cards/forge__ore_rot__tool_09.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_09"
+    },
+    {
+      "manifest_index": 792,
+      "id": "forge__ore_rot__tool_10",
+      "path": "cards/forge__ore_rot__tool_10.png",
+      "bucket": "ROT x TOOL",
+      "left": "ore_rot",
+      "right": "tool_10"
+    },
+    {
+      "manifest_index": 793,
+      "id": "forge__ore_rot__wash_01",
+      "path": "cards/forge__ore_rot__wash_01.png",
+      "bucket": "ROT x WASH",
+      "left": "ore_rot",
+      "right": "wash_01"
+    },
+    {
+      "manifest_index": 794,
+      "id": "forge__ore_rot__wash_02",
+      "path": "cards/forge__ore_rot__wash_02.png",
+      "bucket": "ROT x WASH",
+      "left": "ore_rot",
+      "right": "wash_02"
+    },
+    {
+      "manifest_index": 795,
+      "id": "forge__ore_rot__wash_03",
+      "path": "cards/forge__ore_rot__wash_03.png",
+      "bucket": "ROT x WASH",
+      "left": "ore_rot",
+      "right": "wash_03"
+    },
+    {
+      "manifest_index": 796,
+      "id": "forge__ore_rot__wash_04",
+      "path": "cards/forge__ore_rot__wash_04.png",
+      "bucket": "ROT x WASH",
+      "left": "ore_rot",
+      "right": "wash_04"
+    },
+    {
+      "manifest_index": 797,
+      "id": "forge__ore_rot__wash_05",
+      "path": "cards/forge__ore_rot__wash_05.png",
+      "bucket": "ROT x WASH",
+      "left": "ore_rot",
+      "right": "wash_05"
+    },
+    {
+      "manifest_index": 798,
+      "id": "forge__ore_scatter__ore_still",
+      "path": "cards/forge__ore_scatter__ore_still.png",
+      "bucket": "SCATTER x STILL",
+      "left": "ore_scatter",
+      "right": "ore_still"
+    },
+    {
+      "manifest_index": 799,
+      "id": "forge__ore_scatter__ore_wash",
+      "path": "cards/forge__ore_scatter__ore_wash.png",
+      "bucket": "SCATTER x WASH",
+      "left": "ore_scatter",
+      "right": "ore_wash"
+    },
+    {
+      "manifest_index": 805,
+      "id": "forge__ore_scatter__scat_01",
+      "path": "cards/forge__ore_scatter__scat_01.png",
+      "bucket": "SCATTER x SCATTER",
+      "left": "ore_scatter",
+      "right": "scat_01"
+    },
+    {
+      "manifest_index": 806,
+      "id": "forge__ore_scatter__scat_02",
+      "path": "cards/forge__ore_scatter__scat_02.png",
+      "bucket": "SCATTER x SCATTER",
+      "left": "ore_scatter",
+      "right": "scat_02"
+    },
+    {
+      "manifest_index": 810,
+      "id": "forge__ore_scatter__still_01",
+      "path": "cards/forge__ore_scatter__still_01.png",
+      "bucket": "SCATTER x STILL",
+      "left": "ore_scatter",
+      "right": "still_01"
+    },
+    {
+      "manifest_index": 811,
+      "id": "forge__ore_scatter__still_02",
+      "path": "cards/forge__ore_scatter__still_02.png",
+      "bucket": "SCATTER x STILL",
+      "left": "ore_scatter",
+      "right": "still_02"
+    },
+    {
+      "manifest_index": 812,
+      "id": "forge__ore_scatter__still_03",
+      "path": "cards/forge__ore_scatter__still_03.png",
+      "bucket": "SCATTER x STILL",
+      "left": "ore_scatter",
+      "right": "still_03"
+    },
+    {
+      "manifest_index": 813,
+      "id": "forge__ore_scatter__still_04",
+      "path": "cards/forge__ore_scatter__still_04.png",
+      "bucket": "SCATTER x STILL",
+      "left": "ore_scatter",
+      "right": "still_04"
+    },
+    {
+      "manifest_index": 814,
+      "id": "forge__ore_scatter__still_05",
+      "path": "cards/forge__ore_scatter__still_05.png",
+      "bucket": "SCATTER x STILL",
+      "left": "ore_scatter",
+      "right": "still_05"
+    },
+    {
+      "manifest_index": 815,
+      "id": "forge__ore_scatter__tool_01",
+      "path": "cards/forge__ore_scatter__tool_01.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_01"
+    },
+    {
+      "manifest_index": 816,
+      "id": "forge__ore_scatter__tool_02",
+      "path": "cards/forge__ore_scatter__tool_02.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_02"
+    },
+    {
+      "manifest_index": 817,
+      "id": "forge__ore_scatter__tool_03",
+      "path": "cards/forge__ore_scatter__tool_03.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_03"
+    },
+    {
+      "manifest_index": 818,
+      "id": "forge__ore_scatter__tool_04",
+      "path": "cards/forge__ore_scatter__tool_04.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_04"
+    },
+    {
+      "manifest_index": 819,
+      "id": "forge__ore_scatter__tool_05",
+      "path": "cards/forge__ore_scatter__tool_05.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_05"
+    },
+    {
+      "manifest_index": 820,
+      "id": "forge__ore_scatter__tool_06",
+      "path": "cards/forge__ore_scatter__tool_06.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_06"
+    },
+    {
+      "manifest_index": 821,
+      "id": "forge__ore_scatter__tool_07",
+      "path": "cards/forge__ore_scatter__tool_07.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_07"
+    },
+    {
+      "manifest_index": 822,
+      "id": "forge__ore_scatter__tool_08",
+      "path": "cards/forge__ore_scatter__tool_08.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_08"
+    },
+    {
+      "manifest_index": 823,
+      "id": "forge__ore_scatter__tool_09",
+      "path": "cards/forge__ore_scatter__tool_09.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_09"
+    },
+    {
+      "manifest_index": 824,
+      "id": "forge__ore_scatter__tool_10",
+      "path": "cards/forge__ore_scatter__tool_10.png",
+      "bucket": "SCATTER x TOOL",
+      "left": "ore_scatter",
+      "right": "tool_10"
+    },
+    {
+      "manifest_index": 825,
+      "id": "forge__ore_scatter__wash_01",
+      "path": "cards/forge__ore_scatter__wash_01.png",
+      "bucket": "SCATTER x WASH",
+      "left": "ore_scatter",
+      "right": "wash_01"
+    },
+    {
+      "manifest_index": 826,
+      "id": "forge__ore_scatter__wash_02",
+      "path": "cards/forge__ore_scatter__wash_02.png",
+      "bucket": "SCATTER x WASH",
+      "left": "ore_scatter",
+      "right": "wash_02"
+    },
+    {
+      "manifest_index": 827,
+      "id": "forge__ore_scatter__wash_03",
+      "path": "cards/forge__ore_scatter__wash_03.png",
+      "bucket": "SCATTER x WASH",
+      "left": "ore_scatter",
+      "right": "wash_03"
+    },
+    {
+      "manifest_index": 828,
+      "id": "forge__ore_scatter__wash_04",
+      "path": "cards/forge__ore_scatter__wash_04.png",
+      "bucket": "SCATTER x WASH",
+      "left": "ore_scatter",
+      "right": "wash_04"
+    },
+    {
+      "manifest_index": 829,
+      "id": "forge__ore_scatter__wash_05",
+      "path": "cards/forge__ore_scatter__wash_05.png",
+      "bucket": "SCATTER x WASH",
+      "left": "ore_scatter",
+      "right": "wash_05"
+    },
+    {
+      "manifest_index": 830,
+      "id": "forge__ore_still__ore_wash",
+      "path": "cards/forge__ore_still__ore_wash.png",
+      "bucket": "STILL x WASH",
+      "left": "ore_still",
+      "right": "ore_wash"
+    },
+    {
+      "manifest_index": 841,
+      "id": "forge__ore_still__still_01",
+      "path": "cards/forge__ore_still__still_01.png",
+      "bucket": "STILL x STILL",
+      "left": "ore_still",
+      "right": "still_01"
+    },
+    {
+      "manifest_index": 842,
+      "id": "forge__ore_still__still_02",
+      "path": "cards/forge__ore_still__still_02.png",
+      "bucket": "STILL x STILL",
+      "left": "ore_still",
+      "right": "still_02"
+    },
+    {
+      "manifest_index": 846,
+      "id": "forge__ore_still__tool_01",
+      "path": "cards/forge__ore_still__tool_01.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_01"
+    },
+    {
+      "manifest_index": 847,
+      "id": "forge__ore_still__tool_02",
+      "path": "cards/forge__ore_still__tool_02.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_02"
+    },
+    {
+      "manifest_index": 848,
+      "id": "forge__ore_still__tool_03",
+      "path": "cards/forge__ore_still__tool_03.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_03"
+    },
+    {
+      "manifest_index": 849,
+      "id": "forge__ore_still__tool_04",
+      "path": "cards/forge__ore_still__tool_04.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_04"
+    },
+    {
+      "manifest_index": 850,
+      "id": "forge__ore_still__tool_05",
+      "path": "cards/forge__ore_still__tool_05.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_05"
+    },
+    {
+      "manifest_index": 851,
+      "id": "forge__ore_still__tool_06",
+      "path": "cards/forge__ore_still__tool_06.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_06"
+    },
+    {
+      "manifest_index": 852,
+      "id": "forge__ore_still__tool_07",
+      "path": "cards/forge__ore_still__tool_07.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_07"
+    },
+    {
+      "manifest_index": 853,
+      "id": "forge__ore_still__tool_08",
+      "path": "cards/forge__ore_still__tool_08.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_08"
+    },
+    {
+      "manifest_index": 854,
+      "id": "forge__ore_still__tool_09",
+      "path": "cards/forge__ore_still__tool_09.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_09"
+    },
+    {
+      "manifest_index": 855,
+      "id": "forge__ore_still__tool_10",
+      "path": "cards/forge__ore_still__tool_10.png",
+      "bucket": "STILL x TOOL",
+      "left": "ore_still",
+      "right": "tool_10"
+    },
+    {
+      "manifest_index": 856,
+      "id": "forge__ore_still__wash_01",
+      "path": "cards/forge__ore_still__wash_01.png",
+      "bucket": "STILL x WASH",
+      "left": "ore_still",
+      "right": "wash_01"
+    },
+    {
+      "manifest_index": 857,
+      "id": "forge__ore_still__wash_02",
+      "path": "cards/forge__ore_still__wash_02.png",
+      "bucket": "STILL x WASH",
+      "left": "ore_still",
+      "right": "wash_02"
+    },
+    {
+      "manifest_index": 858,
+      "id": "forge__ore_still__wash_03",
+      "path": "cards/forge__ore_still__wash_03.png",
+      "bucket": "STILL x WASH",
+      "left": "ore_still",
+      "right": "wash_03"
+    },
+    {
+      "manifest_index": 859,
+      "id": "forge__ore_still__wash_04",
+      "path": "cards/forge__ore_still__wash_04.png",
+      "bucket": "STILL x WASH",
+      "left": "ore_still",
+      "right": "wash_04"
+    },
+    {
+      "manifest_index": 860,
+      "id": "forge__ore_still__wash_05",
+      "path": "cards/forge__ore_still__wash_05.png",
+      "bucket": "STILL x WASH",
+      "left": "ore_still",
+      "right": "wash_05"
+    },
+    {
+      "manifest_index": 876,
+      "id": "forge__ore_wash__tool_01",
+      "path": "cards/forge__ore_wash__tool_01.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_01"
+    },
+    {
+      "manifest_index": 877,
+      "id": "forge__ore_wash__tool_02",
+      "path": "cards/forge__ore_wash__tool_02.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_02"
+    },
+    {
+      "manifest_index": 878,
+      "id": "forge__ore_wash__tool_03",
+      "path": "cards/forge__ore_wash__tool_03.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_03"
+    },
+    {
+      "manifest_index": 879,
+      "id": "forge__ore_wash__tool_04",
+      "path": "cards/forge__ore_wash__tool_04.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_04"
+    },
+    {
+      "manifest_index": 880,
+      "id": "forge__ore_wash__tool_05",
+      "path": "cards/forge__ore_wash__tool_05.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_05"
+    },
+    {
+      "manifest_index": 881,
+      "id": "forge__ore_wash__tool_06",
+      "path": "cards/forge__ore_wash__tool_06.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_06"
+    },
+    {
+      "manifest_index": 882,
+      "id": "forge__ore_wash__tool_07",
+      "path": "cards/forge__ore_wash__tool_07.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_07"
+    },
+    {
+      "manifest_index": 883,
+      "id": "forge__ore_wash__tool_08",
+      "path": "cards/forge__ore_wash__tool_08.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_08"
+    },
+    {
+      "manifest_index": 884,
+      "id": "forge__ore_wash__tool_09",
+      "path": "cards/forge__ore_wash__tool_09.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_09"
+    },
+    {
+      "manifest_index": 885,
+      "id": "forge__ore_wash__tool_10",
+      "path": "cards/forge__ore_wash__tool_10.png",
+      "bucket": "TOOL x WASH",
+      "left": "ore_wash",
+      "right": "tool_10"
+    },
+    {
+      "manifest_index": 886,
+      "id": "forge__ore_wash__wash_01",
+      "path": "cards/forge__ore_wash__wash_01.png",
+      "bucket": "WASH x WASH",
+      "left": "ore_wash",
+      "right": "wash_01"
+    },
+    {
+      "manifest_index": 887,
+      "id": "forge__ore_wash__wash_02",
+      "path": "cards/forge__ore_wash__wash_02.png",
+      "bucket": "WASH x WASH",
+      "left": "ore_wash",
+      "right": "wash_02"
+    },
+    {
+      "manifest_index": 1221,
+      "id": "forge__tool_01__tool_02",
+      "path": "cards/forge__tool_01__tool_02.png",
+      "bucket": "TOOL x TOOL",
+      "left": "tool_01",
+      "right": "tool_02"
+    },
+    {
+      "manifest_index": 1222,
+      "id": "forge__tool_01__tool_03",
+      "path": "cards/forge__tool_01__tool_03.png",
+      "bucket": "TOOL x TOOL",
+      "left": "tool_01",
+      "right": "tool_03"
+    },
+    {
+      "manifest_index": 1223,
+      "id": "forge__tool_01__tool_04",
+      "path": "cards/forge__tool_01__tool_04.png",
+      "bucket": "TOOL x TOOL",
+      "left": "tool_01",
+      "right": "tool_04"
+    },
+    {
+      "manifest_index": 1224,
+      "id": "forge__tool_01__tool_05",
+      "path": "cards/forge__tool_01__tool_05.png",
+      "bucket": "TOOL x TOOL",
+      "left": "tool_01",
+      "right": "tool_05"
+    },
+    {
+      "manifest_index": 1225,
+      "id": "forge__tool_01__tool_06",
+      "path": "cards/forge__tool_01__tool_06.png",
+      "bucket": "TOOL x TOOL",
+      "left": "tool_01",
+      "right": "tool_06"
+    },
+    {
+      "manifest_index": 1226,
+      "id": "forge__tool_01__tool_07",
+      "path": "cards/forge__tool_01__tool_07.png",
+      "bucket": "TOOL x TOOL",
+      "left": "tool_01",
+      "right": "tool_07"
+    },
+    {
+      "manifest_index": 1227,
+      "id": "forge__tool_01__tool_08",
+      "path": "cards/forge__tool_01__tool_08.png",
+      "bucket": "TOOL x TOOL",
+      "left": "tool_01",
+      "right": "tool_08"
+    }
+  ]
+}
