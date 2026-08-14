@@ -3,7 +3,7 @@ import {
   calculateResonantPower,
   currentResonanceStreak,
 } from "../resonance";
-import { cloneCombatState, cloneCommand } from "./clone";
+import { cloneCombatState } from "./clone";
 import { applyOperations } from "./operations";
 import { drawCards } from "./prng";
 import type {
@@ -17,7 +17,7 @@ import type {
   EffectProgram,
   RejectionReason,
 } from "./types";
-import { isValidCombatCommand, validateCombatState } from "./validation";
+import { decodeCombatCommand, decodeCombatState } from "./validation";
 
 function reject(state: CombatState, command: CombatCommand, reason: RejectionReason): CombatResult {
   return {
@@ -216,36 +216,17 @@ function assertNever(value: never): never {
 export function reduceCombat(input: CombatState, command: CombatCommand): CombatResult;
 export function reduceCombat(input: unknown, command: unknown): CombatReducerResult;
 export function reduceCombat(input: unknown, command: unknown): CombatReducerResult {
-  const validation = validateCombatState(input);
-  if (!validation.valid) return invalidStateBoundary();
-  let stateInput: CombatState;
-  try {
-    stateInput = cloneCombatState(input as CombatState);
-  } catch {
-    return invalidStateBoundary();
-  }
-  if (!validateCombatState(stateInput).valid) return invalidStateBoundary();
-  if (!isValidCombatCommand(command)) {
+  const decodedState = decodeCombatState(input);
+  if (!decodedState.valid) return invalidStateBoundary();
+  const stateInput = decodedState.value;
+  const decodedCommand = decodeCombatCommand(command);
+  if (!decodedCommand.valid) {
     return {
       state: cloneCombatState(stateInput),
       events: [{ type: "COMMAND_REJECTED", command: "UNKNOWN", reason: "INVALID_COMMAND" }],
     };
   }
-  let safeCommand: CombatCommand;
-  try {
-    safeCommand = cloneCommand(command as CombatCommand);
-  } catch {
-    return {
-      state: cloneCombatState(stateInput),
-      events: [{ type: "COMMAND_REJECTED", command: "UNKNOWN", reason: "INVALID_COMMAND" }],
-    };
-  }
-  if (!isValidCombatCommand(safeCommand)) {
-    return {
-      state: cloneCombatState(stateInput),
-      events: [{ type: "COMMAND_REJECTED", command: "UNKNOWN", reason: "INVALID_COMMAND" }],
-    };
-  }
+  const safeCommand = decodedCommand.value;
   if (stateInput.status !== "ONGOING") return reject(stateInput, safeCommand, "TERMINAL_COMBAT");
 
   const expectedPhase = safeCommand.type === "START_TURN" ? "TURN_READY" : "PLAYER_ACTION";

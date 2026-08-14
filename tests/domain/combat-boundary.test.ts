@@ -4,6 +4,8 @@ import {
   CombatReplayValidationError,
   CombatValidationError,
   createCombatState,
+  decodeCombatSetup,
+  decodeCombatState,
   reduceCombat,
   runCombatReplay,
   validateCombatCommand,
@@ -12,7 +14,28 @@ import {
   type CombatCommand,
   type CombatState,
 } from "../../src/domain";
+import { cloneCombatSetup, cloneOperation } from "../../src/domain/combat/clone";
 import { enemyId, fixtureSetup, jsonClone } from "./fixtures";
+
+function changingDescriptor<T extends object>(
+  source: T,
+  key: PropertyKey,
+  values: readonly unknown[],
+): { value: T; reads: () => number } {
+  let reads = 0;
+  return {
+    value: new Proxy(source, {
+      getOwnPropertyDescriptor(target, candidate) {
+        const descriptor = Reflect.getOwnPropertyDescriptor(target, candidate);
+        if (candidate !== key || !descriptor || !("value" in descriptor)) return descriptor;
+        const value = values[Math.min(reads, values.length - 1)];
+        reads += 1;
+        return { ...descriptor, value };
+      },
+    }),
+    reads: () => reads,
+  };
+}
 
 describe("strict public combat boundaries", () => {
   it.each([
@@ -87,6 +110,84 @@ describe("strict public combat boundaries", () => {
     expect(validateCombatState(proxiedState).valid).toBe(true);
     expect(reduceCombat(proxiedState, { type: "START_TURN" }).state?.phase).toBe("PLAYER_ACTION");
     expect(reads).toBe(0);
+  });
+
+  it("reads nested card descriptors once and keeps the first setup/state snapshot", () => {
+    const setup = fixtureSetup();
+    const setupCost = changingDescriptor(setup.cards[0], "cost", [1, 2, 3]);
+    setup.cards[0] = setupCost.value;
+    const decodedSetup = decodeCombatSetup(setup);
+    expect(decodedSetup.valid).toBe(true);
+    if (!decodedSetup.valid) throw new Error(decodedSetup.errors.join("; "));
+    expect(decodedSetup.value.cards[0].cost).toBe(1);
+    expect(setupCost.reads()).toBe(1);
+
+    const state = createCombatState(fixtureSetup());
+    const stateCost = changingDescriptor(state.cards[0], "cost", [1, 2, 3]);
+    state.cards[0] = stateCost.value;
+    const decodedState = decodeCombatState(state);
+    expect(decodedState.valid).toBe(true);
+    if (!decodedState.valid) throw new Error(decodedState.errors.join("; "));
+    expect(decodedState.value.cards[0].cost).toBe(1);
+    expect(stateCost.reads()).toBe(1);
+  });
+
+  it("uses one decoded setup snapshot for replay setup and initial state", () => {
+    const seed = changingDescriptor(fixtureSetup(), "seed", [100, 101, 102]);
+    const replay = runCombatReplay(seed.value, []);
+    expect(seed.reads()).toBe(1);
+    expect(replay.initialSetup.seed).toBe(100);
+    expect(replay.initialState.randomState).toBe(100);
+    expect(createCombatState(replay.initialSetup)).toEqual(replay.initialState);
+  });
+
+  it("uses the first command target and replay array descriptors exactly once", () => {
+    const action = reduceCombat(createCombatState(fixtureSetup()), { type: "START_TURN" }).state;
+    const enemyTarget = { kind: "ENEMY" as const, enemyId };
+    const command = changingDescriptor(
+      { type: "PLAY_CARD" as const, instanceId: "instance_a1", target: enemyTarget },
+      "target",
+      [enemyTarget, { kind: "PLAYER" }, null],
+    );
+    const result = reduceCombat(action, command.value);
+    expect(command.reads()).toBe(1);
+    expect(result.state?.enemy.hp).toBe(29);
+    expect(result.events.some((event) => event.type === "CARD_PLAYED")).toBe(true);
+
+    const firstCommand = { type: "START_TURN" as const };
+    const commands = changingDescriptor(
+      [firstCommand],
+      "0",
+      [firstCommand, { type: "END_TURN" }, { type: "PLAY_CARD" }],
+    );
+    const replay = runCombatReplay(fixtureSetup(), commands.value);
+    expect(commands.reads()).toBe(1);
+    expect(replay.commands).toEqual([firstCommand]);
+    expect(replay.steps[0].state.phase).toBe("PLAYER_ACTION");
+  });
+
+  it("returns a decoded state immune to later source mutation", () => {
+    const source = createCombatState(fixtureSetup());
+    const decoded = decodeCombatState(source);
+    expect(decoded.valid).toBe(true);
+    if (!decoded.valid) throw new Error(decoded.errors.join("; "));
+    source.player.hp = 1;
+    source.cards[0].cost = 2;
+    source.zones.deck.reverse();
+    expect(decoded.value.player.hp).toBe(30);
+    expect(decoded.value.cards[0].cost).toBe(1);
+    expect(decoded.value.zones.deck[0]).toBe("instance_a1");
+  });
+
+  it("turns reflection failures into invalid boundary results", () => {
+    const setup = new Proxy(fixtureSetup(), {
+      getOwnPropertyDescriptor(target, key) {
+        if (key === "seed") throw new Error("descriptor failure");
+        return Reflect.getOwnPropertyDescriptor(target, key);
+      },
+    });
+    expect(decodeCombatSetup(setup).valid).toBe(false);
+    expect(() => createCombatState(setup)).toThrow(CombatValidationError);
   });
 
   it("returns a null-state boundary failure for malformed state without cloning it", () => {
@@ -202,5 +303,38 @@ describe("strict public combat boundaries", () => {
     expect(validateCombatState(staleTerminal).valid).toBe(false);
     staleTerminal.phase = "TERMINAL";
     expect(validateCombatState(staleTerminal).valid).toBe(true);
+
+    for (const phase of ["START_TURN", "END_TURN"] as const) {
+      const transient = createCombatState(fixtureSetup());
+      transient.phase = phase;
+      expect(validateCombatState(transient).errors).toContain(
+        "ongoing combat must use an externally resumable phase",
+      );
+      expect(reduceCombat(transient, { type: "START_TURN" }).events[0]).toMatchObject({
+        command: "UNKNOWN",
+        reason: "INVALID_STATE",
+      });
+    }
+  });
+
+  it("throws for every malicious clone discriminant", () => {
+    const operation = {
+      kind: "DAMAGE",
+      target: { kind: "PLAYER" },
+      amount: { kind: "FIXED", amount: 1 },
+    };
+    expect(() => cloneOperation({ ...operation, kind: "BOGUS" } as never)).toThrow(
+      "Invalid combat operation",
+    );
+    expect(() => cloneOperation({ ...operation, target: { kind: "BOGUS" } } as never)).toThrow(
+      "Invalid combat target",
+    );
+    expect(() => cloneOperation({ ...operation, amount: { kind: "BOGUS" } } as never)).toThrow(
+      "Invalid combat amount",
+    );
+
+    const setup = fixtureSetup();
+    setup.programs[0].targetRule = { kind: "BOGUS" } as never;
+    expect(() => cloneCombatSetup(setup)).toThrow("Invalid combat target rule");
   });
 });

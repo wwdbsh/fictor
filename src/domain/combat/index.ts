@@ -11,6 +11,9 @@ export { reduceCombat } from "./reducer";
 export { CombatReplayValidationError, runCombatReplay } from "./replay";
 export { CombatValidationError, createCombatState } from "./setup";
 export {
+  decodeCombatCommand,
+  decodeCombatSetup,
+  decodeCombatState,
   validateCombatCommand,
   validateCombatSetup,
   validateCombatState,

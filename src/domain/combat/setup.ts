@@ -1,8 +1,7 @@
 import { createResonanceState } from "../resonance";
-import { cloneCombatSetup } from "./clone";
 import { COMBAT_ENGINE_VERSION, COMBAT_PRNG_VERSION, COMBAT_SCHEMA_VERSION } from "./constants";
 import type { CombatSetup, CombatState } from "./types";
-import { validateCombatSetup } from "./validation";
+import { decodeCombatSetup } from "./validation";
 
 export class CombatValidationError extends Error {
   readonly errors: string[];
@@ -17,17 +16,12 @@ export class CombatValidationError extends Error {
 export function createCombatState(input: CombatSetup): CombatState;
 export function createCombatState(input: unknown): CombatState;
 export function createCombatState(input: unknown): CombatState {
-  const validation = validateCombatSetup(input);
-  if (!validation.valid) throw new CombatValidationError(validation.errors);
-  let setup: CombatSetup;
-  try {
-    setup = cloneCombatSetup(input as CombatSetup);
-  } catch {
-    throw new CombatValidationError(["combat setup changed during canonicalization"]);
-  }
-  const canonicalValidation = validateCombatSetup(setup);
-  if (!canonicalValidation.valid) throw new CombatValidationError(canonicalValidation.errors);
+  const decoded = decodeCombatSetup(input);
+  if (!decoded.valid) throw new CombatValidationError(decoded.errors);
+  return createStateFromDecoded(decoded.value);
+}
 
+export function createStateFromDecoded(setup: CombatSetup): CombatState {
   return {
     schemaVersion: COMBAT_SCHEMA_VERSION,
     engineVersion: COMBAT_ENGINE_VERSION,

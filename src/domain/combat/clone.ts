@@ -33,16 +33,21 @@ function cloneStrings(values: readonly string[]): string[] {
 
 function cloneTarget<T extends CombatTarget | OperationTarget>(target: T): T {
   const kind = own<T["kind"]>(target, "kind");
-  if (kind === "ENEMY") return { kind: "ENEMY", enemyId: own<string>(target, "enemyId") } as T;
-  if (kind === "SELECTED") return { kind: "SELECTED" } as T;
-  return { kind: "PLAYER" } as T;
+  switch (kind) {
+    case "PLAYER": return { kind: "PLAYER" } as T;
+    case "ENEMY": return { kind: "ENEMY", enemyId: own<string>(target, "enemyId") } as T;
+    case "SELECTED": return { kind: "SELECTED" } as T;
+    default: throw new Error("Invalid combat target during canonicalization");
+  }
 }
 
 function cloneAmount(amount: AmountExpression): AmountExpression {
   const kind = own<AmountExpression["kind"]>(amount, "kind");
-  return kind === "FIXED"
-    ? { kind: "FIXED", amount: own<number>(amount, "amount") }
-    : { kind: "EFFECT_POWER", multiplier: own<number>(amount, "multiplier") };
+  switch (kind) {
+    case "FIXED": return { kind: "FIXED", amount: own<number>(amount, "amount") };
+    case "EFFECT_POWER": return { kind: "EFFECT_POWER", multiplier: own<number>(amount, "multiplier") };
+    default: throw new Error("Invalid combat amount during canonicalization");
+  }
 }
 
 export function cloneOperation(operation: AtomicOperation): AtomicOperation {
@@ -53,14 +58,20 @@ export function cloneOperation(operation: AtomicOperation): AtomicOperation {
     case "DAMAGE": return { kind: "DAMAGE", target, amount };
     case "GAIN_BLOCK": return { kind: "GAIN_BLOCK", target, amount };
     case "HEAL": return { kind: "HEAL", target, amount };
+    default: throw new Error("Invalid combat operation during canonicalization");
   }
 }
 
 function cloneTargetRule(rule: TargetRule): TargetRule {
   const kind = own<TargetRule["kind"]>(rule, "kind");
-  return kind === "NONE"
-    ? { kind: "NONE" }
-    : { kind: "REQUIRED", allowed: own<"PLAYER" | "ENEMY" | "EITHER">(rule, "allowed") };
+  switch (kind) {
+    case "NONE": return { kind: "NONE" };
+    case "REQUIRED": return {
+      kind: "REQUIRED",
+      allowed: own<"PLAYER" | "ENEMY" | "EITHER">(rule, "allowed"),
+    };
+    default: throw new Error("Invalid combat target rule during canonicalization");
+  }
 }
 
 function cloneIntent(intent: EnemyIntent): EnemyIntent {

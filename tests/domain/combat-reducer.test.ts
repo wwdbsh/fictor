@@ -47,7 +47,10 @@ describe("combat state machine", () => {
       const intermediate = jsonClone(action);
       intermediate.phase = phase;
       for (const command of [{ type: "START_TURN" }, { type: "END_TURN" }, play("instance_a1")] as CombatCommand[]) {
-        expect(reduceCombat(intermediate, command).events[0]).toMatchObject({ reason: "INVALID_PHASE" });
+        expect(reduceCombat(intermediate, command).events[0]).toMatchObject({
+          command: "UNKNOWN",
+          reason: "INVALID_STATE",
+        });
       }
     }
   });

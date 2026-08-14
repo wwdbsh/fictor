@@ -189,6 +189,10 @@ export interface ValidationResult {
   errors: string[];
 }
 
+export type DecodeResult<T> =
+  | { valid: true; value: T; errors: [] }
+  | { valid: false; errors: string[] };
+
 export interface CombatReplayStep {
   command: CombatCommand;
   state: CombatState;

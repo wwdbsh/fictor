@@ -6,9 +6,9 @@ import {
   COMBAT_REPLAY_SCHEMA_VERSION,
 } from "./constants";
 import { reduceCombat } from "./reducer";
-import { createCombatState } from "./setup";
+import { CombatValidationError, createStateFromDecoded } from "./setup";
 import type { CombatCommand, CombatReplay, CombatSetup } from "./types";
-import { validateCombatCommand } from "./validation";
+import { decodeCombatCommands, decodeCombatSetup } from "./validation";
 
 export class CombatReplayValidationError extends Error {
   readonly errors: string[];
@@ -17,39 +17,6 @@ export class CombatReplayValidationError extends Error {
     super(`Invalid combat replay input: ${errors.join("; ")}`);
     this.name = "CombatReplayValidationError";
     this.errors = errors.slice();
-  }
-}
-
-function safeCommands(candidate: unknown): CombatCommand[] {
-  try {
-    if (!Array.isArray(candidate) || Object.getPrototypeOf(candidate) !== Array.prototype) {
-      throw new CombatReplayValidationError(["commands must be a plain array"]);
-    }
-    const keys = Reflect.ownKeys(candidate);
-    if (keys.some((key) => typeof key === "symbol")) {
-      throw new CombatReplayValidationError(["commands must not contain symbol keys"]);
-    }
-    const lengthDescriptor = Object.getOwnPropertyDescriptor(candidate, "length");
-    const length = lengthDescriptor && "value" in lengthDescriptor ? lengthDescriptor.value : -1;
-    if (!Number.isSafeInteger(length) || length < 0 || keys.length !== length + 1) {
-      throw new CombatReplayValidationError(["commands must be dense and have no extra properties"]);
-    }
-    const commands: CombatCommand[] = [];
-    for (let index = 0; index < length; index += 1) {
-      const descriptor = Object.getOwnPropertyDescriptor(candidate, String(index));
-      if (!descriptor || !("value" in descriptor)) {
-        throw new CombatReplayValidationError([`commands[${index}] must be an own data property`]);
-      }
-      const validation = validateCombatCommand(descriptor.value);
-      if (!validation.valid) {
-        throw new CombatReplayValidationError(validation.errors.map((error) => `commands[${index}]: ${error}`));
-      }
-      commands.push(cloneCommand(descriptor.value as CombatCommand));
-    }
-    return commands;
-  } catch (error) {
-    if (error instanceof CombatReplayValidationError) throw error;
-    throw new CombatReplayValidationError(["commands cannot be inspected safely"]);
   }
 }
 
@@ -105,14 +72,14 @@ export function fnv1a32(value: string): string {
 export function runCombatReplay(inputSetup: CombatSetup, inputCommands: readonly CombatCommand[]): CombatReplay;
 export function runCombatReplay(inputSetup: unknown, inputCommands: unknown): CombatReplay;
 export function runCombatReplay(inputSetup: unknown, inputCommands: unknown): CombatReplay {
-  let state = createCombatState(inputSetup);
-  let initialSetup: CombatSetup;
-  try {
-    initialSetup = cloneCombatSetup(inputSetup as CombatSetup);
-  } catch {
-    throw new CombatReplayValidationError(["setup changed during replay canonicalization"]);
-  }
-  const commands = safeCommands(inputCommands);
+  const decodedSetup = decodeCombatSetup(inputSetup);
+  if (!decodedSetup.valid) throw new CombatValidationError(decodedSetup.errors);
+  const decodedCommands = decodeCombatCommands(inputCommands);
+  if (!decodedCommands.valid) throw new CombatReplayValidationError(decodedCommands.errors);
+
+  const initialSetup = cloneCombatSetup(decodedSetup.value);
+  let state = createStateFromDecoded(decodedSetup.value);
+  const commands = decodedCommands.value;
   const initialState = cloneCombatState(state);
   const steps = commands.map((command) => {
     const result = reduceCombat(state, command);

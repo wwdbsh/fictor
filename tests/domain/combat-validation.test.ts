@@ -4,6 +4,7 @@ import {
   COMBAT_EFFECT_IDS,
   CombatValidationError,
   createCombatState,
+  decodeCombatState,
   validateCombatSetup,
   validateCombatState,
   type CombatEffectId,
@@ -81,11 +82,17 @@ describe("combat runtime boundary", () => {
     );
   });
 
-  it("exports a T024-safe validation seam for atomic deserialized replacement", () => {
+  it("exports a T024-safe decoder alongside the boolean validation wrapper", () => {
     const state = createCombatState(fixtureSetup());
     const replacement = jsonClone(state);
     expect(validateCombatState(replacement)).toEqual({ valid: true, errors: [] });
+    const decoded = decodeCombatState(replacement);
+    expect(decoded.valid).toBe(true);
+    if (!decoded.valid) throw new Error(decoded.errors.join("; "));
+    expect(decoded.value).toEqual(replacement);
+    expect(decoded.value).not.toBe(replacement);
     replacement.player.energy = replacement.rules.maxEnergy + 1;
+    expect(decoded.value.player.energy).toBe(0);
     expect(validateCombatState(replacement).valid).toBe(false);
     expect(validateCombatState({ schemaVersion: "combat-state-v2" }).valid).toBe(false);
   });

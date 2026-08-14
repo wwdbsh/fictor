@@ -6,13 +6,13 @@ import {
   COMBAT_SCHEMA_VERSION,
   type CombatEffectId,
 } from "./constants";
-import { cloneCombatSetup, cloneCombatState } from "./clone";
 import type {
   AtomicOperation,
   CombatCommand,
   CombatRules,
   CombatSetup,
   CombatState,
+  DecodeResult,
   EffectProgram,
   EnemyIntent,
   OperationTarget,
@@ -23,6 +23,116 @@ const UINT32_MAX = 0xffff_ffff;
 const SAFE_MAGNITUDE = Number.MAX_SAFE_INTEGER;
 
 type UnknownRecord = Record<string, unknown>;
+
+class SnapshotError extends Error {}
+
+function snapshotValue(
+  value: unknown,
+  location: string,
+  seen: WeakMap<object, unknown>,
+): unknown {
+  if (value === null || typeof value !== "object") return value;
+
+  const source = value as object;
+  const existing = seen.get(source);
+  if (existing !== undefined) return existing;
+
+  let isArray: boolean;
+  let prototype: object | null;
+  let ownKeys: (string | symbol)[];
+  try {
+    isArray = Array.isArray(source);
+    prototype = Object.getPrototypeOf(source) as object | null;
+    ownKeys = Reflect.ownKeys(source);
+  } catch {
+    throw new SnapshotError(`${location} cannot be inspected safely`);
+  }
+
+  if (isArray ? prototype !== Array.prototype : prototype !== Object.prototype && prototype !== null) {
+    throw new SnapshotError(
+      isArray
+        ? `${location} must use Array.prototype`
+        : `${location} must use Object.prototype or null`,
+    );
+  }
+  if (ownKeys.some((key) => typeof key === "symbol")) {
+    throw new SnapshotError(`${location} must not contain symbol keys`);
+  }
+
+  const descriptors = new Map<string, PropertyDescriptor>();
+  for (const key of ownKeys as string[]) {
+    let descriptor: PropertyDescriptor | undefined;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(source, key);
+    } catch {
+      throw new SnapshotError(`${location}.${key} cannot be inspected safely`);
+    }
+    if (!descriptor || !("value" in descriptor)) {
+      throw new SnapshotError(`${location}.${key} must be an own data property`);
+    }
+    descriptors.set(key, descriptor);
+  }
+
+  if (isArray) {
+    const length = descriptors.get("length")?.value;
+    if (!Number.isSafeInteger(length) || length < 0) {
+      throw new SnapshotError(`${location}.length must be a safe nonnegative integer`);
+    }
+    for (const key of descriptors.keys()) {
+      if (key === "length") continue;
+      const index = Number(key);
+      if (!Number.isSafeInteger(index) || index < 0 || index >= length || String(index) !== key) {
+        throw new SnapshotError(`${location} has unexpected array key: ${key}`);
+      }
+    }
+    if (descriptors.size !== length + 1) {
+      throw new SnapshotError(`${location} must not be sparse or have extra properties`);
+    }
+
+    const snapshot: unknown[] = [];
+    seen.set(source, snapshot);
+    for (let index = 0; index < length; index += 1) {
+      snapshot.push(
+        snapshotValue(descriptors.get(String(index))!.value, `${location}[${index}]`, seen),
+      );
+    }
+    return snapshot;
+  }
+
+  const snapshot: UnknownRecord = {};
+  seen.set(source, snapshot);
+  for (const [key, descriptor] of descriptors) {
+    Object.defineProperty(snapshot, key, {
+      configurable: true,
+      enumerable: true,
+      writable: true,
+      value: snapshotValue(descriptor.value, `${location}.${key}`, seen),
+    });
+  }
+  return snapshot;
+}
+
+function snapshotBoundary(
+  candidate: unknown,
+  location: string,
+): { ok: true; value: unknown } | { ok: false; errors: string[] } {
+  try {
+    return { ok: true, value: snapshotValue(candidate, location, new WeakMap()) };
+  } catch (error) {
+    return {
+      ok: false,
+      errors: [
+        error instanceof SnapshotError
+          ? error.message
+          : `${location} cannot be inspected safely`,
+      ],
+    };
+  }
+}
+
+function asValidationResult<T>(result: DecodeResult<T>): ValidationResult {
+  return { valid: result.valid, errors: [...result.errors] };
+}
 
 export function isCombatEffectId(value: unknown): value is CombatEffectId {
   return typeof value === "string" && COMBAT_EFFECT_IDS.some((effectId) => effectId === value);
@@ -397,7 +507,7 @@ function validateIntentsShape(value: unknown, enemyId: string, location: string,
   return errors.length === 0;
 }
 
-export function validateCombatSetup(candidate: unknown): ValidationResult {
+function validateCombatSetupSnapshot(candidate: unknown): ValidationResult {
   const errors: string[] = [];
   try {
     if (!strictRecord(candidate, ["seed", "rules", "player", "enemy", "cards", "instances", "deck", "programs"], "setup", errors)) return { valid: false, errors };
@@ -424,7 +534,7 @@ export function validateCombatSetup(candidate: unknown): ValidationResult {
     const deckValue = property(setup, "deck");
     validateStringArray(deckValue, "initial deck", errors);
     if (errors.length === 0) {
-      const typed = cloneCombatSetup(candidate as unknown as CombatSetup);
+      const typed = candidate as unknown as CombatSetup;
       addUniqueErrors(typed.deck, "initial deck", errors);
       const instanceIds = new Set(typed.instances.map((instance) => instance.instanceId));
       for (const instanceId of typed.deck) if (!instanceIds.has(instanceId)) errors.push(`initial deck references unknown instance: ${instanceId}`);
@@ -436,7 +546,7 @@ export function validateCombatSetup(candidate: unknown): ValidationResult {
   return { valid: errors.length === 0, errors };
 }
 
-export function validateCombatCommand(candidate: unknown): ValidationResult {
+function validateCombatCommandSnapshot(candidate: unknown): ValidationResult {
   const errors: string[] = [];
   try {
     const typeDescriptor = candidate !== null && typeof candidate === "object" ? Object.getOwnPropertyDescriptor(candidate, "type") : undefined;
@@ -455,7 +565,7 @@ export function validateCombatCommand(candidate: unknown): ValidationResult {
   return { valid: errors.length === 0, errors };
 }
 
-export function validateCombatState(candidate: unknown): ValidationResult {
+function validateCombatStateSnapshot(candidate: unknown): ValidationResult {
   const errors: string[] = [];
   try {
     const stateKeys = ["schemaVersion", "engineVersion", "prngVersion", "phase", "status", "turn", "randomState", "rules", "player", "enemy", "cards", "instances", "programs", "zones", "resonance"];
@@ -511,7 +621,7 @@ export function validateCombatState(candidate: unknown): ValidationResult {
       }
     }
     if (errors.length === 0) {
-      const state = cloneCombatState(candidate as unknown as CombatState);
+      const state = candidate as unknown as CombatState;
       const allZoneIds = [...state.zones.deck, ...state.zones.hand, ...state.zones.discard, ...state.zones.exile];
       const knownInstances = new Set(state.instances.map((instance) => instance.instanceId));
       for (const id of allZoneIds) if (!knownInstances.has(id)) errors.push(`zone references unknown instance: ${id}`);
@@ -520,7 +630,7 @@ export function validateCombatState(candidate: unknown): ValidationResult {
       const enemyDead = state.enemy.hp <= 0;
       const expectedStatus = playerDead && enemyDead ? (state.rules.terminalPolicy === "DEFEAT_FIRST" ? "DEFEAT" : "VICTORY") : playerDead ? "DEFEAT" : enemyDead ? "VICTORY" : "ONGOING";
       if (state.status !== expectedStatus) errors.push(`combat status must be ${expectedStatus} for current HP`);
-      if (state.status === "ONGOING" && state.phase === "TERMINAL") errors.push("ongoing combat cannot use TERMINAL phase");
+      if (state.status === "ONGOING" && !["TURN_READY", "PLAYER_ACTION"].includes(state.phase)) errors.push("ongoing combat must use an externally resumable phase");
       if (state.status !== "ONGOING" && state.phase !== "TERMINAL") errors.push("terminal combat must use TERMINAL phase");
     }
   } catch {
@@ -529,6 +639,65 @@ export function validateCombatState(candidate: unknown): ValidationResult {
   return { valid: errors.length === 0, errors };
 }
 
+export function decodeCombatSetup(candidate: unknown): DecodeResult<CombatSetup> {
+  const snapshot = snapshotBoundary(candidate, "combat setup");
+  if (!snapshot.ok) return { valid: false, errors: snapshot.errors };
+  const validation = validateCombatSetupSnapshot(snapshot.value);
+  return validation.valid
+    ? { valid: true, value: snapshot.value as CombatSetup, errors: [] }
+    : { valid: false, errors: validation.errors };
+}
+
+export function validateCombatSetup(candidate: unknown): ValidationResult {
+  return asValidationResult(decodeCombatSetup(candidate));
+}
+
+export function decodeCombatCommand(candidate: unknown): DecodeResult<CombatCommand> {
+  const snapshot = snapshotBoundary(candidate, "combat command");
+  if (!snapshot.ok) return { valid: false, errors: snapshot.errors };
+  const validation = validateCombatCommandSnapshot(snapshot.value);
+  return validation.valid
+    ? { valid: true, value: snapshot.value as CombatCommand, errors: [] }
+    : { valid: false, errors: validation.errors };
+}
+
+export function decodeCombatCommands(candidate: unknown): DecodeResult<CombatCommand[]> {
+  const snapshot = snapshotBoundary(candidate, "commands");
+  if (!snapshot.ok) return { valid: false, errors: snapshot.errors };
+  if (!Array.isArray(snapshot.value)) {
+    return { valid: false, errors: ["commands must be a plain array"] };
+  }
+  const commands: CombatCommand[] = [];
+  for (let index = 0; index < snapshot.value.length; index += 1) {
+    const validation = validateCombatCommandSnapshot(snapshot.value[index]);
+    if (!validation.valid) {
+      return {
+        valid: false,
+        errors: validation.errors.map((error) => `commands[${index}]: ${error}`),
+      };
+    }
+    commands.push(snapshot.value[index] as CombatCommand);
+  }
+  return { valid: true, value: commands, errors: [] };
+}
+
+export function decodeCombatState(candidate: unknown): DecodeResult<CombatState> {
+  const snapshot = snapshotBoundary(candidate, "combat state");
+  if (!snapshot.ok) return { valid: false, errors: snapshot.errors };
+  const validation = validateCombatStateSnapshot(snapshot.value);
+  return validation.valid
+    ? { valid: true, value: snapshot.value as CombatState, errors: [] }
+    : { valid: false, errors: validation.errors };
+}
+
+export function validateCombatState(candidate: unknown): ValidationResult {
+  return asValidationResult(decodeCombatState(candidate));
+}
+
 export function isValidCombatCommand(candidate: unknown): candidate is CombatCommand {
-  return validateCombatCommand(candidate).valid;
+  return decodeCombatCommand(candidate).valid;
+}
+
+export function validateCombatCommand(candidate: unknown): ValidationResult {
+  return asValidationResult(decodeCombatCommand(candidate));
 }

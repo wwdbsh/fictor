@@ -29,7 +29,9 @@ PLAYER_ACTION --END_TURN--> END_TURN --enemy intent--> TURN_READY
 `terminalPolicy` (`DEFEAT_FIRST` 또는 `VICTORY_FIRST`)로만 결정한다. terminal 상태에서는 모든 명령을
 거부하므로 적 행동이나 intent 회전이 추가로 발생하지 않는다. lethal 판정은 state의 status와 phase를
 함께 바꾼 뒤 `COMBAT_ENDED`, `PHASE_CHANGED(TERMINAL)` 순으로 event를 낸다. validator는 `ONGOING`과
-`TERMINAL`의 조합 및 terminal status와 비-terminal phase의 조합을 모두 거부한다.
+`TERMINAL`의 조합 및 terminal status와 비-terminal phase의 조합을 모두 거부한다. 외부에서 재개 가능한
+phase는 ongoing일 때 `TURN_READY | PLAYER_ACTION`, terminal일 때 `TERMINAL`뿐이다. event에 기록되는
+`START_TURN | END_TURN`은 reducer 내부의 순간 phase이므로 역직렬화 state boundary에서는 거부한다.
 
 ## 수치와 밸런스 주입
 
@@ -78,7 +80,8 @@ registry에 아직 주입되지 않았다.** T023은 dispatch 경계와 원자 �
 카드는 `cardId` 정의와 `instanceId` 인스턴스를 분리한다. 같은 `cardId` 인스턴스가 여러 장 존재할 수
 있지만 `instanceId`는 유일하다. deck, hand, discard, exile은 instance id만 저장하고 모든 인스턴스는 정확히
 한 zone에 있어야 한다. `validateCombatState`는 T024 persistence가 역직렬화 결과를 원자 교체하기 전에 이
-불변식을 검증하는 공개 seam이다.
+불변식을 확인하는 boolean 편의 wrapper다. 실제 교체 seam은 discriminated result로 canonical value를
+돌려주는 `decodeCombatState`이며, T024는 성공 결과의 `value`를 채택해야 한다.
 
 ## 적 intent와 대상
 
@@ -107,7 +110,9 @@ replay는 다음 버전을 기록한다.
 - PRNG: `fictor-splitmix32-fisher-yates-v2`
 - hash: `fnv1a32-v1`
 
-초기 setup/state, 명령, 매 step의 state/events를 모두 저장한다. canonical serializer는 object key를
+초기 setup/state, 명령, 매 step의 state/events를 모두 저장한다. replay는 setup을 한 번 decode하고 같은
+canonical setup으로 `initialSetup`과 `initialState`를 만들므로 둘의 seed/randomState가 갈라질 수 없다.
+canonical serializer는 object key를
 재귀 정렬하며 배열 순서는 보존한다. FNV-1a32 hash는 결정론 회귀 탐지용이지 보안·무결성 서명이 아니다.
 
 ## 불변식, rollback, 후속 seam
@@ -121,7 +126,14 @@ operation에서든 검증 또는 overflow가 실패하면 원본과 deep-equal�
 property allowlist를 가져야 하며 `Object.prototype` 또는 null prototype만 허용한다. 배열은
 `Array.prototype`, dense index와 `length`만 허용한다. 상속 필드, accessor, symbol, extra callback/function,
 sparse array와 array custom property는 거부한다. null-prototype record는 허용하지만 canonical clone은
-ordinary 안전 객체로 만든다. descriptor를 통해 검증·복사하므로 getter를 실행하지 않는다.
+ordinary 안전 객체로 만든다. 공개 호출은 입력 그래프의 각 exact data descriptor를 한 번만 읽어 ordinary
+snapshot을 만든다. 모든 의미 검증, 실행, clone과 replay는 그 snapshot만 사용하고 reflection throw는 invalid로
+처리하므로 getter를 실행하거나 검증 뒤 원본을 재독하지 않는다.
+
+Proxy는 서로 다른 API 호출 사이에 descriptor 값을 바꿀 수 있다. 따라서 `validateCombatState(raw)`의 boolean을
+확인한 뒤 `raw`를 저장하는 두 호출짜리 패턴은 atomic하지 않다. `decodeCombatState(raw)`를 한 번 호출하고 성공
+결과의 canonical `value`를 저장해야 한다. 같은 원칙으로 setup, command, replay command 배열도 각 공개 호출에서
+한 번 decode되며 원본의 이후 mutation은 채택된 value에 전파되지 않는다.
 
 malformed state의 `reduceCombat` 결과는 `{ state: null, events: [INVALID_STATE/UNKNOWN] }`인 별도 boundary
 failure다. invalid state를 clone하지 않는다. state가 유효하고 command만 malformed이면 canonical state의
@@ -129,9 +141,9 @@ deep-equal 복사와 `INVALID_COMMAND/UNKNOWN` event를 반환한다. unknown co
 않는다. malformed setup은 `CombatValidationError`, malformed replay command 배열은
 `CombatReplayValidationError`를 던진다. 둘 다 typed fail-closed 오류다.
 
-root domain API는 create/reduce/validate/replay, versions/constants와 공개 types만 노출한다. PRNG vectors,
+root domain API는 create/reduce/decode/validate/replay, versions/constants와 공개 types만 노출한다. PRNG vectors,
 bounded sampler, canonical serializer와 FNV 구현은 회귀 테스트 가능한 internal module이지만 제품 API는 아니다.
 
-T024는 `validateCombatState`와 version 필드로 atomic persistence를 연결한다. T026은 injected rules의
+T024는 `decodeCombatState`의 canonical value와 version 필드로 atomic persistence를 연결한다. T026은 injected rules의
 block retention과 공명 adapter/정책을 확장한다. 즉석/공방 빚기 수명, UI, 종족 변주, enemy roster/AI,
 production 21효과 의미와 최종 밸런스 수치는 이 문서와 T023 구현 범위 밖이다.
