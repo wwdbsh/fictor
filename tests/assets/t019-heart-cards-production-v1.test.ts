@@ -162,13 +162,21 @@ describe("T019 manifest discovery", () => {
     expect(crossCheckT019EffectivePrompts(repositoryRoot, cachedPlan, [0, 3, 5])).toBe(3);
   });
 
-  test("the six land in cards/, alongside T015 output, and cannot collide with it", () => {
-    // Hearts share the cards/ directory with 384 committed T015 canonical cards. The names are
-    // disjoint and the store is no-clobber, so nothing existing can be overwritten.
+  test("the six land in cards/ on paths disjoint from every other manifest asset", () => {
+    // Hearts share the cards/ directory with T015's canonical cards. The safety property is
+    // that the two sets of paths cannot intersect — not whether the run has happened yet.
+    // (An earlier version asserted the six did not exist on disk, which was true only until
+    // the run wrote them; the same stale-snapshot mistake this suite exists to avoid.)
     const paths = cachedPlan.assets.map(({ path }) => path);
     expect(paths.every((path) => path.startsWith("cards/heart__"))).toBe(true);
     expect(new Set(paths).size).toBe(6);
-    for (const path of paths) expect(existsSync(resolve(repositoryRoot, "public/assets", path)), path).toBe(false);
+    const core = JSON.parse(readFileSync(resolve(repositoryRoot, T019_CORE_PLAN_PATH), "utf8")) as { assets: Array<{ category: string; path: string }> };
+    const others = new Set(core.assets.filter(({ category }) => category !== "HEART").map(({ path }) => path));
+    for (const path of paths) expect(others.has(path), path).toBe(false);
+    // And every other card in the shared directory belongs to someone else, by prefix alone.
+    const sharedDir = core.assets.filter(({ path }) => path.startsWith("cards/") && !path.startsWith("cards/heart__"));
+    expect(sharedDir.length).toBeGreaterThan(0);
+    expect(sharedDir.every(({ category }) => category !== "HEART")).toBe(true);
   });
 });
 
