@@ -1,4 +1,14 @@
-import { createCombatState, decodeCombatCommand, type CombatSetup, type EnemyIntent } from "../../domain/combat";
+import {
+  COMBAT_EFFECT_IDS,
+  createCombatState,
+  decodeCombatCommand,
+  type CardDefinition,
+  type CombatEffectId,
+  type CombatSetup,
+  type EffectProgram,
+  type EnemyIntent,
+} from "../../domain/combat";
+import { resolveForgeCard } from "../../domain/forge";
 import {
   decodeForgeResolverContext,
   decodeForgeRuntimeState,
@@ -15,6 +25,7 @@ import { STILLKIN_BLOCK_RETENTION } from "../../domain/races";
 import { canonicalSerialize, sha256Hex } from "../../domain/forge-runtime/source-binding";
 import {
   classifyPersistentProfile,
+  canonicalRecipeIdForCard,
   createDefaultProfile,
   FICTOR_SAVE_KEY,
   FICTOR_SAVE_V2_KEY,
@@ -30,6 +41,7 @@ import {
   type SaveLoadIssue,
   type StorageLike,
 } from "../../persistence";
+import { assertStillkinTrack1GroundAuthority } from "./track1-ground-authority";
 import {
   STILLKIN_TRACK1_CONFIG_HASH,
   STILLKIN_TRACK1_PROVISIONAL_CONFIG as CONFIG,
@@ -313,27 +325,74 @@ function enemyIntents(kind: "NORMAL" | "ELITE" | "BOSS"): EnemyIntent[] {
   ];
 }
 
-function combatSetup(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState, node: (typeof CONFIG.route)[number] & { kind: "ENCOUNTER" }): CombatSetup {
+const COMBAT_EFFECT_ID_SET = new Set<string>(COMBAT_EFFECT_IDS);
+
+function combatProjection(runtime: ForgeRuntimeStateV1, context: ForgeResolverContextV1): Pick<CombatSetup, "cards" | "instances" | "deck" | "programs"> {
+  const cards: CardDefinition[] = [];
+  const playableCardIds = new Set<string>();
+  const equipmentCardIds = new Set<string>();
+
+  for (const { cardId } of runtime.run.ownedInstances) {
+    if (playableCardIds.has(cardId) || equipmentCardIds.has(cardId)) continue;
+    const recipeId = canonicalRecipeIdForCard(cardId);
+    if (recipeId === null) {
+      if (!context.materials.some(({ id }) => id === cardId)) throw new Error(`unknown Track-1 material projection: ${cardId}`);
+      cards.push({ cardId, ...CONFIG.combat.baselineMaterial });
+      playableCardIds.add(cardId);
+      continue;
+    }
+
+    const [leftId, rightId] = recipeId.split("|");
+    const left = context.materials.find(({ id }) => id === leftId);
+    const right = context.materials.find(({ id }) => id === rightId);
+    if (!left || !right) throw new Error(`missing canonical recipe material: ${recipeId}`);
+    const resolved = resolveForgeCard(left, right, context.inputs);
+    if (resolved.card_id !== cardId || resolved.recipe_id !== recipeId) throw new Error(`canonical recipe projection mismatch: ${cardId}`);
+    if (resolved.branch === "EQUIPMENT") {
+      equipmentCardIds.add(cardId);
+      continue;
+    }
+    if (!resolved.combat_effect || !COMBAT_EFFECT_ID_SET.has(resolved.combat_effect) || !resolved.effective_attributes[0]) {
+      throw new Error(`invalid canonical combat projection: ${cardId}`);
+    }
+    cards.push({
+      cardId,
+      effectId: resolved.combat_effect as CombatEffectId,
+      cost: CONFIG.combat.forgedCard.cost,
+      power: CONFIG.combat.forgedCard.power,
+      resonanceAttribute: resolved.effective_attributes[0],
+    });
+    playableCardIds.add(cardId);
+  }
+
+  const instances = runtime.run.ownedInstances.filter(({ cardId }) => playableCardIds.has(cardId)).map((instance) => ({ ...instance }));
+  const playableInstanceIds = new Set(instances.map(({ instanceId }) => instanceId));
+  const deck = runtime.run.deck.filter((instanceId) => playableInstanceIds.has(instanceId));
+  const effectIds = [...new Set(cards.map(({ effectId }) => effectId))];
+  const programs: EffectProgram[] = effectIds.map((effectId) => effectId === "DELAYED_EXPLOSION"
+    ? { effectId, targetRule: { kind: "REQUIRED", allowed: "ENEMY" }, playedCardDestination: "DISCARD", operations: [{ kind: "DAMAGE", target: { kind: "SELECTED" }, amount: { kind: "EFFECT_POWER", multiplier: 1 } }] }
+    : { effectId, targetRule: { kind: "NONE" }, playedCardDestination: "DISCARD", operations: [] });
+  return { cards, instances, deck, programs };
+}
+
+function combatSetup(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState, node: (typeof CONFIG.route)[number] & { kind: "ENCOUNTER" }, context: ForgeResolverContextV1): CombatSetup {
   const kind = node.encounterKind;
   const hp = kind === "NORMAL" ? CONFIG.combat.normal.hp : kind === "ELITE" ? CONFIG.combat.elite.hp : CONFIG.combat.boss.hp;
-  const cardIds = [...new Set(runtime.run.ownedInstances.map(({ cardId }) => cardId))];
+  const projection = combatProjection(runtime, context);
   return {
     seed: fnv1a(`${flow.runId}|${node.nodeId}|${flow.nextEncounterNonce}`),
     rules: { maxEnergy: CONFIG.combat.maxEnergy, drawCount: CONFIG.combat.drawCount, resonanceRate: CONFIG.combat.resonanceRate, blockRetention: STILLKIN_BLOCK_RETENTION, terminalPolicy: "DEFEAT_FIRST" },
     player: { hp: flow.playerHp, maxHp: CONFIG.maxPlayerHp, block: 0 },
     enemy: { enemyId: node.encounterId, hp, maxHp: hp, block: 0, intents: enemyIntents(kind), initialIntentIndex: 0 },
-    cards: cardIds.map((cardId) => ({ cardId, effectId: "DELAYED_EXPLOSION", cost: CONFIG.combat.genericMaterialCost, power: CONFIG.combat.genericMaterialPower, resonanceAttribute: "STILL" })),
-    instances: runtime.run.ownedInstances.map((instance) => ({ ...instance })),
-    deck: [...runtime.run.deck],
-    programs: [{ effectId: "DELAYED_EXPLOSION", targetRule: { kind: "REQUIRED", allowed: "ENEMY" }, playedCardDestination: "DISCARD", operations: [{ kind: "DAMAGE", target: { kind: "SELECTED" }, amount: { kind: "EFFECT_POWER", multiplier: 1 } }] }],
+    ...projection,
   };
 }
 
-function loadedCombatMatchesAuthority(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState): boolean {
+function loadedCombatMatchesAuthority(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState, context: ForgeResolverContextV1): boolean {
   const active = runtime.run.activeCombat;
   const node = currentNode(flow);
   if (!active || !flow.combatBinding || node?.kind !== "ENCOUNTER" || active.state.status !== "ONGOING") return false;
-  const expected = combatSetup(runtime, { ...flow, nextEncounterNonce: flow.combatBinding.encounterNonce }, node);
+  const expected = combatSetup(runtime, { ...flow, nextEncounterNonce: flow.combatBinding.encounterNonce }, node, context);
   const expectedCards = expected.cards;
   return active.state.enemy.enemyId === node.encounterId
     && active.state.enemy.maxHp === expected.enemy.maxHp
@@ -343,8 +402,8 @@ function loadedCombatMatchesAuthority(runtime: ForgeRuntimeStateV1, flow: Stillk
     && active.state.player.hp <= flow.playerHp
     && JSON.stringify(active.state.cards) === JSON.stringify(expectedCards)
     && JSON.stringify(active.state.programs) === JSON.stringify(expected.programs)
-    && active.enrolledPersistentInstanceIds.length === runtime.run.deck.length
-    && active.enrolledPersistentInstanceIds.every((id, index) => id === runtime.run.deck[index]);
+    && active.enrolledPersistentInstanceIds.length === expected.deck.length
+    && active.enrolledPersistentInstanceIds.every((id, index) => id === expected.deck[index]);
 }
 
 function choicesForOffer(offerId: string): readonly RewardChoice[] {
@@ -357,8 +416,10 @@ function eventChoices(node: (typeof CONFIG.route)[number] | undefined): readonly
   if (!node || node.kind !== "EVENT") return [];
   if (node.eventType === "FICTOR") return CONFIG.offers.fictor.map((choice) => ({
     choiceId: choice.choiceId,
-    price: CONFIG.fictorFuelPrice,
-    effect: choice.kind === "MATERIAL" ? { kind: "MATERIAL", materialId: choice.materialId } : { kind: "RECIPE", recipeId: choice.recipeId },
+    price: choice.kind === "SKIP" ? 0 : CONFIG.fictorFuelPrice,
+    effect: choice.kind === "MATERIAL"
+      ? { kind: "MATERIAL", materialId: choice.materialId }
+      : choice.kind === "RECIPE" ? { kind: "RECIPE", recipeId: choice.recipeId } : { kind: "NONE" },
   }));
   if (node.eventType === "CACHE") return [{ choiceId: "take-cache", price: 0, effect: { kind: "MATERIALS", materialIds: CONFIG.offers.cacheMaterialIds } }];
   if (node.eventType === "WORKSHOP") return [{ choiceId: "use-workshop", price: 0, effect: { kind: "WORKSHOP_ENTITLEMENT", count: 1 } }];
@@ -463,6 +524,7 @@ function forgeEntitledWorkshop(
 
 export function createStillkinTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown): StillkinTrack1Controller {
   const options = captureOptions(rawOptions);
+  assertStillkinTrack1GroundAuthority();
   let state: ControllerState | null = null;
 
   const fresh = (profile = createDefaultProfile(), runSequence = 1): ControllerState => ({
@@ -474,7 +536,9 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
       || candidate.profile.discoveredRecipeIds.some((id, index) => id !== candidate.runtime.profile.discoveredRecipeIds[index])) return false;
     if (!runtimeReferencesAllowed(candidate.runtime, TRACK1_PERSISTENCE_CATALOG)) return false;
     if ((candidate.flow.phase === "IN_COMBAT") !== (candidate.runtime.run.activeCombat !== null)) return false;
-    return candidate.flow.phase !== "IN_COMBAT" || loadedCombatMatchesAuthority(candidate.runtime, candidate.flow);
+    try {
+      return candidate.flow.phase !== "IN_COMBAT" || loadedCombatMatchesAuthority(candidate.runtime, candidate.flow, options.context);
+    } catch { return false; }
   };
 
   const logicalStateHash = (candidate: ControllerState): string => sha256Hex(canonicalSerialize({
@@ -601,9 +665,10 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
           if (next.kind === "EVENT") candidate.flow.phase = "IN_EVENT";
           else {
             try {
-              const combat = createCombatState(combatSetup(candidate.runtime, candidate.flow, next));
+              const setup = combatSetup(candidate.runtime, candidate.flow, next, options.context);
+              const combat = createCombatState(setup);
               const binding = { runId: candidate.flow.runId, nodeId: next.nodeId, encounterId: next.encounterId, encounterNonce: candidate.flow.nextEncounterNonce };
-              const runtime = decodeForgeRuntimeState({ ...candidate.runtime, run: { ...candidate.runtime.run, activeCombat: { state: combat, enrolledPersistentInstanceIds: [...candidate.runtime.run.deck], forgeActionTurn: 0, forgeActionsRemaining: 0, isolatedMaterials: [], ephemeralResults: [] } } });
+              const runtime = decodeForgeRuntimeState({ ...candidate.runtime, run: { ...candidate.runtime.run, activeCombat: { state: combat, enrolledPersistentInstanceIds: [...setup.deck], forgeActionTurn: 0, forgeActionsRemaining: 0, isolatedMaterials: [], ephemeralResults: [] } } });
               if (!runtime.valid) failure = "COMBAT_SETUP_FAILED";
               else {
                 candidate.runtime = runtime.value;
@@ -696,6 +761,7 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
         } else if (eventType === "FICTOR") {
           const choice = CONFIG.offers.fictor.find((item) => item.choiceId === command.choiceId);
           if (!choice) failure = "CHOICE_NOT_BOUND";
+          else if (choice.kind === "SKIP") { /* Explicit zero-cost progression path. */ }
           else if (candidate.runtime.run.fuel < CONFIG.fictorFuelPrice) failure = "INSUFFICIENT_FUEL";
           else {
             const granted = choice.kind === "MATERIAL" ? addMaterial(candidate, choice.materialId, events) : addRecipe(candidate, choice.recipeId, events, true);

@@ -70,13 +70,19 @@ function enter(value: StillkinTrack1Controller): StillkinTrack1Snapshot {
 
 function winCombat(value: StillkinTrack1Controller): StillkinTrack1Snapshot {
   let snapshot = value.snapshot();
+  let steps = 0;
   while (snapshot.flow.phase === "IN_COMBAT") {
+    expect(steps++).toBeLessThan(1_000);
     const binding = snapshot.flow.combatBinding!;
     const active = snapshot.runtime.run.activeCombat!;
+    const instanceId = active.state.zones.hand[0];
+    const instance = active.state.instances.find((item) => item.instanceId === instanceId);
+    const card = active.state.cards.find((item) => item.cardId === instance?.cardId);
+    const program = active.state.programs.find((item) => item.effectId === card?.effectId);
     const combatCommand = active.state.phase === "TURN_READY"
       ? { type: "START_TURN" as const }
       : active.state.player.energy > 0 && active.state.zones.hand.length > 0
-        ? { type: "PLAY_CARD" as const, instanceId: active.state.zones.hand[0], target: { kind: "ENEMY" as const, enemyId: binding.encounterId } }
+        ? { type: "PLAY_CARD" as const, instanceId, target: program?.targetRule.kind === "NONE" ? null : { kind: "ENEMY" as const, enemyId: binding.encounterId } }
         : { type: "END_TURN" as const };
     const result = value.dispatch({ type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: combatCommand });
     expect(result.applied).toBe(true);
@@ -108,9 +114,14 @@ describe("Stillkin literal Track-1 controller", () => {
       authority: "CONTROLLER_SELECTED_EXECUTION_PACKET_UNDER_LITERAL_NOW_DIRECTION",
       balanceFinal: false,
       workshopFuelCost: FORGE_RUNTIME_FUEL_COST,
+      combat: {
+        baselineMaterial: { effectId: "DELAYED_EXPLOSION", cost: 1, power: 10, resonanceAttribute: "STILL" },
+        forgedCard: { cost: 1, power: 10 },
+      },
     });
     expect("cacheCount" in STILLKIN_TRACK1_PROVISIONAL_CONFIG).toBe(false);
     expect(STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers.cacheMaterialIds).toHaveLength(2);
+    expect(STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers.fictor.at(-1)).toEqual({ choiceId: "fictor-skip", kind: "SKIP" });
     expect(sha256Hex(canonicalSerialize(STILLKIN_TRACK1_PROVISIONAL_CONFIG))).toBe(STILLKIN_TRACK1_CONFIG_HASH);
   });
 
@@ -170,7 +181,24 @@ describe("Stillkin literal Track-1 controller", () => {
     expect(paid.snapshot.runtime.run.fuel).toBe(fuelBeforeFree - 1);
     expect(paid.events.filter((event) => event.type === "FUEL_SPENT")).toHaveLength(1);
 
-    snapshot = winCombatAfterEnter(value);
+    snapshot = enter(value);
+    const massive = snapshot.runtime.run.activeCombat!.state.cards.find((card) => card.cardId === "forge__ore_still__still_01");
+    expect(massive).toMatchObject({ effectId: "MASSIVE_BLOCK", resonanceAttribute: "STILL", cost: 1, power: 10 });
+    expect(snapshot.runtime.run.activeCombat!.state.programs.find(({ effectId }) => effectId === "MASSIVE_BLOCK")).toEqual({
+      effectId: "MASSIVE_BLOCK", targetRule: { kind: "NONE" }, playedCardDestination: "DISCARD", operations: [],
+    });
+    expect(snapshot.runtime.run.activeCombat!.state.programs.filter(({ effectId }) => effectId === "MASSIVE_BLOCK")).toHaveLength(1);
+
+    const canonicalReload = createStillkinTrack1Controller({ storage, resolverContext: context(), generationFactory: () => "unused" });
+    expect(canonicalReload.load()).toMatchObject({ source: "SAVED", snapshot: { flow: { phase: "IN_COMBAT" } } });
+    const projectionTamperStorage = new MemoryStorage();
+    const projectionTamper = JSON.parse(storage.values.get(FICTOR_SAVE_V2_KEY)!);
+    projectionTamper.runtime.run.activeCombat.state.cards.find((card: { cardId: string }) => card.cardId === "forge__ore_still__still_01").effectId = "DELAYED_EXPLOSION";
+    projectionTamperStorage.values.set(FICTOR_SAVE_V2_KEY, JSON.stringify(projectionTamper));
+    const projectionTamperController = createStillkinTrack1Controller({ storage: projectionTamperStorage, resolverContext: context(), generationFactory: () => "unused" });
+    expect(projectionTamperController.load()).toMatchObject({ source: "SAFE_INITIALIZED", snapshot: { persistence: { writeBlocked: true, issues: ["INVALID_RUN"] } } });
+
+    snapshot = winCombat(value);
     snapshot = value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "elite-tool-01" }).snapshot;
     snapshot = resolveSimpleEvent(value, "risk-collapse");
     snapshot = enter(value);
@@ -199,10 +227,23 @@ describe("Stillkin literal Track-1 controller", () => {
     const fictor = value.dispatch({ type: "RESOLVE_EVENT", ...base(snapshot), choiceId: "fictor-tool-02" });
     expect(fictor.applied).toBe(true);
     expect(fictor.snapshot.runtime.run.fuel).toBe(fuelBeforeFree - 2);
-    snapshot = value.dispatch({ type: "LEAVE_EVENT", ...base(fictor.snapshot) }).snapshot;
+    const toolOne = fictor.snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === "tool_01")!;
+    const toolTwo = fictor.snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === "tool_02")!;
+    const equipmentForge = value.dispatch({ type: "FORGE_WORKSHOP", ...base(fictor.snapshot), materialInstanceIds: [toolOne.instanceId, toolTwo.instanceId] });
+    expect(equipmentForge.applied).toBe(true);
+    const equipment = equipmentForge.snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === "forge__tool_01__tool_02")!;
+    expect(equipment).toBeDefined();
+    expect(equipmentForge.snapshot.runtime.run.deck).toContain(equipment.instanceId);
+    snapshot = value.dispatch({ type: "LEAVE_EVENT", ...base(equipmentForge.snapshot) }).snapshot;
     snapshot = resolveSimpleEvent(value, "read-record");
     snapshot = resolveSimpleEvent(value, "take-oddity");
-    snapshot = winCombatAfterEnter(value);
+    snapshot = enter(value);
+    const bossCombat = snapshot.runtime.run.activeCombat!;
+    expect(bossCombat.enrolledPersistentInstanceIds).not.toContain(equipment.instanceId);
+    expect(bossCombat.state.instances.some(({ instanceId }) => instanceId === equipment.instanceId)).toBe(false);
+    expect(bossCombat.state.zones.deck).not.toContain(equipment.instanceId);
+    expect(bossCombat.state.cards.some(({ cardId }) => cardId === equipment.cardId)).toBe(false);
+    snapshot = winCombat(value);
     expect(snapshot.flow.phase).toBe("RUN_WON");
     expect(snapshot.profile.ownedHeartIds).toEqual(["heart__still"]);
     expect(snapshot.profile.featureFlags.heartForge).toBe(false);
@@ -238,6 +279,56 @@ describe("Stillkin literal Track-1 controller", () => {
     expect(free).toMatchObject({ applied: true, snapshot: { runtime: { run: { fuel: 0 } } } });
     expect(free.events.filter((event) => event.type === "FREE_WORKSHOP_USED")).toHaveLength(1);
     expect(free.events.some((event) => event.type === "FUEL_SPENT")).toBe(false);
+  });
+
+  it("spends fuel to zero legally and uses the zero-cost FICTOR skip through boss progression", () => {
+    const { value } = controller();
+    let snapshot = enter(value);
+    snapshot = winCombat(value);
+    snapshot = value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "normal-ore" }).snapshot;
+
+    const paidPairs = [
+      ["ore_still", "still_01"],
+      ["still_02", "still_03"],
+      ["still_04", "still_05"],
+      ["ore_still", "still_02"],
+    ] as const;
+    for (const [leftCardId, rightCardId] of paidPairs) {
+      const left = snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === leftCardId)!;
+      const right = snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === rightCardId)!;
+      const paid = value.dispatch({ type: "FORGE_WORKSHOP", ...base(snapshot), materialInstanceIds: [left.instanceId, right.instanceId] });
+      expect(paid.applied).toBe(true);
+      snapshot = paid.snapshot;
+    }
+    expect(snapshot.runtime.run.fuel).toBe(0);
+
+    snapshot = resolveSimpleEvent(value, "take-cache");
+    snapshot = enter(value);
+    snapshot = value.dispatch({ type: "RESOLVE_EVENT", ...base(snapshot), choiceId: "use-workshop" }).snapshot;
+    const freeLeft = snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === "ore_still")!;
+    const freeRight = snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === "still_01")!;
+    snapshot = value.dispatch({ type: "USE_FREE_WORKSHOP", ...base(snapshot), materialInstanceIds: [freeLeft.instanceId, freeRight.instanceId] }).snapshot;
+    expect(snapshot.runtime.run.fuel).toBe(0);
+    snapshot = value.dispatch({ type: "LEAVE_EVENT", ...base(snapshot) }).snapshot;
+
+    snapshot = winCombatAfterEnter(value);
+    snapshot = value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "elite-odd-02" }).snapshot;
+    snapshot = resolveSimpleEvent(value, "risk-collapse");
+    snapshot = enter(value);
+    expect(snapshot.eventChoices).toContainEqual({ choiceId: "fictor-skip", price: 0, effect: { kind: "NONE" } });
+    const ownedBeforeSkip = snapshot.runtime.run.ownedInstances;
+    const recipesBeforeSkip = snapshot.profile.discoveredRecipeIds;
+    const skipped = value.dispatch({ type: "RESOLVE_EVENT", ...base(snapshot), choiceId: "fictor-skip" });
+    expect(skipped).toMatchObject({ applied: true, snapshot: { flow: { phase: "EVENT_RESOLVED" }, runtime: { run: { fuel: 0 } } } });
+    expect(skipped.snapshot.runtime.run.ownedInstances).toEqual(ownedBeforeSkip);
+    expect(skipped.snapshot.profile.discoveredRecipeIds).toEqual(recipesBeforeSkip);
+    snapshot = value.dispatch({ type: "LEAVE_EVENT", ...base(skipped.snapshot) }).snapshot;
+    snapshot = resolveSimpleEvent(value, "read-record");
+    snapshot = resolveSimpleEvent(value, "take-oddity");
+    snapshot = enter(value);
+    expect(snapshot.flow.phase).toBe("IN_COMBAT");
+    snapshot = winCombat(value);
+    expect(snapshot.flow.phase).toBe("RUN_WON");
   });
 
   it("reloads v2 mid-combat, rejects stale writers, rolls back quota failure, and leaves v1 bytes untouched", () => {

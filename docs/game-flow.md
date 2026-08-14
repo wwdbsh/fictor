@@ -22,10 +22,22 @@ route는 다음 순서로 고정된다.
 
 `d1 normal swarm → CACHE → WORKSHOP → d2 elite → COLLAPSE → FICTOR → RECORD → d3 ODDITY → boss`
 
+controller 생성 시 content registry의 실제 `getEnabledGround("GROUND_STILL")`을 조회한다. enabled 상태,
+depth 1/2/3, normal/elite/boss route ID와 종류, 여섯 event type, boss와 `heart__still` 재사용 asset 결속이
+config와 정확히 일치하지 않으면 시작·load 전에 fail-closed한다. 호출자가 registry authority를 주입할 수는 없다.
+
 controller는 node 진입 시 내부 CombatSetup으로 실제 ForgeRuntime `activeCombat`을 만든다. 전투 종료는
 별도 `RESOLVE_COMBAT`가 아니다. terminal이 된 `APPLY_COMBAT` 한 dispatch 안에서 현재 binding과 enemy를
 다시 확인하고, 즉석 빚기 재료 복구/결과 제거 이벤트를 포함해 HP를 회수한 뒤 `activeCombat=null`로
 만들고 보상 또는 패배/심장/승리를 적용한다. Stillkin 방어 절반 잔존과 provisional 공명률 0.1을 쓴다.
+
+전투 card projection은 raw material 52종과 canonical forge 결과를 구분한다. raw material/tool/oddity는
+config의 provisional baseline `DELAYED_EXPLOSION`, cost 1, power 10, STILL projection을 사용한다. canonical
+LAW/CATALYST 결과는 recipe pair를 resolver context에서 다시 `resolveForgeCard`하여 canonical
+`combat_effect`와 첫 `effective_attribute`를 보존한다. `DELAYED_EXPLOSION`만 기존 shared damage program을
+사용하고 나머지 20 effect는 다른 피해 효과로 재분류하지 않으며, T023 registry body가 구현될 때까지
+shared no-op(`targetRule: NONE`, `operations: []`)으로 정직하게 표시한다. EQUIPMENT 결과는 runtime의
+owned/deck에는 보존하지만 passive 전투 계약이 없으므로 combat cards/instances/deck/enrollment에서 제외한다.
 
 ## 보상과 이벤트
 
@@ -37,7 +49,8 @@ controller는 node 진입 시 내부 CombatSetup으로 실제 ForgeRuntime `acti
   `FORGE_WORKSHOP`은 fuel 1과 `FUEL_SPENT` 한 건을 유지한다.
 - COLLAPSE는 persisted xorshift32 상태를 정확히 한 번 전진시킨다. 절반 확률 성공은 `still_05`, 실패는
   HP 5 피해이며 lethal이면 즉시 `RUN_LOST`다.
-- FICTOR는 fuel 1을 지불하고 `still_04`, `tool_02`, `ore_burn|ore_still` 중 선택 하나를 받는다.
+- FICTOR는 fuel 1을 지불하고 `still_04`, `tool_02`, `ore_burn|ore_still` 중 선택 하나를 받거나, fuel 0에서도
+  `fictor-skip`으로 아무것도 받지 않고 진행할 수 있다.
   fuel 부족, 중복 unique tool, 이미 아는 recipe, 잘못된 choice는 전체 후보를 폐기한다.
 - RECORD는 `ore_still|still_01`, ODDITY는 `odd_06`, boss는 `heart__still`을 지급한다.
 
