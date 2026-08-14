@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import materialsSource from "../../src/data/source/materials.json";
@@ -5,10 +7,13 @@ import lawsSource from "../../src/data/source/laws.json";
 import resultClassesSource from "../../src/data/source/resultClasses.json";
 import {
   createCombatState,
+  decodeForgeResolverContext,
+  decodeForgeRuntimeCommand,
   decodeForgeRuntimeState,
   FORGE_RUNTIME_ENGINE_VERSION,
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
+  FORGE_RUNTIME_SOURCE_HASH,
   reduceForgeRuntime,
   reduceCombat,
   resolveForgeCard,
@@ -17,9 +22,10 @@ import {
   type ForgeResultClass,
   type ForgeRuntimeStateV1,
 } from "../../src/domain";
+import { canonicalSerialize, FORGE_RUNTIME_PROJECTION_HASH } from "../../src/domain/forge-runtime/source-binding";
 import { fixtureSetup } from "./fixtures";
 
-const sourceHash = "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720";
+const sourceHash = FORGE_RUNTIME_SOURCE_HASH;
 
 function context(): ForgeResolverContextV1 {
   const materials = materialsSource.map((item) => ({
@@ -100,6 +106,15 @@ function runtime(active = false): ForgeRuntimeStateV1 {
 }
 
 describe("forge runtime", () => {
+  it("binds the real minimal source projection to the reviewed digest", () => {
+    const resolverContext = context();
+    const digest = createHash("sha256")
+      .update(canonicalSerialize({ materials: resolverContext.materials, inputs: resolverContext.inputs }), "utf8")
+      .digest("hex");
+    expect(digest).toBe(FORGE_RUNTIME_PROJECTION_HASH);
+    expect(decodeForgeResolverContext(resolverContext)).toMatchObject({ valid: true });
+  });
+
   it("uses the canonical resolver for workshop and permanently replaces materials", () => {
     const raw = runtime();
     const expected = resolveForgeCard(context().materials[0], context().materials[1], context().inputs);
@@ -186,6 +201,7 @@ describe("forge runtime", () => {
     expect(rejected.state?.run.activeCombat?.forgeActionsRemaining).toBe(0);
 
     result = reduceForgeRuntime(rejected.state, { type: "APPLY_COMBAT", command: { type: "END_TURN" } }, context());
+    expect(result.state?.run.activeCombat?.forgeActionsRemaining).toBe(0);
     result = reduceForgeRuntime(result.state, { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, context());
     expect(result.state?.run.activeCombat).toMatchObject({ forgeActionTurn: 2, forgeActionsRemaining: 1 });
   });
@@ -237,6 +253,52 @@ describe("forge runtime", () => {
     expect(result.events.findIndex((event) => event.type === "COMBAT_ENDED")).toBeLessThan(result.events.length - 1);
     expect(result.state?.run.activeCombat?.state.zones.deck.slice(-2)).toEqual(["material-1", "material-2"]);
     expect(result.state?.run.activeCombat?.ephemeralResults).toEqual([]);
+    expect(result.state?.run.activeCombat?.forgeActionsRemaining).toBe(0);
+  });
+
+  it("rejects persisted budget bypasses and a second instant forge in one turn", () => {
+    const readyBypass = runtime(true);
+    readyBypass.run.activeCombat!.forgeActionsRemaining = 1;
+    expect(decodeForgeRuntimeState(readyBypass).valid).toBe(false);
+
+    const started = reduceForgeRuntime(runtime(true), { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, context());
+    const valueTwo = structuredClone(started.state!);
+    valueTwo.run.activeCombat!.forgeActionsRemaining = 2;
+    expect(decodeForgeRuntimeState(valueTwo).valid).toBe(false);
+    const wrongTurn = structuredClone(started.state!);
+    wrongTurn.run.activeCombat!.forgeActionTurn = 0;
+    expect(decodeForgeRuntimeState(wrongTurn).valid).toBe(false);
+
+    const four = runtime();
+    four.run.ownedInstances.push({ instanceId: "material-4", cardId: materialsSource[3].id });
+    four.run.deck.push("material-4");
+    const setup = fixtureSetup({
+      rules: { ...fixtureSetup().rules, drawCount: 4 },
+      cards: four.run.ownedInstances.map((item, index) => ({
+        cardId: item.cardId,
+        effectId: "DELAYED_EXPLOSION" as const,
+        cost: 0,
+        power: 1,
+        resonanceAttribute: (["STILL", "BURN", "SCATTER", "ROT"] as const)[index],
+      })),
+      instances: four.run.ownedInstances,
+      deck: four.run.deck,
+      programs: fixtureSetup().programs.slice(0, 1),
+    });
+    const combat = reduceCombat(createCombatState(setup), { type: "START_TURN" });
+    four.run.activeCombat = {
+      state: combat.state,
+      enrolledPersistentInstanceIds: [...four.run.deck],
+      forgeActionTurn: 1,
+      forgeActionsRemaining: 1,
+      isolatedMaterials: [],
+      ephemeralResults: [],
+    };
+    const first = reduceForgeRuntime(four, { type: "FORGE_INSTANT", materialInstanceIds: ["material-1", "material-2"] }, context());
+    const beforeSecond = structuredClone(first.state);
+    const second = reduceForgeRuntime(first.state, { type: "FORGE_INSTANT", materialInstanceIds: ["reserve", "material-4"] }, context());
+    expect(second.events).toEqual([{ type: "FORGE_REJECTED", command: "FORGE_INSTANT", reason: "NO_FORGE_ACTION" }]);
+    expect(second.state).toEqual(beforeSecond);
   });
 
   it("returns atomic failures without consuming fuel, sequence, or discovery", () => {
@@ -272,12 +334,43 @@ describe("forge runtime", () => {
     noFuel.run.fuel = 0;
     expect(reduceForgeRuntime(noFuel, { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] }, context()).events[0]).toMatchObject({ reason: "INSUFFICIENT_FUEL" });
 
-    const wrongVersion = context();
+    const wrongVersion = context() as unknown as { resolverVersion: string };
     wrongVersion.resolverVersion = "canonical-v2";
-    expect(reduceForgeRuntime(runtime(), { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] }, wrongVersion).events[0]).toMatchObject({ reason: "CONTEXT_VERSION_MISMATCH" });
-    const wrongHash = context();
+    expect(reduceForgeRuntime(runtime(), { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] }, wrongVersion).events[0]).toMatchObject({ reason: "INVALID_CONTEXT" });
+    const wrongHash = context() as unknown as { sourceHash: string };
     wrongHash.sourceHash = "b".repeat(64);
-    expect(reduceForgeRuntime(runtime(), { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] }, wrongHash).events[0]).toMatchObject({ reason: "CONTEXT_VERSION_MISMATCH" });
+    expect(reduceForgeRuntime(runtime(), { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] }, wrongHash).events[0]).toMatchObject({ reason: "INVALID_CONTEXT" });
+  });
+
+  it("rejects official-hash projection tampering and self-consistent fake bindings", () => {
+    const mutations: Array<(candidate: ForgeResolverContextV1) => void> = [
+      (candidate) => { candidate.materials[0].id = "fake_material"; },
+      (candidate) => { candidate.materials[0].attribute = "BURN"; },
+      (candidate) => { candidate.inputs.laws[0].actor = "JOIN"; },
+      (candidate) => { candidate.inputs.resultClasses[0].density = "MAX"; },
+      (candidate) => {
+        const equipment = candidate.inputs.resultClasses.find((item) => item.family === "EQUIPMENT")!;
+        equipment.equipment_interactions![0].passive_effect_id = "FAKE_PASSIVE";
+      },
+      (candidate) => { candidate.inputs.tuning = { SAME_BONUS: 0, COST_DIVISOR: 1 }; },
+    ];
+    for (const mutate of mutations) {
+      const tampered = structuredClone(context());
+      mutate(tampered);
+      const original = runtime();
+      const result = reduceForgeRuntime(original, { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] }, tampered);
+      expect(result.events).toEqual([{ type: "FORGE_REJECTED", command: "FORGE_WORKSHOP", reason: "INVALID_CONTEXT" }]);
+      expect(result.state).toEqual(original);
+    }
+
+    const fakeState = runtime() as unknown as { sourceHash: string };
+    const fakeContext = context() as unknown as { sourceHash: string };
+    fakeState.sourceHash = "b".repeat(64);
+    fakeContext.sourceHash = "b".repeat(64);
+    expect(reduceForgeRuntime(fakeState, { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] }, fakeContext)).toEqual({
+      state: null,
+      events: [{ type: "FORGE_REJECTED", command: "UNKNOWN", reason: "INVALID_STATE" }],
+    });
   });
 
   it("keeps discovery atomic and returns deterministic detached results", () => {
@@ -344,5 +437,32 @@ describe("forge runtime", () => {
     });
     expect(decodeForgeRuntimeState(proxied).valid).toBe(true);
     expect(fuelDescriptorReads).toBe(1);
+  });
+
+  it("snapshots descriptor-changing command and context proxies exactly once", () => {
+    let commandTypeReads = 0;
+    const commandTarget = { type: "FORGE_WORKSHOP", materialInstanceIds: ["material-1", "material-2"] };
+    const command = new Proxy(commandTarget, {
+      getOwnPropertyDescriptor(target, property) {
+        if (property !== "type") return Reflect.getOwnPropertyDescriptor(target, property);
+        commandTypeReads += 1;
+        return { configurable: true, enumerable: true, writable: true, value: commandTypeReads === 1 ? "FORGE_WORKSHOP" : "CLEANUP_COMBAT" };
+      },
+    });
+    const decodedCommand = decodeForgeRuntimeCommand(command);
+    expect(decodedCommand).toMatchObject({ valid: true, value: { type: "FORGE_WORKSHOP" } });
+    expect(commandTypeReads).toBe(1);
+
+    let sourceHashReads = 0;
+    const contextTarget = context();
+    const proxiedContext = new Proxy(contextTarget, {
+      getOwnPropertyDescriptor(target, property) {
+        if (property !== "sourceHash") return Reflect.getOwnPropertyDescriptor(target, property);
+        sourceHashReads += 1;
+        return { configurable: true, enumerable: true, writable: true, value: sourceHashReads === 1 ? FORGE_RUNTIME_SOURCE_HASH : "b".repeat(64) };
+      },
+    });
+    expect(decodeForgeResolverContext(proxiedContext)).toMatchObject({ valid: true });
+    expect(sourceHashReads).toBe(1);
   });
 });

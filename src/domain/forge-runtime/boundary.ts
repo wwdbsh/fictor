@@ -18,6 +18,7 @@ import {
   FORGE_RUNTIME_ENGINE_VERSION,
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
+  FORGE_RUNTIME_SOURCE_HASH,
   type ActiveCombatForgeRuntime,
   type EphemeralForgeResult,
   type ForgeResolverContextV1,
@@ -27,6 +28,7 @@ import {
   type ForgeRuntimeValidationResult,
   type IsolatedMaterial,
 } from "./types";
+import { FORGE_RUNTIME_PROJECTION_HASH, projectionHash } from "./source-binding";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -37,7 +39,6 @@ const MATERIAL_CATEGORIES = ["ORE", "GROUND_PRODUCT", "TOOL", "ODDITY"] as const
 const RESULT_FAMILIES = ["CROSS", "SAME", "CATALYST", "EQUIPMENT", "HEART"] as const;
 const DENSITIES = ["MIN", "SPARSE", "MID", "DENSE", "MAX"] as const;
 const LOCATIONS = ["HAND", "DECK", "DISCARD", "EXILE", "EQUIPMENT"] as const;
-const HASH_PATTERN = /^[0-9a-f]{64}$/;
 const MATERIAL_ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 class BoundaryError extends Error {}
@@ -197,7 +198,7 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
   else value.state = decodedCombat.value;
   validateStringList(value.enrolledPersistentInstanceIds, `${location}.enrolledPersistentInstanceIds`, errors);
   if (!count(value.forgeActionTurn)) errors.push(`${location}.forgeActionTurn must be a safe unsigned integer`);
-  if (!count(value.forgeActionsRemaining)) errors.push(`${location}.forgeActionsRemaining must be a safe unsigned integer`);
+  if (value.forgeActionsRemaining !== 0 && value.forgeActionsRemaining !== 1) errors.push(`${location}.forgeActionsRemaining must be zero or one`);
   if (array(value.isolatedMaterials, `${location}.isolatedMaterials`, errors)) {
     for (let index = 0; index < value.isolatedMaterials.length; index += 1) {
       const isolated = value.isolatedMaterials[index];
@@ -219,6 +220,9 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
   if (errors.length > 0 || !decodedCombat.valid) return false;
 
   const active = value as unknown as ActiveCombatForgeRuntime;
+  if (active.forgeActionTurn !== active.state.turn) errors.push(`${location}.forgeActionTurn must equal combat turn`);
+  const mayHaveAction = active.state.status === "ONGOING" && active.state.phase === "PLAYER_ACTION";
+  if (!mayHaveAction && active.forgeActionsRemaining !== 0) errors.push(`${location}.forgeActionsRemaining must be zero outside an ongoing player action`);
   uniqueStrings(active.enrolledPersistentInstanceIds, `${location}.enrolledPersistentInstanceIds`, errors);
   const ownedById = new Map(owned.map((instance) => [instance.instanceId, instance]));
   for (const id of active.enrolledPersistentInstanceIds) if (!ownedById.has(id)) errors.push(`${location} enrolls an unowned instance: ${id}`);
@@ -250,7 +254,7 @@ function validateStateSnapshot(value: unknown): ForgeRuntimeValidationResult {
   if (value.schemaVersion !== FORGE_RUNTIME_SCHEMA_VERSION) errors.push("state.schemaVersion mismatch");
   if (value.engineVersion !== FORGE_RUNTIME_ENGINE_VERSION) errors.push("state.engineVersion mismatch");
   if (value.resolverVersion !== FORGE_RUNTIME_RESOLVER_VERSION) errors.push("state.resolverVersion mismatch");
-  if (typeof value.sourceHash !== "string" || !HASH_PATTERN.test(value.sourceHash)) errors.push("state.sourceHash must be a lowercase SHA-256 hex string");
+  if (value.sourceHash !== FORGE_RUNTIME_SOURCE_HASH) errors.push("state.sourceHash is not bound to the canonical source");
   if (!count(value.revision)) errors.push("state.revision must be a safe unsigned integer");
   if (record(value.profile, ["discoveredRecipeIds"], "state.profile", errors)) {
     if (validateStringList(value.profile.discoveredRecipeIds, "state.profile.discoveredRecipeIds", errors)) {
@@ -355,8 +359,8 @@ function validateInputs(value: unknown, location: string, errors: string[]): val
 function validateContextSnapshot(value: unknown): ForgeRuntimeValidationResult {
   const errors: string[] = [];
   if (!record(value, ["resolverVersion", "sourceHash", "materials", "inputs"], "context", errors)) return { valid: false, errors };
-  if (!nonempty(value.resolverVersion)) errors.push("context.resolverVersion must be nonempty");
-  if (typeof value.sourceHash !== "string" || !HASH_PATTERN.test(value.sourceHash)) errors.push("context.sourceHash must be a lowercase SHA-256 hex string");
+  if (value.resolverVersion !== FORGE_RUNTIME_RESOLVER_VERSION) errors.push("context.resolverVersion mismatch");
+  if (value.sourceHash !== FORGE_RUNTIME_SOURCE_HASH) errors.push("context.sourceHash is not bound to the canonical source");
   if (array(value.materials, "context.materials", errors)) for (let index = 0; index < value.materials.length; index += 1) validateMaterial(value.materials[index], `context.materials[${index}]`, errors);
   validateInputs(value.inputs, "context.inputs", errors);
   if (errors.length === 0) {
@@ -368,6 +372,7 @@ function validateContextSnapshot(value: unknown): ForgeRuntimeValidationResult {
     uniqueStrings(context.inputs.resultClasses.map((item) => item.id), "context result class ids", errors);
     const lawKeys = context.inputs.laws.map((law) => [...law.pair].sort().join("|"));
     uniqueStrings(lawKeys, "context law pairs", errors);
+    if (projectionHash(context) !== FORGE_RUNTIME_PROJECTION_HASH) errors.push("context canonical projection mismatch");
   }
   return { valid: errors.length === 0, errors };
 }

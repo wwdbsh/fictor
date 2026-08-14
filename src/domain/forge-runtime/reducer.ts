@@ -147,6 +147,8 @@ function applyCombat(
   if (command.command.type === "START_TURN") {
     active.forgeActionTurn = active.state.turn;
     active.forgeActionsRemaining = 1;
+  } else if (command.command.type === "END_TURN" || active.state.status !== "ONGOING") {
+    active.forgeActionsRemaining = 0;
   }
   const events: ForgeRuntimeEvent[] = [...combatResult.events];
   if (active.state.status !== "ONGOING") events.push(cleanupActive(active));
@@ -164,7 +166,7 @@ function forgeInstant(
   if (!active) return reject(state, command.type, "COMBAT_NOT_ACTIVE");
   if (active.state.status !== "ONGOING") return reject(state, command.type, "TERMINAL_COMBAT");
   if (active.state.phase !== "PLAYER_ACTION") return reject(state, command.type, "INVALID_COMBAT_PHASE");
-  if (active.forgeActionTurn !== active.state.turn || active.forgeActionsRemaining < 1) return reject(state, command.type, "NO_FORGE_ACTION");
+  if (active.forgeActionTurn !== active.state.turn || active.forgeActionsRemaining !== 1) return reject(state, command.type, "NO_FORGE_ACTION");
 
   const selected = selectInstances(state, command);
   if (!selected.ok) return reject(state, command.type, selected.reason);

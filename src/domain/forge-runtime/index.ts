@@ -12,5 +12,6 @@ export {
   FORGE_RUNTIME_FUEL_COST,
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
+  FORGE_RUNTIME_SOURCE_HASH,
 } from "./types";
 export type * from "./types";

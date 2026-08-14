@@ -9,6 +9,7 @@ import type { ForgeInputs, ForgeMaterial, GeneratedCard } from "../forge";
 export const FORGE_RUNTIME_SCHEMA_VERSION = "forge-runtime-state-v1" as const;
 export const FORGE_RUNTIME_ENGINE_VERSION = "forge-runtime-engine-v1" as const;
 export const FORGE_RUNTIME_RESOLVER_VERSION = "canonical-v1" as const;
+export const FORGE_RUNTIME_SOURCE_HASH = "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720" as const;
 export const FORGE_RUNTIME_FUEL_COST = 1 as const;
 
 export type EphemeralLocation = "HAND" | "DECK" | "DISCARD" | "EXILE" | "EQUIPMENT";
@@ -37,7 +38,7 @@ export interface ForgeRuntimeStateV1 {
   schemaVersion: typeof FORGE_RUNTIME_SCHEMA_VERSION;
   engineVersion: typeof FORGE_RUNTIME_ENGINE_VERSION;
   resolverVersion: typeof FORGE_RUNTIME_RESOLVER_VERSION;
-  sourceHash: string;
+  sourceHash: typeof FORGE_RUNTIME_SOURCE_HASH;
   revision: number;
   profile: {
     discoveredRecipeIds: string[];
@@ -52,8 +53,8 @@ export interface ForgeRuntimeStateV1 {
 }
 
 export interface ForgeResolverContextV1 {
-  resolverVersion: string;
-  sourceHash: string;
+  resolverVersion: typeof FORGE_RUNTIME_RESOLVER_VERSION;
+  sourceHash: typeof FORGE_RUNTIME_SOURCE_HASH;
   materials: ForgeMaterial[];
   inputs: ForgeInputs;
 }

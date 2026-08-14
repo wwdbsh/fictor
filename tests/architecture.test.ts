@@ -85,5 +85,9 @@ describe("current source architecture", () => {
     expect(combined.match(/resolveForgeCard\s*\(/g)).toHaveLength(2);
     expect(combined).not.toMatch(/from\s+["'][^"']*(?:data\/(?:source|generated)|\.generated\.json|unstable)[^"']*["']/i);
     expect(combined).not.toMatch(/function\s+(?:resolve|makeTier2|deriveStats)/);
+
+    const runtimeIndex = readFileSync(join(runtimeRoot, "index.ts"), "utf8");
+    expect(runtimeIndex).toContain("FORGE_RUNTIME_SOURCE_HASH");
+    expect(runtimeIndex).not.toMatch(/(?:sha256Hex|canonicalSerialize|projectionHash|PROJECTION_HASH)/);
   });
 });
