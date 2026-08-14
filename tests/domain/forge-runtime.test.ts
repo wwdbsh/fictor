@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import materialsSource from "../../src/data/source/materials.json";
 import lawsSource from "../../src/data/source/laws.json";
 import resultClassesSource from "../../src/data/source/resultClasses.json";
+import { calculateSourceHash } from "../../src/data/generator/render-generated";
 import {
   createCombatState,
   decodeForgeResolverContext,
@@ -112,6 +113,9 @@ describe("forge runtime", () => {
       .update(canonicalSerialize({ materials: resolverContext.materials, inputs: resolverContext.inputs }), "utf8")
       .digest("hex");
     expect(digest).toBe(FORGE_RUNTIME_PROJECTION_HASH);
+    expect(calculateSourceHash([materialsSource, lawsSource, resultClassesSource])).toBe(
+      FORGE_RUNTIME_SOURCE_HASH,
+    );
     expect(decodeForgeResolverContext(resolverContext)).toMatchObject({ valid: true });
   });
 
@@ -263,7 +267,7 @@ describe("forge runtime", () => {
 
     const started = reduceForgeRuntime(runtime(true), { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, context());
     const valueTwo = structuredClone(started.state!);
-    valueTwo.run.activeCombat!.forgeActionsRemaining = 2;
+    (valueTwo.run.activeCombat as unknown as { forgeActionsRemaining: number }).forgeActionsRemaining = 2;
     expect(decodeForgeRuntimeState(valueTwo).valid).toBe(false);
     const wrongTurn = structuredClone(started.state!);
     wrongTurn.run.activeCombat!.forgeActionTurn = 0;

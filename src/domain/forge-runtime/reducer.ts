@@ -289,9 +289,6 @@ export function reduceForgeRuntime(
   const decodedContext = decodeForgeResolverContext(rawContext);
   if (!decodedContext.valid) return reject(state, command.type, "INVALID_CONTEXT");
   const context = decodedContext.value;
-  if (state.resolverVersion !== context.resolverVersion || state.sourceHash !== context.sourceHash) {
-    return reject(state, command.type, "CONTEXT_VERSION_MISMATCH");
-  }
   const workingDecode = decodeForgeRuntimeState(state);
   if (!workingDecode.valid) return invalidState();
   const working = workingDecode.value;

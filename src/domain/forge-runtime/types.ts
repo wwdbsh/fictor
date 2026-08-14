@@ -29,7 +29,7 @@ export interface ActiveCombatForgeRuntime {
   state: CombatState;
   enrolledPersistentInstanceIds: string[];
   forgeActionTurn: number;
-  forgeActionsRemaining: number;
+  forgeActionsRemaining: 0 | 1;
   isolatedMaterials: IsolatedMaterial[];
   ephemeralResults: EphemeralForgeResult[];
 }
@@ -69,7 +69,6 @@ export type ForgeRuntimeFailureCode =
   | "INVALID_STATE"
   | "INVALID_COMMAND"
   | "INVALID_CONTEXT"
-  | "CONTEXT_VERSION_MISMATCH"
   | "COMBAT_NOT_ACTIVE"
   | "COMBAT_ACTIVE"
   | "INVALID_COMBAT_PHASE"
