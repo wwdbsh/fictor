@@ -1,11 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  createDormantRunFlowState,
-  executeRunGameCommand,
-  type RunGameSessionV1,
-  type RunScenarioV1,
-} from "../../src/application/run";
+import { executeRunGameCommand, type RunGameSessionV1 } from "../../src/application/run/game-run-session";
+import { createDormantRunFlowState } from "../../src/application/run/reducer";
+import type { RunScenarioV1 } from "../../src/application/run/types";
 import { loadGameSession } from "../../src/application/game-session";
 import {
   FORGE_RUNTIME_ENGINE_VERSION,

@@ -23,6 +23,10 @@ workshop entitlement, 다음 encounter nonce 및 현재 combat binding을 포함
 저장 직전에 v2를 다시 읽어 `(saveGeneration, saveRevision)`을 비교한다. 이는 같은 탭/프로세스에서의
 stale 보호이지 browser `localStorage`의 진정한 multi-tab CAS라고 주장하지 않는다. quota/read/stale/
 revision exhaustion 실패 시 profile, runtime, flow와 반환 이벤트 전부가 논리적으로 rollback된다.
+토큰 비교 전에 현재 bytes를 v2 전체 schema, canonical material/recipe/card 권한, unique tool,
+phase/combat/node/nonce 불변식까지 다시 decode한다. 같은 토큰이라도 malformed/unsupported/noncanonical이면
+`WRITE_BLOCKED`, canonical하지만 로드 당시 상태와 달라졌으면 state hash 불일치 `STALE_WRITE`로 원본을
+보존한다.
 
 첫 v2 load에서 v2가 없으면 `fictor.save.v1`을 읽을 수 있다. v1 outer와 profile이 유효할 때 recipe와
 heart만 이관하고, runtime/run/flow는 controller 소유 starter로 새로 시작한다. v1 bytes는 읽기만 하며

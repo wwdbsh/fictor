@@ -5,16 +5,20 @@ import lawsSource from "../../src/data/source/laws.json";
 import resultClassesSource from "../../src/data/source/resultClasses.json";
 import {
   createStillkinTrack1Controller,
+  STILLKIN_TRACK1_CONFIG_HASH,
+  STILLKIN_TRACK1_PROVISIONAL_CONFIG,
   type StillkinTrack1Controller,
   type StillkinTrack1Snapshot,
 } from "../../src/application";
 import {
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SOURCE_HASH,
+  FORGE_RUNTIME_FUEL_COST,
   type ForgeMaterial,
   type ForgeResolverContextV1,
   type ForgeResultClass,
 } from "../../src/domain";
+import { canonicalSerialize, sha256Hex } from "../../src/domain/forge-runtime/source-binding";
 import { FICTOR_SAVE_KEY, FICTOR_SAVE_V2_KEY, type StorageLike } from "../../src/persistence";
 
 class MemoryStorage implements StorageLike {
@@ -98,6 +102,18 @@ function resolveSimpleEvent(value: StillkinTrack1Controller, choiceId: string) {
 }
 
 describe("Stillkin literal Track-1 controller", () => {
+  it("binds every provisional packet field to executable authority", () => {
+    expect(STILLKIN_TRACK1_PROVISIONAL_CONFIG).toMatchObject({
+      status: "PROVISIONAL_USER_DIRECTION_2026_08_15",
+      authority: "CONTROLLER_SELECTED_EXECUTION_PACKET_UNDER_LITERAL_NOW_DIRECTION",
+      balanceFinal: false,
+      workshopFuelCost: FORGE_RUNTIME_FUEL_COST,
+    });
+    expect("cacheCount" in STILLKIN_TRACK1_PROVISIONAL_CONFIG).toBe(false);
+    expect(STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers.cacheMaterialIds).toHaveLength(2);
+    expect(sha256Hex(canonicalSerialize(STILLKIN_TRACK1_PROVISIONAL_CONFIG))).toBe(STILLKIN_TRACK1_CONFIG_HASH);
+  });
+
   it("owns combat authority, completes the literal route, and preserves paid/free forge economics", () => {
     const { storage, value } = controller();
     let snapshot = value.load().snapshot;
@@ -199,6 +215,31 @@ describe("Stillkin literal Track-1 controller", () => {
     expect(restarted.snapshot.profile.ownedHeartIds).toEqual(["heart__still"]);
   });
 
+  it("uses a workshop entitlement successfully at zero fuel without exposing a free runtime command", () => {
+    const { storage, value } = controller();
+    let snapshot = enter(value);
+    snapshot = winCombat(value);
+    snapshot = value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "normal-ore" }).snapshot;
+    snapshot = enter(value);
+    snapshot = value.dispatch({ type: "RESOLVE_EVENT", ...base(snapshot), choiceId: "take-cache" }).snapshot;
+    snapshot = value.dispatch({ type: "LEAVE_EVENT", ...base(snapshot) }).snapshot;
+    snapshot = enter(value);
+    snapshot = value.dispatch({ type: "RESOLVE_EVENT", ...base(snapshot), choiceId: "use-workshop" }).snapshot;
+
+    const envelope = JSON.parse(storage.values.get(FICTOR_SAVE_V2_KEY)!);
+    envelope.runtime.run.fuel = 0;
+    storage.values.set(FICTOR_SAVE_V2_KEY, JSON.stringify(envelope));
+    const reloaded = createStillkinTrack1Controller({ storage, resolverContext: context(), generationFactory: () => "unused" });
+    snapshot = reloaded.load().snapshot;
+    const ore = snapshot.runtime.run.ownedInstances.find((item) => item.cardId === "ore_still")!;
+    const one = snapshot.runtime.run.ownedInstances.find((item) => item.cardId === "still_01")!;
+    const free = reloaded.dispatch({ type: "USE_FREE_WORKSHOP", ...base(snapshot), materialInstanceIds: [ore.instanceId, one.instanceId] });
+
+    expect(free).toMatchObject({ applied: true, snapshot: { runtime: { run: { fuel: 0 } } } });
+    expect(free.events.filter((event) => event.type === "FREE_WORKSHOP_USED")).toHaveLength(1);
+    expect(free.events.some((event) => event.type === "FUEL_SPENT")).toBe(false);
+  });
+
   it("reloads v2 mid-combat, rejects stale writers, rolls back quota failure, and leaves v1 bytes untouched", () => {
     const { storage, value } = controller();
     let snapshot = enter(value);
@@ -288,6 +329,67 @@ describe("Stillkin literal Track-1 controller", () => {
       const loaded = value.load();
       expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", snapshot: { persistence: { writeBlocked: true } } });
       expect(storage.values.get(FICTOR_SAVE_V2_KEY)).toBe(JSON.stringify(envelope));
+    }
+  });
+
+  it("rejects noncanonical, undiscovered forge, mismatched forge, and duplicate-tool v2 authority", () => {
+    const original = controller();
+    let snapshot = enter(original.value);
+    snapshot = winCombat(original.value);
+    original.value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "normal-ore" });
+    const bytes = original.storage.values.get(FICTOR_SAVE_V2_KEY)!;
+    const mutations: Array<(envelope: any) => void> = [
+      (envelope) => { envelope.runtime.run.ownedInstances[0].cardId = "not_canonical"; },
+      (envelope) => { envelope.runtime.run.ownedInstances[0].cardId = "forge__ore_burn__ore_still"; },
+      (envelope) => {
+        envelope.profile.discoveredRecipeIds.push("ore_burn|ore_still");
+        envelope.profile.discoveredRecipeIds.sort();
+        envelope.runtime.run.ownedInstances[0].cardId = "forge__ore_still__ore_burn";
+      },
+      (envelope) => {
+        const first = `authority-tool-${envelope.runtime.run.nextInstanceSequence}`;
+        const second = `${first}-duplicate`;
+        envelope.runtime.run.ownedInstances.push({ instanceId: first, cardId: "tool_01" }, { instanceId: second, cardId: "tool_01" });
+        envelope.runtime.run.deck.push(first, second);
+        envelope.runtime.run.nextInstanceSequence += 2;
+      },
+    ];
+    for (const mutate of mutations) {
+      const storage = new MemoryStorage();
+      const envelope = JSON.parse(bytes);
+      mutate(envelope);
+      const tampered = JSON.stringify(envelope);
+      storage.values.set(FICTOR_SAVE_V2_KEY, tampered);
+      const value = createStillkinTrack1Controller({ storage, resolverContext: context(), generationFactory: () => "blocked" });
+      expect(value.load()).toMatchObject({ source: "SAFE_INITIALIZED", snapshot: { persistence: { writeBlocked: true, issues: ["INVALID_RUN"] } } });
+      expect(storage.values.get(FICTOR_SAVE_V2_KEY)).toBe(tampered);
+    }
+  });
+
+  it("fully revalidates same-token v2 bytes before CAS overwrite", () => {
+    const original = controller();
+    let snapshot = enter(original.value);
+    snapshot = winCombat(original.value);
+    original.value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "normal-ore" });
+    const bytes = original.storage.values.get(FICTOR_SAVE_V2_KEY)!;
+
+    const cases: Array<{ mutate: (envelope: any) => string; reason: "STALE_WRITE" | "WRITE_BLOCKED" }> = [
+      { mutate: (envelope) => { envelope.runtime.run.fuel -= 1; return JSON.stringify(envelope); }, reason: "STALE_WRITE" },
+      { mutate: () => "{bad", reason: "WRITE_BLOCKED" },
+      { mutate: (envelope) => { envelope.schemaVersion = 3; return JSON.stringify(envelope); }, reason: "WRITE_BLOCKED" },
+      { mutate: (envelope) => { envelope.runtime.run.ownedInstances[0].cardId = "not_canonical"; return JSON.stringify(envelope); }, reason: "WRITE_BLOCKED" },
+    ];
+    for (const item of cases) {
+      const storage = new MemoryStorage();
+      storage.values.set(FICTOR_SAVE_V2_KEY, bytes);
+      const value = createStillkinTrack1Controller({ storage, resolverContext: context(), generationFactory: () => "unused" });
+      const before = value.load().snapshot;
+      const replacement = item.mutate(JSON.parse(bytes));
+      storage.values.set(FICTOR_SAVE_V2_KEY, replacement);
+      const result = value.dispatch({ type: "ENTER_NEXT_NODE", ...base(before) });
+      expect(result).toMatchObject({ applied: false, persistence: { ok: false, reason: item.reason }, reason: "PERSISTENCE_FAILED" });
+      expect(result.snapshot).toEqual(before);
+      expect(storage.values.get(FICTOR_SAVE_V2_KEY)).toBe(replacement);
     }
   });
 

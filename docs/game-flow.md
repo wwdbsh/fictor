@@ -13,9 +13,10 @@ rollback을 위한 deep module에 남지만 application root에서는 노출하�
 
 ## 고정된 provisional 계약
 
-`stillkin-track1-provisional-v1`은 상헌 님이 2026-08-15에 명시적으로 승인한 임시 실행값이며 상태는
-`PROVISIONAL_USER_DIRECTION_2026_08_15`다. 최종 밸런스 승인으로 해석하지 않는다. 정확한 값과
-해시는 [결정 기록](decisions/t027-track1-provisional-config-2026-08-15.md)에 중앙화되어 있다.
+`stillkin-track1-provisional-v1`은 2026-08-15의 “literal T027를 지금 진행” 방향 아래 controller가
+선택한 provisional execution packet이며 상태는 `PROVISIONAL_USER_DIRECTION_2026_08_15`다. 이 표기는
+개별 exact value에 대한 사용자 승인이나 최종 밸런스 승인을 뜻하지 않는다. 값과 해시는
+[결정 기록](decisions/t027-track1-provisional-config-2026-08-15.md)에 중앙화되어 있다.
 
 route는 다음 순서로 고정된다.
 

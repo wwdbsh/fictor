@@ -1,4 +1,5 @@
 import { canonicalSerialize, sha256Hex } from "../../domain/forge-runtime/source-binding";
+import { FORGE_RUNTIME_FUEL_COST } from "../../domain/forge-runtime";
 
 export const STILLKIN_TRACK1_PROVISIONAL_STATUS = "PROVISIONAL_USER_DIRECTION_2026_08_15" as const;
 export const T027_LITERAL_CONTRACT_HASH = "dcbd69c50f569efe75e5a0c72550dc4aa6ef76e1f9964199f010b9078792ed99" as const;
@@ -7,12 +8,12 @@ export const STILLKIN_TRACK1_PROVISIONAL_CONFIG = Object.freeze({
   configId: "stillkin-track1-provisional-v1",
   contractHash: T027_LITERAL_CONTRACT_HASH,
   status: STILLKIN_TRACK1_PROVISIONAL_STATUS,
+  authority: "CONTROLLER_SELECTED_EXECUTION_PACKET_UNDER_LITERAL_NOW_DIRECTION",
   balanceFinal: false,
   startFuel: 4,
   maxPlayerHp: 30,
-  workshopFuelCost: 1,
+  workshopFuelCost: FORGE_RUNTIME_FUEL_COST,
   fictorFuelPrice: 1,
-  cacheCount: 2,
   collapse: Object.freeze({ probabilityNumerator: 1, probabilityDenominator: 2, damage: 5, rewardMaterialId: "still_05" }),
   combat: Object.freeze({
     maxEnergy: 3,

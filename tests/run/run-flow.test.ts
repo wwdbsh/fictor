@@ -1,14 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  STILLKIN_PRODUCTION_SCENARIO_V1,
-  createDormantRunFlowState,
-  decodeRunFlowCommand,
-  decodeRunScenario,
-  reduceRunFlow,
-  type EventNodeV1,
-  type RunScenarioV1,
-} from "../../src/application/run";
+import { decodeRunFlowCommand, decodeRunScenario } from "../../src/application/run/boundary";
+import { createDormantRunFlowState, reduceRunFlow } from "../../src/application/run/reducer";
+import { STILLKIN_PRODUCTION_SCENARIO_V1 } from "../../src/application/run/scenario";
+import type { EventNodeV1, RunScenarioV1 } from "../../src/application/run/types";
 import {
   CANONICAL_MATERIAL_IDS_V1,
   ODDITY_MATERIAL_IDS_V1,

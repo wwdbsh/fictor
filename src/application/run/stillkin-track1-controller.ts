@@ -3,6 +3,7 @@ import {
   decodeForgeResolverContext,
   decodeForgeRuntimeState,
   FORGE_RUNTIME_ENGINE_VERSION,
+  FORGE_RUNTIME_FUEL_COST,
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
   FORGE_RUNTIME_SOURCE_HASH,
@@ -10,8 +11,8 @@ import {
   type ForgeResolverContextV1,
   type ForgeRuntimeStateV1,
 } from "../../domain/forge-runtime";
-import { reduceEntitledWorkshopForgeInternal } from "../../domain/forge-runtime/reducer";
 import { STILLKIN_BLOCK_RETENTION } from "../../domain/races";
+import { canonicalSerialize, sha256Hex } from "../../domain/forge-runtime/source-binding";
 import {
   classifyPersistentProfile,
   createDefaultProfile,
@@ -20,7 +21,9 @@ import {
   isValidSaveGeneration,
   parseKnownEnvelope,
   projectRuntimeState,
+  runtimeReferencesAllowed,
   SAVE_SCHEMA_VERSION_V2,
+  snapshotPersistenceCatalog,
   type PersistentProfileV1,
   type SaveEnvelopeV2,
   type SaveFailureCode,
@@ -56,6 +59,20 @@ type ControllerState = {
   writeBlocked: boolean;
   issues: SaveLoadIssue[];
 };
+
+const TRACK1_PERSISTENCE_CATALOG = snapshotPersistenceCatalog({
+  sourceHash: FORGE_RUNTIME_SOURCE_HASH,
+  allowedEnemyIds: ["enemy__still__swarm", "elite__still__burn", "the_stilling"],
+  allowedIntentIds: [
+    "stillkin-track1-normal-attack",
+    "stillkin-track1-elite-charge-1",
+    "stillkin-track1-elite-charge-2",
+    "stillkin-track1-elite-release",
+    "stillkin-track1-boss-total-stop",
+    "stillkin-track1-boss-attack",
+  ],
+  allowedDisplayTexts: ["정지한 타격", "눌린 불 축적", "눌린 불 재축적", "눌린 불 방출", "완전 정지", "멈춘 손길"],
+});
 
 export interface StillkinTrack1ControllerOptions {
   storage: StorageLike;
@@ -423,6 +440,27 @@ function bindingMatches(binding: Track1CombatBinding | null, command: Track1Comb
   return binding !== null && binding.runId === command.runId && binding.nodeId === command.nodeId && binding.encounterId === command.encounterId && binding.encounterNonce === command.encounterNonce;
 }
 
+function forgeEntitledWorkshop(
+  runtime: ForgeRuntimeStateV1,
+  materialInstanceIds: [string, string],
+  context: ForgeResolverContextV1,
+) {
+  const originalFuel = runtime.run.fuel;
+  const paymentFuel = Math.max(originalFuel, FORGE_RUNTIME_FUEL_COST);
+  const paymentState = decodeForgeRuntimeState({ ...runtime, run: { ...runtime.run, fuel: paymentFuel } });
+  if (!paymentState.valid) return null;
+  const result = reduceForgeRuntime(paymentState.value, { type: "FORGE_WORKSHOP", materialInstanceIds }, context);
+  if (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED")) return null;
+  const restored = decodeForgeRuntimeState({ ...result.state, run: { ...result.state.run, fuel: originalFuel } });
+  if (!restored.valid) return null;
+  return {
+    state: restored.value,
+    events: result.events.map((event) => event.type === "FUEL_SPENT"
+      ? { type: "FREE_WORKSHOP_USED" as const, amount: 0 as const, remainingFuel: originalFuel }
+      : event),
+  };
+}
+
 export function createStillkinTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown): StillkinTrack1Controller {
   const options = captureOptions(rawOptions);
   let state: ControllerState | null = null;
@@ -431,6 +469,45 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
     profile: clone(profile), runtime: createStarterRuntime(profile), flow: createFlow(runSequence), generation: null, saveRevision: 0, writeBlocked: false, issues: [],
   });
 
+  const stateAuthorityValid = (candidate: ControllerState): boolean => {
+    if (candidate.profile.discoveredRecipeIds.length !== candidate.runtime.profile.discoveredRecipeIds.length
+      || candidate.profile.discoveredRecipeIds.some((id, index) => id !== candidate.runtime.profile.discoveredRecipeIds[index])) return false;
+    if (!runtimeReferencesAllowed(candidate.runtime, TRACK1_PERSISTENCE_CATALOG)) return false;
+    if ((candidate.flow.phase === "IN_COMBAT") !== (candidate.runtime.run.activeCombat !== null)) return false;
+    return candidate.flow.phase !== "IN_COMBAT" || loadedCombatMatchesAuthority(candidate.runtime, candidate.flow);
+  };
+
+  const logicalStateHash = (candidate: ControllerState): string => sha256Hex(canonicalSerialize({
+    profile: candidate.profile,
+    runtime: projectRuntimeState(candidate.runtime),
+    flow: candidate.flow,
+  }));
+
+  const decodeV2Bytes = (bytes: string): { ok: true; value: ControllerState } | { ok: false; issue: SaveLoadIssue } => {
+    let parsed: JsonRecord;
+    try { parsed = JSON.parse(bytes) as JsonRecord; } catch { return { ok: false, issue: "INVALID_JSON" }; }
+    if (parsed && parsed.schemaVersion !== SAVE_SCHEMA_VERSION_V2) return { ok: false, issue: "UNSUPPORTED_VERSION" };
+    const keys = ["schemaVersion", "saveGeneration", "saveRevision", "profile", "runtime", "flow"];
+    if (!parsed || Object.keys(parsed).length !== keys.length || keys.some((key) => !Object.hasOwn(parsed, key))
+      || !isValidSaveGeneration(parsed.saveGeneration) || !safeCount(parsed.saveRevision)) return { ok: false, issue: "INVALID_ENVELOPE" };
+    const profile = classifyPersistentProfile(parsed.profile);
+    if (profile.kind !== "VALID") return { ok: false, issue: profile.kind === "UNSUPPORTED" ? "UNSUPPORTED_VERSION" : "INVALID_PROFILE" };
+    const runtimeProjection = parsed.runtime as JsonRecord;
+    const runtime = decodeForgeRuntimeState({ ...runtimeProjection, profile: { discoveredRecipeIds: [...profile.value.discoveredRecipeIds] } });
+    const flow = decodeFlow(parsed.flow);
+    if (!runtime.valid || !flow) return { ok: false, issue: "INVALID_RUN" };
+    const value: ControllerState = {
+      profile: profile.value,
+      runtime: runtime.value,
+      flow,
+      generation: parsed.saveGeneration as string,
+      saveRevision: parsed.saveRevision as number,
+      writeBlocked: false,
+      issues: [],
+    };
+    return stateAuthorityValid(value) ? { ok: true, value } : { ok: false, issue: "INVALID_RUN" };
+  };
+
   const load = (): StillkinTrack1LoadResult => {
     let v2: string | null;
     try { v2 = options.getItem(FICTOR_SAVE_V2_KEY); } catch {
@@ -438,40 +515,13 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
       return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
     }
     if (v2 !== null) {
-      let parsed: JsonRecord;
-      try {
-        parsed = JSON.parse(v2) as JsonRecord;
-      } catch {
-        state = { ...fresh(), writeBlocked: true, issues: ["INVALID_JSON"] };
-        return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
-      }
-      try {
-        if (parsed && parsed.schemaVersion !== SAVE_SCHEMA_VERSION_V2) {
-          state = { ...fresh(), writeBlocked: true, issues: ["UNSUPPORTED_VERSION"] };
-          return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
-        }
-        const keys = ["schemaVersion", "saveGeneration", "saveRevision", "profile", "runtime", "flow"];
-        if (!parsed || Object.keys(parsed).length !== keys.length || keys.some((key) => !Object.hasOwn(parsed, key)) || !isValidSaveGeneration(parsed.saveGeneration) || !safeCount(parsed.saveRevision)) throw new BoundaryFailure();
-        const profile = classifyPersistentProfile(parsed.profile);
-        const runtimeProjection = parsed.runtime as JsonRecord;
-        const runtime = profile.kind === "VALID" ? decodeForgeRuntimeState({ ...runtimeProjection, profile: { discoveredRecipeIds: [...profile.value.discoveredRecipeIds] } }) : null;
-        const flow = decodeFlow(parsed.flow);
-        if (profile.kind !== "VALID") {
-          state = { ...fresh(), writeBlocked: true, issues: [profile.kind === "UNSUPPORTED" ? "UNSUPPORTED_VERSION" : "INVALID_PROFILE"] };
-          return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
-        }
-        if (!runtime?.valid || !flow) {
-          state = { ...fresh(), writeBlocked: true, issues: ["INVALID_RUN"] };
-          return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
-        }
-        if ((flow.phase === "IN_COMBAT") !== (runtime.value.run.activeCombat !== null)) throw new BoundaryFailure();
-        if (flow.phase === "IN_COMBAT" && !loadedCombatMatchesAuthority(runtime.value, flow)) throw new BoundaryFailure();
-        state = { profile: profile.value, runtime: runtime.value, flow, generation: parsed.saveGeneration as string, saveRevision: parsed.saveRevision as number, writeBlocked: false, issues: [] };
+      const decoded = decodeV2Bytes(v2);
+      if (decoded.ok) {
+        state = decoded.value;
         return { snapshot: makeSnapshot(state), source: "SAVED" };
-      } catch {
-        state = { ...fresh(), writeBlocked: true, issues: ["INVALID_ENVELOPE"] };
-        return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
       }
+      state = { ...fresh(), writeBlocked: true, issues: [decoded.issue] };
+      return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
     }
     let profile = createDefaultProfile();
     let source: StillkinTrack1LoadResult["source"] = "EMPTY";
@@ -500,17 +550,18 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
 
   const persist = (candidate: ControllerState): StillkinTrack1DispatchResult["persistence"] => {
     if (candidate.writeBlocked) return { ok: false, reason: "WRITE_BLOCKED" };
+    if (!stateAuthorityValid(candidate)) return { ok: false, reason: "INVALID_RUNTIME" };
     if (candidate.saveRevision === Number.MAX_SAFE_INTEGER) return { ok: false, reason: "REVISION_EXHAUSTED" };
     let bytes: string | null;
     try { bytes = options.getItem(FICTOR_SAVE_V2_KEY); } catch { return { ok: false, reason: "READ_FAILED" }; }
     if (candidate.generation === null) {
-      if (bytes !== null) return { ok: false, reason: "STALE_WRITE" };
+      if (bytes !== null) return decodeV2Bytes(bytes).ok ? { ok: false, reason: "STALE_WRITE" } : { ok: false, reason: "WRITE_BLOCKED" };
     } else {
       if (bytes === null) return { ok: false, reason: "STALE_WRITE" };
-      try {
-        const current = JSON.parse(bytes) as JsonRecord;
-        if (current.saveGeneration !== candidate.generation || current.saveRevision !== candidate.saveRevision) return { ok: false, reason: "STALE_WRITE" };
-      } catch { return { ok: false, reason: "WRITE_BLOCKED" }; }
+      const current = decodeV2Bytes(bytes);
+      if (!current.ok) return { ok: false, reason: "WRITE_BLOCKED" };
+      if (current.value.generation !== candidate.generation || current.value.saveRevision !== candidate.saveRevision) return { ok: false, reason: "STALE_WRITE" };
+      if (!state || logicalStateHash(current.value) !== logicalStateHash(state)) return { ok: false, reason: "STALE_WRITE" };
     }
     let generation = candidate.generation;
     let revision = candidate.saveRevision + 1;
@@ -651,7 +702,7 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
             if (!granted) failure = choice.kind === "MATERIAL" && choice.materialId.startsWith("tool_") ? "UNIQUE_TOOL_ALREADY_OWNED" : "CHOICE_ALREADY_OWNED";
             else {
               candidate.runtime.run.fuel -= CONFIG.fictorFuelPrice;
-              events.push({ type: "FUEL_SPENT", amount: 1, remaining: candidate.runtime.run.fuel });
+              events.push({ type: "FUEL_SPENT", amount: CONFIG.fictorFuelPrice, remaining: candidate.runtime.run.fuel });
             }
           }
         } else if (eventType === "RECORD") {
@@ -663,8 +714,8 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
     } else if (command.type === "USE_FREE_WORKSHOP") {
       if (candidate.flow.phase !== "EVENT_RESOLVED" || node?.kind !== "EVENT" || node.eventType !== "WORKSHOP" || candidate.flow.workshopEntitlementNodeId !== node.nodeId) failure = "NO_WORKSHOP_ENTITLEMENT";
       else {
-        const result = reduceEntitledWorkshopForgeInternal(candidate.runtime, command.materialInstanceIds, options.context);
-        if (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED")) failure = "RUNTIME_REJECTED";
+        const result = forgeEntitledWorkshop(candidate.runtime, command.materialInstanceIds, options.context);
+        if (!result) failure = "RUNTIME_REJECTED";
         else {
           candidate.runtime = result.state;
           events.push(...result.events, { type: "WORKSHOP_ENTITLEMENT_CONSUMED", nodeId: node.nodeId });
