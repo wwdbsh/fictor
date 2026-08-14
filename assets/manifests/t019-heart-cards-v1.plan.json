@@ -1,0 +1,463 @@
+{
+  "schema_version": 1,
+  "plan_version": "t019-heart-cards-v1",
+  "issue_number": 21,
+  "issue_contract_sha256": "7c5b1e3d94a2f60c8b3e7d51a9f4c02e6b8d3a175f9e2c48b06d1a73e5c9f284",
+  "state": "HOLD_FOR_EXACT_SCOPED_USER_APPROVAL",
+  "remote_execution_allowed_without_approval": false,
+  "scope": {
+    "task_key": "T019",
+    "category": "HEART",
+    "asset_count": 6,
+    "attributes": [
+      "STILL",
+      "BURN",
+      "SCATTER",
+      "ROT",
+      "WASH",
+      "JOIN"
+    ],
+    "composition": "CELESTIAL",
+    "density": "MAX",
+    "doubles_as_boss_art": true,
+    "heart_forge_generation_allowed": false,
+    "heart_forge_out_of_scope_count": 36,
+    "style_redecision_allowed": false,
+    "manifest_id_change_allowed": false,
+    "other_categories_allowed": false
+  },
+  "selection": {
+    "expression": "core.assets.filter(category === 'HEART'), manifest order",
+    "id_list_encoding": "UTF-8_IDS_JOINED_BY_NEWLINE_WITH_TRAILING_NEWLINE",
+    "id_list_sha256": "e1b132635564a4c930139d09ea0d03e18f39c4f0611c2c450f02e9adcf666885",
+    "first_id": "heart__still",
+    "last_id": "heart__join",
+    "unique_ids": true,
+    "unique_paths": true
+  },
+  "sources": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    },
+    "risk_disclosure": {
+      "path": "assets/evidence/t019-heart-cards-risk-disclosure-v1.json",
+      "sha256": "f3608ff9deb7a85b8f574c6d6c66492f74aeaa06e3136cb195c1837614b4870c",
+      "text_sha256": "02a50d6c891c5ba3f70edeee1d76c538e2b0171f18250da0d4e4d39eff09db5a"
+    },
+    "provider_schema": {
+      "path": "assets/evidence/t019-heart-cards-higgsfield-schema-v1.json",
+      "sha256": "8c0f0d5c7b1ef73151d1fe20ed29d9d7d2de4b76fe16d78ee4a2f04dd722abc9"
+    },
+    "forensics": {
+      "path": "assets/evidence/t019-heart-cards-forensics-v1.json",
+      "sha256": "b4d9d55e93bd38ab793dbf9c5d34dca95ff603e7e589c79f9a703900bd652480"
+    },
+    "implementation_binding": {
+      "path": "assets/evidence/t019-heart-cards-implementation-binding-v1.json",
+      "sha256": "c595ab0d8763c30ac6846087d8685777d6a616c9506a58344d6e84de2aa29e79",
+      "files": {
+        "controller": {
+          "path": "scripts/assets/t019-heart-cards-production-v1-controller.ts",
+          "sha256": "58b18c5335800802ca4509fe09adb87a6bd59a3058117a6311d1d1f6c16b25bc"
+        },
+        "preparation": {
+          "path": "scripts/assets/t019-heart-cards-production-v1-cli.ts",
+          "sha256": "5e993f3eb411dbdd030eb07379de1a9b61f082c1b5a9fc4be3decacf05a524b3"
+        },
+        "production": {
+          "path": "scripts/assets/t019-heart-cards-production-v1-ops.ts",
+          "sha256": "3463ad15273b87ca24a91cbdf8befe2eabfefda92f3425f64f6fc3c0d5b4a1da"
+        },
+        "contract": {
+          "path": "scripts/assets/t019-heart-cards-production-v1.ts",
+          "sha256": "14e2d41d391f0da8249c4e077a76a074fd767d0ea1e9be8c038f1f737c3436a8"
+        },
+        "provider_transport": {
+          "path": "scripts/assets/provider-transport.ts",
+          "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+        },
+        "t020_contract": {
+          "path": "scripts/assets/t020-world-art-production-v1.ts",
+          "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+        },
+        "t020_production": {
+          "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+          "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+        },
+        "filesystem": {
+          "path": "scripts/assets/filesystem.ts",
+          "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+        },
+        "filesystem_types": {
+          "path": "scripts/assets/types.ts",
+          "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+        },
+        "schema_contracts": {
+          "path": "src/data/schema/contracts.ts",
+          "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+        }
+      }
+    }
+  },
+  "provider_contract": {
+    "tool": "generate_image_batch",
+    "requested_model": "nano_banana_2",
+    "expected_provider_reported_model_for_canary_and_drift": "nano_banana_flash",
+    "model_canary_applies_to_every_batch": true,
+    "aspect_ratio_per_asset": true,
+    "aspect_homogeneous_batches": true,
+    "resolution": "1k",
+    "count_per_asset": 1,
+    "use_unlim": false,
+    "batch_max": 12,
+    "response_topology": "INDEXED_JOB_ONE_TO_ONE_PER_ASSET"
+  },
+  "reference_binding": {
+    "role": "image",
+    "source_job_id": "e0f36c95-2e1b-4e38-9931-7e10e562f209",
+    "reference_id": "fictor-copperplate-media-master",
+    "revision": 1,
+    "source_sha256": "3cadedb377db1e299bf2ac355404df3c8c092a3d229665c5e519243bbb5efde3",
+    "lock_scope": "MEDIA_ONLY",
+    "reference_instruction": "Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio."
+  },
+  "prompt_contract": {
+    "core_prompt_preserved_verbatim": true,
+    "reference_instruction": "Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.",
+    "no_copy_boundary": "MEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+    "deterministic_text_only": true
+  },
+  "budget": {
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "billing_uses_credits_exact_only": true,
+    "paid_request_count": 6,
+    "paid_batch_count": 1,
+    "paid_batch_sizes": [
+      6
+    ],
+    "total_credit_cap_decimal": "9.00",
+    "total_credit_cap_units": 900,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false
+  },
+  "cumulative_budget": {
+    "balance_at_disclosure_decimal": "252.90",
+    "balance_at_disclosure_units": 25290,
+    "this_task_cap_decimal": "9.00",
+    "projected_balance_after_t019_decimal": "243.90",
+    "remaining_plan_after_t019_decimal": "240.00",
+    "remaining_plan_breakdown": [
+      {
+        "task": "T016",
+        "credit_units": 24000,
+        "credit_decimal": "240.00"
+      }
+    ],
+    "headroom_after_t019_decimal": "3.90",
+    "a_single_lost_batch_breaks_the_remaining_plan": true,
+    "max_single_batch_exposure_decimal": "9.00"
+  },
+  "retry_policy": {
+    "automatic_paid_retry_allowed": false,
+    "automatic_paid_retry_count": 0,
+    "ambiguous_or_partial_submission_retry_allowed": false,
+    "single_submission_per_batch": true,
+    "ambiguous_submission_windows": 1,
+    "ambiguous_window_max_exposure_decimal": "9.00",
+    "operator_recovery_only_for_durable_job_ids": true,
+    "operator_gated_resume_never_resubmits": true,
+    "fail_stop_scope": "BATCH"
+  },
+  "recovery_policy": {
+    "local_root": "public/assets",
+    "backup_root": "assets/backups/t019-heart-cards",
+    "provider_native_unmodified": true,
+    "crop_or_resize_allowed": false,
+    "aspect_ratio_source": "PER_ASSET_FROM_PINNED_CORE_MANIFEST",
+    "aspect_expectation": {
+      "criterion": "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
+      "tolerance_ppm_by_aspect": {
+        "3:4": 5000
+      },
+      "declared_aspects": [
+        "3:4"
+      ],
+      "undeclared_aspect_throws": true,
+      "provider_dimension_grid_px": 32,
+      "resolution": "1k",
+      "aspects_in_this_task": [
+        "3:4"
+      ],
+      "observed_3_4": {
+        "width": 896,
+        "height": 1200,
+        "aspect_error_ppm": 4445,
+        "source": "T015 and T020 deliveries",
+        "provider_validated": true
+      },
+      "t020_16_9_tolerance_deliberately_not_declared_here": {
+        "tolerance_ppm": 12500,
+        "reason": "16:9-SPECIFIC_GRID_ALLOWANCE_MUST_NOT_LEAK_INTO_3_4"
+      },
+      "out_of_tolerance_terminal_code": "ASPECT_MISMATCH",
+      "out_of_tolerance_blocks_all_later_batches": true
+    },
+    "production_jobs_wait_input": "STDIN_ONLY",
+    "signed_urls_or_raw_errors_persisted": false
+  },
+  "immutable_forensics": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    }
+  },
+  "model_canary": {
+    "expected_provider_reported_model": "nano_banana_flash",
+    "applies_to_every_batch": true,
+    "canary_batch_id": "heart-cards-001",
+    "blocks_all_later_batches_on_drift": true,
+    "later_batches_exist": false,
+    "drift_still_costs_batch_spend": true
+  },
+  "approval_gate": {
+    "pending_disclosure_packet_path": "assets/evidence/t019-heart-cards-disclosure-presentation-v1.pending.json",
+    "disclosure_presentation_path": "assets/evidence/t019-heart-cards-disclosure-presentation-v1.json",
+    "controller_disclosure_attestation_path": "assets/evidence/t019-heart-cards-controller-disclosure-attestation-v1.json",
+    "controller_approval_attestation_path": "assets/evidence/t019-heart-cards-controller-approval-attestation-v1.json",
+    "approval_path": "assets/evidence/t019-heart-cards-approval-v1.json",
+    "status": "MISSING_NOT_AUTHORIZED",
+    "exact_phrase": "T019 신의 심장 카드 6장 생성을 승인한다. 한도 9.00 크레딧.",
+    "prior_task_approval_inherited": false,
+    "committed_clean_runtime_binding_required": true
+  },
+  "assets": [
+    {
+      "index": 0,
+      "id": "heart__still",
+      "category": "HEART",
+      "attribute": "STILL",
+      "composition": "CELESTIAL",
+      "density": "MAX",
+      "path": "cards/heart__still.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient still god, frontal and monumental; colors=GOLD+TEAL; density=MAX; paper=OCHRE; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "5f5d95becf6c52f64675e082240c9b9897b015acc932dcdafe9633d0808dc27a",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient still god, frontal and monumental; colors=GOLD+TEAL; density=MAX; paper=OCHRE; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "070b1fdf36c9cb3dc6d19be5c89c4d615dac7d9c072cac49c1f2f70dcc2789a4",
+      "request": {
+        "index": 0,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient still god, frontal and monumental; colors=GOLD+TEAL; density=MAX; paper=OCHRE; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "3e4588bb32e18b7091a2051e0c640936222805d25419278f8df693e65c20b927"
+    },
+    {
+      "index": 1,
+      "id": "heart__burn",
+      "category": "HEART",
+      "attribute": "BURN",
+      "composition": "CELESTIAL",
+      "density": "MAX",
+      "path": "cards/heart__burn.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient burn god, frontal and monumental; colors=GOLD+VERMILION; density=MAX; paper=SCORCHED_BROWN; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "73b099a5c543b4b87c9743e06bcaee0f5b8bb04df338ce1309a234bd26dd8958",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient burn god, frontal and monumental; colors=GOLD+VERMILION; density=MAX; paper=SCORCHED_BROWN; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "722685e96b7736f17627feac7a0ca0ef17b1cb703a505e382f91b38398125c74",
+      "request": {
+        "index": 1,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient burn god, frontal and monumental; colors=GOLD+VERMILION; density=MAX; paper=SCORCHED_BROWN; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "fd3274fcf771755575d05f760e439e299897acb922c3d176c9c409fd02571aef"
+    },
+    {
+      "index": 2,
+      "id": "heart__scatter",
+      "category": "HEART",
+      "attribute": "SCATTER",
+      "composition": "CELESTIAL",
+      "density": "MAX",
+      "path": "cards/heart__scatter.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient scatter god, frontal and monumental; colors=GOLD+SULPHUR; density=MAX; paper=CREAM; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "8a8479236756b9fcff1fbed518492d1dd32ad73ee68ed45110ea231c52e2ec55",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient scatter god, frontal and monumental; colors=GOLD+SULPHUR; density=MAX; paper=CREAM; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "1262ee29fca451db6e04a7e9b3d3e947cc45e64248f17ef1e8e329c2d330657c",
+      "request": {
+        "index": 2,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient scatter god, frontal and monumental; colors=GOLD+SULPHUR; density=MAX; paper=CREAM; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "1020668970db97ab10b3607fcb8029facdf2189dde2f39b9ef8e612b6b2bbe8e"
+    },
+    {
+      "index": 3,
+      "id": "heart__rot",
+      "category": "HEART",
+      "attribute": "ROT",
+      "composition": "CELESTIAL",
+      "density": "MAX",
+      "path": "cards/heart__rot.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient rot god, frontal and monumental; colors=GOLD+ACID_GREEN; density=MAX; paper=CREAM; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "bed17d59ace487cdd25c1f4666d19ee6488841e9d1e4725d86be0df4bd907fe3",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient rot god, frontal and monumental; colors=GOLD+ACID_GREEN; density=MAX; paper=CREAM; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "c0f9b4e57de37bb57e5da1da927ad268c239c90e10971c3b978d9d004bfd0ff2",
+      "request": {
+        "index": 3,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient rot god, frontal and monumental; colors=GOLD+ACID_GREEN; density=MAX; paper=CREAM; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "e6e3bd083f61395214e9e17a60f936a762b21d0928f2fabc232ea56039f0304e"
+    },
+    {
+      "index": 4,
+      "id": "heart__wash",
+      "category": "HEART",
+      "attribute": "WASH",
+      "composition": "CELESTIAL",
+      "density": "MAX",
+      "path": "cards/heart__wash.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient wash god, frontal and monumental; colors=GOLD+ULTRAMARINE; density=MAX; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "c4c60cbac268f2c6d5b1f7f044bb0858d410b2f23d29cf02b6ddb8b5435a6f7c",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient wash god, frontal and monumental; colors=GOLD+ULTRAMARINE; density=MAX; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "44855dd5d06760513b16fd63eaa9d918def289eb29da4636e1d6cca7c5d8694e",
+      "request": {
+        "index": 4,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient wash god, frontal and monumental; colors=GOLD+ULTRAMARINE; density=MAX; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "babd5470fb8907aa2c91b9e077936ffee3920b816766c9f26d66357b31a7472a"
+    },
+    {
+      "index": 5,
+      "id": "heart__join",
+      "category": "HEART",
+      "attribute": "JOIN",
+      "composition": "CELESTIAL",
+      "density": "MAX",
+      "path": "cards/heart__join.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient join god, frontal and monumental; colors=GOLD+MAGENTA; density=MAX; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "05b31c69b5521b8740b2e2b6aac3cb85cdd9ae64f8e1ab0fe39b764e13df83bf",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient join god, frontal and monumental; colors=GOLD+MAGENTA; density=MAX; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "6e027183acaedb4bb62b0b7ea8429692a3fa38a9deaa7e47546a9d9848f0f8e8",
+      "request": {
+        "index": 5,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient join god, frontal and monumental; colors=GOLD+MAGENTA; density=MAX; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "dc6891dc8a7097f84712e1d488d4e6dddf4eb483f29bd2050b5f0d60731b7736"
+    }
+  ],
+  "batches": [
+    {
+      "id": "heart-cards-001",
+      "index": 0,
+      "aspect_ratio": "3:4",
+      "asset_ids": [
+        "heart__still",
+        "heart__burn",
+        "heart__scatter",
+        "heart__rot",
+        "heart__wash",
+        "heart__join"
+      ],
+      "size": 6
+    }
+  ]
+}
