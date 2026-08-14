@@ -21,9 +21,10 @@
     "prior_journal_present": false,
     "legacy_recovery_present": false,
     "aspect_3_4_provider_validated": true,
-    "aspect_16_9_provider_validated": true,
+    "aspect_3_4_observed": "896x1200",
+    "aspect_3_4_observed_error_ppm": 4445,
     "provider_dimension_grid_px": 32,
-    "aspects_used_in_this_task": [
+    "declared_aspects": [
       "3:4"
     ],
     "paid_retry_count": 0

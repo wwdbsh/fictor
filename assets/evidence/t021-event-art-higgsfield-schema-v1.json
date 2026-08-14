@@ -77,9 +77,12 @@
   "aspect_expectation": {
     "criterion": "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
     "tolerance_ppm_by_aspect": {
-      "3:4": 5000,
-      "16:9": 12500
+      "3:4": 5000
     },
+    "declared_aspects": [
+      "3:4"
+    ],
+    "undeclared_aspect_throws": true,
     "provider_dimension_grid_px": 32,
     "resolution": "1k",
     "aspects_in_this_task": [
@@ -92,13 +95,9 @@
       "source": "T015 and T020 deliveries",
       "provider_validated": true
     },
-    "observed_16_9": {
-      "width": 1376,
-      "height": 768,
-      "aspect_error_ppm": 7813,
-      "source": "T020 v1/v2 deliveries",
-      "provider_validated": true,
-      "unused_in_this_task": true
+    "t020_16_9_tolerance_deliberately_not_declared_here": {
+      "tolerance_ppm": 12500,
+      "reason": "16:9-SPECIFIC_GRID_ALLOWANCE_MUST_NOT_LEAK_INTO_3_4"
     },
     "out_of_tolerance_terminal_code": "ASPECT_MISMATCH",
     "out_of_tolerance_blocks_all_later_batches": true

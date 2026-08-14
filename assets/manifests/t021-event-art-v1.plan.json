@@ -48,20 +48,20 @@
     },
     "risk_disclosure": {
       "path": "assets/evidence/t021-event-art-risk-disclosure-v1.json",
-      "sha256": "d30b93b957625c2b3aa925377e3ef49790d8d3b8c7f67a2d219a972eaa04f525",
-      "text_sha256": "800c85e06d1a1209bb66635563c540cbd5b734ac09cb82aa0e82df32ab620649"
+      "sha256": "9e1b6ab64ac4e67daff589a41ac8380b78291ee5e664655b0ac3fe3f0b0302c4",
+      "text_sha256": "f7491d89cb26b0ac727e2f4b658fc1559979453cb51ad275e67edae2f53dd2d3"
     },
     "provider_schema": {
       "path": "assets/evidence/t021-event-art-higgsfield-schema-v1.json",
-      "sha256": "a7a5f5c21a033c001618576ef07c61f3a168306847749c2df61e081622c10899"
+      "sha256": "bc270a74e9ee7d22c4517ce14aeeb3e6d0509211fa048fa51db00b81dd955908"
     },
     "forensics": {
       "path": "assets/evidence/t021-event-art-forensics-v1.json",
-      "sha256": "4ff9410ae50d910d0a64a2cbb5a1b475492db42d858add1cf8699851f7c3b967"
+      "sha256": "3ccd70306199c094fc07f05fd84c3ec4a22ebe4434b5e79ce71864e7586854d1"
     },
     "implementation_binding": {
       "path": "assets/evidence/t021-event-art-implementation-binding-v1.json",
-      "sha256": "5b55e2eece8840ae0ec8f378556b8dd56c298aba9d8ccbd62325342e83215fa5",
+      "sha256": "a3fc87a7f45b5aaf04f136ef3e3e5bdc2faea3c357269fca4ead605e69017da3",
       "files": {
         "controller": {
           "path": "scripts/assets/t021-event-art-production-v1-controller.ts",
@@ -69,7 +69,7 @@
         },
         "preparation": {
           "path": "scripts/assets/t021-event-art-production-v1-cli.ts",
-          "sha256": "445b31796a7d5666c009077ebbaa240f0ce3a283df6ca9e39c44b33f35231bbb"
+          "sha256": "af6b60ba027f30774b1f1fb59a7dfb22f9c9ca53fafa16ed03dd75a2c44b8026"
         },
         "production": {
           "path": "scripts/assets/t021-event-art-production-v1-ops.ts",
@@ -77,7 +77,7 @@
         },
         "contract": {
           "path": "scripts/assets/t021-event-art-production-v1.ts",
-          "sha256": "455b9fd9c316469739b35bd00b95f3a20726e2545bf49cd8a34d9299e6ab3174"
+          "sha256": "ca769536c69c2cf2258933ab9ceafb3c03612c8ad59d881eebf17f2d3a1b7f10"
         },
         "provider_transport": {
           "path": "scripts/assets/provider-transport.ts",
@@ -193,9 +193,12 @@
     "aspect_expectation": {
       "criterion": "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
       "tolerance_ppm_by_aspect": {
-        "3:4": 5000,
-        "16:9": 12500
+        "3:4": 5000
       },
+      "declared_aspects": [
+        "3:4"
+      ],
+      "undeclared_aspect_throws": true,
       "provider_dimension_grid_px": 32,
       "resolution": "1k",
       "aspects_in_this_task": [
@@ -208,13 +211,9 @@
         "source": "T015 and T020 deliveries",
         "provider_validated": true
       },
-      "observed_16_9": {
-        "width": 1376,
-        "height": 768,
-        "aspect_error_ppm": 7813,
-        "source": "T020 v1/v2 deliveries",
-        "provider_validated": true,
-        "unused_in_this_task": true
+      "t020_16_9_tolerance_deliberately_not_declared_here": {
+        "tolerance_ppm": 12500,
+        "reason": "16:9-SPECIFIC_GRID_ALLOWANCE_MUST_NOT_LEAK_INTO_3_4"
       },
       "out_of_tolerance_terminal_code": "ASPECT_MISMATCH",
       "out_of_tolerance_blocks_all_later_batches": true

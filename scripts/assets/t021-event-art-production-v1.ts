@@ -84,18 +84,19 @@ export const T021_V1_REMAINING_PLAN_BREAKDOWN = [
 /* -------------------------------------------------------------- tolerance */
 
 /**
- * Both aspects are now provider-validated, and both figures are the same 32-px grid artifact
- * T020 diagnosed: 3:4 delivered 896x1200 (4445 ppm) and 16:9 delivered 1376x768 (7813 ppm).
+ * T021 declares exactly one aspect: 3:4 at 5000 ppm.
  *
- * T021's assets are all 3:4, so only the first entry is exercised. The table is kept whole
- * anyway — it costs nothing, and a lookup that throws loudly on an undeclared aspect is what
- * makes a future mixed-aspect task safe by construction rather than by remembering.
+ * T020's 16:9 tolerance of 12500 is deliberately NOT declared here. It exists only to clear
+ * the provider's 32-px grid at 16:9, where the worst case near 1MP is about 11364 ppm. An
+ * entry that is unreachable by design still invites a later reader to assume 16:9 is
+ * acceptable in this task; an absent entry cannot leak, and the lookup below throws loudly on
+ * anything undeclared. The plan selector already refuses a non-3:4 EVENT asset outright, so
+ * this is the second of two independent refusals rather than the only one.
  *
- * The 16:9 widening is deliberately NOT applied to 3:4. It exists to clear the grid at 16:9,
- * where the worst case near 1MP is about 11364 ppm; 3:4's 4445 sits comfortably inside 5000,
- * and widening it would only discard signal.
+ * 3:4's own delivered geometry is the same grid artifact: 896x1200 measures 4445 ppm off
+ * exact, comfortably inside 5000. Known, observed, and not a reason to widen anything.
  */
-export const T021_V1_ASPECT_TOLERANCE_PPM: Readonly<Record<AspectRatio, number>> = { "3:4": 5_000, "16:9": 12_500 };
+export const T021_V1_ASPECT_TOLERANCE_PPM: Readonly<Partial<Record<AspectRatio, number>>> = { "3:4": 5_000 };
 export function t021AspectTolerancePpm(aspect: AspectRatio): number {
   const tolerance = T021_V1_ASPECT_TOLERANCE_PPM[aspect];
   if (tolerance === undefined) throw new Error(`T021 has no declared tolerance for aspect ${aspect}`);
@@ -104,12 +105,13 @@ export function t021AspectTolerancePpm(aspect: AspectRatio): number {
 export const T021_V1_GRID_PX = 32 as const;
 export const T021_V1_ASPECT_EXPECTATION = {
   criterion: "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
-  tolerance_ppm_by_aspect: { "3:4": 5_000, "16:9": 12_500 },
+  tolerance_ppm_by_aspect: { "3:4": 5_000 },
+  declared_aspects: ["3:4"], undeclared_aspect_throws: true,
   provider_dimension_grid_px: T021_V1_GRID_PX,
   resolution: "1k",
   aspects_in_this_task: ["3:4"],
   observed_3_4: { width: 896, height: 1200, aspect_error_ppm: 4_445, source: "T015 and T020 deliveries", provider_validated: true },
-  observed_16_9: { width: 1376, height: 768, aspect_error_ppm: 7_813, source: "T020 v1/v2 deliveries", provider_validated: true, unused_in_this_task: true },
+  t020_16_9_tolerance_deliberately_not_declared_here: { tolerance_ppm: 12_500, reason: "16:9-SPECIFIC_GRID_ALLOWANCE_MUST_NOT_LEAK_INTO_3_4" },
   out_of_tolerance_terminal_code: "ASPECT_MISMATCH",
   out_of_tolerance_blocks_all_later_batches: true,
 } as const;
@@ -131,9 +133,9 @@ export const T021_V1_LOSS_ACKNOWLEDGMENT_PHRASE = "T021 이 배치의 손실을 
 
 export const T021_V1_RISK_TEXT = `T021은 이벤트 세계 아트 정확히 20장을 2개 배치([12,8])로 배치당 단 한 번씩 유료 생성합니다. 상한은 정확히 30.00 credits(정확 단가 1.50 x 20장)이고 자동 유료 재시도 예산은 0이며, T015/T020 승인은 하나도 상속되지 않습니다.
 (i) 범위 - 6개 이벤트 유형(cache, workshop, collapse, fictor, record, oddity) 기본 6장과 주요 터 변주 14장(cache 6터, oddity 6터, collapse 2터)을 합쳐 20장입니다. 전부 3:4이고 ${T021_V1_LOCAL_ROOT}/events/에 저장되며 같은 상대 경로로 ${T021_V1_BACKUP_ROOT} 아래에 백업됩니다. 이벤트 36변주 전체, 이벤트 런타임 구현, style 재결정, manifest ID 변경은 범위 밖입니다.
-(ii) 종횡비 위험은 이번에 해소된 상태입니다 - T020에서 provider의 32픽셀 격자 정책이 실증되었고 3:4의 실제 전달값 896x1200(4445ppm)은 허용치 5000ppm 안쪽입니다. 16:9(1376x768, 7813ppm)도 T020에서 검증되었으나 이 실행에는 쓰이지 않습니다. 즉 T020 v1을 멈춰 세웠던 미검증 종횡비 위험은 T021에는 없습니다. 다만 provider가 크기 정책을 바꾸면 여전히 ASPECT_MISMATCH로 정지하며, 그 배치의 지출은 회수되지 않습니다.
+(ii) 종횡비 위험은 이번에 해소된 상태입니다 - T020에서 provider가 출력 크기를 32픽셀 격자에 맞춘다는 사실이 실증되었습니다. 이 실행의 20장은 전부 3:4이고, 3:4의 실제 전달값 896x1200은 정확한 3:4 대비 4445ppm으로 같은 격자 현상이지만 허용치 5000ppm 안쪽입니다. 이미 관찰된 값이고 허용 범위 안이므로 허용치를 넓힐 이유가 없습니다. T020에서 16:9에 적용했던 12500ppm은 16:9 전용 완화이므로 T021에는 아예 선언하지 않습니다. 즉 이 실행에서 3:4가 아닌 전달물은 어떤 값이든 통과하지 못합니다. 다만 provider가 크기 정책을 바꾸면 여전히 ASPECT_MISMATCH로 정지하며, 그 배치의 지출은 회수되지 않습니다.
 (iii) 남는 실질 위험은 두 가지입니다. 첫째, 배치마다 제출 응답을 잃을 수 있는 모호 제출 구간이 정확히 1회씩 총 2회 있습니다. 각 구간에서 최대 18.00 credits(12장 x 1.50)가 실제로 차감되고도 응답을 받지 못하면 그 배치의 job ID를 전혀 열거할 수 없어 이미 지불한 이미지를 영구히 회수하지 못할 수 있습니다. 둘째, credits는 2026-08-17에 만료됩니다. 정확한 만료 시각은 알 수 없습니다.
-(iv) 누적 예산 - 현재 잔액은 282.90입니다. T021이 상한까지 쓰면 252.90이 남고, 남은 계획은 T019 9.00과 T016 240.00을 합쳐 249.00입니다. 여유는 3.90뿐입니다. 따라서 이 실행에서 배치 하나를 손실로 확정하면(최대 18.00) 남은 계획을 그대로 수행할 수 없게 됩니다. T021의 손실은 T021 안에서 흡수되지 않으며, 손실이 발생하면 남은 계획의 범위나 예산을 다시 논의해야 합니다.
+(iv) 누적 예산 - 현재 잔액은 282.90입니다. T021이 상한까지 쓰면 252.90이 남고, 남은 계획은 T019 9.00과 T016 240.00을 합쳐 249.00입니다. 여유는 3.90뿐입니다. 따라서 이 실행에서 배치 하나를 손실로 확정하면(최대 18.00) 남은 계획을 그대로 수행할 수 없습니다. 구체적으로는 T016의 범위를 줄여야 하며, 잃은 1.50마다 canonical 카드 약 1장씩 줄어듭니다. 예를 들어 18.00을 잃으면 T016은 계획한 160장이 아니라 그보다 적은 수로 다시 잡아야 합니다. T021의 손실은 T021 안에서 흡수되지 않으므로, 손실이 발생하면 남은 계획의 범위를 다시 논의해야 합니다.
 (v) 각 배치는 단 한 번만 제출합니다. 유료 envelope이 한 번이라도 밖으로 나간 배치는 모호 제출이든 부분 응답이든 즉시 fail-stop하고 어떤 경우에도 재제출하지 않습니다. fail-stop은 배치 단위이며, 지출이 0인 배치(유료 envelope 이전 단계 실패)만 되돌려 재실행할 수 있습니다. 지출이 발생한 배치는 operator가 정확히 “${T021_V1_LOSS_ACKNOWLEDGMENT_PHRASE}”로 손실을 확인해야만 다음 배치가 열리고, 확인된 손실은 30.00 상한에서 그대로 차감됩니다.
 (vi) 과금은 provider가 보고하는 credits_exact(1.50)만 사용합니다. 화면 표시값 credits(1.00)는 기록만 하고 상한 계산에 절대 쓰지 않습니다.
 (vii) 모델 canary는 모든 배치에 적용됩니다. 완료된 job의 provider-reported model이 ${T021_V1_EXPECTED_MODEL}가 아니면 그 배치는 즉시 정지하고 다음 배치는 직전 배치가 모델 확인을 통과할 때까지 열리지 않습니다. MODEL_DRIFT와 ASPECT_MISMATCH는 provider 계약 드리프트로 취급되어 한 번이라도 관찰되면 이후 모든 배치가 영구히 열리지 않으며, 손실 확인과 재개 문구로도 열 수 없습니다.
@@ -183,8 +185,8 @@ export function buildT021Forensics(root: string) {
     },
     observed: {
       prior_paid_spend_units: 0, prior_journal_present: false, legacy_recovery_present: false,
-      aspect_3_4_provider_validated: true, aspect_16_9_provider_validated: true,
-      provider_dimension_grid_px: T021_V1_GRID_PX, aspects_used_in_this_task: ["3:4"], paid_retry_count: 0,
+      aspect_3_4_provider_validated: true, aspect_3_4_observed: "896x1200", aspect_3_4_observed_error_ppm: 4_445,
+      provider_dimension_grid_px: T021_V1_GRID_PX, declared_aspects: ["3:4"], paid_retry_count: 0,
     },
     policy: {
       paid_resubmit_allowed: false, automatic_paid_retry_allowed: false, batch_scoped_fail_stop: true,
@@ -206,7 +208,7 @@ export function t021ApprovalScope() {
     total_credit_cap_decimal: decimalT021(T021_V1_TOTAL_CAP_UNITS), total_credit_cap_units: T021_V1_TOTAL_CAP_UNITS,
     legacy_committed_units: 0, automatic_paid_retry_reserve_decimal: "0.00", automatic_paid_retry_count: 0,
     max_batch_exposure_decimal: decimalT021(T021_V1_MAX_BATCH_EXPOSURE_UNITS), ambiguous_submission_windows: T021_V1_BATCH_COUNT,
-    aspect_tolerance_ppm_3_4: 5_000, aspect_3_4_provider_validated: true,
+    aspect_tolerance_ppm_3_4: 5_000, aspect_3_4_provider_validated: true, declared_aspects: ["3:4"],
     balance_at_disclosure_decimal: decimalT021(T021_V1_BALANCE_AT_DISCLOSURE_UNITS),
     remaining_plan_after_t021_decimal: decimalT021(T021_V1_REMAINING_PLAN_AFTER_T021_UNITS),
     remaining_plan_breakdown: [...T021_V1_REMAINING_PLAN_BREAKDOWN],

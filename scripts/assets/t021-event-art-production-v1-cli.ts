@@ -90,7 +90,7 @@ export function dryRunT021(root = repositoryRoot): Record<string, unknown> {
     event_types: [...new Set(plan.assets.map(({ event_type }) => event_type))],
     assets_by_event_type: plan.assets.reduce<Record<string, number>>((counts, { event_type }) => ({ ...counts, [event_type]: (counts[event_type] ?? 0) + 1 }), {}),
     aspect_ratio_counts: plan.assets.reduce<Record<string, number>>((counts, { aspect_ratio }) => ({ ...counts, [aspect_ratio]: (counts[aspect_ratio] ?? 0) + 1 }), {}),
-    aspect_tolerance_ppm: { "3:4": 5_000, "16:9": 12_500 },
+    aspect_tolerance_ppm: { "3:4": 5_000 }, declared_aspects: ["3:4"],
     batch_count: plan.batches.length, batch_layout: batches, batch_sizes: plan.batches.map(({ size }) => size),
     batches_are_aspect_homogeneous: true, batch_max: 12,
     unit_cost_units: 150, planned_spend_units: plannedUnits, total_credit_cap_units: T021_V1_TOTAL_CAP_UNITS, total_credit_cap_decimal: decimalT021(T021_V1_TOTAL_CAP_UNITS),

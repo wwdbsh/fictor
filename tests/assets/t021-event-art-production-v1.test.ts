@@ -147,22 +147,24 @@ describe("T021 manifest discovery", () => {
 });
 
 describe("T021 tolerance table", () => {
-  test("3:4 is 5000 and the 16:9 entry is retained but unused here", () => {
+  test("3:4 is the only declared aspect, and anything else throws rather than defaulting", () => {
     expect(t021AspectTolerancePpm("3:4")).toBe(5_000);
-    expect(t021AspectTolerancePpm("16:9")).toBe(12_500);
-    expect(T021_V1_ASPECT_TOLERANCE_PPM).toEqual({ "3:4": 5_000, "16:9": 12_500 });
+    expect(T021_V1_ASPECT_TOLERANCE_PPM).toEqual({ "3:4": 5_000 });
+    // T020's 16:9 allowance is not declared here at all. An absent entry cannot leak, and the
+    // lookup refuses rather than silently picking a default.
+    expect(() => t021AspectTolerancePpm("16:9")).toThrow(/no declared tolerance for aspect 16:9/);
     expect(cachedPlan.assets.every(({ aspect_ratio }) => aspect_ratio === "3:4")).toBe(true);
   });
 
-  test("the 16:9 widening is not applied to 3:4", () => {
+  test("the observed 3:4 grid geometry is inside tolerance and a wider plate is not", () => {
     const ppm = (w: number, h: number, ew: number, eh: number) => Math.ceil((Math.abs(w * eh - h * ew) * 1_000_000) / (h * ew));
+    // The real delivered geometry: the same 32-px grid artifact as 16:9, but inside 5000.
     expect(ppm(896, 1200, 3, 4)).toBe(4_445);
     expect(ppm(896, 1200, 3, 4)).toBeLessThanOrEqual(t021AspectTolerancePpm("3:4"));
-    // A plate between the two limits proves the widening did not leak: it would pass under
-    // 16:9's 12500 and must not pass under 3:4's 5000.
+    // A plate that T020's 16:9 allowance would have admitted is refused here.
     expect(ppm(908, 1200, 3, 4)).toBe(8_889);
-    expect(ppm(908, 1200, 3, 4)).toBeLessThanOrEqual(t021AspectTolerancePpm("16:9"));
     expect(ppm(908, 1200, 3, 4)).toBeGreaterThan(t021AspectTolerancePpm("3:4"));
+    expect(ppm(908, 1200, 3, 4)).toBeLessThanOrEqual(12_500);
   });
 });
 
@@ -412,6 +414,7 @@ describe("T021 entry gates and preparation", () => {
     });
     expect(result.batch_sizes).toEqual([...T021_V1_BATCH_SIZES]);
     expect(result.aspect_ratio_counts).toEqual({ "3:4": 20 });
+    expect(result.aspect_tolerance_ppm).toEqual({ "3:4": 5_000 });
     expect(result.event_types).toEqual([...T021_V1_EVENT_TYPES]);
     expect(result.plan_sha256).toBe(t021PlanSha256(cachedPlan));
     expect(result.disclosure_chain_status).toBe(result.authorized ? "approved" : "pending approval");
