@@ -34,6 +34,9 @@ describe("current source architecture", () => {
       expect(source, relative(repositoryRoot, file)).not.toMatch(
         /(?:from\s+["']node:|import\s*\(\s*["']node:|\b(?:crypto|fs|path)\b)/,
       );
+      expect(source, relative(repositoryRoot, file)).not.toMatch(
+        /\b(?:Math\.random|Date|setTimeout|setInterval)\b/,
+      );
     }
   });
 
@@ -65,5 +68,12 @@ describe("current source architecture", () => {
         /(?:data\/(?:source|schema|generator|generated)|\.generated\.json|\bajv\b|\btsx\b)/i,
       );
     }
+  });
+
+  it("keeps combat implementation helpers out of the root domain API", () => {
+    const combatIndex = readFileSync(join(sourceRoot, "domain", "combat", "index.ts"), "utf8");
+    expect(combatIndex).not.toMatch(
+      /\b(?:nextUint32|nextBoundedUint32|shuffleInstanceIds|canonicalSerialize|fnv1a32|isSafeCount|isFiniteNonnegative)\b/,
+    );
   });
 });
