@@ -4,6 +4,8 @@ import {
 } from "../domain/forge-runtime";
 
 export const FICTOR_SAVE_KEY = "fictor.save.v1" as const;
+export const FICTOR_SAVE_V2_KEY = "fictor.save.v2" as const;
+export const SAVE_SCHEMA_VERSION_V2 = 2 as const;
 export const SAVE_SCHEMA_VERSION = 1 as const;
 export const PROFILE_SCHEMA_VERSION = 1 as const;
 export const SAVE_GENERATION_MAX_LENGTH = 128 as const;
@@ -56,6 +58,15 @@ export interface SaveEnvelopeV1 {
   saveRevision: number;
   profile: PersistentProfileV1;
   run: RunProjectionV1;
+}
+
+export interface SaveEnvelopeV2<TFlow = unknown> {
+  schemaVersion: typeof SAVE_SCHEMA_VERSION_V2;
+  saveGeneration: string;
+  saveRevision: number;
+  profile: PersistentProfileV1;
+  runtime: RunProjectionV1;
+  flow: TFlow;
 }
 
 export type SaveLoadIssue =

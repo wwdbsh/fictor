@@ -218,11 +218,12 @@ function forgeInstant(
   return commit(state, rollbackState, events, command.type, resolvedCard);
 }
 
-function forgeWorkshop(
+function forgeWorkshopWithPayment(
   state: ForgeRuntimeStateV1,
   rollbackState: ForgeRuntimeStateV1,
   command: Extract<ForgeRuntimeCommand, { type: "FORGE_WORKSHOP" }>,
   context: ForgeResolverContextV1,
+  payment: "PAID" | "CONTROLLER_ENTITLEMENT",
 ): ForgeRuntimeSuccessResult {
   if (state.run.activeCombat !== null) return reject(state, command.type, "COMBAT_ACTIVE");
   const selected = selectInstances(state, command);
@@ -230,7 +231,7 @@ function forgeWorkshop(
   for (const instance of selected.instances) if (!state.run.deck.includes(instance.instanceId)) return reject(state, command.type, "NOT_IN_DECK");
   const definitions = materialDefinitions(context, selected.instances);
   if (!definitions.ok) return reject(state, command.type, definitions.reason);
-  if (state.run.fuel < FORGE_RUNTIME_FUEL_COST) return reject(state, command.type, "INSUFFICIENT_FUEL");
+  if (payment === "PAID" && state.run.fuel < FORGE_RUNTIME_FUEL_COST) return reject(state, command.type, "INSUFFICIENT_FUEL");
   const generatedId = nextInstanceId(state);
   if (!generatedId.ok) return reject(state, command.type, generatedId.reason);
   if (state.revision === Number.MAX_SAFE_INTEGER) return reject(state, command.type, "POSTCONDITION_FAILED");
@@ -247,17 +248,57 @@ function forgeWorkshop(
   state.run.deck = state.run.deck.filter((id) => !selectedIds.has(id));
   state.run.ownedInstances.push({ instanceId: generatedId.instanceId, cardId: resolvedCard.card_id });
   state.run.deck.push(generatedId.instanceId);
-  state.run.fuel -= FORGE_RUNTIME_FUEL_COST;
+  if (payment === "PAID") state.run.fuel -= FORGE_RUNTIME_FUEL_COST;
   state.run.nextInstanceSequence += 1;
   state.revision += 1;
   const discovered = insertDiscovery(state, resolvedCard.recipe_id);
   const events: ForgeRuntimeEvent[] = [
     { type: "MATERIALS_CONSUMED", instanceIds: [...command.materialInstanceIds] },
-    { type: "FUEL_SPENT", amount: FORGE_RUNTIME_FUEL_COST, remaining: state.run.fuel },
+    payment === "PAID"
+      ? { type: "FUEL_SPENT", amount: FORGE_RUNTIME_FUEL_COST, remaining: state.run.fuel }
+      : { type: "FREE_WORKSHOP_USED", amount: 0, remainingFuel: state.run.fuel },
     { type: "FORGE_RESULT_CREATED", mode: "WORKSHOP", instanceId: generatedId.instanceId, cardId: resolvedCard.card_id, recipeId: resolvedCard.recipe_id, location: "DECK" },
   ];
   if (discovered) events.push({ type: "RECIPE_DISCOVERED", recipeId: resolvedCard.recipe_id });
   return commit(state, rollbackState, events, command.type, resolvedCard);
+}
+
+function forgeWorkshop(
+  state: ForgeRuntimeStateV1,
+  rollbackState: ForgeRuntimeStateV1,
+  command: Extract<ForgeRuntimeCommand, { type: "FORGE_WORKSHOP" }>,
+  context: ForgeResolverContextV1,
+): ForgeRuntimeSuccessResult {
+  return forgeWorkshopWithPayment(state, rollbackState, command, context, "PAID");
+}
+
+/**
+ * Controller-only entitlement seam. It deliberately accepts the already-decoded
+ * paid command shape, so ordinary ForgeRuntime callers cannot select free payment.
+ * This symbol is not re-exported from the ForgeRuntime public barrel.
+ */
+export function reduceEntitledWorkshopForgeInternal(
+  rawState: unknown,
+  materialInstanceIds: [string, string],
+  rawContext: unknown,
+): ForgeRuntimeReducerResult {
+  const decodedState = decodeForgeRuntimeState(rawState);
+  if (!decodedState.valid) return invalidState();
+  const decodedContext = decodeForgeResolverContext(rawContext);
+  if (!decodedContext.valid) return reject(decodedState.value, "FORGE_WORKSHOP", "INVALID_CONTEXT");
+  const decodedCommand = decodeForgeRuntimeCommand({ type: "FORGE_WORKSHOP", materialInstanceIds });
+  if (!decodedCommand.valid || decodedCommand.value.type !== "FORGE_WORKSHOP") {
+    return reject(decodedState.value, "FORGE_WORKSHOP", "INVALID_COMMAND");
+  }
+  const working = decodeForgeRuntimeState(decodedState.value);
+  if (!working.valid) return invalidState();
+  return forgeWorkshopWithPayment(
+    working.value,
+    decodedState.value,
+    decodedCommand.value,
+    decodedContext.value,
+    "CONTROLLER_ENTITLEMENT",
+  );
 }
 
 function cleanupCombat(

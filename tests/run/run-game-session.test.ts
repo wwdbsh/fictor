@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   createDormantRunFlowState,
   executeRunGameCommand,
-  loadGameSession,
   type RunGameSessionV1,
   type RunScenarioV1,
-} from "../../src/application";
+} from "../../src/application/run";
+import { loadGameSession } from "../../src/application/game-session";
 import {
   FORGE_RUNTIME_ENGINE_VERSION,
   FORGE_RUNTIME_RESOLVER_VERSION,

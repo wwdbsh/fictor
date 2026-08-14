@@ -1,6 +1,34 @@
-# FICTOR 로컬 저장 스키마 v1
+# FICTOR 로컬 저장 스키마
 
-## 범위와 수명
+## Track 1 진행 envelope v2
+
+literal T027 진행은 새 키 `fictor.save.v2`에 한 번의 `setItem`으로 저장한다.
+
+```ts
+interface SaveEnvelopeV2 {
+  schemaVersion: 2;
+  saveGeneration: string;
+  saveRevision: number;
+  profile: PersistentProfileV1;
+  runtime: RunProjectionV1;
+  flow: StillkinTrack1FlowState;
+}
+```
+
+`flow`는 controller/config/scenario hash, runId와 run sequence, route 위치, HP, COLLAPSE RNG,
+workshop entitlement, 다음 encounter nonce 및 현재 combat binding을 포함한다. runtime의
+`activeCombat` 유무와 binding enemy가 일치하지 않으면 로드하지 않는다. 지원하지 않거나 손상된 v2는
+안전 초기화하되 write-block하며 원본을 덮어쓰지 않는다.
+
+저장 직전에 v2를 다시 읽어 `(saveGeneration, saveRevision)`을 비교한다. 이는 같은 탭/프로세스에서의
+stale 보호이지 browser `localStorage`의 진정한 multi-tab CAS라고 주장하지 않는다. quota/read/stale/
+revision exhaustion 실패 시 profile, runtime, flow와 반환 이벤트 전부가 논리적으로 rollback된다.
+
+첫 v2 load에서 v2가 없으면 `fictor.save.v1`을 읽을 수 있다. v1 outer와 profile이 유효할 때 recipe와
+heart만 이관하고, runtime/run/flow는 controller 소유 starter로 새로 시작한다. v1 bytes는 읽기만 하며
+삭제하거나 덮어쓰지 않는다. 아래 v1 구현과 reset API는 rollback 호환성을 위해 그대로 유지한다.
+
+## v1 범위와 수명
 
 저장 키는 `fictor.save.v1` 하나다. 브라우저 `localStorage`와 같은 `StorageLike`를 주입하며 서버, 계정, 동기화, 사용자 식별 정보는 사용하지 않는다. 한 번의 `setItem`으로 envelope 전체를 교체하는 것이 프로토타입의 원자성 경계다.
 

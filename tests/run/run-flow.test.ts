@@ -8,7 +8,7 @@ import {
   reduceRunFlow,
   type EventNodeV1,
   type RunScenarioV1,
-} from "../../src/application";
+} from "../../src/application/run";
 import {
   CANONICAL_MATERIAL_IDS_V1,
   ODDITY_MATERIAL_IDS_V1,

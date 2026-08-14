@@ -97,6 +97,7 @@ export type ForgeRuntimeEvent =
   | { type: "MATERIALS_CONSUMED"; instanceIds: [string, string] }
   | { type: "FORGE_ACTION_SPENT"; remaining: number; turn: number }
   | { type: "FUEL_SPENT"; amount: 1; remaining: number }
+  | { type: "FREE_WORKSHOP_USED"; amount: 0; remainingFuel: number }
   | {
       type: "FORGE_RESULT_CREATED";
       mode: "INSTANT" | "WORKSHOP";
