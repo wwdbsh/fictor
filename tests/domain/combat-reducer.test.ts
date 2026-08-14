@@ -189,8 +189,12 @@ describe("combat state machine", () => {
     const state = started(setup);
     const result = reduceCombat(state, { type: "END_TURN" });
     expect(result.state.status).toBe("DEFEAT");
+    expect(result.state.phase).toBe("TERMINAL");
     expect(result.state.enemy.currentIntentIndex).toBe(0);
-    expect(result.events.at(-1)).toEqual({ type: "COMBAT_ENDED", status: "DEFEAT" });
+    expect(result.events.slice(-2)).toEqual([
+      { type: "COMBAT_ENDED", status: "DEFEAT" },
+      { type: "PHASE_CHANGED", phase: "TERMINAL" },
+    ]);
     expect(reduceCombat(result.state, { type: "START_TURN" }).events[0]).toMatchObject({
       reason: "TERMINAL_COMBAT",
     });
@@ -236,5 +240,25 @@ describe("combat state machine", () => {
     const result = reduceCombat(state, play("instance_a1"));
     expect(result.events[0]).toMatchObject({ reason: "CALCULATION_OVERFLOW" });
     expect(result.state).toEqual(before);
+  });
+
+  it("classifies EFFECT_POWER multiplication overflow and rejects atomically", () => {
+    const setup = fixtureSetup();
+    setup.rules.resonanceRate = 0;
+    setup.programs[0] = program("DELAYED_EXPLOSION", [
+      {
+        kind: "DAMAGE",
+        target: { kind: "ENEMY", enemyId },
+        amount: { kind: "EFFECT_POWER", multiplier: Number.MAX_SAFE_INTEGER },
+      },
+    ]);
+    const state = started(setup);
+    const before = jsonClone(state);
+    const result = reduceCombat(state, play("instance_a1"));
+    expect(result.events).toEqual([
+      { type: "COMMAND_REJECTED", command: "PLAY_CARD", reason: "CALCULATION_OVERFLOW" },
+    ]);
+    expect(result.state).toEqual(before);
+    expect(state).toEqual(before);
   });
 });

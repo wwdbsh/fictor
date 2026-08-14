@@ -7,14 +7,11 @@ export {
   COMBAT_SCHEMA_VERSION,
 } from "./constants";
 export type { CombatEffectId } from "./constants";
-export { nextUint32, shuffleInstanceIds } from "./prng";
 export { reduceCombat } from "./reducer";
-export { canonicalSerialize, fnv1a32, runCombatReplay } from "./replay";
+export { CombatReplayValidationError, runCombatReplay } from "./replay";
 export { CombatValidationError, createCombatState } from "./setup";
 export {
-  isCombatEffectId,
-  isFiniteNonnegative,
-  isSafeCount,
+  validateCombatCommand,
   validateCombatSetup,
   validateCombatState,
 } from "./validation";

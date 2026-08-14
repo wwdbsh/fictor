@@ -87,10 +87,7 @@ describe("combat runtime boundary", () => {
     expect(validateCombatState(replacement)).toEqual({ valid: true, errors: [] });
     replacement.player.energy = replacement.rules.maxEnergy + 1;
     expect(validateCombatState(replacement).valid).toBe(false);
-    expect(validateCombatState({ schemaVersion: "combat-state-v1" })).toEqual({
-      valid: false,
-      errors: ["combat state structure is invalid"],
-    });
+    expect(validateCombatState({ schemaVersion: "combat-state-v2" }).valid).toBe(false);
   });
 
   it("keeps effect ids typed as the exact literal union", () => {

@@ -69,4 +69,11 @@ describe("current source architecture", () => {
       );
     }
   });
+
+  it("keeps combat implementation helpers out of the root domain API", () => {
+    const combatIndex = readFileSync(join(sourceRoot, "domain", "combat", "index.ts"), "utf8");
+    expect(combatIndex).not.toMatch(
+      /\b(?:nextUint32|nextBoundedUint32|shuffleInstanceIds|canonicalSerialize|fnv1a32|isSafeCount|isFiniteNonnegative)\b/,
+    );
+  });
 });

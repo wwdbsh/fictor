@@ -1,7 +1,7 @@
 import type { CombatEffectId } from "./constants";
 import type { ResonanceAttribute, ResonanceState } from "../resonance";
 
-export type CombatPhase = "TURN_READY" | "START_TURN" | "PLAYER_ACTION" | "END_TURN";
+export type CombatPhase = "TURN_READY" | "START_TURN" | "PLAYER_ACTION" | "END_TURN" | "TERMINAL";
 export type CombatStatus = "ONGOING" | "VICTORY" | "DEFEAT";
 export type TerminalPolicy = "DEFEAT_FIRST" | "VICTORY_FIRST";
 
@@ -22,8 +22,8 @@ export interface CombatRules {
 export interface CardDefinition {
   cardId: string;
   effectId: CombatEffectId;
-  cost: number;
-  power: number;
+  cost: number | null;
+  power: number | null;
   resonanceAttribute: ResonanceAttribute | null;
 }
 
@@ -92,9 +92,9 @@ export interface CardZones {
 }
 
 export interface CombatState {
-  schemaVersion: "combat-state-v1";
-  engineVersion: "combat-engine-v1";
-  prngVersion: "fictor-lcg32-fisher-yates-v1";
+  schemaVersion: "combat-state-v2";
+  engineVersion: "combat-engine-v2";
+  prngVersion: "fictor-splitmix32-fisher-yates-v2";
   phase: CombatPhase;
   status: CombatStatus;
   turn: number;
@@ -130,6 +130,7 @@ export type CombatCommand =
   | { type: "END_TURN" };
 
 export type RejectionReason =
+  | "INVALID_COMMAND"
   | "INVALID_STATE"
   | "TERMINAL_COMBAT"
   | "INVALID_PHASE"
@@ -147,7 +148,7 @@ export type RejectionReason =
   | "INVALID_EFFECT_PROGRAM";
 
 export type CombatEvent =
-  | { type: "COMMAND_REJECTED"; command: CombatCommand["type"]; reason: RejectionReason }
+  | { type: "COMMAND_REJECTED"; command: CombatCommand["type"] | "UNKNOWN"; reason: RejectionReason }
   | { type: "PHASE_CHANGED"; phase: CombatPhase }
   | { type: "TURN_STARTED"; turn: number; energy: number }
   | { type: "DISCARD_SHUFFLED"; instanceIds: string[] }
@@ -176,6 +177,13 @@ export interface CombatResult {
   events: CombatEvent[];
 }
 
+export interface CombatBoundaryFailureResult {
+  state: null;
+  events: [{ type: "COMMAND_REJECTED"; command: "UNKNOWN"; reason: "INVALID_STATE" }];
+}
+
+export type CombatReducerResult = CombatResult | CombatBoundaryFailureResult;
+
 export interface ValidationResult {
   valid: boolean;
   errors: string[];
@@ -188,9 +196,9 @@ export interface CombatReplayStep {
 }
 
 export interface CombatReplay {
-  schemaVersion: "combat-replay-v1";
-  engineVersion: "combat-engine-v1";
-  prngVersion: "fictor-lcg32-fisher-yates-v1";
+  schemaVersion: "combat-replay-v2";
+  engineVersion: "combat-engine-v2";
+  prngVersion: "fictor-splitmix32-fisher-yates-v2";
   hashAlgorithm: "fnv1a32-v1";
   initialSetup: CombatSetup;
   initialState: CombatState;

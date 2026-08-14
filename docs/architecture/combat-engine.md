@@ -3,14 +3,15 @@
 ## 범위와 상태 기계
 
 이 모듈은 React, 브라우저 API, Node API, canonical 데이터 import 없이 동작하는 순수 TypeScript 경계다.
-`createCombatState(setup)`과 `reduceCombat(state, command)`가 공개 진입점이며 reducer는 항상 새 상태와
-직렬화 가능한 ordered event 배열을 반환한다.
+`createCombatState(setup)`과 `reduceCombat(state, command)`가 공개 진입점이다. 유효한 state boundary에서
+reducer는 새 상태와 직렬화 가능한 ordered event 배열을 반환하며, malformed state는 아래의 명시적인
+null-state boundary failure로 반환한다.
 
 ```text
 TURN_READY --START_TURN--> START_TURN --energy/draw--> PLAYER_ACTION
 PLAYER_ACTION --PLAY_CARD--> PLAYER_ACTION
 PLAYER_ACTION --END_TURN--> END_TURN --enemy intent--> TURN_READY
-                                      \--lethal--> VICTORY | DEFEAT
+                                      \--lethal--> TERMINAL (VICTORY | DEFEAT)
 ```
 
 초기 turn은 0이고 성공한 `START_TURN`만 turn을 1 올린다. 시작 처리는 에너지를 `maxEnergy`로
@@ -26,7 +27,9 @@ PLAYER_ACTION --END_TURN--> END_TURN --enemy intent--> TURN_READY
 카드 program도 모든 operation을 실행하고 카드를 지정 zone으로 이동한 뒤 양측 HP를 함께 판정한다.
 따라서 한 program 안의 자해 후 회복 같은 순서는 중간 사망으로 잘리지 않는다. 동시 사망은 필수
 `terminalPolicy` (`DEFEAT_FIRST` 또는 `VICTORY_FIRST`)로만 결정한다. terminal 상태에서는 모든 명령을
-거부하므로 적 행동이나 intent 회전이 추가로 발생하지 않는다.
+거부하므로 적 행동이나 intent 회전이 추가로 발생하지 않는다. lethal 판정은 state의 status와 phase를
+함께 바꾼 뒤 `COMBAT_ENDED`, `PHASE_CHANGED(TERMINAL)` 순으로 event를 낸다. validator는 `ONGOING`과
+`TERMINAL`의 조합 및 terminal status와 비-terminal phase의 조합을 모두 거부한다.
 
 ## 수치와 밸런스 주입
 
@@ -42,9 +45,11 @@ block 잔존은 `{ numerator, denominator, rounding: "FLOOR" }`로 직렬화한�
 `floor(block * numerator / denominator)`만 허용한다. T023의 완전 만료는 `0/1`, T026의 절반 잔존은
 `1/2`로 표현할 수 있다. 부동소수 반올림 규칙이나 종족별 상수는 엔진에 숨겨 두지 않는다.
 
-count, cost, energy, seed와 index는 안전한 정수여야 한다. HP, block, power, rate와 operation amount는
+count, 확정 cost, energy, seed와 index는 안전한 정수여야 한다. HP, block, 확정 power, rate와 operation amount는
 유한·비음수이고 안전 범위를 벗어나지 않아야 한다. 공명률이 `null`이거나 계산이 overflow이면 수치
-효과의 카드 플레이 전체를 거부한다. 계산 결과를 반올림하지 않는다.
+효과의 카드 플레이 전체를 거부한다. 계산 결과를 반올림하지 않는다. 아직 밸런스가 승인되지 않은
+canonical projection은 card cost/power를 `null`로 보존할 수 있다. 이는 유효한 setup/state이지만 해당
+카드는 `INVALID_CARD_NUMERIC`으로 플레이할 수 없다. `NaN`, 음수, 무한대는 boundary 자체가 거부한다.
 
 ## 기본 공명과 카드 projection
 
@@ -90,13 +95,16 @@ optional raw string target은 사용하지 않는다.
 
 deck 배열의 index 0이 top이다. 초기 deck 순서는 그대로 보존한다. 필요한 draw 중 deck이 비었을 때만
 discard 전체를 한 번 shuffle하여 새 deck으로 만들며, 둘 다 비면 조용히 멈춘다. shuffle은 고정
-`fictor-lcg32-fisher-yates-v1` uint32 PRNG와 Fisher–Yates를 사용한다. 전역 상태나 외부 entropy는 없다.
+`fictor-splitmix32-fisher-yates-v2` uint32 PRNG와 Fisher–Yates를 사용한다. state increment 뒤 avalanche로
+output을 섞고, bounded 값은 2^32 구간의 불완전한 꼬리를 rejection한 뒤 산출하므로 low-bit parity나
+modulo bias를 shuffle index에 전달하지 않는다. 전역 상태나 외부 entropy는 없다.
 
 replay는 다음 버전을 기록한다.
 
-- schema: `combat-replay-v1`
-- engine: `combat-engine-v1`
-- PRNG: `fictor-lcg32-fisher-yates-v1`
+- state schema: `combat-state-v2`
+- replay schema: `combat-replay-v2`
+- engine: `combat-engine-v2`
+- PRNG: `fictor-splitmix32-fisher-yates-v2`
 - hash: `fnv1a32-v1`
 
 초기 setup/state, 명령, 매 step의 state/events를 모두 저장한다. canonical serializer는 object key를
@@ -108,6 +116,21 @@ replay는 다음 버전을 기록한다.
 대상·에너지·공명 계산, program 전체 실행을 작업 복사본에서 마친 뒤에만 성공 결과를 반환한다. 어느
 operation에서든 검증 또는 overflow가 실패하면 원본과 deep-equal인 새 상태와 단일 rejection event를
 반환한다. 이 rollback 규칙이 T024의 저장 교체와 replay 재현의 기반이다.
+
+공개 boundary는 타입 표기만 신뢰하지 않는다. setup/state/command와 모든 nested record는 정확한 own data
+property allowlist를 가져야 하며 `Object.prototype` 또는 null prototype만 허용한다. 배열은
+`Array.prototype`, dense index와 `length`만 허용한다. 상속 필드, accessor, symbol, extra callback/function,
+sparse array와 array custom property는 거부한다. null-prototype record는 허용하지만 canonical clone은
+ordinary 안전 객체로 만든다. descriptor를 통해 검증·복사하므로 getter를 실행하지 않는다.
+
+malformed state의 `reduceCombat` 결과는 `{ state: null, events: [INVALID_STATE/UNKNOWN] }`인 별도 boundary
+failure다. invalid state를 clone하지 않는다. state가 유효하고 command만 malformed이면 canonical state의
+deep-equal 복사와 `INVALID_COMMAND/UNKNOWN` event를 반환한다. unknown command는 `END_TURN`으로 fallthrough하지
+않는다. malformed setup은 `CombatValidationError`, malformed replay command 배열은
+`CombatReplayValidationError`를 던진다. 둘 다 typed fail-closed 오류다.
+
+root domain API는 create/reduce/validate/replay, versions/constants와 공개 types만 노출한다. PRNG vectors,
+bounded sampler, canonical serializer와 FNV 구현은 회귀 테스트 가능한 internal module이지만 제품 API는 아니다.
 
 T024는 `validateCombatState`와 version 필드로 atomic persistence를 연결한다. T026은 injected rules의
 block retention과 공명 adapter/정책을 확장한다. 즉석/공방 빚기 수명, UI, 종족 변주, enemy roster/AI,

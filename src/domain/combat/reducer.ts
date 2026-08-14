@@ -3,19 +3,21 @@ import {
   calculateResonantPower,
   currentResonanceStreak,
 } from "../resonance";
-import { cloneCombatState } from "./clone";
+import { cloneCombatState, cloneCommand } from "./clone";
 import { applyOperations } from "./operations";
 import { drawCards } from "./prng";
 import type {
   CombatCommand,
   CombatEvent,
+  CombatBoundaryFailureResult,
+  CombatReducerResult,
   CombatResult,
   CombatState,
   CombatTarget,
   EffectProgram,
   RejectionReason,
 } from "./types";
-import { validateCombatState } from "./validation";
+import { isValidCombatCommand, validateCombatState } from "./validation";
 
 function reject(state: CombatState, command: CombatCommand, reason: RejectionReason): CombatResult {
   return {
@@ -38,7 +40,9 @@ function finishIfTerminal(state: CombatState, events: CombatEvent[]): boolean {
   const status = terminalStatus(state);
   if (status === null) return false;
   state.status = status;
+  state.phase = "TERMINAL";
   events.push({ type: "COMBAT_ENDED", status });
+  events.push({ type: "PHASE_CHANGED", phase: "TERMINAL" });
   return true;
 }
 
@@ -85,6 +89,8 @@ function playCard(
   if (!program) return reject(original, command, "EFFECT_PROGRAM_UNAVAILABLE");
   if (card.resonanceAttribute === null) return reject(original, command, "RESONANCE_ATTRIBUTE_REQUIRED");
   if (
+    card.cost === null ||
+    card.power === null ||
     !Number.isSafeInteger(card.cost) ||
     card.cost < 0 ||
     !Number.isFinite(card.power) ||
@@ -104,12 +110,9 @@ function playCard(
     state.rules.resonanceRate,
   );
   if (!calculation.ok) {
-    const reason =
-      calculation.reason === "INVALID_RESONANCE_RATE"
-        ? "INVALID_RESONANCE_RATE"
-        : calculation.reason === "INVALID_POWER" || calculation.reason === "INVALID_STREAK"
-          ? "INVALID_CARD_NUMERIC"
-          : "CALCULATION_OVERFLOW";
+    const reason = calculation.reason === "INVALID_RESONANCE_RATE"
+      ? "INVALID_RESONANCE_RATE"
+      : "CALCULATION_OVERFLOW";
     return reject(original, command, reason);
   }
 
@@ -199,17 +202,60 @@ function endTurn(original: CombatState, state: CombatState, command: CombatComma
   return { state, events };
 }
 
-export function reduceCombat(input: CombatState, command: CombatCommand): CombatResult {
+function invalidStateBoundary(): CombatBoundaryFailureResult {
+  return {
+    state: null,
+    events: [{ type: "COMMAND_REJECTED", command: "UNKNOWN", reason: "INVALID_STATE" }],
+  };
+}
+
+function assertNever(value: never): never {
+  throw new Error(`Unreachable combat command: ${String(value)}`);
+}
+
+export function reduceCombat(input: CombatState, command: CombatCommand): CombatResult;
+export function reduceCombat(input: unknown, command: unknown): CombatReducerResult;
+export function reduceCombat(input: unknown, command: unknown): CombatReducerResult {
   const validation = validateCombatState(input);
-  if (!validation.valid) return reject(input, command, "INVALID_STATE");
-  if (input.status !== "ONGOING") return reject(input, command, "TERMINAL_COMBAT");
+  if (!validation.valid) return invalidStateBoundary();
+  let stateInput: CombatState;
+  try {
+    stateInput = cloneCombatState(input as CombatState);
+  } catch {
+    return invalidStateBoundary();
+  }
+  if (!validateCombatState(stateInput).valid) return invalidStateBoundary();
+  if (!isValidCombatCommand(command)) {
+    return {
+      state: cloneCombatState(stateInput),
+      events: [{ type: "COMMAND_REJECTED", command: "UNKNOWN", reason: "INVALID_COMMAND" }],
+    };
+  }
+  let safeCommand: CombatCommand;
+  try {
+    safeCommand = cloneCommand(command as CombatCommand);
+  } catch {
+    return {
+      state: cloneCombatState(stateInput),
+      events: [{ type: "COMMAND_REJECTED", command: "UNKNOWN", reason: "INVALID_COMMAND" }],
+    };
+  }
+  if (!isValidCombatCommand(safeCommand)) {
+    return {
+      state: cloneCombatState(stateInput),
+      events: [{ type: "COMMAND_REJECTED", command: "UNKNOWN", reason: "INVALID_COMMAND" }],
+    };
+  }
+  if (stateInput.status !== "ONGOING") return reject(stateInput, safeCommand, "TERMINAL_COMBAT");
 
-  const expectedPhase =
-    command.type === "START_TURN" ? "TURN_READY" : "PLAYER_ACTION";
-  if (input.phase !== expectedPhase) return reject(input, command, "INVALID_PHASE");
+  const expectedPhase = safeCommand.type === "START_TURN" ? "TURN_READY" : "PLAYER_ACTION";
+  if (stateInput.phase !== expectedPhase) return reject(stateInput, safeCommand, "INVALID_PHASE");
 
-  const state = cloneCombatState(input);
-  if (command.type === "START_TURN") return startTurn(input, state, command);
-  if (command.type === "PLAY_CARD") return playCard(input, state, command);
-  return endTurn(input, state, command);
+  const state = cloneCombatState(stateInput);
+  switch (safeCommand.type) {
+    case "START_TURN": return startTurn(stateInput, state, safeCommand);
+    case "PLAY_CARD": return playCard(stateInput, state, safeCommand);
+    case "END_TURN": return endTurn(stateInput, state, safeCommand);
+    default: return assertNever(safeCommand);
+  }
 }

@@ -14,10 +14,19 @@ export class CombatValidationError extends Error {
   }
 }
 
-export function createCombatState(input: CombatSetup): CombatState {
-  const setup = cloneCombatSetup(input);
-  const validation = validateCombatSetup(setup);
+export function createCombatState(input: CombatSetup): CombatState;
+export function createCombatState(input: unknown): CombatState;
+export function createCombatState(input: unknown): CombatState {
+  const validation = validateCombatSetup(input);
   if (!validation.valid) throw new CombatValidationError(validation.errors);
+  let setup: CombatSetup;
+  try {
+    setup = cloneCombatSetup(input as CombatSetup);
+  } catch {
+    throw new CombatValidationError(["combat setup changed during canonicalization"]);
+  }
+  const canonicalValidation = validateCombatSetup(setup);
+  if (!canonicalValidation.valid) throw new CombatValidationError(canonicalValidation.errors);
 
   return {
     schemaVersion: COMBAT_SCHEMA_VERSION,
@@ -28,7 +37,7 @@ export function createCombatState(input: CombatSetup): CombatState {
     turn: 0,
     randomState: setup.seed,
     rules: setup.rules,
-    player: { ...setup.player, energy: 0 },
+    player: { hp: setup.player.hp, maxHp: setup.player.maxHp, block: setup.player.block, energy: 0 },
     enemy: {
       hp: setup.enemy.hp,
       maxHp: setup.enemy.maxHp,

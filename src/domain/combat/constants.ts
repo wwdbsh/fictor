@@ -24,8 +24,8 @@ export const COMBAT_EFFECT_IDS = [
 
 export type CombatEffectId = (typeof COMBAT_EFFECT_IDS)[number];
 
-export const COMBAT_SCHEMA_VERSION = "combat-state-v1" as const;
-export const COMBAT_ENGINE_VERSION = "combat-engine-v1" as const;
-export const COMBAT_PRNG_VERSION = "fictor-lcg32-fisher-yates-v1" as const;
-export const COMBAT_REPLAY_SCHEMA_VERSION = "combat-replay-v1" as const;
+export const COMBAT_SCHEMA_VERSION = "combat-state-v2" as const;
+export const COMBAT_ENGINE_VERSION = "combat-engine-v2" as const;
+export const COMBAT_PRNG_VERSION = "fictor-splitmix32-fisher-yates-v2" as const;
+export const COMBAT_REPLAY_SCHEMA_VERSION = "combat-replay-v2" as const;
 export const COMBAT_REPLAY_HASH_ALGORITHM = "fnv1a32-v1" as const;

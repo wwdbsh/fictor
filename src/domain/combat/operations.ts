@@ -25,14 +25,30 @@ function resolveTarget(
   return target.kind === "SELECTED" ? selectedTarget : target;
 }
 
+type AmountResolution =
+  | { ok: true; amount: number }
+  | { ok: false; reason: OperationFailure };
+
 function resolveAmount(
   operation: AtomicOperation,
   effectivePower: number | null,
-): number | null {
-  if (operation.amount.kind === "FIXED") return operation.amount.amount;
-  if (effectivePower === null) return null;
-  const amount = effectivePower * operation.amount.multiplier;
-  return safe(amount) && amount >= 0 ? amount : null;
+): AmountResolution {
+  const expression = operation.amount as unknown as { kind?: unknown; amount?: unknown; multiplier?: unknown };
+  if (expression.kind === "FIXED") {
+    return typeof expression.amount === "number" && safe(expression.amount) && expression.amount >= 0
+      ? { ok: true, amount: expression.amount }
+      : { ok: false, reason: "INVALID_EFFECT_PROGRAM" };
+  }
+  if (expression.kind !== "EFFECT_POWER" || effectivePower === null) {
+    return { ok: false, reason: "INVALID_EFFECT_PROGRAM" };
+  }
+  if (typeof expression.multiplier !== "number" || !safe(expression.multiplier) || expression.multiplier < 0) {
+    return { ok: false, reason: "INVALID_EFFECT_PROGRAM" };
+  }
+  const amount = effectivePower * expression.multiplier;
+  return safe(amount) && amount >= 0
+    ? { ok: true, amount }
+    : { ok: false, reason: "CALCULATION_OVERFLOW" };
 }
 
 function applyDamage(state: CombatState, target: CombatTarget, amount: number): OperationResult {
@@ -77,8 +93,10 @@ export function applyOperations(
 ): OperationResult {
   for (const operation of operations) {
     const target = resolveTarget(operation.target, context.selectedTarget);
-    const amount = resolveAmount(operation, context.effectivePower);
-    if (target === null || amount === null || !safe(amount) || amount < 0) {
+    const amountResult = resolveAmount(operation, context.effectivePower);
+    if (!amountResult.ok) return amountResult;
+    const amount = amountResult.amount;
+    if (target === null) {
       return { ok: false, reason: "INVALID_EFFECT_PROGRAM" };
     }
     if (target.kind === "ENEMY" && target.enemyId !== state.enemy.enemyId) {
@@ -98,7 +116,7 @@ export function applyOperations(
       type: "OPERATION_APPLIED",
       source: context.source,
       operation: operation.kind,
-      target: { ...target },
+      target: target.kind === "PLAYER" ? { kind: "PLAYER" } : { kind: "ENEMY", enemyId: target.enemyId },
       amount,
     });
   }

@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  canonicalSerialize,
   createCombatState,
-  fnv1a32,
   reduceCombat,
   runCombatReplay,
-  shuffleInstanceIds,
   type CombatCommand,
 } from "../../src/domain";
+import { canonicalSerialize, fnv1a32 } from "../../src/domain/combat/replay";
+import { shuffleInstanceIds } from "../../src/domain/combat/prng";
 import { enemyId, fixtureSetup, jsonClone } from "./fixtures";
 
 describe("deterministic draw and shuffle", () => {
@@ -81,11 +80,12 @@ describe("combat replay", () => {
     expect(second).toEqual(first);
     expect(first.hash).toMatch(/^[0-9a-f]{8}$/);
     expect(first).toMatchObject({
-      schemaVersion: "combat-replay-v1",
-      engineVersion: "combat-engine-v1",
-      prngVersion: "fictor-lcg32-fisher-yates-v1",
+      schemaVersion: "combat-replay-v2",
+      engineVersion: "combat-engine-v2",
+      prngVersion: "fictor-splitmix32-fisher-yates-v2",
       hashAlgorithm: "fnv1a32-v1",
     });
+    expect(first.hash).toBe("82199f6e");
   });
 
   it("changes the regression hash when an intermediate command changes", () => {
@@ -102,6 +102,7 @@ describe("combat replay", () => {
     const left = { z: 1, nested: { b: "한글", a: [true, null] } };
     const right = { nested: { a: [true, null], b: "한글" }, z: 1 };
     expect(canonicalSerialize(left)).toBe(canonicalSerialize(right));
+    expect(canonicalSerialize(left)).toBe('{"nested":{"a":[true,null],"b":"한글"},"z":1}');
     expect(fnv1a32("hello")).toBe("4f9f2cab");
   });
 });
