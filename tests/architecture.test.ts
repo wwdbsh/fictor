@@ -34,6 +34,9 @@ describe("current source architecture", () => {
       expect(source, relative(repositoryRoot, file)).not.toMatch(
         /(?:from\s+["']node:|import\s*\(\s*["']node:|\b(?:crypto|fs|path)\b)/,
       );
+      expect(source, relative(repositoryRoot, file)).not.toMatch(
+        /\b(?:Math\.random|Date|setTimeout|setInterval)\b/,
+      );
     }
   });
 
