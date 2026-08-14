@@ -1,4 +1,5 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, isAbsolute, relative, resolve, sep } from "node:path";
 import process from "node:process";
@@ -14,9 +15,50 @@ const contentTypes = new Map([
   [".js", "text/javascript; charset=utf-8"],
   [".json", "application/json; charset=utf-8"],
   [".map", "application/json; charset=utf-8"],
+  [".png", "image/png"],
   [".svg", "image/svg+xml"],
   [".webp", "image/webp"],
 ]);
+
+const auditManifestPath = resolve(process.cwd(), "assets/manifests/t022-m2-assets-audit-v1.json");
+
+async function verifyMountedPngs(origin) {
+  const manifest = JSON.parse(readFileSync(auditManifestPath, "utf8"));
+  const records = manifest?.assets?.records;
+  if (!Array.isArray(records) || records.length !== 621) {
+    throw new Error("T022 감사 manifest의 621개 asset record를 읽을 수 없습니다.");
+  }
+  let cursor = 0;
+  let verified = 0;
+  let notFound = 0;
+  const failures = [];
+  const worker = async () => {
+    while (true) {
+      const index = cursor;
+      cursor += 1;
+      if (index >= records.length) return;
+      const record = records[index];
+      const relativePath = String(record.public_path).replace(/^public\//, "");
+      const url = `${origin}${mountPath}${relativePath}`;
+      const response = await fetch(url);
+      if (response.status === 404) notFound += 1;
+      if (response.status !== 200) { failures.push(`${response.status} ${relativePath}`); continue; }
+      const contentType = response.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
+      if (contentType !== "image/png") { failures.push(`CONTENT_TYPE ${relativePath}: ${contentType ?? "missing"}`); continue; }
+      if (response.body === null) { failures.push(`EMPTY_BODY ${relativePath}`); continue; }
+      const hash = createHash("sha256");
+      for await (const chunk of response.body) hash.update(chunk);
+      const actual = hash.digest("hex");
+      if (actual !== record.sha256) { failures.push(`SHA256 ${relativePath}`); continue; }
+      verified += 1;
+    }
+  };
+  await Promise.all(Array.from({ length: 6 }, worker));
+  if (failures.length > 0 || verified !== 621 || notFound !== 0) {
+    throw new Error(`정적 PNG 검증 실패: verified=${verified}, 404=${notFound}, failures=${failures.slice(0, 10).join(", ")}`);
+  }
+  return { requested: 621, verified, http200: verified, imagePng: verified, sha256Matched: verified, notFound, concurrency: 6 };
+}
 
 function resolveRequestPath(requestUrl) {
   const url = new URL(requestUrl, "http://127.0.0.1");
@@ -167,6 +209,7 @@ async function main() {
     if (webSocketRequests.length > 0) {
       throw new Error(`WebSocket 요청:\n${webSocketRequests.join("\n")}`);
     }
+    const staticAssets = await verifyMountedPngs(origin);
 
     console.log(
       JSON.stringify({
@@ -179,6 +222,7 @@ async function main() {
         externalRequests: 0,
         apiRequests: 0,
         webSocketRequests: 0,
+        staticAssets,
       }),
     );
   } catch (error) {

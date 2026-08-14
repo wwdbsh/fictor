@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "milestone_id": "M2",
+  "phase": "PHASE_0_5_ASSETS",
+  "task_key": "T022",
+  "status": "VERIFIED",
+  "contract_sha256": "1d1d68b20896583bbd88c66c5df3d62971be820d8419ffbd6905e4f38be0185c",
+  "verified_at": "2026-08-14T06:31:20.000Z",
+  "audit_manifest_path": "assets/manifests/t022-m2-assets-audit-v1.json",
+  "audit_manifest_file_sha256": "1456506d259c95f3e68d8383b9fafe2ed026ffa260b9f82fc65960d5395a429b",
+  "counts": {
+    "audited": 621,
+    "repository_png": 625,
+    "style_out_of_scope": 4,
+    "fallback": 873
+  },
+  "trust_boundary": {
+    "public_bytes_reverified_in_ci": true,
+    "backup_presence_reverified_in_ci": false,
+    "backup_status": "VERIFIED_LOCALLY_AT"
+  }
+}
