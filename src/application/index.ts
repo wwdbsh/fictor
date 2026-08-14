@@ -6,3 +6,4 @@ export {
   startNewRun,
 } from "./game-session";
 export type { GameSession, SessionMutationResult } from "./game-session";
+export * from "./run";
