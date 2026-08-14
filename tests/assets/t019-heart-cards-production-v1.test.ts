@@ -216,7 +216,7 @@ describe("T019 batching and cap", () => {
 
   test("the cumulative budget is reported, and it shows only 3.90 of slack", () => {
     // Issue #23 asks for cumulative budget compliance, and the honest answer is tight: a
-    // single lost batch here (up to 18.00) would leave the remaining plan unaffordable.
+    // single lost batch here (the whole 9.00, one window) would leave the plan unaffordable.
     expect(cachedPlan.cumulative_budget).toMatchObject({
       balance_at_disclosure_decimal: "252.90", this_task_cap_decimal: "9.00",
       projected_balance_after_t019_decimal: "243.90", remaining_plan_after_t019_decimal: "240.00",
@@ -264,7 +264,7 @@ describe("T019 phrase binding", () => {
 });
 
 describe("T019 paid discipline", () => {
-  test("the full run closes at exactly 30.00 with all 20 assets in both roots", async () => {
+  test("the run closes at exactly 9.00 with all 6 cards in both roots", async () => {
     const p = fixture();
     let balance = START_UNITS;
     for (let index = 0; index < T019_V1_BATCH_COUNT; index += 1) balance = await runBatch(p, index, balance, 100 + index * 1000);
@@ -478,7 +478,7 @@ describe("T019 budget arithmetic and the observed-balance path", () => {
    * MINOR-2. `covers_remaining_plan` is reported, not enforced — deliberately. A balance that
    * cannot fund the rest of the plan is a planning decision for whoever approves (T016 shrinks),
    * not a safety property of T019, whose own affordability is already gated by `init` refusing a
-   * balance under the 30.00 cap. Gating here would block a legitimate "we accept the re-scope"
+   * balance under the 9.00 cap. Gating here would block a legitimate "we accept the re-scope"
    * answer. What must never happen is the artifact hiding it, which is what this pins.
    */
   function disclosureRoot(): string {
@@ -497,7 +497,7 @@ describe("T019 budget arithmetic and the observed-balance path", () => {
     const { buildT019ControllerDisclosure, buildT019Presentation, buildT019Plan: build } = await import("../../scripts/assets/t019-heart-cards-production-v1");
     const root = disclosureRoot();
     const plan = build(root);
-    const disclosedAt = "2026-08-16T00:00:00.000Z";
+    const disclosedAt = "2026-08-14T12:00:00.000Z";
     writeFileSync(resolve(root, "assets/evidence/t019-heart-cards-controller-disclosure-attestation-v1.json"), `${JSON.stringify(buildT019ControllerDisclosure(root, plan, disclosedAt), null, 2)}\n`);
 
     // Healthy: 252.90 funds this task and leaves exactly 3.90 over the remaining plan.
@@ -515,7 +515,7 @@ describe("T019 budget arithmetic and the observed-balance path", () => {
     const { buildT019ControllerDisclosure, buildT019Presentation, buildT019Plan: build } = await import("../../scripts/assets/t019-heart-cards-production-v1");
     const root = disclosureRoot();
     const plan = build(root);
-    const disclosedAt = "2026-08-16T00:00:00.000Z";
+    const disclosedAt = "2026-08-14T12:00:00.000Z";
     writeFileSync(resolve(root, "assets/evidence/t019-heart-cards-controller-disclosure-attestation-v1.json"), `${JSON.stringify(buildT019ControllerDisclosure(root, plan, disclosedAt), null, 2)}\n`);
     const broke = buildT019Presentation(root, plan, { credits: 8.99, provider_observed_at: disclosedAt });
     expect(broke.balance_disclosure).toMatchObject({ covers_total_cap: false, covers_remaining_plan: false });

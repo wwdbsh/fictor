@@ -63,7 +63,7 @@
     },
     "implementation_binding": {
       "path": "assets/evidence/t019-heart-cards-implementation-binding-v1.json",
-      "sha256": "d35f30838ff5141f52201ce8e52341a672ff6248c1ba4533134e023f049e06a2",
+      "sha256": "c595ab0d8763c30ac6846087d8685777d6a616c9506a58344d6e84de2aa29e79",
       "files": {
         "controller": {
           "path": "scripts/assets/t019-heart-cards-production-v1-controller.ts",
@@ -75,11 +75,11 @@
         },
         "production": {
           "path": "scripts/assets/t019-heart-cards-production-v1-ops.ts",
-          "sha256": "ea4015d78e09da5848f4b29c36251bdf68e2cf0561cbc7c93053fb0e85f533b4"
+          "sha256": "3463ad15273b87ca24a91cbdf8befe2eabfefda92f3425f64f6fc3c0d5b4a1da"
         },
         "contract": {
           "path": "scripts/assets/t019-heart-cards-production-v1.ts",
-          "sha256": "cf374785f7b8c79756c9f372c381f333db71771a4bf6f89bbd6c77678333296a"
+          "sha256": "14e2d41d391f0da8249c4e077a76a074fd767d0ea1e9be8c038f1f737c3436a8"
         },
         "provider_transport": {
           "path": "scripts/assets/provider-transport.ts",

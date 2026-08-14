@@ -14,11 +14,11 @@
     },
     "production": {
       "path": "scripts/assets/t019-heart-cards-production-v1-ops.ts",
-      "sha256": "ea4015d78e09da5848f4b29c36251bdf68e2cf0561cbc7c93053fb0e85f533b4"
+      "sha256": "3463ad15273b87ca24a91cbdf8befe2eabfefda92f3425f64f6fc3c0d5b4a1da"
     },
     "contract": {
       "path": "scripts/assets/t019-heart-cards-production-v1.ts",
-      "sha256": "cf374785f7b8c79756c9f372c381f333db71771a4bf6f89bbd6c77678333296a"
+      "sha256": "14e2d41d391f0da8249c4e077a76a074fd767d0ea1e9be8c038f1f737c3436a8"
     },
     "provider_transport": {
       "path": "scripts/assets/provider-transport.ts",

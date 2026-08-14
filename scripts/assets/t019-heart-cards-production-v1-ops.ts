@@ -1076,7 +1076,7 @@ export function auditT019(context: T019Context, journal: T019Journal, observedAt
   }
   const capUsed = capUsedUnits(journal);
   if (capUsed > T019_V1_TOTAL_CAP_UNITS) throw new Error("T019 credit accounting exceeds the approved cap");
-  if (exact && (capUsed !== T019_V1_TOTAL_CAP_UNITS || losses !== 0)) throw new Error("T019 exact audit does not close at 81.00");
+  if (exact && (capUsed !== T019_V1_TOTAL_CAP_UNITS || losses !== 0)) throw new Error(`T019 exact audit does not close at ${decimal(T019_V1_TOTAL_CAP_UNITS)}`);
   const lost = t019LostAssets(journal);
   if (lost.some(({ asset_id }) => recoveredIds.has(asset_id)) || lost.length + recoveries.length > T019_V1_ASSET_COUNT) throw new Error("T019 per-asset loss ledger disagrees with the recovered set");
   const scope = checkT019BackupScope(root, plan);

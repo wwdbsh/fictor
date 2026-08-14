@@ -400,7 +400,7 @@ export function buildT019Plan(root: string) {
       projected_balance_after_t019_decimal: decimalT019(T019_V1_BALANCE_AT_DISCLOSURE_UNITS - T019_V1_TOTAL_CAP_UNITS),
       remaining_plan_after_t019_decimal: decimalT019(T019_V1_REMAINING_PLAN_AFTER_T019_UNITS), remaining_plan_breakdown: T019_V1_REMAINING_PLAN_BREAKDOWN.map((entry) => ({ ...entry })),
       headroom_after_t019_decimal: decimalT019(T019_V1_BALANCE_AT_DISCLOSURE_UNITS - T019_V1_TOTAL_CAP_UNITS - T019_V1_REMAINING_PLAN_AFTER_T019_UNITS),
-      // 3.90 of slack against a 18.00 per-batch exposure: a loss here is not locally absorbed.
+      // 3.90 of slack against a 9.00 single-window exposure: one loss overshoots the plan by 5.10.
       a_single_lost_batch_breaks_the_remaining_plan: true,
       max_single_batch_exposure_decimal: decimalT019(T019_V1_MAX_BATCH_EXPOSURE_UNITS),
     },
