@@ -1,5 +1,8 @@
-/**
- * Use-case orchestration belongs in this boundary.
- * T002 intentionally defines no game use cases.
- */
-export {};
+export {
+  executeForgeRuntimeCommand,
+  loadGameSession,
+  ownsHeart,
+  recordOwnedHeart,
+  startNewRun,
+} from "./game-session";
+export type { GameSession, SessionMutationResult } from "./game-session";
