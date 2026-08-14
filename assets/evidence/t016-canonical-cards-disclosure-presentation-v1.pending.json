@@ -3,13 +3,18 @@
   "artifact_version": "t016-canonical-cards-disclosure-presentation-v1-pending",
   "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
   "secret_free": true,
-  "plan_sha256": "37506e4b889451af1b944f75edc783b8302468991f656299d4c9c962d9af3a69",
-  "risk_disclosure_evidence_sha256": "8740da8fb678ca9b1f775a6ea84e1fc8aa2a891c2591dd66b24b231e324ee5ad",
-  "risk_disclosure_text_sha256": "8752b2a20d28a01152fadfa53484bf7db901b5fb45ee3600f023cdc6cec3ad11",
+  "plan_sha256": "e3925eb033eb852ac8f1e7f8765991ae749a9c508c8aee48601d58bd4a61044e",
+  "risk_disclosure_evidence_sha256": "4e94032401eaf3eb8bd0becaeaff84e82d90628b9b058459ae5b61e64ea91dbf",
+  "risk_disclosure_text_sha256": "b7fe6d5b19fcc4e43efcb9cbdc06187733856a52d6233ff7105498932c5d1ade",
   "provider_schema_evidence_sha256": "d1907861c91d57a2357ba9a39a02e25ebf246073bc20e5024ae2a892b3196a36",
   "forensics_evidence_sha256": "7728e83cb71c87696a02e6c77d31e179f6baa0f2de84a2ee843c815ac2b6e1b7",
   "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
-  "implementation_binding_sha256": "4bf5e120d7b7d417683a42afe0cedee08511b623596031b6ef8da1e451a9371a",
+  "selection_kind": "COVERAGE_NOT_FREQUENCY",
+  "frequency_score_available": false,
+  "selection_artifact_path": "assets/manifests/t016-canonical-selection-v1.json",
+  "selection_artifact_sha256": "6eab6fe7b563973a82eff3f98447eced4c3b462f360c4e6d048afb8f735e2c4c",
+  "selection_list_sha256": "d161c90456757ca5f00957b563fd80ace2b3e9a19a0fa5d03e61675e37d264f0",
+  "implementation_binding_sha256": "2489ab80ff53d58e7958804dd6af7f751879772bb3d92e282b89497e46a9daa8",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/t016-canonical-cards-production-v1-controller.ts",
@@ -17,7 +22,7 @@
     },
     "preparation": {
       "path": "scripts/assets/t016-canonical-cards-production-v1-cli.ts",
-      "sha256": "91f89f0c914b11a3085ed7ce13affea4289725ee4339bd20b72d67f7c9e7d6f0"
+      "sha256": "5f1556b12a9985313a887ab453f37d33d42c188cd92187f936d75dea4ebd55a3"
     },
     "production": {
       "path": "scripts/assets/t016-canonical-cards-production-v1-ops.ts",
@@ -25,11 +30,11 @@
     },
     "contract": {
       "path": "scripts/assets/t016-canonical-cards-production-v1.ts",
-      "sha256": "e0999f4a74e3bfbe15da22904c0ef2a28533d0d9a76de9a48ca0ae40c9b0c65a"
+      "sha256": "bc7696a14c3e07d89de676eab46d70acc8bf94cf701e5d381f97a5f95af981e0"
     },
     "selection": {
       "path": "scripts/assets/t016-canonical-selection-v1.ts",
-      "sha256": "d390ffb846fe37f41de2c7bbd1a5b22d4cf7633a099e9784c72e2e464d9cb64a"
+      "sha256": "c74716573fc978e88b3ce6cc94e245d2e21eb34359f8d4e3ac35cd51004010b0"
     },
     "provider_transport": {
       "path": "scripts/assets/provider-transport.ts",

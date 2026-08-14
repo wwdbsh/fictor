@@ -148,9 +148,9 @@ export const T016_V1_LOSS_ACKNOWLEDGMENT_PHRASE = "T016 이 배치의 손실을 
 export const T016_V1_RISK_TEXT = `T016은 canonical 카드 160장을 14개 배치([12 x 13, 4])로 배치당 단 한 번씩 유료 생성합니다. 상한은 정확히 240.00 credits(정확 단가 1.50 x 160장)이고 자동 유료 재시도 예산은 0이며, T015/T019/T020/T021 승인은 하나도 상속되지 않습니다. **이 실행은 계획의 마지막 유료 작업입니다.**
 (i) 어떤 160장인가 - 전체 canonical 조합 1,326개 중 T015가 이미 만든 332장을 뺀 994개가 후보이고, 그중 160개를 고정된 선별 산출물(${T016_SELECTION_PATH})이 정합니다. 이 산출물은 고정 manifest와 materials 데이터에서 매번 다시 파생되어 바이트가 일치하는지 확인되며, 목록 sha가 조금이라도 달라지면 실행이 시작되지 않습니다.
 (ii) 이 선별은 "노출 빈도"가 아니라 "커버리지"입니다 - 원래 계약은 3종족 시작 덱과 터별 재료 드랍 풀에 기반한 결정론적 노출 빈도 점수를 요구했습니다. 그 데이터는 저장소에 존재하지 않습니다. 종족·시작 덱·드랍 풀 정의가 어디에도 없고, 대신 쓸 수 있을 재료 가중치도 없거나 미확정입니다. rarity는 52개 중 30개가 null(PENDING_DEPTH_CLASSIFICATION)이고 potency와 cost_base는 52개 전부 null이며 모든 재료의 balance_status가 PENDING_2026_08_21입니다. rarity만으로 점수를 만들면 994개 후보 중 763개(76.8%)가 신호 없는 재료를 최소 하나 포함하고 257개는 둘 다 신호가 없습니다. 그리고 재료 balance가 확정되는 2026-08-21은 credits 만료일 2026-08-17보다 뒤이므로 데이터를 기다리면 실행 자체가 불가능해집니다. 따라서 이 선별은 빈도를 모형화한다고 주장하지 않습니다. 후보군의 구조를 고르게 덮어 체계적 사각지대를 만들지 않는다고만 주장합니다.
-(iii) 기각한 대안 - 첫째, manifest 순서로 앞 160개를 취하는 방식. 중립처럼 보이지만 실제로는 join_03·join_04·join_05가 각각 44번 등장하고 BURN 재료 다섯 개와 join_01은 단 한 번도 나오지 않습니다. 즉 여섯 터가 대칭인 게임에서 BURN 터가 통째로 빠진 160장이 됩니다. 둘째, 진짜 빈도 데이터를 기다리는 방식. 위 날짜 계산으로 불가능합니다.
+(iii) 기각한 대안 - 첫째, manifest 순서로 앞 160개를 취하는 방식. 중립처럼 보이지만 실제로는 join_03·join_04·join_05가 각각 44번, join_01은 0번 등장합니다. BURN 그룹은 재료 6종 중 burn_01~burn_05가 한 번도 나오지 않고, 그룹 전체 등장 4회가 전부 ore_burn 하나를 통해서만 발생합니다. 즉 여섯 터가 대칭인 게임에서 BURN 터가 재료 한 종으로만 대표되는 160장이 됩니다(BURN 카드 4장). 채택한 규칙에서는 BURN이 6장이 되고 44회 편중도 사라집니다. 둘째, 진짜 빈도 데이터를 기다리는 방식. 위 날짜 계산으로 불가능합니다.
 (iv) 선별 규칙 - 후보를 재료 출신(origin) 쌍으로 35개 버킷에 나누고, 160석을 버킷 크기에 비례해 최대잉여법으로 배분한 뒤, 각 버킷 안에서는 manifest 순서로 채웁니다. 계산은 부동소수점을 쓰지 않고 정수만 씁니다. 잉여가 같을 때는 그 버킷의 첫 후보가 manifest에서 나오는 순서로 정렬해 정합니다. 결과는 35개 버킷 중 34개가 최소 한 석을 받고, 출신별 대표 수는 BURN 6 / JOIN 28 / ODDITY 43 / ROT 43 / SCATTER 43 / STILL 43 / TOOL 71 / WASH 43입니다.
-(v) BURN이 낮은 이유 - 규칙이 만든 편향이 아니라 후보군에 원래 있는 비대칭입니다. T015가 BURN 조합을 이미 대부분 가져갔기 때문에 남은 후보에 BURN 쌍이 적습니다. 규칙은 이 비대칭을 만들지도 감추지도 않습니다.
+(v) BURN이 낮은 이유, 그리고 이 선별이 보장하지 않는 것 - BURN이 6인 것은 규칙이 만든 편향이 아니라 후보군에 원래 있는 비대칭입니다. T015가 BURN 조합을 이미 대부분 가져갔기 때문에 남은 후보에 BURN 쌍이 적습니다. 규칙은 이 비대칭을 만들지도 감추지도 않습니다. 다만 보장 범위를 정확히 밝힙니다 - 이 선별은 **그룹 단위 커버리지**를 보장하고 **쌍(버킷) 단위 커버리지는 보장하지 않습니다.** 실제로 35개 버킷 중 "BURN x JOIN" 한 곳은 후보가 4개뿐이라 비례 배분에서 0석을 받습니다. 즉 BURN 재료와 JOIN 재료를 함께 쓴 카드는 이번 160장에 한 장도 들어가지 않습니다. 나머지 34개 버킷은 최소 1석을 받습니다.
 (vi) 남는 실질 위험 - 배치마다 제출 응답을 잃을 수 있는 모호 제출 구간이 정확히 1회씩, 총 14회 존재합니다. 각 구간에서 최대 18.00 credits(12장 x 1.50)가 실제로 차감되고도 응답을 받지 못하면 그 배치의 job ID를 전혀 열거할 수 없어 이미 지불한 이미지를 영구히 회수하지 못할 수 있습니다.
 (vii) 누적 예산과 손실의 결과 - 아래 수치는 이 계획을 작성한 시점의 관찰값(as-of)입니다. 승인 시점에 다시 관찰한 잔액으로 공시 문서(presentation)가 여유를 새로 계산하며, 두 값이 다르면 공시 문서 쪽이 정확합니다. 작성 시점 잔액은 243.90이고 이 실행의 상한은 240.00이므로 여유는 3.90입니다. **이 실행은 마지막 유료 작업이므로 손실을 흡수할 후속 작업이 없습니다.** 배치 하나(12장, 18.00)를 잃으면 그 12장은 이 승인으로 다시 만들지 않으며, 실행은 160장이 아니라 148장으로 마감됩니다. 일반화하면 잃은 1.50마다 카드 한 장씩 줄어듭니다. 여유 3.90은 어떤 배치 손실도 메우지 못합니다(최소 손실 단위가 4장 배치의 6.00, 12장 배치는 18.00).
 (viii) 각 배치는 단 한 번만 제출합니다. 유료 envelope이 한 번이라도 밖으로 나간 배치는 모호 제출이든 부분 응답이든 즉시 fail-stop하고 어떤 경우에도 재제출하지 않습니다. fail-stop은 배치 단위이며, 지출이 0인 배치만 되돌려 재실행할 수 있습니다. 지출이 발생한 배치는 operator가 정확히 “${T016_V1_LOSS_ACKNOWLEDGMENT_PHRASE}”로 손실을 확인해야만 다음 배치가 열리고, 확인된 손실은 240.00 상한에서 그대로 차감됩니다.
@@ -474,6 +474,12 @@ export function buildT016Pending(root: string, plan: T016Plan) {
     plan_sha256: t016PlanSha256(plan), risk_disclosure_evidence_sha256: sha256T016(renderT016CanonicalJson(risk)), risk_disclosure_text_sha256: risk.disclosure_text_sha256,
     provider_schema_evidence_sha256: sha256T016(renderT016CanonicalJson(schema)), forensics_evidence_sha256: sha256T016(renderT016CanonicalJson(forensics)),
     core_plan_sha256: T020_CORE_PLAN_SHA256,
+    // The selection rule is the contested item of this task, so its two hashes sit in the
+    // packet itself rather than one hop away in the plan. An approver checking what they are
+    // consenting to should not have to open a second file to find which 160 they bought.
+    selection_kind: "COVERAGE_NOT_FREQUENCY", frequency_score_available: false,
+    selection_artifact_path: T016_SELECTION_PATH, selection_artifact_sha256: loadT016Selection(root).sha256,
+    selection_list_sha256: T016_V1_ID_LIST_SHA256,
     implementation_binding_sha256: sha256T016(renderT016CanonicalJson(binding)), implementation_files: binding.files,
     exact_approval_phrase_required: T016_V1_EXACT_APPROVAL_PHRASE, recovery_operator_phrase: T016_V1_RECOVERY_OPERATOR_PHRASE,
     resume_operator_phrase: T016_V1_RESUME_OPERATOR_PHRASE, loss_acknowledgment_operator_phrase: T016_V1_LOSS_ACKNOWLEDGMENT_PHRASE,
@@ -524,6 +530,11 @@ export function buildT016Presentation(root: string, plan: T016Plan, balance: { c
     risk_disclosure_evidence_sha256: pending.risk_disclosure_evidence_sha256, risk_disclosure_text_sha256: pending.risk_disclosure_text_sha256, risk_disclosure_text_ko: T016_V1_RISK_TEXT,
     provider_schema_evidence_sha256: pending.provider_schema_evidence_sha256, forensics_evidence_sha256: pending.forensics_evidence_sha256,
     core_plan_sha256: T020_CORE_PLAN_SHA256,
+    // Carried through from the packet, not recomputed: the presentation is what the approver
+    // actually reads, and the selection hashes are the thing they are really consenting to.
+    selection_kind: pending.selection_kind, frequency_score_available: pending.frequency_score_available,
+    selection_artifact_path: pending.selection_artifact_path, selection_artifact_sha256: pending.selection_artifact_sha256,
+    selection_list_sha256: pending.selection_list_sha256,
     controller_disclosure_attestation_sha256: controller.sha256, implementation_binding_sha256: pending.implementation_binding_sha256, implementation_files: pending.implementation_files,
     disclosed_at: controller.value.event_sequence.assistant_disclosure_presented_at, source: "current user conversation",
     balance_disclosure: disclosure, scope: t016ApprovalScope(),

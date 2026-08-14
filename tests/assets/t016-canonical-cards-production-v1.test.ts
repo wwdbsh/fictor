@@ -12,7 +12,7 @@ import {
   T016_V1_EXACT_APPROVAL_PHRASE, T016_V1_EXPECTED_MODEL, T016_V1_ID_LIST_SHA256, T016_V1_JOURNAL_PATH,
   T016_V1_LOSS_ACKNOWLEDGMENT_PHRASE, T016_V1_RECOVERY_OPERATOR_PHRASE, T016_V1_REMAINING_PLAN_AFTER_T016_UNITS,
   T016_V1_REMAINING_PLAN_BREAKDOWN, T016_V1_RESUME_OPERATOR_PHRASE, T016_V1_RISK_TEXT,
-  T016_V1_TOTAL_CAP_UNITS, T016_V1_UNIT_COST_UNITS, buildT016Assets, buildT016Batches, buildT016Plan, canonicalJsonT016,
+  T016_V1_TOTAL_CAP_UNITS, T016_V1_UNIT_COST_UNITS, buildT016Assets, buildT016Batches, buildT016Pending, buildT016Plan, canonicalJsonT016,
   crossCheckT016EffectivePrompts, decimalT016, isT016Authorized, renderT016Plan, sha256T016, selectT016SelectedAssets,
   t016AspectTolerancePpm, t016PlanSha256, type T016Approval, type T016Plan, type T016Presentation,
 } from "../../scripts/assets/t016-canonical-cards-production-v1";
@@ -198,7 +198,8 @@ describe("T016 selection — which 160 of the 994", () => {
 
   test("34 of the 35 buckets are represented, and no origin group is wiped out", () => {
     // The failure mode this rule exists to prevent: manifest order would have produced 160
-    // cards containing zero BURN-origin materials. Whatever else changes, that must not.
+    // cards in which five of the BURN group's six materials never appear and the group's only
+    // 4 appearances all come through ore_burn. Whatever else changes, no group may be wiped.
     const assets = buildT016Assets(repositoryRoot);
     const representation = loadT016Selection(repositoryRoot).value.group_representation as Record<string, number>;
     expect(Object.keys(representation)).toHaveLength(8);
@@ -206,6 +207,13 @@ describe("T016 selection — which 160 of the 994", () => {
     for (const [group, count] of Object.entries(representation)) expect(count, group).toBeGreaterThan(0);
     expect(Object.values(representation).reduce((sum, n) => sum + n, 0)).toBeGreaterThanOrEqual(T016_SELECTION_COUNT);
     expect(new Set(assets.map(({ bucket }) => bucket)).size).toBe(34);
+    // And the limit of the guarantee, asserted rather than left implicit: coverage is promised
+    // at the group level, not the bucket level. BURN x JOIN has 4 candidates and wins no seat,
+    // so no card in this run pairs a BURN material with a JOIN one.
+    const seatless = loadT016Selection(repositoryRoot).value.allocation.filter((row) => row.base + (row.extra_seat ? 1 : 0) === 0);
+    expect(seatless.map(({ bucket }) => bucket)).toEqual(["BURN x JOIN"]);
+    expect(assets.some(({ bucket }) => bucket === "BURN x JOIN")).toBe(false);
+    expect(T016_V1_RISK_TEXT).toContain("BURN x JOIN");
   });
 
   test("out-of-scope assets never enter the plan, including the 834 unselected pairs", () => {
@@ -547,6 +555,32 @@ describe("T016 entry gates and preparation", () => {
     expect(paths).toContain("scripts/assets/t020-world-art-production-v1-ops.ts");
     expect(paths).not.toContain("package.json");
     for (const [key, entry] of Object.entries(files)) expect(entry.sha256, key).toBe(sha256T016(readFileSync(resolve(repositoryRoot, entry.path))));
+  });
+
+  test("the packet carries the selection hashes directly, not one hop away in the plan", () => {
+    // The selection rule is the contested item of this task. An approver reading the packet
+    // must see which 160 they are buying without opening another file.
+    const pending = buildT016Pending(repositoryRoot, cachedPlan) as unknown as Record<string, unknown>;
+    expect(pending.selection_kind).toBe("COVERAGE_NOT_FREQUENCY");
+    expect(pending.frequency_score_available).toBe(false);
+    expect(pending.selection_artifact_path).toBe(T016_SELECTION_PATH);
+    expect(pending.selection_artifact_sha256).toBe(sha256T016(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH))));
+    expect(pending.selection_list_sha256).toBe(T016_V1_ID_LIST_SHA256);
+  });
+
+  test("selection-gen reproduces the committed artifact byte for byte", () => {
+    // The artifact was hand-made once during design; without a committed generator, nobody
+    // could rebuild it. Regenerating into a scratch root must land on the same bytes.
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-selgen-"));
+    for (const path of [T016_CORE_PLAN_PATH, T016_MATERIALS_PATH]) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
+    const result = runT016Preparation(["selection-gen"], root);
+    expect(result.selected).toBe(T016_SELECTION_COUNT);
+    expect(result.selection_list_sha256).toBe(T016_V1_ID_LIST_SHA256);
+    expect(readFileSync(resolve(root, T016_SELECTION_PATH), "utf8")).toBe(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH), "utf8"));
+    // And it is refused mid-run, like every other derivation command.
+    mkdirSync(resolve(root, "assets/runs/t016-canonical-cards"), { recursive: true });
+    writeFileSync(resolve(root, T016_V1_JOURNAL_PATH), "{}\n");
+    expect(() => runT016Preparation(["selection-gen"], root)).toThrow(/refused while a run journal exists/);
   });
 
   test("the selection artifact's sha is carried in the plan, so the 160 cannot be swapped", () => {

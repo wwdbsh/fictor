@@ -14,6 +14,9 @@ import {
   validateT016Approval, validateT016ControllerApproval, validateT016ControllerDisclosure, validateT016Presentation,
   type T016BalanceObservation, type T016Plan, type T016Presentation,
 } from "./t016-canonical-cards-production-v1";
+import {
+  T016_SELECTION_COUNT, T016_SELECTION_PATH, buildT016Selection, renderT016Selection, t016SelectionSha256,
+} from "./t016-canonical-selection-v1";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 function option(args: readonly string[], name: string): string { const index = args.indexOf(name); const value = index < 0 ? undefined : args[index + 1]; if (!value || value.startsWith("--")) throw new Error(`missing ${name}`); return value; }
@@ -116,6 +119,20 @@ function assertNoLiveJournal(root: string, command: string): void {
 
 export function runT016Preparation(args: readonly string[], root: string = repositoryRoot): Record<string, unknown> {
   const command = args[0];
+  /**
+   * The selection artifact was hand-generated once during design, which left the most
+   * contract-critical file in the task with no committed way to reproduce it. It has one now,
+   * and it is ordered before `gen` because `gen` re-derives the artifact and refuses to build a
+   * plan against a stale one.
+   */
+  if (command === "selection-gen") {
+    if (args.length !== 1) throw new Error("usage: t016-canonical-cards selection-gen");
+    assertNoLiveJournal(root, command);
+    const selection = buildT016Selection(root);
+    if (selection.selected.length !== T016_SELECTION_COUNT) throw new Error(`T016 selection derived ${selection.selected.length}, expected ${T016_SELECTION_COUNT}`);
+    writeFileSync(resolve(root, T016_SELECTION_PATH), renderT016Selection(selection));
+    return { command, selection_path: T016_SELECTION_PATH, artifact_sha256: t016SelectionSha256(selection), selection_list_sha256: selection.selection_list_sha256, selected: selection.selected.length };
+  }
   if (command === "binding-gen") {
     if (args.length !== 1) throw new Error("usage: t016-canonical-cards binding-gen");
     assertNoLiveJournal(root, command);
@@ -165,5 +182,5 @@ export function runT016Preparation(args: readonly string[], root: string = repos
     writeT016NoClobber(root, T016_V1_APPROVAL_PATH, approval);
     return { command, approval_sha256: sha256T016(renderT016CanonicalJson(approval)), authorized: true };
   }
-  throw new Error("usage: t016-canonical-cards <binding-gen|gen|check|dry-run|disclosure-build|approval-build>");
+  throw new Error("usage: t016-canonical-cards <selection-gen|binding-gen|gen|check|dry-run|disclosure-build|approval-build>");
 }

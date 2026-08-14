@@ -35,7 +35,7 @@ rarity만으로 점수를 만들면 후보 994개 중 **763개(76.8%)** 가 신�
 
 | 대안 | 기각 사유 |
 |---|---|
-| A. manifest 순서로 앞 160개 | 중립처럼 보이지만 join_03/04/05가 각 44회 등장하고 **BURN 재료 5종과 join_01은 0회** — 여섯 터가 대칭인 게임에서 BURN 터가 통째로 빠진다 |
+| A. manifest 순서로 앞 160개 | 중립처럼 보이지만 join_03/04/05가 각 44회, join_01은 0회. **BURN 그룹 재료 6종 중 burn_01~05는 0회이고 그룹 전체 등장 4회가 전부 ore_burn 하나를 통해서만 발생** — 여섯 터가 대칭인 게임에서 BURN 터가 재료 한 종으로만 대표된다(BURN 카드 4장). 채택 규칙에서는 BURN 6장, 44회 편중 소멸 |
 | B. 실제 빈도 데이터 확정까지 대기 | 2026-08-21 > 2026-08-17, 날짜로 봉쇄됨 |
 
 **결과.** 35개 버킷 중 **34개**가 최소 한 석을 받는다(무석 버킷은 `BURN x JOIN` 하나).
@@ -44,13 +44,23 @@ WASH 43 (카드 한 장이 두 출신에 기여하므로 합은 320 = 160 × 2).
 
 **BURN이 낮은 것은 규칙이 만든 편향이 아니다.** T015가 BURN 조합을 이미 대부분 가져가서 남은
 후보에 BURN 쌍이 적다 — 데이터에 내재한 비대칭이고, 규칙은 그것을 만들지도 감추지도 않는다.
-이 문장은 공시 (v)에 그대로 들어간다.
+
+**이 선별이 보장하지 않는 것도 공시에 적었다.** 보장은 **그룹 단위**이고 **쌍(버킷) 단위가
+아니다.** `BURN x JOIN` 버킷은 후보가 4개뿐이라 비례 배분에서 0석을 받는다 — BURN 재료와
+JOIN 재료를 함께 쓴 카드는 이번 160장에 한 장도 없다. 승인자가 나중에 발견할 일이 아니라
+공시 (v)에서 미리 읽어야 하는 사실이다.
 
 **산출물:** `assets/manifests/t016-canonical-selection-v1.json`
-- artifact sha256 `69d6abeccdc4c517e1e2c9b350033b37f37dd888bea85ea800a68f624e7ffc0d`
+- artifact sha256 `6eab6fe7b563973a82eff3f98447eced4c3b462f360c4e6d048afb8f735e2c4c`
 - selection list sha256 `d161c90456757ca5f00957b563fd80ace2b3e9a19a0fa5d03e61675e37d264f0`
 - 첫 id `forge__join_02__wash_02`, 끝 id `forge__tool_01__tool_08`
 - `selection_kind: "COVERAGE_NOT_FREQUENCY"` 를 산출물 표면에 기록
+- 두 해시(artifact/list)는 **packet과 presentation에도 직접 실린다** — 승인자가 무엇에
+  동의하는지 확인하려고 다른 파일을 열 필요가 없어야 한다
+
+산출물 재생성 명령은 `preparation selection-gen`이다. 설계 단계에서 한 번 손으로 만들어졌던
+탓에 이 Task에서 가장 계약-결정적인 파일에 재현 경로가 없었다 — 리뷰 후 추가했고, 빈 루트에서
+재생성하면 커밋된 바이트와 정확히 일치한다(테스트가 확인한다).
 
 산출물은 고정 manifest와 materials에서 **매 로드마다 다시 파생**되어 바이트 비교된다.
 따라서 산출물만 손대는 조작(개수·형식이 전부 유효한 id 한 개 교체)도 통과하지 못한다.
@@ -76,9 +86,11 @@ plan sha → packet이 전부 바뀐다. 승인을 조용히 다른 160장으로
 | 항목 | 값 |
 |---|---|
 | plan | `assets/manifests/t016-canonical-cards-v1.plan.json` |
-| plan sha256 | `37506e4b889451af1b944f75edc783b8302468991f656299d4c9c962d9af3a69` |
-| pending packet sha256 | `40c07f9101e7875b102bba5dcb29cc5db7e32d7eff15750e3a733a677de573b6` |
-| implementation binding sha256 | `4bf5e120d7b7d417683a42afe0cedee08511b623596031b6ef8da1e451a9371a` (11 files) |
+| selection artifact sha256 | `6eab6fe7b563973a82eff3f98447eced4c3b462f360c4e6d048afb8f735e2c4c` |
+| selection list sha256 | `d161c90456757ca5f00957b563fd80ace2b3e9a19a0fa5d03e61675e37d264f0` |
+| plan sha256 | `e3925eb033eb852ac8f1e7f8765991ae749a9c508c8aee48601d58bd4a61044e` |
+| pending packet sha256 | `ce1d656be34cecb0b2e75a10120271fa2798a6f7aba4ade0cc9e92980323cd56` |
+| implementation binding sha256 | `2489ab80ff53d58e7958804dd6af7f751879772bb3d92e282b89497e46a9daa8` (11 files) |
 | 승인 문구 | `T016 canonical 선별 카드 160장 생성을 승인한다. 한도 240.00 크레딧.` |
 
 런타임: `scripts/assets/t016-canonical-cards-production-v1{,-ops,-cli,-controller}.ts` +

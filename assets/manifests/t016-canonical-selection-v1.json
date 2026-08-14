@@ -29,8 +29,12 @@
   "rejected_alternatives": {
     "manifest_order_top_160": {
       "rejected": true,
-      "reason": "NOT_NEUTRAL_OMITS_AN_ENTIRE_GROUND",
-      "observed": "join_03/join_04/join_05 appear 44 times each; all five BURN materials and join_01 appear zero times"
+      "reason": "NOT_NEUTRAL_NEARLY_OMITS_THE_BURN_GROUND",
+      "observed": "join_03/join_04/join_05 appear 44 times each and join_01 appears zero times; of the BURN group's six materials, burn_01..burn_05 appear zero times and the only BURN-group appearances are 4, all via ore_burn",
+      "burn_group_material_count": 6,
+      "burn_group_appearances_in_top_160": 4,
+      "burn_cards_under_this_rule": 4,
+      "burn_cards_under_the_adopted_rule": 6
     },
     "wait_for_real_frequency_data": {
       "rejected": true,

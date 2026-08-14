@@ -24,7 +24,7 @@
     "kind": "COVERAGE_NOT_FREQUENCY",
     "frequency_score_available": false,
     "artifact_path": "assets/manifests/t016-canonical-selection-v1.json",
-    "artifact_sha256": "69d6abeccdc4c517e1e2c9b350033b37f37dd888bea85ea800a68f624e7ffc0d",
+    "artifact_sha256": "6eab6fe7b563973a82eff3f98447eced4c3b462f360c4e6d048afb8f735e2c4c",
     "rule": "proportional-to-bucket-size largest-remainder over origin-pair buckets, integer arithmetic, manifest order within each bucket",
     "id_list_encoding": "UTF-8_IDS_JOINED_BY_NEWLINE_WITH_TRAILING_NEWLINE",
     "id_list_sha256": "d161c90456757ca5f00957b563fd80ace2b3e9a19a0fa5d03e61675e37d264f0",
@@ -48,8 +48,8 @@
     },
     "risk_disclosure": {
       "path": "assets/evidence/t016-canonical-cards-risk-disclosure-v1.json",
-      "sha256": "8740da8fb678ca9b1f775a6ea84e1fc8aa2a891c2591dd66b24b231e324ee5ad",
-      "text_sha256": "8752b2a20d28a01152fadfa53484bf7db901b5fb45ee3600f023cdc6cec3ad11"
+      "sha256": "4e94032401eaf3eb8bd0becaeaff84e82d90628b9b058459ae5b61e64ea91dbf",
+      "text_sha256": "b7fe6d5b19fcc4e43efcb9cbdc06187733856a52d6233ff7105498932c5d1ade"
     },
     "provider_schema": {
       "path": "assets/evidence/t016-canonical-cards-higgsfield-schema-v1.json",
@@ -61,7 +61,7 @@
     },
     "implementation_binding": {
       "path": "assets/evidence/t016-canonical-cards-implementation-binding-v1.json",
-      "sha256": "4bf5e120d7b7d417683a42afe0cedee08511b623596031b6ef8da1e451a9371a",
+      "sha256": "2489ab80ff53d58e7958804dd6af7f751879772bb3d92e282b89497e46a9daa8",
       "files": {
         "controller": {
           "path": "scripts/assets/t016-canonical-cards-production-v1-controller.ts",
@@ -69,7 +69,7 @@
         },
         "preparation": {
           "path": "scripts/assets/t016-canonical-cards-production-v1-cli.ts",
-          "sha256": "91f89f0c914b11a3085ed7ce13affea4289725ee4339bd20b72d67f7c9e7d6f0"
+          "sha256": "5f1556b12a9985313a887ab453f37d33d42c188cd92187f936d75dea4ebd55a3"
         },
         "production": {
           "path": "scripts/assets/t016-canonical-cards-production-v1-ops.ts",
@@ -77,11 +77,11 @@
         },
         "contract": {
           "path": "scripts/assets/t016-canonical-cards-production-v1.ts",
-          "sha256": "e0999f4a74e3bfbe15da22904c0ef2a28533d0d9a76de9a48ca0ae40c9b0c65a"
+          "sha256": "bc7696a14c3e07d89de676eab46d70acc8bf94cf701e5d381f97a5f95af981e0"
         },
         "selection": {
           "path": "scripts/assets/t016-canonical-selection-v1.ts",
-          "sha256": "d390ffb846fe37f41de2c7bbd1a5b22d4cf7633a099e9784c72e2e464d9cb64a"
+          "sha256": "c74716573fc978e88b3ce6cc94e245d2e21eb34359f8d4e3ac35cd51004010b0"
         },
         "provider_transport": {
           "path": "scripts/assets/provider-transport.ts",

@@ -10,7 +10,7 @@
     },
     "preparation": {
       "path": "scripts/assets/t016-canonical-cards-production-v1-cli.ts",
-      "sha256": "91f89f0c914b11a3085ed7ce13affea4289725ee4339bd20b72d67f7c9e7d6f0"
+      "sha256": "5f1556b12a9985313a887ab453f37d33d42c188cd92187f936d75dea4ebd55a3"
     },
     "production": {
       "path": "scripts/assets/t016-canonical-cards-production-v1-ops.ts",
@@ -18,11 +18,11 @@
     },
     "contract": {
       "path": "scripts/assets/t016-canonical-cards-production-v1.ts",
-      "sha256": "e0999f4a74e3bfbe15da22904c0ef2a28533d0d9a76de9a48ca0ae40c9b0c65a"
+      "sha256": "bc7696a14c3e07d89de676eab46d70acc8bf94cf701e5d381f97a5f95af981e0"
     },
     "selection": {
       "path": "scripts/assets/t016-canonical-selection-v1.ts",
-      "sha256": "d390ffb846fe37f41de2c7bbd1a5b22d4cf7633a099e9784c72e2e464d9cb64a"
+      "sha256": "c74716573fc978e88b3ce6cc94e245d2e21eb34359f8d4e3ac35cd51004010b0"
     },
     "provider_transport": {
       "path": "scripts/assets/provider-transport.ts",

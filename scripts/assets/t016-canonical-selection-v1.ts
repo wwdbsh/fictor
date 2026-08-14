@@ -20,8 +20,11 @@ import {
  * So this selects for COVERAGE instead: it guarantees the 160 are spread across the origin-pair
  * structure of the candidate set rather than clustered. That matters because the obvious
  * fallback is not neutral — the first 160 candidates in manifest order contain `join_03/04/05`
- * 44 times each and NO BURN material at all, which would ship a 160-card set with an entire
- * ground missing.
+ * 44 times each, `join_01` zero times, and almost nothing from the BURN group: five of its six
+ * materials (`burn_01`..`burn_05`) never appear, and the only 4 BURN-group appearances all come
+ * through `ore_burn`. That ships a 160-card set with one of six symmetric grounds represented
+ * by a single material. The adopted rule takes BURN from 4 cards to 6 and removes the
+ * 44x clustering.
  *
  * The algorithm, stated exactly because the artifact is pinned by sha and quoted in the
  * disclosure:
@@ -36,7 +39,10 @@ import {
  *   4. Allocation is largest-remainder on integers only, never floats. For a bucket of size s
  *      out of total t, quota = 160 * s; base = floor(quota / t); remainder = quota mod t.
  *      Every bucket receives `base`; the leftover 160 - sum(base) seats go to the buckets with
- *      the largest remainder.
+ *      the largest remainder. Note `base` is 0 for every bucket here (994 > 160), so a bucket
+ *      is represented only if it wins a remainder seat — which is why 34 of 35 buckets appear
+ *      and `BURN x JOIN`, with 4 candidates, does not. The guarantee this rule makes is at the
+ *      GROUP level, not the bucket level, and the disclosure says so in those words.
  *   5. Ties on remainder break by bucket order, and bucket order is the manifest index of that
  *      bucket's first candidate — ascending. This is a total order (each bucket has exactly one
  *      first candidate), so the outcome is unique.
@@ -164,7 +170,11 @@ export function buildT016Selection(root: string) {
       date_math: { material_balance_settles: "2026-08-21", credit_expiry: "2026-08-17", waiting_forecloses_the_run: true },
     },
     rejected_alternatives: {
-      manifest_order_top_160: { rejected: true, reason: "NOT_NEUTRAL_OMITS_AN_ENTIRE_GROUND", observed: "join_03/join_04/join_05 appear 44 times each; all five BURN materials and join_01 appear zero times" },
+      manifest_order_top_160: {
+        rejected: true, reason: "NOT_NEUTRAL_NEARLY_OMITS_THE_BURN_GROUND",
+        observed: "join_03/join_04/join_05 appear 44 times each and join_01 appears zero times; of the BURN group's six materials, burn_01..burn_05 appear zero times and the only BURN-group appearances are 4, all via ore_burn",
+        burn_group_material_count: 6, burn_group_appearances_in_top_160: 4, burn_cards_under_this_rule: 4, burn_cards_under_the_adopted_rule: 6,
+      },
       wait_for_real_frequency_data: { rejected: true, reason: "SETTLES_AFTER_CREDIT_EXPIRY" },
     },
     formula: {
