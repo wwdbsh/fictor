@@ -78,7 +78,7 @@ export const T019_CONTRACT_DRIFT_CODES: readonly T019TerminalCode[] = ["MODEL_DR
  *
  * Without that rule a single transient download blip left a fully recovered, exactly-billed
  * batch stuck short of COMPLETE with no command able to clear it, which made a 100%-successful
- * 54-asset run permanently un-closable and un-auditable.
+ * run permanently un-closable and un-auditable. (Found in T020; the rule is carried forward.)
  *
  * Note the deliberately narrow membership: codes that mean "the provider billed us for bytes
  * we cannot use" (ASPECT_MISMATCH, PAYLOAD_UNUSABLE) are NOT superseded by anything.
@@ -496,7 +496,7 @@ export function validateT019Journal(journal: T019Journal, plan: T019Plan, presen
     (journal.run_state === "ACTIVE" && (unresolved.length !== 0 || journal.fail_stop_batch_id !== null)) ||
     (journal.run_state === "FAIL_STOP" && (unresolved.length !== 1 || journal.fail_stop_batch_id !== unresolved[0].batch_id)) ||
     (journal.run_state === "COMPLETE" && (journal.fail_stop_batch_id !== null || losses !== 0 || journal.batches.some(({ state }) => state !== "COMPLETE") || globalRecovered.size !== T019_V1_ASSET_COUNT || capUsed !== T019_V1_TOTAL_CAP_UNITS)) ||
-    // A discharged batch is what makes an exact 81.00/54-asset close impossible, not the
+    // A discharged batch is what makes an exact full-cap, all-assets close impossible, not the
     // money: a provider that never charged the failed generations books a 0.00 discharge.
     (journal.run_state === "CLOSED_WITH_LOSSES" && (journal.fail_stop_batch_id !== null || !journal.batches.some((record) => lossDischarged(record)) || !closable(journal) || unresolved.length !== 0));
   if (runStateIsBad) throw new Error("T019 run-state evidence changed");
@@ -1024,17 +1024,18 @@ export function writeT019ContactSegments(root: string, plan: T019Plan, recovered
   return results;
 }
 /**
- * The T019 backup root is exclusive to this task's 54 assets. Event art (T019), hearts, and
- * cards must never appear under it, and nothing outside the plan may either.
+ * The T019 backup root is exclusive to this task's six heart cards. Nothing else in the core
+ * manifest may appear under it — not the canonical cards that share the `cards/` prefix in the
+ * public tree, and not any other task's output.
  */
 export function checkT019BackupScope(root: string, plan: T019Plan): { checked_count: number; out_of_scope_present_count: 0; all_absent: true } {
   // Pinned, like every other consumer: the out-of-scope enumeration must come from the sha
   // the plan was derived against, not from whatever the working tree happens to hold.
   const core = JSON.parse(readPinnedT019(root, T019_CORE_PLAN_PATH, T019_CORE_PLAN_SHA256).toString("utf8")) as { assets: Array<{ id: string; category: string; path: string }> };
-  // In scope for the T019 backup root: exactly the 20 event assets. Anything else appearing
+  // In scope for the T019 backup root: exactly the six heart cards. Anything else appearing
   // there means another task wrote into this run's tree.
   const planned = new Set(plan.assets.map(({ path }) => path));
-  if (planned.size !== T019_V1_ASSET_COUNT) throw new Error("T019 in-scope path set is not the full 20");
+  if (planned.size !== T019_V1_ASSET_COUNT) throw new Error(`T019 in-scope path set is not the full ${T019_V1_ASSET_COUNT}`);
   const outOfScope = core.assets.filter(({ path }) => !planned.has(path));
   const present = outOfScope.filter(({ path }) => existsSync(safeResolve(resolve(root, T019_V1_BACKUP_ROOT), path)));
   if (outOfScope.length !== core.assets.length - planned.size || present.length > 0) throw new Error("T019 out-of-scope asset exists under the T019 backup root");

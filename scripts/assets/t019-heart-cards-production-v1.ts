@@ -75,8 +75,8 @@ export const T019_V1_CREDIT_EXPIRY_DATE = "2026-08-17" as const;
  * Cumulative budget context, which Issue #23 requires the run to report rather than assume.
  *
  * The headroom after T019 is 3.90 — not a typo, and the reason this is a plan field rather
- * than a footnote. A single lost batch here (up to 18.00) would leave the rest of the plan
- * short, so T019 cannot be treated as a task whose losses are locally absorbed.
+ * than a footnote. This run has one batch, so a loss is the whole 9.00 at once and takes the
+ * headroom to -5.10 — T019 cannot be treated as a task whose losses are locally absorbed.
  */
 export const T019_V1_BALANCE_AT_DISCLOSURE_UNITS = 25_290 as const;
 /**

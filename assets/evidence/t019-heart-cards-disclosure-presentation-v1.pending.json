@@ -3,13 +3,13 @@
   "artifact_version": "t019-heart-cards-disclosure-presentation-v1-pending",
   "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
   "secret_free": true,
-  "plan_sha256": "09318b43ec0f5f96e8af0a4f2670d0e7a09fd87543800490eb843d7449cd9195",
+  "plan_sha256": "f9ed3595f2a1575bae0dc797adef341ba06e9ed4a49ccb754e74813e142cbf18",
   "risk_disclosure_evidence_sha256": "f3608ff9deb7a85b8f574c6d6c66492f74aeaa06e3136cb195c1837614b4870c",
   "risk_disclosure_text_sha256": "02a50d6c891c5ba3f70edeee1d76c538e2b0171f18250da0d4e4d39eff09db5a",
   "provider_schema_evidence_sha256": "8c0f0d5c7b1ef73151d1fe20ed29d9d7d2de4b76fe16d78ee4a2f04dd722abc9",
   "forensics_evidence_sha256": "b4d9d55e93bd38ab793dbf9c5d34dca95ff603e7e589c79f9a703900bd652480",
   "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
-  "implementation_binding_sha256": "1c4eb9a0b024b1ee680284fb6d354abcf1bdd1cafabe631da2bfef76a0b7b3f5",
+  "implementation_binding_sha256": "d35f30838ff5141f52201ce8e52341a672ff6248c1ba4533134e023f049e06a2",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/t019-heart-cards-production-v1-controller.ts",
@@ -21,11 +21,11 @@
     },
     "production": {
       "path": "scripts/assets/t019-heart-cards-production-v1-ops.ts",
-      "sha256": "b8344c15b6fd19b20eb0188eb8b88af2168e31e95180dafc7f271b9826ce2534"
+      "sha256": "ea4015d78e09da5848f4b29c36251bdf68e2cf0561cbc7c93053fb0e85f533b4"
     },
     "contract": {
       "path": "scripts/assets/t019-heart-cards-production-v1.ts",
-      "sha256": "bd684097bf425121ea357008078da9ef2e3f1a36772bcd88a1c4dbdd6150bc44"
+      "sha256": "cf374785f7b8c79756c9f372c381f333db71771a4bf6f89bbd6c77678333296a"
     },
     "provider_transport": {
       "path": "scripts/assets/provider-transport.ts",
