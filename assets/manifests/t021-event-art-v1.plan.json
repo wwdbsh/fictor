@@ -48,8 +48,8 @@
     },
     "risk_disclosure": {
       "path": "assets/evidence/t021-event-art-risk-disclosure-v1.json",
-      "sha256": "9e1b6ab64ac4e67daff589a41ac8380b78291ee5e664655b0ac3fe3f0b0302c4",
-      "text_sha256": "f7491d89cb26b0ac727e2f4b658fc1559979453cb51ad275e67edae2f53dd2d3"
+      "sha256": "c91aad0b06b309ccb7f5bd7c1d64ad010c5ffddc301bafe6892be6a47e7d0f88",
+      "text_sha256": "8a08ae69e5da63808734b8280dee2432433614d80191c3907e99421b5975a06d"
     },
     "provider_schema": {
       "path": "assets/evidence/t021-event-art-higgsfield-schema-v1.json",
@@ -61,7 +61,7 @@
     },
     "implementation_binding": {
       "path": "assets/evidence/t021-event-art-implementation-binding-v1.json",
-      "sha256": "a3fc87a7f45b5aaf04f136ef3e3e5bdc2faea3c357269fca4ead605e69017da3",
+      "sha256": "40241468fedfc41657512fda7263cf9921d23a996317d6ef1af2608baf792268",
       "files": {
         "controller": {
           "path": "scripts/assets/t021-event-art-production-v1-controller.ts",
@@ -77,7 +77,7 @@
         },
         "contract": {
           "path": "scripts/assets/t021-event-art-production-v1.ts",
-          "sha256": "ca769536c69c2cf2258933ab9ceafb3c03612c8ad59d881eebf17f2d3a1b7f10"
+          "sha256": "c80b2fae1b6d43d4e6d7eb4805d8c94bcb18545b8187b2defced128ceedff55b"
         },
         "provider_transport": {
           "path": "scripts/assets/provider-transport.ts",

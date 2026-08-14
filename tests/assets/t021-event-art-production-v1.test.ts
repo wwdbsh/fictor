@@ -10,7 +10,8 @@ import {
   T021_CORE_PLAN_PATH, T021_CORE_PLAN_SHA256, T021_V1_ASPECT_TOLERANCE_PPM, T021_V1_ASSET_COUNT, T021_V1_BATCH_COUNT,
   T021_V1_BATCH_MAX, T021_V1_BATCH_SIZES, T021_V1_CANARY_BATCH_ID, T021_V1_CANARY_BLOCKED_BATCH_ID, T021_V1_CONTACT_SEGMENT_DIR,
   T021_V1_EVENT_TYPES, T021_V1_EXACT_APPROVAL_PHRASE, T021_V1_EXPECTED_MODEL, T021_V1_ID_LIST_SHA256, T021_V1_JOURNAL_PATH,
-  T021_V1_LOSS_ACKNOWLEDGMENT_PHRASE, T021_V1_RECOVERY_OPERATOR_PHRASE, T021_V1_RESUME_OPERATOR_PHRASE, T021_V1_RISK_TEXT,
+  T021_V1_LOSS_ACKNOWLEDGMENT_PHRASE, T021_V1_RECOVERY_OPERATOR_PHRASE, T021_V1_REMAINING_PLAN_AFTER_T021_UNITS,
+  T021_V1_REMAINING_PLAN_BREAKDOWN, T021_V1_RESUME_OPERATOR_PHRASE, T021_V1_RISK_TEXT,
   T021_V1_TOTAL_CAP_UNITS, T021_V1_UNIT_COST_UNITS, buildT021Assets, buildT021Batches, buildT021Plan, canonicalJsonT021,
   crossCheckT021EffectivePrompts, decimalT021, isT021Authorized, renderT021Plan, sha256T021, selectT021EventAssets,
   t021AspectTolerancePpm, t021PlanSha256, type T021Approval, type T021Plan, type T021Presentation,
@@ -428,5 +429,67 @@ describe("T021 entry gates and preparation", () => {
     expect(paths).toContain("scripts/assets/t020-world-art-production-v1-ops.ts");
     expect(paths).not.toContain("package.json");
     for (const [key, entry] of Object.entries(files)) expect(entry.sha256, key).toBe(sha256T021(readFileSync(resolve(repositoryRoot, entry.path))));
+  });
+});
+
+describe("T021 budget arithmetic and the observed-balance path", () => {
+  test("the published breakdown sums to the total the headroom is derived from", () => {
+    // MINOR-1: the approver reads the decomposition while the headroom comes from the total.
+    // Both now derive from one list, so they cannot disagree — this pins that they don't.
+    expect(T021_V1_REMAINING_PLAN_BREAKDOWN.reduce((sum, { credit_units }) => sum + credit_units, 0)).toBe(T021_V1_REMAINING_PLAN_AFTER_T021_UNITS);
+    for (const entry of T021_V1_REMAINING_PLAN_BREAKDOWN) expect(entry.credit_decimal, entry.task).toBe(decimalT021(entry.credit_units));
+    const scope = cachedPlan.cumulative_budget;
+    expect(scope.remaining_plan_after_t021_decimal).toBe(decimalT021(T021_V1_REMAINING_PLAN_AFTER_T021_UNITS));
+    expect(scope.remaining_plan_breakdown.reduce((sum, { credit_units }) => sum + credit_units, 0)).toBe(T021_V1_REMAINING_PLAN_AFTER_T021_UNITS);
+    // And the headroom really is balance − cap − remaining plan, not a typed-in figure.
+    expect(scope.headroom_after_t021_decimal).toBe(decimalT021(28_290 - T021_V1_TOTAL_CAP_UNITS - T021_V1_REMAINING_PLAN_AFTER_T021_UNITS));
+  });
+
+  /**
+   * MINOR-2. `covers_remaining_plan` is reported, not enforced — deliberately. A balance that
+   * cannot fund the rest of the plan is a planning decision for whoever approves (T016 shrinks),
+   * not a safety property of T021, whose own affordability is already gated by `init` refusing a
+   * balance under the 30.00 cap. Gating here would block a legitimate "we accept the re-scope"
+   * answer. What must never happen is the artifact hiding it, which is what this pins.
+   */
+  function disclosureRoot(): string {
+    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-disclosure-"));
+    const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t021-event-art-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
+    const needed = [
+      ...Object.values(binding.files).map(({ path }) => path),
+      "assets/evidence/t021-event-art-implementation-binding-v1.json",
+      "assets/manifests/core-v1.plan.json", "assets/manifests/master-style-v1.json", "assets/manifests/material-style-approval-v1.json",
+    ];
+    for (const path of needed) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
+    return root;
+  }
+
+  test("a balance that cannot fund the remaining plan is reported, not hidden", async () => {
+    const { buildT021ControllerDisclosure, buildT021Presentation, buildT021Plan: build } = await import("../../scripts/assets/t021-event-art-production-v1");
+    const root = disclosureRoot();
+    const plan = build(root);
+    const disclosedAt = "2026-08-16T00:00:00.000Z";
+    writeFileSync(resolve(root, "assets/evidence/t021-event-art-controller-disclosure-attestation-v1.json"), `${JSON.stringify(buildT021ControllerDisclosure(root, plan, disclosedAt), null, 2)}\n`);
+
+    // Healthy: 282.90 funds this task and leaves 3.90 over the remaining plan.
+    const healthy = buildT021Presentation(root, plan, { credits: 282.9, provider_observed_at: disclosedAt });
+    expect(healthy.balance_disclosure).toMatchObject({ covers_total_cap: true, covers_remaining_plan: true, headroom_after_t021_decimal: "3.90" });
+
+    // Short: 270.00 still covers T021's own 30.00, but leaves 240.00 against 249.00 planned.
+    const short = buildT021Presentation(root, plan, { credits: 270, provider_observed_at: disclosedAt });
+    expect(short.balance_disclosure).toMatchObject({ covers_total_cap: true, covers_remaining_plan: false, headroom_after_t021_decimal: "-9.00" });
+    // Reported, not refused: building the presentation is exactly how the human gets told.
+    expect(short.authorized).toBe(false);
+  });
+
+  test("a balance below this task's own cap is reported too", async () => {
+    const { buildT021ControllerDisclosure, buildT021Presentation, buildT021Plan: build } = await import("../../scripts/assets/t021-event-art-production-v1");
+    const root = disclosureRoot();
+    const plan = build(root);
+    const disclosedAt = "2026-08-16T00:00:00.000Z";
+    writeFileSync(resolve(root, "assets/evidence/t021-event-art-controller-disclosure-attestation-v1.json"), `${JSON.stringify(buildT021ControllerDisclosure(root, plan, disclosedAt), null, 2)}\n`);
+    const broke = buildT021Presentation(root, plan, { credits: 29.99, provider_observed_at: disclosedAt });
+    expect(broke.balance_disclosure).toMatchObject({ covers_total_cap: false, covers_remaining_plan: false });
+    // `init` is the gate for this one; the disclosure's job is to say it out loud first.
   });
 });

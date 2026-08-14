@@ -3,13 +3,13 @@
   "artifact_version": "t021-event-art-disclosure-presentation-v1-pending",
   "status": "PENDING_PRESENTATION_NOT_AUTHORIZED",
   "secret_free": true,
-  "plan_sha256": "019f99a108f54319131299bcd140030b820b2976fd7e2aae2dd60b1a1b0e29cf",
-  "risk_disclosure_evidence_sha256": "9e1b6ab64ac4e67daff589a41ac8380b78291ee5e664655b0ac3fe3f0b0302c4",
-  "risk_disclosure_text_sha256": "f7491d89cb26b0ac727e2f4b658fc1559979453cb51ad275e67edae2f53dd2d3",
+  "plan_sha256": "4024351cd765c2d178836debfe5bf14e4c9ca92a256770996531743da23b76f6",
+  "risk_disclosure_evidence_sha256": "c91aad0b06b309ccb7f5bd7c1d64ad010c5ffddc301bafe6892be6a47e7d0f88",
+  "risk_disclosure_text_sha256": "8a08ae69e5da63808734b8280dee2432433614d80191c3907e99421b5975a06d",
   "provider_schema_evidence_sha256": "bc270a74e9ee7d22c4517ce14aeeb3e6d0509211fa048fa51db00b81dd955908",
   "forensics_evidence_sha256": "3ccd70306199c094fc07f05fd84c3ec4a22ebe4434b5e79ce71864e7586854d1",
   "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
-  "implementation_binding_sha256": "a3fc87a7f45b5aaf04f136ef3e3e5bdc2faea3c357269fca4ead605e69017da3",
+  "implementation_binding_sha256": "40241468fedfc41657512fda7263cf9921d23a996317d6ef1af2608baf792268",
   "implementation_files": {
     "controller": {
       "path": "scripts/assets/t021-event-art-production-v1-controller.ts",
@@ -25,7 +25,7 @@
     },
     "contract": {
       "path": "scripts/assets/t021-event-art-production-v1.ts",
-      "sha256": "ca769536c69c2cf2258933ab9ceafb3c03612c8ad59d881eebf17f2d3a1b7f10"
+      "sha256": "c80b2fae1b6d43d4e6d7eb4805d8c94bcb18545b8187b2defced128ceedff55b"
     },
     "provider_transport": {
       "path": "scripts/assets/provider-transport.ts",

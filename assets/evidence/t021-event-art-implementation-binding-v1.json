@@ -18,7 +18,7 @@
     },
     "contract": {
       "path": "scripts/assets/t021-event-art-production-v1.ts",
-      "sha256": "ca769536c69c2cf2258933ab9ceafb3c03612c8ad59d881eebf17f2d3a1b7f10"
+      "sha256": "c80b2fae1b6d43d4e6d7eb4805d8c94bcb18545b8187b2defced128ceedff55b"
     },
     "provider_transport": {
       "path": "scripts/assets/provider-transport.ts",
