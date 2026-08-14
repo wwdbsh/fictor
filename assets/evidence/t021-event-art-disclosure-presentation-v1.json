@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t021-event-art-disclosure-presentation-v1",
+  "secret_free": true,
+  "pending_packet_sha256": "86caf5aeb9fe16fb89c8db06e25700959aa73d098e26a120d0306cecf9650dcb",
+  "plan_sha256": "4024351cd765c2d178836debfe5bf14e4c9ca92a256770996531743da23b76f6",
+  "risk_disclosure_evidence_sha256": "c91aad0b06b309ccb7f5bd7c1d64ad010c5ffddc301bafe6892be6a47e7d0f88",
+  "risk_disclosure_text_sha256": "8a08ae69e5da63808734b8280dee2432433614d80191c3907e99421b5975a06d",
+  "risk_disclosure_text_ko": "T021은 이벤트 세계 아트 정확히 20장을 2개 배치([12,8])로 배치당 단 한 번씩 유료 생성합니다. 상한은 정확히 30.00 credits(정확 단가 1.50 x 20장)이고 자동 유료 재시도 예산은 0이며, T015/T020 승인은 하나도 상속되지 않습니다.\n(i) 범위 - 6개 이벤트 유형(cache, workshop, collapse, fictor, record, oddity) 기본 6장과 주요 터 변주 14장(cache 6터, oddity 6터, collapse 2터)을 합쳐 20장입니다. 전부 3:4이고 public/assets/events/에 저장되며 같은 상대 경로로 assets/backups/t021-event-art 아래에 백업됩니다. 이벤트 36변주 전체, 이벤트 런타임 구현, style 재결정, manifest ID 변경은 범위 밖입니다.\n(ii) 종횡비 위험은 이번에 해소된 상태입니다 - T020에서 provider가 출력 크기를 32픽셀 격자에 맞춘다는 사실이 실증되었습니다. 이 실행의 20장은 전부 3:4이고, 3:4의 실제 전달값 896x1200은 정확한 3:4 대비 4445ppm으로 같은 격자 현상이지만 허용치 5000ppm 안쪽입니다. 이미 관찰된 값이고 허용 범위 안이므로 허용치를 넓힐 이유가 없습니다. T020에서 16:9에 적용했던 12500ppm은 16:9 전용 완화이므로 T021에는 아예 선언하지 않습니다. 즉 이 실행에서 3:4가 아닌 전달물은 어떤 값이든 통과하지 못합니다. 다만 provider가 크기 정책을 바꾸면 여전히 ASPECT_MISMATCH로 정지하며, 그 배치의 지출은 회수되지 않습니다.\n(iii) 남는 실질 위험은 두 가지입니다. 첫째, 배치마다 제출 응답을 잃을 수 있는 모호 제출 구간이 정확히 1회씩 총 2회 있습니다. 각 구간에서 최대 18.00 credits(12장 x 1.50)가 실제로 차감되고도 응답을 받지 못하면 그 배치의 job ID를 전혀 열거할 수 없어 이미 지불한 이미지를 영구히 회수하지 못할 수 있습니다. 둘째, credits는 2026-08-17에 만료됩니다. 정확한 만료 시각은 알 수 없습니다.\n(iv) 누적 예산 - 아래 수치는 이 계획을 작성한 시점의 관찰값(as-of)입니다. 승인 시점에 다시 관찰한 잔액으로 공시 문서(presentation)가 여유를 새로 계산하며, 두 값이 다르면 공시 문서 쪽이 정확합니다. 작성 시점 잔액은 282.90입니다. T021이 상한까지 쓰면 252.90이 남고, 남은 계획은 T019 9.00과 T016 240.00을 합쳐 249.00입니다. 여유는 3.90뿐입니다. 따라서 이 실행에서 배치 하나를 손실로 확정하면(최대 18.00) 남은 계획을 그대로 수행할 수 없습니다. 구체적으로는 T016의 범위를 줄여야 하며, 잃은 1.50마다 canonical 카드 약 1장씩 줄어듭니다. 예를 들어 18.00을 잃으면 T016은 계획한 160장이 아니라 그보다 적은 수로 다시 잡아야 합니다. T021의 손실은 T021 안에서 흡수되지 않으므로, 손실이 발생하면 남은 계획의 범위를 다시 논의해야 합니다.\n(v) 각 배치는 단 한 번만 제출합니다. 유료 envelope이 한 번이라도 밖으로 나간 배치는 모호 제출이든 부분 응답이든 즉시 fail-stop하고 어떤 경우에도 재제출하지 않습니다. fail-stop은 배치 단위이며, 지출이 0인 배치(유료 envelope 이전 단계 실패)만 되돌려 재실행할 수 있습니다. 지출이 발생한 배치는 operator가 정확히 “T021 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.”로 손실을 확인해야만 다음 배치가 열리고, 확인된 손실은 30.00 상한에서 그대로 차감됩니다.\n(vi) 과금은 provider가 보고하는 credits_exact(1.50)만 사용합니다. 화면 표시값 credits(1.00)는 기록만 하고 상한 계산에 절대 쓰지 않습니다.\n(vii) 모델 canary는 모든 배치에 적용됩니다. 완료된 job의 provider-reported model이 nano_banana_flash가 아니면 그 배치는 즉시 정지하고 다음 배치는 직전 배치가 모델 확인을 통과할 때까지 열리지 않습니다. MODEL_DRIFT와 ASPECT_MISMATCH는 provider 계약 드리프트로 취급되어 한 번이라도 관찰되면 이후 모든 배치가 영구히 열리지 않으며, 손실 확인과 재개 문구로도 열 수 없습니다.\n(viii) 승인 증거의 한계는 이전과 같습니다. operator 문구와 승인 attestation 파일은 모두 agent가 쓸 수 있고 “정확한 사용자 발화”는 코드 상수에서 나옵니다. 실제 인적 게이트는 절차적이며, 사용자가 이 고지를 본 뒤 이 세션에서 정확한 승인 문구를 직접 입력해야 하고 그 사실은 파일이 아니라 대화 기록으로만 확인됩니다.\n(ix) 모든 요청은 use_unlim:false를 문자 그대로 포함하며 이 값은 각 자산의 canonical_request_sha256 안에 고정되어 있습니다. 저장은 provider가 준 바이트 그대로이고 crop이나 resize는 하지 않으며, 로컬과 백업 두 사본의 sha256이 저장 직후 일치해야 합니다.\nsigned URL, redirect URL, host, provider raw error는 journal, evidence, stdout 어디에도 기록하지 않습니다. 승인은 정확히 “T021 이벤트 세계 아트 20장 생성을 승인한다. 한도 30.00 크레딧.”라는 문구로만 기록합니다.",
+  "provider_schema_evidence_sha256": "bc270a74e9ee7d22c4517ce14aeeb3e6d0509211fa048fa51db00b81dd955908",
+  "forensics_evidence_sha256": "3ccd70306199c094fc07f05fd84c3ec4a22ebe4434b5e79ce71864e7586854d1",
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "controller_disclosure_attestation_sha256": "7a66fb236e343eaf583ecd5f6b0f3621799bff86401948a188c48e69ac8f220a",
+  "implementation_binding_sha256": "40241468fedfc41657512fda7263cf9921d23a996317d6ef1af2608baf792268",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t021-event-art-production-v1-controller.ts",
+      "sha256": "7efaa6c6720338eac1488a972fc5554acdaec8c4e4e054b237a029b82881f722"
+    },
+    "preparation": {
+      "path": "scripts/assets/t021-event-art-production-v1-cli.ts",
+      "sha256": "af6b60ba027f30774b1f1fb59a7dfb22f9c9ca53fafa16ed03dd75a2c44b8026"
+    },
+    "production": {
+      "path": "scripts/assets/t021-event-art-production-v1-ops.ts",
+      "sha256": "b17f09f2cda314e5ef4f6a50eaedd355ffa384c079765b7ff356d8ca74183472"
+    },
+    "contract": {
+      "path": "scripts/assets/t021-event-art-production-v1.ts",
+      "sha256": "c80b2fae1b6d43d4e6d7eb4805d8c94bcb18545b8187b2defced128ceedff55b"
+    },
+    "provider_transport": {
+      "path": "scripts/assets/provider-transport.ts",
+      "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+    },
+    "t020_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "t020_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "disclosed_at": "2026-08-14T00:10:48.000Z",
+  "source": "current user conversation",
+  "balance_disclosure": {
+    "balance_observation_present": true,
+    "observed_balance_decimal": "282.90",
+    "observed_balance_units": 28290,
+    "provider_observed_at": "2026-08-14T00:10:48.000Z",
+    "total_credit_cap_decimal": "30.00",
+    "projected_remainder_decimal": "252.90",
+    "covers_total_cap": true,
+    "remaining_plan_after_t021_decimal": "249.00",
+    "headroom_after_t021_decimal": "3.90",
+    "covers_remaining_plan": true,
+    "balance_disclosure_incomplete": false
+  },
+  "scope": {
+    "task_key": "T021",
+    "category": "EVENT",
+    "asset_count": 20,
+    "base_type_count": 6,
+    "variant_count": 14,
+    "aspect_ratio": "3:4",
+    "batch_count": 2,
+    "batch_sizes": [
+      12,
+      8
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "30.00",
+    "total_credit_cap_units": 3000,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 2,
+    "aspect_tolerance_ppm_3_4": 5000,
+    "aspect_3_4_provider_validated": true,
+    "declared_aspects": [
+      "3:4"
+    ],
+    "balance_at_disclosure_decimal": "282.90",
+    "remaining_plan_after_t021_decimal": "249.00",
+    "remaining_plan_breakdown": [
+      {
+        "task": "T019",
+        "credit_units": 900,
+        "credit_decimal": "9.00"
+      },
+      {
+        "task": "T016",
+        "credit_units": 24000,
+        "credit_decimal": "240.00"
+      }
+    ],
+    "headroom_after_t021_decimal": "3.90",
+    "a_single_lost_batch_breaks_the_remaining_plan": true,
+    "model_canary_applies_to_every_batch": true,
+    "contract_drift_blocks_all_later_batches": true,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "event_variant_expansion_allowed": false,
+    "style_redecision_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "exact_approval_phrase_required": "T021 이벤트 세계 아트 20장 생성을 승인한다. 한도 30.00 크레딧.",
+  "recovery_operator_phrase": "T021 이 배치의 확정 job ID만 복구하고 새 유료 제출은 하지 않습니다.",
+  "resume_operator_phrase": "T021 실패한 배치를 재제출하지 않고 다음 배치만 진행합니다.",
+  "loss_acknowledgment_operator_phrase": "T021 이 배치의 손실을 확인했고 재제출 없이 손실을 상한에서 차감한 뒤 남은 배치만 진행합니다.",
+  "operator_phrases_are_agent_satisfiable": true,
+  "approval_attestation_is_agent_writable": true,
+  "human_approval_gate_is_procedural": true,
+  "prior_task_approval_inherited": false,
+  "committed_clean_runtime_binding_required": true,
+  "authorized": false
+}
