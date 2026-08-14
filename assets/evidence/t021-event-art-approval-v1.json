@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t021-event-art-approval-v1",
+  "secret_free": true,
+  "decision": "APPROVE_T021_EVENT_ART_EXACTLY_20_ASSETS_30_00_CREDIT_CAP",
+  "source": "controller approval attestation",
+  "exact_user_quote": "T021 이벤트 세계 아트 20장 생성을 승인한다. 한도 30.00 크레딧.",
+  "approved_at": "2026-08-14T00:16:42.000Z",
+  "disclosed_at": "2026-08-14T00:10:48.000Z",
+  "plan_sha256": "4024351cd765c2d178836debfe5bf14e4c9ca92a256770996531743da23b76f6",
+  "disclosure_presentation_evidence_sha256": "3b663648daddd779549bafd25a592e2746536c0c6488f2ed01d5c086bf768067",
+  "risk_disclosure_evidence_sha256": "c91aad0b06b309ccb7f5bd7c1d64ad010c5ffddc301bafe6892be6a47e7d0f88",
+  "risk_disclosure_text_sha256": "8a08ae69e5da63808734b8280dee2432433614d80191c3907e99421b5975a06d",
+  "provider_schema_evidence_sha256": "bc270a74e9ee7d22c4517ce14aeeb3e6d0509211fa048fa51db00b81dd955908",
+  "forensics_evidence_sha256": "3ccd70306199c094fc07f05fd84c3ec4a22ebe4434b5e79ce71864e7586854d1",
+  "controller_disclosure_attestation_sha256": "7a66fb236e343eaf583ecd5f6b0f3621799bff86401948a188c48e69ac8f220a",
+  "controller_approval_attestation_path": "assets/evidence/t021-event-art-controller-approval-attestation-v1.json",
+  "controller_approval_attestation_sha256": "20db5d4dd8a7443bfa54d47c9d81aa3fa45d57b79d83caeceae38fdd7a2ea248",
+  "implementation_binding_sha256": "40241468fedfc41657512fda7263cf9921d23a996317d6ef1af2608baf792268",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t021-event-art-production-v1-controller.ts",
+      "sha256": "7efaa6c6720338eac1488a972fc5554acdaec8c4e4e054b237a029b82881f722"
+    },
+    "preparation": {
+      "path": "scripts/assets/t021-event-art-production-v1-cli.ts",
+      "sha256": "af6b60ba027f30774b1f1fb59a7dfb22f9c9ca53fafa16ed03dd75a2c44b8026"
+    },
+    "production": {
+      "path": "scripts/assets/t021-event-art-production-v1-ops.ts",
+      "sha256": "b17f09f2cda314e5ef4f6a50eaedd355ffa384c079765b7ff356d8ca74183472"
+    },
+    "contract": {
+      "path": "scripts/assets/t021-event-art-production-v1.ts",
+      "sha256": "c80b2fae1b6d43d4e6d7eb4805d8c94bcb18545b8187b2defced128ceedff55b"
+    },
+    "provider_transport": {
+      "path": "scripts/assets/provider-transport.ts",
+      "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+    },
+    "t020_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "t020_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "balance_disclosure": {
+    "balance_observation_present": true,
+    "observed_balance_decimal": "282.90",
+    "observed_balance_units": 28290,
+    "provider_observed_at": "2026-08-14T00:10:48.000Z",
+    "total_credit_cap_decimal": "30.00",
+    "projected_remainder_decimal": "252.90",
+    "covers_total_cap": true,
+    "remaining_plan_after_t021_decimal": "249.00",
+    "headroom_after_t021_decimal": "3.90",
+    "covers_remaining_plan": true,
+    "balance_disclosure_incomplete": false
+  },
+  "scope": {
+    "task_key": "T021",
+    "category": "EVENT",
+    "asset_count": 20,
+    "base_type_count": 6,
+    "variant_count": 14,
+    "aspect_ratio": "3:4",
+    "batch_count": 2,
+    "batch_sizes": [
+      12,
+      8
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "30.00",
+    "total_credit_cap_units": 3000,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 2,
+    "aspect_tolerance_ppm_3_4": 5000,
+    "aspect_3_4_provider_validated": true,
+    "declared_aspects": [
+      "3:4"
+    ],
+    "balance_at_disclosure_decimal": "282.90",
+    "remaining_plan_after_t021_decimal": "249.00",
+    "remaining_plan_breakdown": [
+      {
+        "task": "T019",
+        "credit_units": 900,
+        "credit_decimal": "9.00"
+      },
+      {
+        "task": "T016",
+        "credit_units": 24000,
+        "credit_decimal": "240.00"
+      }
+    ],
+    "headroom_after_t021_decimal": "3.90",
+    "a_single_lost_batch_breaks_the_remaining_plan": true,
+    "model_canary_applies_to_every_batch": true,
+    "contract_drift_blocks_all_later_batches": true,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "event_variant_expansion_allowed": false,
+    "style_redecision_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "prior_task_approval_inherited": false,
+  "acknowledges_prior_approvals_not_inherited": true,
+  "committed_clean_runtime_binding_required": true,
+  "automatic_paid_retry_count": 0
+}
