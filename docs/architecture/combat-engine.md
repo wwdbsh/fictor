@@ -147,3 +147,7 @@ bounded sampler, canonical serializer와 FNV 구현은 회귀 테스트 가능�
 T024는 `decodeCombatState`의 canonical value와 version 필드로 atomic persistence를 연결한다. T026은 injected rules의
 block retention과 공명 adapter/정책을 확장한다. 즉석/공방 빚기 수명, UI, 종족 변주, enemy roster/AI,
 production 21효과 의미와 최종 밸런스 수치는 이 문서와 T023 구현 범위 밖이다.
+
+T024의 실제 overlay 계약은 [공유 빚기 런타임](./forge-runtime.md)에 정의한다. 이 연결은 nested
+`combat-state-v2`를 decode해 채택할 뿐 combat engine/replay v2의 명령, 상태 전이, hash 의미를 변경하거나
+별도 v2 구현을 만들지 않는다. 즉석 결과는 T024에서 playable card로 투영되지 않는다.
