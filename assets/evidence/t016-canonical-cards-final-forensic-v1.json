@@ -1,0 +1,1849 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t016-canonical-cards-final-forensic-v1",
+  "verified_at": "2026-08-14T06:31:20.000Z",
+  "source_journal_path": "assets/runs/t016-canonical-cards/operations-v1.json",
+  "source_journal_sha256": "0ac8265b7f8fe3df9e1a632be0545e64d3a03ea928dff997a3cbdf9dba93b5bd",
+  "sanitization": "ALLOWLIST_ONLY_SCAN_PASSED",
+  "run_state": "CLOSED_WITH_LOSSES",
+  "expected_model": "nano_banana_flash",
+  "paid_retry_count": 0,
+  "use_unlim": false,
+  "batches_sha256": "2be41500a6f94d8b391795e2d49ddae7876f52f88857cbb5f6276b35fd473441",
+  "batches": [
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-001",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "243.90",
+      "balance_after_decimal": "225.90",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 0,
+          "asset_id": "forge__join_02__wash_02",
+          "job_id": "bf6273d7-f58e-44a8-8902-23d840d20b86",
+          "canonical_request_sha256": "a91f0a5611bc4bda1dbc8b8dff760745d2498fe3612c788d588bb1232c1df079",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "97f27cb7df6436d6efd0b3e28753cdf4edd382c830eaa7a8a27d3ec2861b1e72"
+        },
+        {
+          "index": 1,
+          "asset_id": "forge__join_02__wash_03",
+          "job_id": "2870f5dc-63ab-4ef7-a1a2-1c8a4d4ec39b",
+          "canonical_request_sha256": "73d2916e023f3f9a845418cac5d9384a6dec5f61c605b5ef05f679be888644b2",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "684343520ecca3d03ca38292d2a53704c9f4de8f5b32165ebb684912f924940b"
+        },
+        {
+          "index": 2,
+          "asset_id": "forge__join_02__wash_04",
+          "job_id": "d25f44ff-8f89-4e84-9b07-13cc46c35dda",
+          "canonical_request_sha256": "82977c37313eae429feea90490ed085dc5358e86a53f88325593a777b1486aa7",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "2eed020e2325ea541e0edf8b63fdf597629d28d49b3843075166927c22d0c23d"
+        },
+        {
+          "index": 3,
+          "asset_id": "forge__join_02__wash_05",
+          "job_id": "741d729a-7f10-4a6e-8da1-552eb5a83807",
+          "canonical_request_sha256": "feb83eafed18f7e52ce285f791efc4ddb3a5de96d1d6606d157469859b57842c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c47e5cab8c48cf94cba0dc2f5f71f898909a5f208d6fa41878aa618b9302d001"
+        },
+        {
+          "index": 4,
+          "asset_id": "forge__join_03__join_04",
+          "job_id": "93a97d39-f929-490a-bfbe-21110ef4ab85",
+          "canonical_request_sha256": "356cdbe070e079caef67a5bf219a80c156467bf2041fa589824381c4f0227cd4",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c6d4f9bc14efaa7de9c48f70f4a32c6bf3abcdea595072c3459f430acbade546"
+        },
+        {
+          "index": 5,
+          "asset_id": "forge__join_03__odd_01",
+          "job_id": "b5fa0606-589b-4156-b0cd-b1e9e300a527",
+          "canonical_request_sha256": "349e859e2a486c48fe72460456fa1c49b15a07546a80c6f94e4d3d7b68ab45a4",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "5b7eae1f2e6e9303556a9835c794e985d3b006f1e004ccbe2148508cbb8b0e5d"
+        },
+        {
+          "index": 6,
+          "asset_id": "forge__join_03__odd_02",
+          "job_id": "bf3347e0-9810-493c-b11c-cee75c8298c6",
+          "canonical_request_sha256": "d9160f4713ba8ea3f067920363cba99fda6dae7cd7e578b34f147e0d2b4fe76d",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "1db3fbd26b470ce6451f1c21be6ed72ed9fefd2e3938614b513dc7f2b90aec4e"
+        },
+        {
+          "index": 7,
+          "asset_id": "forge__join_03__odd_03",
+          "job_id": "34160dea-48e5-4d45-aeeb-053ff3a7a9d2",
+          "canonical_request_sha256": "a1f2270d4cc589c6b45e34fb639fc65d096cdc7666565b591db76d2ffade54f4",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "a58c541b1b1deb0aada844a3a123d0384a7b9dc2e6d3a99155993aa441718b54"
+        },
+        {
+          "index": 8,
+          "asset_id": "forge__join_03__odd_04",
+          "job_id": "40c03944-a800-4fb1-9c8b-6e570ca673fa",
+          "canonical_request_sha256": "cf57f8312211bd8bfa90a3d904e13b20d96aa1419ebb2320341baf7ef6786d43",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ae34acea12cb91605548dbbb0c6a08b74d53757ceaed955c50d40ddb18cf4869"
+        },
+        {
+          "index": 9,
+          "asset_id": "forge__join_03__ore_rot",
+          "job_id": "6504ca42-6629-4194-beab-827ba00085f7",
+          "canonical_request_sha256": "8ec74bb2d9b7fd86aa65cb2702e8ca089fbc401437bc8b5142755c2a035bc6f2",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c6d63118dc1759c61abd5897301121e2bfb0314d0c7398655f19e22d04d92652"
+        },
+        {
+          "index": 10,
+          "asset_id": "forge__join_03__ore_scatter",
+          "job_id": "98b4baed-2ac0-4090-989a-7c7de9dd337e",
+          "canonical_request_sha256": "5ace47f41fc822e4d2322b1f10d6ba0a9d8aba5889ee99d657b4bb97b0f273f9",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "6f125b126d98c9a22cd045b5d0422a120df38f13c3a3a258184a1b4660232b3b"
+        },
+        {
+          "index": 11,
+          "asset_id": "forge__join_03__ore_still",
+          "job_id": "db685a1e-9e89-47b8-84f5-f79b11c6162a",
+          "canonical_request_sha256": "18e8fa9bab342db86512eeee6db2377b0e787ef7a8b650dcad5f00b731f86c20",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "aa9fbeb22ade60b3743cdc2ba5d0321152b95aca9b16e1c65504d28a115d848a"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-002",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "225.90",
+      "balance_after_decimal": "207.90",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 12,
+          "asset_id": "forge__join_03__rot_01",
+          "job_id": "1fd61fe4-9138-4e36-ae69-f3d3393ad8ab",
+          "canonical_request_sha256": "c1d266f02dda7e679660d30005488ae5d858f1e43f457d08eeeb49206d1a7d40",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "68139c34ae0aa36947dda6a285a78f0b9ec1cc4c51d54a16a0aa23c38003a185"
+        },
+        {
+          "index": 13,
+          "asset_id": "forge__join_03__rot_02",
+          "job_id": "541173c6-b38e-4536-9b3a-bc56a9e17a34",
+          "canonical_request_sha256": "91ab40e8d456cdf91674da4069a292dc9c5d1fb919295b486fa5cdf223640d47",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "0f08ad241e1946307fd0f09ddcab6ad476ac9309d6788e69f613964bd344dffc"
+        },
+        {
+          "index": 14,
+          "asset_id": "forge__join_03__rot_03",
+          "job_id": "513fd8d3-bbbf-4171-8616-488161744faa",
+          "canonical_request_sha256": "522f908bf88aba942052284a6aef419702832c0d65776c5c0b0f4245d9ccf866",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "48c798cf5535eb0b2c2ec7b6db6060b64dd255ad8b5d4728e41c93db5c7aee33"
+        },
+        {
+          "index": 15,
+          "asset_id": "forge__join_03__scat_01",
+          "job_id": "263f4fb7-af59-4c92-bdf7-1757cd0eebc0",
+          "canonical_request_sha256": "cc7cd9eeb6d6477a3d84d120c6d9500e49d1ca73014cd691257309ba995a8fee",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "074d80b571dc99636ea88aae865a98aab869ec1029bc677d0061efd87c9d7640"
+        },
+        {
+          "index": 16,
+          "asset_id": "forge__join_03__scat_02",
+          "job_id": "c0503de7-b2ea-4c94-abc5-0a0d23950bba",
+          "canonical_request_sha256": "e49b7d6a8e70088d85346a89306a0f3a8c8bc8d76e895d6af60a7186dbaa6164",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "6dcaa68ee5ca3e596cfdbecab9ba457fcb01176f0f74940acbaef74111f3daa9"
+        },
+        {
+          "index": 17,
+          "asset_id": "forge__join_03__scat_03",
+          "job_id": "909d72ff-1bf9-43eb-b26d-402d7aed4165",
+          "canonical_request_sha256": "55564fb11dd805e564d503a1d7031ada37b727b2235d31e6f0c21f2905df4633",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "eae44b0151d8229202b3b9e1053b67f447bd11ef954e801cd06b6df15d04611d"
+        },
+        {
+          "index": 18,
+          "asset_id": "forge__join_03__still_01",
+          "job_id": "406b834d-d346-478a-bf3a-6182a28438dd",
+          "canonical_request_sha256": "7f548d281bf2c4c64af7a49316da8df7a7e7b3492b8cfa9853d2bd1e214a9484",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "0b5330d676e14071fd8464a5956d5812fb5759c6ea6f39457190bf464f58af4e"
+        },
+        {
+          "index": 19,
+          "asset_id": "forge__join_03__still_02",
+          "job_id": "03aeb018-7a3b-4f99-86d7-6e7d4cb20c24",
+          "canonical_request_sha256": "0f15bba178b42b679f1bf28f5fdf7ecde0f20fec7cd5231261bd40febed77df9",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "508cb78cc510bedd627cc84a556788f1296a2cff73df87dc446197158e50f401"
+        },
+        {
+          "index": 20,
+          "asset_id": "forge__join_03__still_03",
+          "job_id": "f26c0593-3e2f-4326-8604-f85b43ee1557",
+          "canonical_request_sha256": "3546f7a0883f6086dda87e8f2cf51650c3e2ba89e4cacee5dd821a25787f56f3",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "13b945fd7e4044e1271988a06e28541a277e89f31c34ba94d3b449c44d509faf"
+        },
+        {
+          "index": 21,
+          "asset_id": "forge__join_03__tool_01",
+          "job_id": "8530ec39-fae6-4e57-883a-e92dc10b7fdd",
+          "canonical_request_sha256": "d0c391342f785328dffd3a4417042b27b60c7500857ce702f14eaa8877938c73",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "7ab1bab25c6c2ac097618c3139492512b5ee6790e4aa747ce67d4a5ee50bf07d"
+        },
+        {
+          "index": 22,
+          "asset_id": "forge__join_03__tool_02",
+          "job_id": "4db50184-5374-4689-ac8d-32438fed89d6",
+          "canonical_request_sha256": "858bc63d6b55307cd8f7d2d26cc66c7708211f059bbc0b76ba7eb262fdcf0e71",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "916298c0913fb8ed6efa3e00633497a1f3bee729d1232dd6e065a6c10c832efb"
+        },
+        {
+          "index": 23,
+          "asset_id": "forge__join_03__tool_03",
+          "job_id": "20a7c923-a876-465d-bb8f-85ceea9f225a",
+          "canonical_request_sha256": "96b07e01c4a56c330ba0fe53915a4ef3abf8eb650769cc0961b2fbf752a19f4b",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "bfd4b140736692a827871fdbb794f54468be92132941b71bbe2267bb52becc3e"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-003",
+      "final_state": "FAIL_STOP",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 11,
+      "recovered": 11,
+      "balance_before_decimal": "207.90",
+      "balance_after_decimal": "191.40",
+      "spend_decimal": "16.50",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 24,
+          "asset_id": "forge__join_03__tool_04",
+          "job_id": "cdfdc75c-442b-469c-adfa-6e09f88c719d",
+          "canonical_request_sha256": "9e28894d956aa8703421cb250310d72e79cd16884a0df0225a7a370264c7e1b2",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "3bf63cc2b03fd54ccecdb39fd3e299fc86f30b2aa6927039e3a18e9708292e62"
+        },
+        {
+          "index": 25,
+          "asset_id": "forge__join_03__tool_05",
+          "job_id": "690dd6d5-2449-4f4f-9e0b-f816f2f45a63",
+          "canonical_request_sha256": "58f7df5c8c5765712c85ba8cf2a36538dfd4a23e3bc0116d8d8c8a821264586f",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "8becb4822c61def9ac5b6ab1b401fa8e38f314037321c9e3792cb9811a2a3c64"
+        },
+        {
+          "index": 26,
+          "asset_id": "forge__join_03__tool_06",
+          "job_id": "0e070845-d352-49d0-8f61-90cdd610198c",
+          "canonical_request_sha256": "deac36256590bdf7fc63267fb3f6fefb9ceb7eab2300fc30ef329f89f3892073",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "bac15856fee19c68920a028e641e65864c6da62f727e125daedb7c1e3856bee5"
+        },
+        {
+          "index": 27,
+          "asset_id": "forge__odd_01__odd_02",
+          "job_id": "40a6be1c-4ed0-4672-a652-651540e6f532",
+          "canonical_request_sha256": "49842d82e89a1e787f3f87726be0b8cc6b2571b65e212279345f9ae02649e6f8",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "88436bf713a281e43e7284ea68299bc7d2ee1a54589c89f375cf12d1477b9f12"
+        },
+        {
+          "index": 28,
+          "asset_id": "forge__odd_01__odd_03",
+          "job_id": "e166dd85-cde2-42b5-a6b8-9db6930031f0",
+          "canonical_request_sha256": "dc22da2c9d7426e6ff56327dff9f04eeda548206b14916f1bc371ada2a6b1072",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "776c6fe6d950d5df1015a0938fe7ceaf8d35731a9e86885db067b2376e0d52a5"
+        },
+        {
+          "index": 29,
+          "asset_id": "forge__odd_01__ore_burn",
+          "job_id": "07ed9310-5598-440d-93a9-1231b74806a2",
+          "canonical_request_sha256": "17b9bece187cd85cb5ec979fe09f16670e5336a8f3efe6c4a85188389ed98a0c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "2ad32be83c4133265ee0d2dbe0a213d87f510161aa9fcf60fb6ade744c18f1e9"
+        },
+        {
+          "index": 30,
+          "asset_id": "forge__odd_01__ore_rot",
+          "job_id": "1b539bb5-2eb1-4101-9ab9-28cffdc3ac6a",
+          "canonical_request_sha256": "79df9dde235d9268d368daa23438e6ba3d50f9c0c4dbe322751de15cd55884ce",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "32dc0155f8893e81399456290e76336ec60d3247e31d62881c686688b8ede98a"
+        },
+        {
+          "index": 31,
+          "asset_id": "forge__odd_01__ore_scatter",
+          "job_id": "480ab25a-4c9a-4e2e-94c4-be1f19c028cd",
+          "canonical_request_sha256": "014792e803bbc5db0aec44a3a171f9ff4a5ae77bd81ed90c14e38eb919d1b4f4",
+          "request_use_unlim": false,
+          "final_status": "failed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": null
+        },
+        {
+          "index": 32,
+          "asset_id": "forge__odd_01__ore_still",
+          "job_id": "e78d8c26-d5f8-4988-9472-b2abc7867c71",
+          "canonical_request_sha256": "f0ce249fa1e6d5f6266d56d698e56b87854adebc04536d87cbb548a719533ac1",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "bd1aaddf553d08cbb97693188c0f3d281ad9492f43fd9cca9daed56283a75ef9"
+        },
+        {
+          "index": 33,
+          "asset_id": "forge__odd_01__ore_wash",
+          "job_id": "fe6b2fc5-b5b1-4b54-a39e-b33ade4d3165",
+          "canonical_request_sha256": "a183b9e9f46691e023a0b635407d6f04ed61ac88511a5f1f1170b93558a45b49",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "9bb1f4cb5540b9558825125fadccac6d5a1b77256bc2d17a042a27f37a60f54e"
+        },
+        {
+          "index": 34,
+          "asset_id": "forge__odd_01__rot_01",
+          "job_id": "c9216b79-29ac-4a11-a3cb-0d91c649eb66",
+          "canonical_request_sha256": "d82f197fd27bf0870dac44358a997539e14f7b0ee41c6d01aa27bf7c54a27165",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "7045db8db39be7b0140ea04ca74e51f757eeb1b508ff3c1beba8fed1b6671b5a"
+        },
+        {
+          "index": 35,
+          "asset_id": "forge__odd_01__rot_02",
+          "job_id": "cbb94786-9b87-49f1-9c82-41ad6b8eb12b",
+          "canonical_request_sha256": "a6cdb59b57b50984ae21e3f62b2fa0e507b3172e53d59873d72baf303b83930f",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "d1104c5666cf168f50f7e328761131c3407daf29d966489ecfc8971b1bc58fb4"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-004",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "191.40",
+      "balance_after_decimal": "173.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 36,
+          "asset_id": "forge__odd_01__rot_03",
+          "job_id": "1841038f-90b3-42e7-95e0-c2aa12ccb952",
+          "canonical_request_sha256": "161605095f0d591d41e78ad85ddf00bfa3855b8098450a196f99251c514c12a6",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "1e1914dea24c8ec3bb51d15bb9691a398859bf2f98940f122dfc4c824f10f4b1"
+        },
+        {
+          "index": 37,
+          "asset_id": "forge__odd_01__rot_04",
+          "job_id": "451b0b2b-e152-44c4-9ecf-2fb275003f8d",
+          "canonical_request_sha256": "cc1431e4a56d6ffb11a689045b1d66abbbd8f0eed92fd2503e39446b86576820",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e492e3398e87867c18d4c395c908bc4a6d1541930c48ee91bf5f9e67723ab306"
+        },
+        {
+          "index": 38,
+          "asset_id": "forge__odd_01__rot_05",
+          "job_id": "5ac869b7-2e94-4a2b-b4e0-3cd6462e1ee6",
+          "canonical_request_sha256": "7908c5f515eccb5158b911a485db3f3eddb96a39a6902b583dbf6d47997cd6ea",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "1495f9501d5e627b74b5e544b482c672e7b1d5439b3f1f738e13e4536bd231f5"
+        },
+        {
+          "index": 39,
+          "asset_id": "forge__odd_01__scat_01",
+          "job_id": "7b7098f8-8d15-4f08-a907-1a32668ae566",
+          "canonical_request_sha256": "60a70a2f3125c8621890ef254e2be4aa4a760ac4c0a36b0f3607c631fe9a0a7e",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ed9e8c802cbd638735cc76603035318975989e420f7e05452d54a306245a17a3"
+        },
+        {
+          "index": 40,
+          "asset_id": "forge__odd_01__scat_02",
+          "job_id": "d13aa73e-6cdb-4559-8b0f-021f4db96917",
+          "canonical_request_sha256": "fd7946bd5bdea9d438f8c2590dc0b73849ab9dea851f0ed5f23278749ee74a3e",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "bd5ae66cd2781677eb6f518b8f99e2242c7dde76f76990a9182d0b66bf8cf48e"
+        },
+        {
+          "index": 41,
+          "asset_id": "forge__odd_01__scat_03",
+          "job_id": "3f4f1b04-3880-43e1-9f8e-f4d98efe27b0",
+          "canonical_request_sha256": "140b06bb15cb8e86d302d1dc09c5932d84cc3b3a93c063102167a3578105d01b",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "de8e839bdd2ffeb623b76b88342d52001b5698c8637d0d67ad026068c0a8cf6b"
+        },
+        {
+          "index": 42,
+          "asset_id": "forge__odd_01__scat_04",
+          "job_id": "33f14a21-3d38-4699-ae0c-26d263f2bd7a",
+          "canonical_request_sha256": "9385e9b81c09185f30a7e7e11daa96d8e560f7eaffc4971cf8072a6c0b01471c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c20f846f9d41b99b2b6333dd73bbd49bdd4a69e48713e4184756d55ce64d1e31"
+        },
+        {
+          "index": 43,
+          "asset_id": "forge__odd_01__scat_05",
+          "job_id": "338b6d45-a9b8-417a-91b5-963057f955ed",
+          "canonical_request_sha256": "a94f841b0bcb05c8736fb1804704213d205969aa134479cb5b40511d9ae2164c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "4ad2194e124dc1ff4c749de1f4b3ff66f099b5e497cb018294c43bf422b8d982"
+        },
+        {
+          "index": 44,
+          "asset_id": "forge__odd_01__still_01",
+          "job_id": "98be0bf9-7b4a-4713-96e5-5638e86ee8ea",
+          "canonical_request_sha256": "a8bb92adea5ccd1c1af19320e00dca7e3e93326ec81a1aefb68036fe66ccaf9d",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "da224399e28a824294c4d542c696a19f0cfbb2299e03779f73fb829e26df6cff"
+        },
+        {
+          "index": 45,
+          "asset_id": "forge__odd_01__still_02",
+          "job_id": "9f7e8070-18bd-4e87-9f19-ee31621437ab",
+          "canonical_request_sha256": "889001766b87c1563f4c950f4312e7156e3f5163833a09353ca6879bec0ca123",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "19c94174f4bbe111591e5b1177dab2d66ca5d059d091c3f1c9d62839d7008556"
+        },
+        {
+          "index": 46,
+          "asset_id": "forge__odd_01__still_03",
+          "job_id": "24b2e6c5-809f-41a1-ade4-d37e0bfdde09",
+          "canonical_request_sha256": "fda842a7880e2803b5321f2decca3a9786be9fe847b9553ab0b38526aa1f3dae",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ad740587e2929b9330ef3ab636511e9b2171cd15fc7943bf21aaef0f7a82e1f3"
+        },
+        {
+          "index": 47,
+          "asset_id": "forge__odd_01__still_04",
+          "job_id": "784ddfb9-c066-4b91-be6d-18f29ebb7cc8",
+          "canonical_request_sha256": "24e15416f80a40206151846065397c22b8fab06e5dbac8abfa3c832d0e4b3148",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "acfd4f01c097d497fc6d6877daaf6cc60b0b65b29e01c23887811bae19ddff98"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-005",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "173.40",
+      "balance_after_decimal": "155.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 48,
+          "asset_id": "forge__odd_01__still_05",
+          "job_id": "d96390ce-e435-423c-bfa5-52981198ca38",
+          "canonical_request_sha256": "23f88924aa9c8d20ee86d406e7673d45fe2affa5e3f6943bfdf39115d5ab2f51",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "23aa40090cc8b7a63aa6e8b3a05eda05572018a3909b4a9dc34241e59a771f08"
+        },
+        {
+          "index": 49,
+          "asset_id": "forge__odd_01__tool_01",
+          "job_id": "e0800a98-5f5a-47ec-90ef-cfc869659894",
+          "canonical_request_sha256": "8a0edc9f50815eb19e1fde48dfea8d34dcdc779a61f9977cad22e452cb997637",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b500405ad104a366eadfea0e978ed3877574f9f7bbf48973dd4d3fdf5a938369"
+        },
+        {
+          "index": 50,
+          "asset_id": "forge__odd_01__tool_02",
+          "job_id": "daac559f-285c-4639-820f-20ca471d43ed",
+          "canonical_request_sha256": "8a896ff0ec719cc9a02bcb6e62ee9c6307748b34c5fef0a68f27eb816a82a794",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "1f6d70c2005180f218c5f45a6413e4dc377ff1648c79836bb277a94a279dd9f7"
+        },
+        {
+          "index": 51,
+          "asset_id": "forge__odd_01__tool_03",
+          "job_id": "1d598e14-a46d-4c76-aa57-b93830018bfc",
+          "canonical_request_sha256": "3bb901e146ceb4d2b2ef00bb0f2396642b442dccc4564b69b3400254e88e0fb0",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "8ca8fe2d8f9f2cf44fdd158952b561fde7c58d0c89a392463555c286721254d3"
+        },
+        {
+          "index": 52,
+          "asset_id": "forge__odd_01__tool_04",
+          "job_id": "59da4550-2ec4-4d9e-80f7-eb12dd647d77",
+          "canonical_request_sha256": "64a53cfe96c811e3758e8d42b131b3d76045da244e41dbe1a1ece0fd81e74e44",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "909963907085c3839a2020b2fe5135cf909ca4053c9e96b14550be38892fa18b"
+        },
+        {
+          "index": 53,
+          "asset_id": "forge__odd_01__tool_05",
+          "job_id": "600e625d-d4fb-4ac3-b440-267f146281ed",
+          "canonical_request_sha256": "02ed77315696118fecf2612bad0e1cb00c75557a6a399e5bbce9662b6edde543",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "3ebfb714411928af1ad87ae043fd57038b947f23bfa013f86487f8831979d4dc"
+        },
+        {
+          "index": 54,
+          "asset_id": "forge__odd_01__tool_06",
+          "job_id": "2e8e2687-c093-4711-a8a8-d02d8e8365a1",
+          "canonical_request_sha256": "a9cfe7e172dd30fb3d7fbe74a17ab86546c0c571aa222292368ce1797be02c23",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "38f4fb8fa86abcd3004dda0da63be03a993e1194cebf6b108264266481886d30"
+        },
+        {
+          "index": 55,
+          "asset_id": "forge__odd_01__tool_07",
+          "job_id": "0d642d6e-424f-49c8-8ff6-4498f032014a",
+          "canonical_request_sha256": "388accb159b63af098c9bfe30703513c6d0d67a4720668d216b8ee6fd91923f3",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "3259c006696782899c2648cf103dd19104e104d20e98337f6267d2e291197461"
+        },
+        {
+          "index": 56,
+          "asset_id": "forge__odd_01__tool_08",
+          "job_id": "e0e4274c-8f03-4dcf-9d5b-2609ee2b3a07",
+          "canonical_request_sha256": "80c9b9abbc469781f5e24e585d1ebd21b71a77f7153efdb1dcf1e51c3474242c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b16c675c9f8f942a170a60be3db122d226dec92aad0d9f93cb12ff28f8ddc660"
+        },
+        {
+          "index": 57,
+          "asset_id": "forge__odd_01__tool_09",
+          "job_id": "a23a0f3a-8c7c-47e2-b1f6-e7248ff906bc",
+          "canonical_request_sha256": "0cc7e225c821b994b4b8674c2c4a8504a950a5b49bd55acf7b4d2850fe3a32f2",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "796fef776c5934cffe0923fe678b4b2c2ad97ff0c91798c4e15daf9739f7caa1"
+        },
+        {
+          "index": 58,
+          "asset_id": "forge__odd_01__tool_10",
+          "job_id": "54b0c264-ebbc-4b8e-9cc4-892602bc289b",
+          "canonical_request_sha256": "87caa02daca0f87ddbcf71ccc2323b1bb2330b2acc7aa03654cf33a683f8d118",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e15725917c913aa20070949a08d32b3a2a0f931fbb693ff811d82a5ea6774e13"
+        },
+        {
+          "index": 59,
+          "asset_id": "forge__odd_01__wash_01",
+          "job_id": "21b94c8e-9945-48bd-b4bb-d44bb58d9290",
+          "canonical_request_sha256": "eb3c5b4f77eed4634601c37810ede2fdd4a1a8dc384d88e1d5035bf0d0a91da8",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "065157b65943e18d0cc94e6c75833be7ff328942629671c97a3f0e5c65a1e523"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-006",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "155.40",
+      "balance_after_decimal": "137.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 60,
+          "asset_id": "forge__odd_01__wash_02",
+          "job_id": "e619d76b-4206-4462-97fe-5d14bfa46079",
+          "canonical_request_sha256": "db589287977d09d2d258b73f769fa9ce7445526d2dacf84de7c372461e29731a",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "8b512bfad00d8cabda25d9f31d61c9fdb1001d538658973cff904a29e893d0cf"
+        },
+        {
+          "index": 61,
+          "asset_id": "forge__odd_01__wash_03",
+          "job_id": "82027ea0-6b11-4105-a91e-d42858e1a032",
+          "canonical_request_sha256": "01e09a27367cde03aea827d8f3ce3aa7fd70651570ee1cbec6efcead45e2b695",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "a944444b25b0cc061186641aec0788df563080ab9a4a9d93cd627c7b06cb9950"
+        },
+        {
+          "index": 62,
+          "asset_id": "forge__odd_01__wash_04",
+          "job_id": "e95331a5-132b-4447-babc-068ef3d086b9",
+          "canonical_request_sha256": "79515ab9ce0ad91b35525bd4e5a84b9d0ecd1096962caf11d3ead57741042ccb",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c6ae5effaa247b9451c665b5895252997c4d1477ad846e3a985ea826ee17cb90"
+        },
+        {
+          "index": 63,
+          "asset_id": "forge__odd_01__wash_05",
+          "job_id": "2df5f0d7-06b6-44b3-a80c-160e68dc56da",
+          "canonical_request_sha256": "1e4bdc99f8ac234a7102f5edb91bb0bff0b1ef815254afd0c13e6284af5e6f53",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "af5fb6140d60f73f38b578771f6d7d9f3da31785067a488d72e498932318275e"
+        },
+        {
+          "index": 64,
+          "asset_id": "forge__ore_burn__ore_rot",
+          "job_id": "8dea13a9-d241-4159-9805-7f7c8e9e89e9",
+          "canonical_request_sha256": "88983724abab9f361a7d7d563d99cce808fce4324e0d4d257ac97e45770fa1ab",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "5ae100c7403bb23152fa1bc441fd9a8288e7e164982ed22a599b058a59ff0692"
+        },
+        {
+          "index": 65,
+          "asset_id": "forge__ore_burn__ore_scatter",
+          "job_id": "991b3bed-5486-46de-8d89-d3f7cfa801ff",
+          "canonical_request_sha256": "754ce7d292d3ab69a9edc2986b0fd38f71900ddda459a426c6001ae22e59b434",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "06357ec048a9d539266fb01f66f3f09959f42c6135b69d4b413d4ee7d257e8d3"
+        },
+        {
+          "index": 66,
+          "asset_id": "forge__ore_burn__ore_still",
+          "job_id": "9674a6da-3b4b-4b49-95d3-c598161dd782",
+          "canonical_request_sha256": "395e32437c7d4fc8ed6831c94637410d1f05685a6748cbb9e258f578c8021876",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "1280227e8b3f051abe0f2250ae770a0964eed32e615806236867371a35baa4f1"
+        },
+        {
+          "index": 67,
+          "asset_id": "forge__ore_burn__ore_wash",
+          "job_id": "9ed903a2-43bf-4659-be02-8e4ca5db55d9",
+          "canonical_request_sha256": "a0853cc533f964622c78657d2476dc6550a12b93747f524ca5714835446edf64",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "245575c918d258f7b2d18b08e8924cc9bd762d70af535ded7a5eb8741adb1072"
+        },
+        {
+          "index": 68,
+          "asset_id": "forge__ore_burn__tool_01",
+          "job_id": "358753d3-bdcb-4426-82a1-cd7d1b7e8e5a",
+          "canonical_request_sha256": "9e6814cb8ddb77dc0c11ad3c25f07433f147c0972fad16bdbf23c680f9c96692",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "d04787157d3dfa768510a8887e8d1b679bbf59ebcf92838fba017bebe1b50bbe"
+        },
+        {
+          "index": 69,
+          "asset_id": "forge__ore_rot__ore_scatter",
+          "job_id": "ffca9bfc-a280-42e1-ba74-dc919bf5584d",
+          "canonical_request_sha256": "1b1d12dde0ee36b773a8355654e617621c40ae0f12f81d365cd813d27660fb14",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ff2195e2f59b451eadafe8cd3cbaa0281e47bd71260d6685bb53e3d328bc49f9"
+        },
+        {
+          "index": 70,
+          "asset_id": "forge__ore_rot__ore_still",
+          "job_id": "53260329-a8cf-4795-acf4-3c4c4e843b85",
+          "canonical_request_sha256": "ed6117a215364c974ff7cf82179cbc3b07bae1fa8858d8a87d3a18a7c8853888",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "8dccb5de7053b118e8488a286996a22e88144d54d91ddc26d11583b4c9824bb7"
+        },
+        {
+          "index": 71,
+          "asset_id": "forge__ore_rot__ore_wash",
+          "job_id": "73ad5aaf-d41d-4367-b812-ddc688b48803",
+          "canonical_request_sha256": "953d32d50d74bce26032dd4b8dc9719839966ca617406fd76f1e68e6fac58283",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "f5c995545826bcab0f07d2ae0542b4b4240f5d9f0ac0b4208539812f7c53c11d"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-007",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "137.40",
+      "balance_after_decimal": "119.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 72,
+          "asset_id": "forge__ore_rot__rot_01",
+          "job_id": "c77f9877-ebd8-4e36-9f77-8726ffbed6d6",
+          "canonical_request_sha256": "f8a9f6e8717e4594e5cd78b78aee082705f8a796c4d41d5f95db0c8eeb4a777f",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e6bb0e77979bc8e5436bd5ebe20e02af2fb7f4e6c95e668d654240a1696f1d9d"
+        },
+        {
+          "index": 73,
+          "asset_id": "forge__ore_rot__rot_02",
+          "job_id": "2bb82642-b27c-4580-8cfa-4402a741430a",
+          "canonical_request_sha256": "bda6514010957a135ce39575507d3a50caac1dcb53d7e09770487ce7dd5308c3",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "d41e41250a737cb99e27a2bd2999a4cb6cab6931d1f776089ba15810d244a5a8"
+        },
+        {
+          "index": 74,
+          "asset_id": "forge__ore_rot__scat_01",
+          "job_id": "b7cba797-167e-4ada-9b76-aa03ba39f31c",
+          "canonical_request_sha256": "c0640d7aaa4a22014b2ac9e3d5da4c0ef21bd1e39d818eb3357dbecc7d4d39cc",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "26f9bdae91d21be4a5973acfb7a01609d692b6bf28dfae9504292709bf565a0f"
+        },
+        {
+          "index": 75,
+          "asset_id": "forge__ore_rot__scat_02",
+          "job_id": "5f80aaee-79e9-450c-b696-3eed5fafa38a",
+          "canonical_request_sha256": "421bca685a9055deea84daae9b070c243c6e3356da28c0044c2598ef27f18912",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e8773a889c7f4c1963bf8c5ae9138dde52f3bf9235ed62d4baa57f0effd00de4"
+        },
+        {
+          "index": 76,
+          "asset_id": "forge__ore_rot__scat_03",
+          "job_id": "547f5117-fbb2-42ec-bb86-d65ceea155ca",
+          "canonical_request_sha256": "a4c11fdacc87f4f8d3e9abea3339a99f86acb6c31efd7573e1ea435fb9841c98",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "924f324cea26a50eee5a5c5078feff6c10d3a5f901e59af4af7cb9647d487630"
+        },
+        {
+          "index": 77,
+          "asset_id": "forge__ore_rot__scat_04",
+          "job_id": "a9bf1157-79bf-4473-9949-2869c3c445a0",
+          "canonical_request_sha256": "3261aff7c8b0f86c2b62deb897fe39de580fe2da338e9087925099b282f9c071",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e84d81de5b25273e05ea8a334d01373703b17e104e5671983da9d0e9affe3458"
+        },
+        {
+          "index": 78,
+          "asset_id": "forge__ore_rot__scat_05",
+          "job_id": "ba75677f-df63-468c-bb2c-ec92ab38217f",
+          "canonical_request_sha256": "e24c911814732963dd8d264e26b739c12c9d31c3bfd45a2c0f4792564e36c4cd",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "3cc63ce8ba3bb67693801bc290f076ee7bc03cdfd3ccc38098fb4a75882ab2d3"
+        },
+        {
+          "index": 79,
+          "asset_id": "forge__ore_rot__still_01",
+          "job_id": "63417313-c971-45aa-a8e1-6c945d879c52",
+          "canonical_request_sha256": "0af6d17493b6f5d1f2e89dab7edd8f5d71bf9afce1b2f33887acb4a4f0ba0337",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ec03674cd3e5630a02a2c3098d982762e45c051c4aaa1febc11c56c23eeaf618"
+        },
+        {
+          "index": 80,
+          "asset_id": "forge__ore_rot__still_02",
+          "job_id": "7be8a06d-5962-407a-8eea-c87f0417ecb0",
+          "canonical_request_sha256": "fa360795606a4d72341264f366b0cb41f5d97dacd4b6fa3f7dd555697f1280cf",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "be85750ac3ae23d4f5f20a496899086356daa9f794c148c9522b88c649ce5588"
+        },
+        {
+          "index": 81,
+          "asset_id": "forge__ore_rot__still_03",
+          "job_id": "76a251a2-7ab3-4f4c-8c9a-46858f849944",
+          "canonical_request_sha256": "765e8c0ca3e972747afbe9877bff07e45048836c563505214accafca38c6dc82",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b4d76c8bc8eb664a8541b78bb0a75338bd0c9b8aeb162c1f20a9d48f9ad02e47"
+        },
+        {
+          "index": 82,
+          "asset_id": "forge__ore_rot__still_04",
+          "job_id": "4754e1b9-024d-45a1-8253-6d8cc3752f65",
+          "canonical_request_sha256": "926b795a5354e538490431a2f6f68215d39798681909f2ef4e1e3306a8061dca",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "9736fc79aa1501e0c748ac9163898d89bfa7e698eedc640f0a2e9da3e240b2b0"
+        },
+        {
+          "index": 83,
+          "asset_id": "forge__ore_rot__still_05",
+          "job_id": "41dedb62-f1a8-4f79-a214-15a60ed13509",
+          "canonical_request_sha256": "539d3cfbf0dd3f3fda971e742ba507484e19faf720ac45b4d6d7f88db1fd18c5",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "561fac1d188fb8475e968976bbac053697c03c6cf67bcd4466840b1677dc50cd"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-008",
+      "final_state": "FAIL_STOP",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 10,
+      "recovered": 10,
+      "balance_before_decimal": "119.40",
+      "balance_after_decimal": "104.40",
+      "spend_decimal": "15.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 84,
+          "asset_id": "forge__ore_rot__tool_01",
+          "job_id": "9936ae48-cdc3-4c9c-9d0f-722ef6a773be",
+          "canonical_request_sha256": "979a85de8c7c039016513adf77a2a3c05f8605deb81d02344e77fade3e890140",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "a9c20ae5254a1a2f23487414f76f86137f2de1b00d1f2e3bdea01c784b6fc186"
+        },
+        {
+          "index": 85,
+          "asset_id": "forge__ore_rot__tool_02",
+          "job_id": "f7b98996-27c8-4c8d-9b95-df5103a867b5",
+          "canonical_request_sha256": "b83c76cb7782c0342be23bcd7675d2a42e7f9471ae911fbae0b9d037491781db",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "a8c436d61092891df7a96a0a4ab883c4a2750bc1a0c59f754e8cf36634067022"
+        },
+        {
+          "index": 86,
+          "asset_id": "forge__ore_rot__tool_03",
+          "job_id": "88bbb8dd-215d-491c-9142-f9744a266808",
+          "canonical_request_sha256": "a84d49c064b214a113dbbcded1f8a6b84f9757aae06525ba33ba543c7f8c1deb",
+          "request_use_unlim": false,
+          "final_status": "failed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": null
+        },
+        {
+          "index": 87,
+          "asset_id": "forge__ore_rot__tool_04",
+          "job_id": "f3321c5f-e12a-4535-ba62-a7ae98fd6069",
+          "canonical_request_sha256": "f35a521983de55b9552d129e010732dc76ed572f39993be0fb14da19b82ed1c3",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "696c5ff136c440dd971fb8c5b30b5c94938b1199fcb3b5c75d8ef6289c4b2e47"
+        },
+        {
+          "index": 88,
+          "asset_id": "forge__ore_rot__tool_05",
+          "job_id": "b7245aa0-957e-45b9-9ca2-b8a13233471e",
+          "canonical_request_sha256": "56e4e46d7560d7fb729f9dcff3abca7fad53d54bbf2e662816abfeb0ecaf4311",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "468b9d86103025edf562b7bd7a480624332e6311d32f24652d6f88632c7540f0"
+        },
+        {
+          "index": 89,
+          "asset_id": "forge__ore_rot__tool_06",
+          "job_id": "de3d7571-b68a-4767-955a-deb07e052ea5",
+          "canonical_request_sha256": "350641972ca298b9bdc0ce0154d8990e8b3043c6104943d1e23f305da5f1a951",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "deea8fb85c809ff2e691550e60d4a95e1bd796d9d6ff7c42be7309df514d1802"
+        },
+        {
+          "index": 90,
+          "asset_id": "forge__ore_rot__tool_07",
+          "job_id": "25bf302b-324a-48f3-9335-f9438612c568",
+          "canonical_request_sha256": "5b87c068e4213c280744169c3dfa50a79254b8030bc71cf378eef046ce0b329b",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "4418d2814b6fb3316d6609c9da0539bd367d68331ccedff048fbe2328e36a765"
+        },
+        {
+          "index": 91,
+          "asset_id": "forge__ore_rot__tool_08",
+          "job_id": "2ddd5b02-6a2c-4cba-90ee-49290a5c1012",
+          "canonical_request_sha256": "0de113d0a95f4dcf5b1c14898561beccf445ea4ffc45618f8ecae8cea2025c9a",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "95884d5bc0badd4d068cb2d9a8eb4c99d36c760fc9ffdf19a980af0421a6be51"
+        },
+        {
+          "index": 92,
+          "asset_id": "forge__ore_rot__tool_09",
+          "job_id": "e2c949e2-c483-487b-a8f2-f997a12102f4",
+          "canonical_request_sha256": "e3aaaa9f118eee854c28c53b477ef61306a7d7ce38c5e950840c1ea42728f88a",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "03d7843203e6eab316001ad029597169ee5cb4926539c738494657f83a093c0e"
+        },
+        {
+          "index": 93,
+          "asset_id": "forge__ore_rot__tool_10",
+          "job_id": "9a18f257-1cbe-4f57-810f-845fb31593eb",
+          "canonical_request_sha256": "2c1989f751cd9143d4f1725f3dd3ea483b3556f4f30bbcfcb481e177fb899d38",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "d181b850ad38c86f5c26f16064625c1cc3ea15745b1335461f7a51031af03bb3"
+        },
+        {
+          "index": 94,
+          "asset_id": "forge__ore_rot__wash_01",
+          "job_id": "94203d0c-6a03-4e39-8bd2-30f650adf879",
+          "canonical_request_sha256": "1a9fec325deebc509ffa005cecb0ee94a9d4cb0dff39f9fec3ba4d46afc8f280",
+          "request_use_unlim": false,
+          "final_status": "failed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": null
+        },
+        {
+          "index": 95,
+          "asset_id": "forge__ore_rot__wash_02",
+          "job_id": "f55eb652-2dc0-45f6-9324-314cdf102bef",
+          "canonical_request_sha256": "943f6eb4dd2c00f3ed4a9f8314b790c504b8cfce04fc4f631bbc33ca6f7f020d",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c975fa8dc03cc779677df4c05862cdbda7acf04e50b60c92e96d3d85fc466e02"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-009",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "104.40",
+      "balance_after_decimal": "86.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 96,
+          "asset_id": "forge__ore_rot__wash_03",
+          "job_id": "e1b760f7-f1f6-4639-8189-b258a9fbe510",
+          "canonical_request_sha256": "94461b693b5fea23428b30c5f66041c10e098b3b32ddbf840502d91fcd13e490",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "4a50f756f8b4900fa1610151d3a4ce7f41d2262d77cb0fa1d6758543a53dab03"
+        },
+        {
+          "index": 97,
+          "asset_id": "forge__ore_rot__wash_04",
+          "job_id": "15613f6e-f887-4b0d-a8e2-b3d7266862fd",
+          "canonical_request_sha256": "468d3f1d86f311ff038e998b187b0a764b562b3008ac7f83f4941d5728eaccf7",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "67718f0a20c35e64484aff3ba5e02dc77cf21aca8115b604405a54ee8a68d782"
+        },
+        {
+          "index": 98,
+          "asset_id": "forge__ore_rot__wash_05",
+          "job_id": "06d369aa-a946-476a-967a-fdfa661a468a",
+          "canonical_request_sha256": "d0a7880d48eda0129ed0ef1fd384548c0cf6079b50469e7773984d88fc298891",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c070489da5ed5b19f6da69417ff3a0018b03a215480d5692998003dd28bd4cc7"
+        },
+        {
+          "index": 99,
+          "asset_id": "forge__ore_scatter__ore_still",
+          "job_id": "e9fef706-b1b7-43ee-ae9d-a0586155e8b6",
+          "canonical_request_sha256": "32e23a6799d889bf300696d19e06c2e87c6d1a6dfd6f978af885ead57d49044a",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "355cb4a8fe4ada980e2c57825033faa21f2018e72ae6dd3e3536c4da6c98d1ac"
+        },
+        {
+          "index": 100,
+          "asset_id": "forge__ore_scatter__ore_wash",
+          "job_id": "60b70622-02cb-4b0c-8c24-6514af022652",
+          "canonical_request_sha256": "878370a155067eae32c707ec67ef0ffe827607660d67cb03cfb8723763fb4ffd",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "050fcfefbf7be913fe83950ec1d567442f9e6d71b69375b5e7cbc292610be2b1"
+        },
+        {
+          "index": 101,
+          "asset_id": "forge__ore_scatter__scat_01",
+          "job_id": "d9a68879-0c5f-465c-ae71-e5475c498417",
+          "canonical_request_sha256": "b28e4203eca349695d646e84b989abfba8de9d6e342daa0e859981a3dcaf5dcb",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b6d5d3900ec83d9977bb7876dad39bd775d8c05a31d647b91472ddc3ff668e50"
+        },
+        {
+          "index": 102,
+          "asset_id": "forge__ore_scatter__scat_02",
+          "job_id": "4443c136-8142-477a-bb00-4d0006f6816d",
+          "canonical_request_sha256": "40ad7ee3651aaa90297121ba488a745c91af915288787f8704a5eba4f8dbf1d9",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "93330e6245ca671df594d3eccde8ae5e5fd784eb22072e172af0b16c2e01357e"
+        },
+        {
+          "index": 103,
+          "asset_id": "forge__ore_scatter__still_01",
+          "job_id": "8abedb88-cfe4-4a9f-93f5-54d29d6311fc",
+          "canonical_request_sha256": "8d21a180835ce6c9f175b834fc4b5fb7845edac1373a1ace9ee6d19adefbb908",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "d16699c925c77b8bfade15593d888ad8315ba0187c5937121d53b042de786fc0"
+        },
+        {
+          "index": 104,
+          "asset_id": "forge__ore_scatter__still_02",
+          "job_id": "d08baf37-7bbe-488b-9fe7-5ae4734f9b1a",
+          "canonical_request_sha256": "0b5163024b72369dc1b3212cfb100e9996cbe6831cc2a4ddfeb34b3cf66a630c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "cab9e88b3829779eea77b45c4b639f183dd9dd77330136727b55d632ec0da2e8"
+        },
+        {
+          "index": 105,
+          "asset_id": "forge__ore_scatter__still_03",
+          "job_id": "c9a3f799-299e-4514-b7db-8b98841fa831",
+          "canonical_request_sha256": "61668b79b9e86e49c4fb8989d8b06af0acbe05cb11eb9966e81ca057abbffda7",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "cb983ecc326dbd85ec699c46be3b6f91454b066f8855b316f73a4a27174fec12"
+        },
+        {
+          "index": 106,
+          "asset_id": "forge__ore_scatter__still_04",
+          "job_id": "cdac2a5f-0170-4b39-b409-b56f43bd1a51",
+          "canonical_request_sha256": "71248ab29b19efb1b2e5c988b211dd9d5284c4ecf262697d8bd76ccee5415c92",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e06b4d45cc210032292db5397e5c8411ffd8745c2a15896e207771e9db12ff8f"
+        },
+        {
+          "index": 107,
+          "asset_id": "forge__ore_scatter__still_05",
+          "job_id": "c896a294-296c-43f7-8bcf-5b07bae65b15",
+          "canonical_request_sha256": "1b36c8e17e1c93a3d6e202089bbbe03524be189cac6f02dd46a56c699f0da603",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e7743851c3e90ef32dcc3a70344ba362fa3f63fd9022b1f49b00b4d8f2d135e7"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-010",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "86.40",
+      "balance_after_decimal": "68.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 108,
+          "asset_id": "forge__ore_scatter__tool_01",
+          "job_id": "cfb1df1f-42a9-463d-ab03-2e2b6052f0b1",
+          "canonical_request_sha256": "7c81d3f10a54f8490a0c2902301fafb50647c68a8686db3c2e1b3868b0a540a9",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b5aedfe43a196fa257abcc78e1498ca9aac7553301fe7e80dd152d4be7d5564d"
+        },
+        {
+          "index": 109,
+          "asset_id": "forge__ore_scatter__tool_02",
+          "job_id": "3bee846f-9fa9-4a85-8494-5bc6b9eb0930",
+          "canonical_request_sha256": "7993d7eca726d03e8ede07ec5b3cc203879c19194801acc1dd41d1ab53d11bbd",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "76eb5923c66a25fa2118b238b16c62c1d6c23fa59ba8fc29bb6dfc72cda04263"
+        },
+        {
+          "index": 110,
+          "asset_id": "forge__ore_scatter__tool_03",
+          "job_id": "1533bdfb-46c5-4851-91a0-019c30c34b9b",
+          "canonical_request_sha256": "ac692d464695ab279db2d419b0914cabc7264bc07b2c4d318c7bee3e2f3f709d",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "05724bf3bea8338be13b67122214ec6490ec86259f0e946a2b570b25b95b640d"
+        },
+        {
+          "index": 111,
+          "asset_id": "forge__ore_scatter__tool_04",
+          "job_id": "00b24370-4d89-454d-ba49-afdddca3b46a",
+          "canonical_request_sha256": "86f0c6e18b5742b835901bd3fc05841268b4852311a931ad3affd1d918075707",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "a04ad10f20d4791181599bbdd0b11961412dace31dc8ac2896c3608657cf9ede"
+        },
+        {
+          "index": 112,
+          "asset_id": "forge__ore_scatter__tool_05",
+          "job_id": "f14f9eeb-bc16-4a69-a969-d4f115873115",
+          "canonical_request_sha256": "bce677a12e3db14ebf712ef07897f65c0f47f391b34f14767e0e98636ec8311d",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "0f3f55750af6e21cf7fde0481b027651b75ae1a16f0dddf77223c9b329d51d1f"
+        },
+        {
+          "index": 113,
+          "asset_id": "forge__ore_scatter__tool_06",
+          "job_id": "2a109043-05e9-491e-af6c-c9356f4e8a76",
+          "canonical_request_sha256": "1d931ab387cd6e1aec4641303d4d0e43a72b9bd281c0f52e3853aa9031c566d4",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "12f510bcfb870c241fb853d2a61e718116eaf6c21b67c27cff72403ac12fea46"
+        },
+        {
+          "index": 114,
+          "asset_id": "forge__ore_scatter__tool_07",
+          "job_id": "d1b3c40f-2264-4469-af8d-425c31bd8bec",
+          "canonical_request_sha256": "c52d0a9b14441ee7257d44f5198b1e78c6f560c04807d4f28c4a024a04cd6f33",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "c2d7112e1402cefac1d9ae0f850907f90b17f26935be83ffaeb4ebe3338d9572"
+        },
+        {
+          "index": 115,
+          "asset_id": "forge__ore_scatter__tool_08",
+          "job_id": "f1292772-db5b-4990-acbc-4871a0619ec2",
+          "canonical_request_sha256": "3d1f15e758a14112d91e8fba93e199f473ae171db05ec70aaa5b9b592f06b1fc",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "78d810d5bbe42d0eaab1be35ea4566a4560694d96124eb150a8dfc4b78a57877"
+        },
+        {
+          "index": 116,
+          "asset_id": "forge__ore_scatter__tool_09",
+          "job_id": "c1725025-4c1d-481c-a122-85aa228a155b",
+          "canonical_request_sha256": "d323546d1a180dc9527c246578a7502fcc9a3f80e66ad9f54dcafc15766b7181",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "3a534acf4a09a55227c497b26b7841f247e3ef71c74543f8f3eddd6f0afe1c90"
+        },
+        {
+          "index": 117,
+          "asset_id": "forge__ore_scatter__tool_10",
+          "job_id": "9e8883a6-ec97-496e-acb3-7b46819a23c9",
+          "canonical_request_sha256": "d5e289d04ec767d688f9f2396769640969de30fe96552dc462234c86feab5bb1",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "64e392ff60d338a9551b84feb78708b8b149d9ec5770d0b2c7cfcffc80f4683a"
+        },
+        {
+          "index": 118,
+          "asset_id": "forge__ore_scatter__wash_01",
+          "job_id": "5b75a7f7-9c9d-4ebc-bdd7-d067a4478f77",
+          "canonical_request_sha256": "bec705acdff485ee68c513a327406b217174a4050a67d1fd3356b023258189b7",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "aeab7095e4a95e9a670a424db6b32e3ad4ae1f4b9ff19a124a01209b5e675fb6"
+        },
+        {
+          "index": 119,
+          "asset_id": "forge__ore_scatter__wash_02",
+          "job_id": "17514ac0-117e-4715-99d0-4ea3a799fff5",
+          "canonical_request_sha256": "9e5425f90eaa2f1e8c5324d747428f30dda685355c2196f869b21c05339c6372",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "2459496590f9287f60f5d163f7e4191db8c91452e7cc161da268fa58f91e8202"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-011",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "68.40",
+      "balance_after_decimal": "50.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 120,
+          "asset_id": "forge__ore_scatter__wash_03",
+          "job_id": "e6488489-9b5f-4f93-a293-38c08f9c7f01",
+          "canonical_request_sha256": "373e6800392cb9b6e27a2346271ec475af7dab1d40082e15cf2a41fa274719ee",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "582129b61b625d743eb74a1f108f05ed6812997e6b35accc5106592eefc50cb2"
+        },
+        {
+          "index": 121,
+          "asset_id": "forge__ore_scatter__wash_04",
+          "job_id": "e5cb6e4d-de8a-4ddc-abf1-f588963de010",
+          "canonical_request_sha256": "47cfa6b9e2eb446bb410b02d9e2eb38c435651ddbdc969bd645fdb9e78c2962c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "4197ec88cbe692788e236dc3f236cbcac3646682a6209af416c030f014b213df"
+        },
+        {
+          "index": 122,
+          "asset_id": "forge__ore_scatter__wash_05",
+          "job_id": "9d30f8ff-a004-4ccc-9b0e-fb2488374a4d",
+          "canonical_request_sha256": "e4470d25081514df65e050ab08b70a270f9870fb8ae7ece7fc1c8b0cebb2592d",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e0bf445ec14e53a871db63db64b734a8b062d1472880bcbe6d2b4841f45d401f"
+        },
+        {
+          "index": 123,
+          "asset_id": "forge__ore_still__ore_wash",
+          "job_id": "8917a42f-761b-443d-bf7f-db14892986e4",
+          "canonical_request_sha256": "968b073f1357e736a65c8eb0da1697eb9d8e9beda6a56de9895f8609c6183b52",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "cd227551559f5afe421636454d2456933edbd5439683765b70524c20a2ea1532"
+        },
+        {
+          "index": 124,
+          "asset_id": "forge__ore_still__still_01",
+          "job_id": "365455c0-109a-4024-98f7-304eed815f75",
+          "canonical_request_sha256": "d43e917d3394092829098a819bfa449eb815186760afe2389a3046ab2f4fbd49",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ea7d053965680912aa67c526911c1fcd5239c878a31585a26bf1bccaf37b3d88"
+        },
+        {
+          "index": 125,
+          "asset_id": "forge__ore_still__still_02",
+          "job_id": "62bc008c-8156-4564-8546-17f10ba4d0ca",
+          "canonical_request_sha256": "760139a3f15f95c1f1ecb9b0161ad1da8b8cd050432a684018c481db8462dfcd",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "02f12f00717064edeffacfae709b793196b0091aab43dc0c3bf5ef3fd555371a"
+        },
+        {
+          "index": 126,
+          "asset_id": "forge__ore_still__tool_01",
+          "job_id": "a0616ba8-d8d8-494d-b887-49e6858b19ac",
+          "canonical_request_sha256": "7560657b5283addd527c8770b642f3c9de2d7522174b44c84015a9483ca12c50",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "da61d2b175b114d322283d9874df74c5a81bb1018d838ada0766a48d96ae1f82"
+        },
+        {
+          "index": 127,
+          "asset_id": "forge__ore_still__tool_02",
+          "job_id": "0e298ba0-fd44-4bdf-8602-f64ab957c2c9",
+          "canonical_request_sha256": "e0a773a7ccac858589a2f0ea7dfeb57fddc9b1e6a4c26a75e2d6bbd184275c8c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "07d102bf49b2f25f36ab2ac1bd644395a78ddda1920b83b9397d9fecfb5e9e54"
+        },
+        {
+          "index": 128,
+          "asset_id": "forge__ore_still__tool_03",
+          "job_id": "49cf54cb-1511-4ec4-a0c1-739612b59e51",
+          "canonical_request_sha256": "d066cc6e0e571098ace605dd00d208da785b5902a999a0ad22109b12ad2d9fa0",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "9cea81eed9553902e05586495340766df32bfb2edd7ec1eaca8851aa00c13b8b"
+        },
+        {
+          "index": 129,
+          "asset_id": "forge__ore_still__tool_04",
+          "job_id": "3679a94a-eba5-43a8-acab-809bf2b866a6",
+          "canonical_request_sha256": "776e060a7a6a079294a844176a3513ac386c286d513900f222b6d9e0ff773a3a",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "4f2eb0dfd16c55e60dbe57c33b0f2ef4359fcc1909a430f7f48b2d42444df4d0"
+        },
+        {
+          "index": 130,
+          "asset_id": "forge__ore_still__tool_05",
+          "job_id": "0815e986-6c42-4465-80f6-5387d9e993dd",
+          "canonical_request_sha256": "7ca310f8e3f6f154c717ecbd8a5a5be4f30826d0e9c6d5ab8e9cea11c595ada0",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e442dce36c011e50d76d9501c4af004f5ea7ec4bb4b88fb4a5ed653d1337847c"
+        },
+        {
+          "index": 131,
+          "asset_id": "forge__ore_still__tool_06",
+          "job_id": "a62a1f95-7320-4e12-90a5-e9a78604e876",
+          "canonical_request_sha256": "a83c7b37fa59ff5b96fc7e74fa86d8e682c031c7c933800fc479c7bb5bfa1fb9",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "5166c5b239896212c6f1ef79bf8202b4d23a7b03796c81918a497d51afe1127c"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-012",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "50.40",
+      "balance_after_decimal": "32.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 132,
+          "asset_id": "forge__ore_still__tool_07",
+          "job_id": "57a4be78-d7cb-4eeb-8d10-4ee716fd3497",
+          "canonical_request_sha256": "eb9e453e209164ac350796656752121cf2e9d5e62a9472ba1307c67eef4a4dcb",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "76c3d2327929d391ccd81b380d6e81729aead8045fd07892f7e6794a3f2dab7c"
+        },
+        {
+          "index": 133,
+          "asset_id": "forge__ore_still__tool_08",
+          "job_id": "9893ea4b-9d4e-4abf-9734-2ddfafce92e4",
+          "canonical_request_sha256": "a064ce333fb2e97df1ddb682abbc713659166fa3527780813b7698ec2b50ecdc",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "df9e8697b4a7863b3c5ccfe555e39666db26ee07dbcc2db4b2f743cb73e026f1"
+        },
+        {
+          "index": 134,
+          "asset_id": "forge__ore_still__tool_09",
+          "job_id": "5d4a34bb-21ec-4dea-a77f-43e8b5549f85",
+          "canonical_request_sha256": "6cb1e40e170ce1d84cbb750c195ddc911d3f972807342edbd8a2c337fbd60653",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "d853b0e8f49de98bad55078bb570396f82672015b38260a5c51f7b12c5b1fc43"
+        },
+        {
+          "index": 135,
+          "asset_id": "forge__ore_still__tool_10",
+          "job_id": "b7dc3869-9147-4578-9e4c-895a15f57e45",
+          "canonical_request_sha256": "003f28b15afd9416219db4ba95cf03afe05fe51e94cf98d4b52cf27a17933095",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "5c23ef37ffb614e45991f4bb10e154bee013fb117d9e715d600a579fa6dc1dda"
+        },
+        {
+          "index": 136,
+          "asset_id": "forge__ore_still__wash_01",
+          "job_id": "8cb545bc-a402-480e-a3ff-d137ba5ee0dd",
+          "canonical_request_sha256": "09dd4c5b3911819b144ca7bc5f2b499c656de087b6132761f29d3617934aea01",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ab1f1d40d89f7ccc3d1d90510247e751f2fc9741f21f6bd685d89c4f144f0ef8"
+        },
+        {
+          "index": 137,
+          "asset_id": "forge__ore_still__wash_02",
+          "job_id": "3aaa1759-08da-483e-9440-01acc3653bf4",
+          "canonical_request_sha256": "98828c06d1c3c9b8474f565ef39e2a5f2cfcb8954ba5aa7a103f3e316b525c75",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "2f0cd7d43ae575b09127df131fff8f2186c7d752484bf8f802dcac2b61baa9ab"
+        },
+        {
+          "index": 138,
+          "asset_id": "forge__ore_still__wash_03",
+          "job_id": "c8aa4ab4-e058-4c59-b46b-29c53b078aee",
+          "canonical_request_sha256": "6a2134bac48cc4cb07ca2ece9dcb948ca3dfebb3f3dbadfc25d8fd787af528ce",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b4397f30ee31e4443d37c28c057c811113c2a01e5aeec7177c2544780abd825a"
+        },
+        {
+          "index": 139,
+          "asset_id": "forge__ore_still__wash_04",
+          "job_id": "c1246606-2510-407f-ad7c-9f82a8225f82",
+          "canonical_request_sha256": "f42965d851850fd851e62624402b641018866a43a540008a16987f5f2291556d",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "dea16538ffb0f26da4cfa1f87f6916d83f6460535678c9341497294e6d23677e"
+        },
+        {
+          "index": 140,
+          "asset_id": "forge__ore_still__wash_05",
+          "job_id": "bb142940-5ffa-4a5c-b412-2b2427c67114",
+          "canonical_request_sha256": "358a7c36833915870694a49d6fe94dddf71b3e30757ddd8d1f941056f2682540",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "451a2567c3d4bdf9af75537da6e5688dd5751609bfbd3c1de096f476195c0304"
+        },
+        {
+          "index": 141,
+          "asset_id": "forge__ore_wash__tool_01",
+          "job_id": "069706eb-8370-4bef-8ae4-f9f2a8eb441a",
+          "canonical_request_sha256": "16a988952927f2514b3cbc1331d7693f8f703161afa3d83b83c9a70e3c238b66",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "3ab1eabc1f78801e2787ecbc1b24d7e0768332a1b18271771c4898becf8134b3"
+        },
+        {
+          "index": 142,
+          "asset_id": "forge__ore_wash__tool_02",
+          "job_id": "46464401-2cba-4886-ae66-eb2a08de1690",
+          "canonical_request_sha256": "6433977a36bb1fe1ae1e386e66d5ee323c02154e20109b052454a015b916a62c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b3df586c851ff626dc58bf58f5860c95fb73e3e28b3816604bd7108dfa5aef8c"
+        },
+        {
+          "index": 143,
+          "asset_id": "forge__ore_wash__tool_03",
+          "job_id": "2e9569f1-b1f8-45f4-a8e2-fc2a6bc25a40",
+          "canonical_request_sha256": "ff0991c43b31c401efe018e0dcaa21ccb786ede1f38348d935778c58f9c7ee87",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "2c6d8c1c86314cd6c2f048134789145be324d54d0d9f73e5f3038ee3c1d23cac"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-013",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 12,
+      "charged": 12,
+      "recovered": 12,
+      "balance_before_decimal": "32.40",
+      "balance_after_decimal": "14.40",
+      "spend_decimal": "18.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 144,
+          "asset_id": "forge__ore_wash__tool_04",
+          "job_id": "97b581af-1678-4180-a016-84c3686f5efe",
+          "canonical_request_sha256": "581215f0a601ce25c97ee6fc2133fabda83386e2a9c39d38a8a966239824df5f",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "82df2de43bf42151b0c87896d5fc593e231849d39cc206c9354487e823f168a4"
+        },
+        {
+          "index": 145,
+          "asset_id": "forge__ore_wash__tool_05",
+          "job_id": "37f9eb65-77d4-48cf-8a74-e42be021a6a2",
+          "canonical_request_sha256": "d2db452ec03659719ebf89fe2d2eac5505bac1a7b369daabe47b4a48b0235cb3",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "e4f43d04cb8e653dd49d5ad6f1e9bce4be488ef0b6064ced7ac3f5eb5ebffe10"
+        },
+        {
+          "index": 146,
+          "asset_id": "forge__ore_wash__tool_06",
+          "job_id": "51c0cf5c-c9af-4c89-829e-98293cc1e68d",
+          "canonical_request_sha256": "da6c89c71d2a7049b155b87fb95a3d165047179446e971b849a99cd1b8f72c42",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "1110cdb05b7fe190e8df98f82e048c7fea0a3b4a0acfb79b6d8fc6d0f89321cb"
+        },
+        {
+          "index": 147,
+          "asset_id": "forge__ore_wash__tool_07",
+          "job_id": "0331169f-c864-4044-a71f-a806ef6098f2",
+          "canonical_request_sha256": "19b3120de41233b9bf234f102f87b951aa3626055a74890e4d67f7bad1a57d92",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "fba1656fe58294ec6b06db2e9cbb82dd349fef2e11b4f7a236eff1622a7e2601"
+        },
+        {
+          "index": 148,
+          "asset_id": "forge__ore_wash__tool_08",
+          "job_id": "82567021-0acf-43a0-8815-73a5d94c55ef",
+          "canonical_request_sha256": "0f0d1c1b6d8153a8661a8aacdb5bd544d5fcccb49a765e91227ce25ce36bd930",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "49dc38a3ac1bf3bbb560efc4a7370701b3bc3aa11712349718bf0ec529d93d5c"
+        },
+        {
+          "index": 149,
+          "asset_id": "forge__ore_wash__tool_09",
+          "job_id": "855d5697-965c-45b4-8a74-a28ab4d11a28",
+          "canonical_request_sha256": "584ccf49181ca3507e936cd88212fd0960cd65f3e6801a332585afbba416c409",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "58da4f0b632891d8c0e4c894c5778383f0020000053e6d6965f1d16d1f5bf777"
+        },
+        {
+          "index": 150,
+          "asset_id": "forge__ore_wash__tool_10",
+          "job_id": "9d7ceeb8-5e82-43ed-ba7d-412f3e740fc6",
+          "canonical_request_sha256": "d996cc9c854c7712ced7417a5cf97f49a4b5871a50430f464f07a2290553bf26",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "78e763d3597e34119da9265c506de9d74e0775722ac05f4ff16469f3930fbf8e"
+        },
+        {
+          "index": 151,
+          "asset_id": "forge__ore_wash__wash_01",
+          "job_id": "bc108ae4-9905-4a8d-9fe1-473c06f297f1",
+          "canonical_request_sha256": "3c87a542aba10d250f80fd7f47a632e3cfaa96cc325f2e6fa28d42259de893ca",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "ff043e5faccf94c252e347d7b18253516f1b9cffe8edc65b435368fc8dbdddd2"
+        },
+        {
+          "index": 152,
+          "asset_id": "forge__ore_wash__wash_02",
+          "job_id": "21db93fe-bd25-4a59-b8cf-3826d52fcca6",
+          "canonical_request_sha256": "db19bf061f9989a8b211c84a11c08fd5811af67e885676df6f8d995c5d1e765e",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "b3811b442942c2174f3514f3a1b5704f0a3e426cce67a39432816876e2d4985b"
+        },
+        {
+          "index": 153,
+          "asset_id": "forge__tool_01__tool_02",
+          "job_id": "6f4512c1-b46b-4e30-b058-fe38ee154dbd",
+          "canonical_request_sha256": "64aaa87d92952422c837bd8a589ffc588149f85f4c5ccf30a10e004e01eaf969",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "994ba7a8664bc3f68a82bff37a26e75bb531dec9839cbc88dd2f5187882c6206"
+        },
+        {
+          "index": 154,
+          "asset_id": "forge__tool_01__tool_03",
+          "job_id": "5b9c2436-f0dc-4ade-a9dc-cb2962f97d3f",
+          "canonical_request_sha256": "ea172f3251dda0b72f0470256daf2a17f6d49cd86971ea8efdb9b848dfc65796",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "fc35ac296adf665059fa6cf696b5d2af4aa2ccf676980c115bf62402f805da2e"
+        },
+        {
+          "index": 155,
+          "asset_id": "forge__tool_01__tool_04",
+          "job_id": "3ee1c0b6-bdd7-4d84-9678-bfb3212aeee8",
+          "canonical_request_sha256": "17cb28169011fd288fefb1e55e8b0273e5f2aa2f946ca8f74c6442372961b6d0",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "9c71e848d92590305ac630e30f1195133f898ad3113722d4ad599e7f9712e06e"
+        }
+      ]
+    },
+    {
+      "task": "T016",
+      "batch_id": "canonical-selected-014",
+      "final_state": "COMPLETE",
+      "all_terminal": true,
+      "submitted": 4,
+      "charged": 4,
+      "recovered": 4,
+      "balance_before_decimal": "14.40",
+      "balance_after_decimal": "8.40",
+      "spend_decimal": "6.00",
+      "paid_retry_count": 0,
+      "use_unlim": false,
+      "jobs": [
+        {
+          "index": 156,
+          "asset_id": "forge__tool_01__tool_05",
+          "job_id": "4f338a5a-697a-45d0-a30b-1065fa1ae32b",
+          "canonical_request_sha256": "cace0c50166cba1aee46c4ce14c160352b004498b3cf06c5a60d9b98e8e12626",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "f8d9793197f24e7d6d11dcf98f3ff71aad0f7e3898b89d39d286b8882e42166b"
+        },
+        {
+          "index": 157,
+          "asset_id": "forge__tool_01__tool_06",
+          "job_id": "4b345956-d0f1-404d-a842-27667e9f7cd1",
+          "canonical_request_sha256": "42276a8912f7256025818c8d913aa74e581595515de37a97dd700f334664969c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "da2cf05b9dc51edc1643431811b42b9f21aed2d2d3a7ddf3d4121fd70765c678"
+        },
+        {
+          "index": 158,
+          "asset_id": "forge__tool_01__tool_07",
+          "job_id": "ccdeba78-06a5-4d3f-b3fa-8ab165353803",
+          "canonical_request_sha256": "eead10b6e92e1cc4146e1c1b58e1db6b80409ba25110031336a51db94019baa0",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "5ba7c5ec5ab318ddf56062bff159b8497244002b525fb8f129096de419da7e81"
+        },
+        {
+          "index": 159,
+          "asset_id": "forge__tool_01__tool_08",
+          "job_id": "fb2d1f85-8802-4cf0-b591-7d0d8781dcb7",
+          "canonical_request_sha256": "a925f416af82411703c741be5d4a0636374dca9fa2b0a93c364a19e5679c271c",
+          "request_use_unlim": false,
+          "final_status": "completed",
+          "model": "nano_banana_flash",
+          "recovery_sha256": "71727574e5d6d5bcda1a2727c9ec29c0228c18a2226900f3afc69b4d92971b4f"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "batches": 14,
+    "submitted": 160,
+    "charged": 157,
+    "recovered": 157,
+    "uncharged_failures": 3,
+    "spend_decimal": "235.50",
+    "balance_start_decimal": "243.90",
+    "balance_end_decimal": "8.40"
+  }
+}
