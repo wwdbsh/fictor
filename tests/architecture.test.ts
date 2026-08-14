@@ -76,4 +76,18 @@ describe("current source architecture", () => {
       /\b(?:nextUint32|nextBoundedUint32|shuffleInstanceIds|canonicalSerialize|fnv1a32|isSafeCount|isFiniteNonnegative)\b/,
     );
   });
+
+  it("keeps forge runtime on the shared resolver and out of canonical catalogs", () => {
+    const runtimeRoot = join(sourceRoot, "domain", "forge-runtime");
+    const runtimeFiles = sourceFiles(runtimeRoot);
+    const combined = runtimeFiles.map((file) => readFileSync(file, "utf8")).join("\n");
+
+    expect(combined.match(/resolveForgeCard\s*\(/g)).toHaveLength(2);
+    expect(combined).not.toMatch(/from\s+["'][^"']*(?:data\/(?:source|generated)|\.generated\.json|unstable)[^"']*["']/i);
+    expect(combined).not.toMatch(/function\s+(?:resolve|makeTier2|deriveStats)/);
+
+    const runtimeIndex = readFileSync(join(runtimeRoot, "index.ts"), "utf8");
+    expect(runtimeIndex).toContain("FORGE_RUNTIME_SOURCE_HASH");
+    expect(runtimeIndex).not.toMatch(/(?:sha256Hex|canonicalSerialize|projectionHash|PROJECTION_HASH)/);
+  });
 });
