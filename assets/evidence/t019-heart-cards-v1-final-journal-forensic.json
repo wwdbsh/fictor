@@ -1,0 +1,490 @@
+{
+  "schema_version": 1,
+  "journal_version": "t019-heart-cards-operations-v1",
+  "redacted": true,
+  "plan_sha256": "21a0db26918e398e5eb634bcc4c9ae5eaa9fef66761de10593f3ff93340219c2",
+  "disclosure_presentation_evidence_sha256": "c8944a73079a1adcbdff5528f4bf4e11fcbff8338847b8afcef75de582bf6282",
+  "approval_evidence_sha256": "a9eeac809561310b3ea667c00a9b1ff2398ce725875e94b476ebb18084cb3a2c",
+  "immutable_forensics": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    }
+  },
+  "run_state": "COMPLETE",
+  "fail_stop_batch_id": null,
+  "initial_balance": {
+    "credits": 252.9,
+    "normalized_decimal": "252.90",
+    "provider_observed_at": "2026-08-14T01:00:31.000Z"
+  },
+  "total_credit_cap_units": 900,
+  "automatic_paid_retry_reserve_decimal": "0.00",
+  "paid_retry_count": 0,
+  "local_root": "public/assets",
+  "backup_root": "assets/backups/t019-heart-cards",
+  "expected_provider_reported_model": "nano_banana_flash",
+  "resumes": [],
+  "batches": [
+    {
+      "batch_id": "heart-cards-001",
+      "asset_ids": [
+        "heart__still",
+        "heart__burn",
+        "heart__scatter",
+        "heart__rot",
+        "heart__wash",
+        "heart__join"
+      ],
+      "aspect_ratio": "3:4",
+      "state": "COMPLETE",
+      "transitions": [
+        {
+          "state": "PREFLIGHT_REQUESTED",
+          "observed_at": "2026-08-14T01:00:32.000Z"
+        },
+        {
+          "state": "PREFLIGHT_VERIFIED",
+          "observed_at": "2026-08-14T01:01:00.000Z"
+        },
+        {
+          "state": "SUBMITTING",
+          "observed_at": "2026-08-14T01:01:00.000Z"
+        },
+        {
+          "state": "SUBMITTED",
+          "observed_at": "2026-08-14T01:01:38.000Z"
+        },
+        {
+          "state": "RECOVERY_OPEN",
+          "observed_at": "2026-08-14T01:01:39.000Z"
+        },
+        {
+          "state": "RECOVERING",
+          "observed_at": "2026-08-14T01:02:06.000Z"
+        },
+        {
+          "state": "RECOVERED",
+          "observed_at": "2026-08-14T01:02:06.000Z"
+        },
+        {
+          "state": "COMPLETE",
+          "observed_at": "2026-08-14T01:02:34.000Z"
+        }
+      ],
+      "resets": [],
+      "recovery_gates": [
+        {
+          "opened_at": "2026-08-14T01:01:39.000Z",
+          "exact_operator_phrase_sha256": "de97fcf08d6910d0f6da2a50c78a98c80d175d799b698c05dfdbad819e3f9ad3",
+          "no_new_paid_submit": true
+        }
+      ],
+      "job_polls": [
+        {
+          "observed_at": "2026-08-14T01:02:06.000Z",
+          "all_terminal": true,
+          "jobs": [
+            {
+              "index": 0,
+              "job_id": "b06ca279-13ce-455f-90a3-478c2860e45c",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 1,
+              "job_id": "ec118f11-d36d-4357-a89b-4b9de2b7c8e4",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 2,
+              "job_id": "fca472bc-73ad-485b-b65b-f04f6bea62f8",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 3,
+              "job_id": "7d56c25b-6ff2-4b5a-8cac-11c504774ac3",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 4,
+              "job_id": "f71da0b3-0465-41a8-8e1a-2d4d96a425fa",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 5,
+              "job_id": "c6e8ed43-719c-4f8d-a0ba-2f728f06c2a1",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            }
+          ]
+        }
+      ],
+      "recoveries": [
+        {
+          "asset_id": "heart__still",
+          "provider_job_index": 0,
+          "provider_job_id": "b06ca279-13ce-455f-90a3-478c2860e45c",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T01:02:06.000Z",
+          "local_relative_path": "cards/heart__still.png",
+          "backup_relative_path": "cards/heart__still.png",
+          "aspect_ratio": "3:4",
+          "sha256": "2a079532f0610de1af117422a32c7d33a24bd0c55758c48db94e724911e98995",
+          "size_bytes": 2451768,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "heart__burn",
+          "provider_job_index": 1,
+          "provider_job_id": "ec118f11-d36d-4357-a89b-4b9de2b7c8e4",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T01:02:06.000Z",
+          "local_relative_path": "cards/heart__burn.png",
+          "backup_relative_path": "cards/heart__burn.png",
+          "aspect_ratio": "3:4",
+          "sha256": "e1fd60f736c0a764d1b6ce896679fcc9ca3f560312ebf9f56adb726c4fd561d9",
+          "size_bytes": 2192235,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "heart__scatter",
+          "provider_job_index": 2,
+          "provider_job_id": "fca472bc-73ad-485b-b65b-f04f6bea62f8",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T01:02:06.000Z",
+          "local_relative_path": "cards/heart__scatter.png",
+          "backup_relative_path": "cards/heart__scatter.png",
+          "aspect_ratio": "3:4",
+          "sha256": "bc9f85128fd8d537a9892fb6573f362a062472f34fe1782e2f155f448caf2ab6",
+          "size_bytes": 1955213,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "heart__rot",
+          "provider_job_index": 3,
+          "provider_job_id": "7d56c25b-6ff2-4b5a-8cac-11c504774ac3",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T01:02:06.000Z",
+          "local_relative_path": "cards/heart__rot.png",
+          "backup_relative_path": "cards/heart__rot.png",
+          "aspect_ratio": "3:4",
+          "sha256": "0a6cbafa7c7f292336735aadce34be5703aeba1d840582c2c8f9cc1eb24da415",
+          "size_bytes": 2021469,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "heart__wash",
+          "provider_job_index": 4,
+          "provider_job_id": "f71da0b3-0465-41a8-8e1a-2d4d96a425fa",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T01:02:06.000Z",
+          "local_relative_path": "cards/heart__wash.png",
+          "backup_relative_path": "cards/heart__wash.png",
+          "aspect_ratio": "3:4",
+          "sha256": "9e4aea7a373419b794504e3dbfd78829273380a658a3552e88ac97fa7f2d0f4f",
+          "size_bytes": 2115758,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "heart__join",
+          "provider_job_index": 5,
+          "provider_job_id": "c6e8ed43-719c-4f8d-a0ba-2f728f06c2a1",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T01:02:06.000Z",
+          "local_relative_path": "cards/heart__join.png",
+          "backup_relative_path": "cards/heart__join.png",
+          "aspect_ratio": "3:4",
+          "sha256": "236a8fb5e96906a974b95aad43de2b6968f26b8b9bec34c70253e8b5562f6865",
+          "size_bytes": 2457093,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        }
+      ],
+      "terminals": [],
+      "discharges": [],
+      "preflight": {
+        "requests": [
+          {
+            "index": 0,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient still god, frontal and monumental; colors=GOLD+TEAL; density=MAX; paper=OCHRE; representation=SOLID; attribute=STILL. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 1,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient burn god, frontal and monumental; colors=GOLD+VERMILION; density=MAX; paper=SCORCHED_BROWN; representation=SOLID; attribute=BURN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 2,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient scatter god, frontal and monumental; colors=GOLD+SULPHUR; density=MAX; paper=CREAM; representation=SOLID; attribute=SCATTER. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 3,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient rot god, frontal and monumental; colors=GOLD+ACID_GREEN; density=MAX; paper=CREAM; representation=SOLID; attribute=ROT. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 4,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient wash god, frontal and monumental; colors=GOLD+ULTRAMARINE; density=MAX; paper=CREAM; representation=SOLID; attribute=WASH. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 5,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=CELESTIAL; subject=the heart of the ancient join god, frontal and monumental; colors=GOLD+MAGENTA; density=MAX; paper=BLUE_GREY; representation=SOLID; attribute=JOIN. Depict a tangible object with a clear physical silhouette. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this god-heart card's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core heart prompt, never from the reference subject. Heart cards are 3:4 CELESTIAL plates; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          }
+        ],
+        "requests_sha256": "c6c57ce4f7fabba97dee2b112ad2b197ab85f45696861a0573766b5b10072c55",
+        "requested_at": "2026-08-14T01:00:32.000Z",
+        "costs": [
+          {
+            "index": 0,
+            "request_sha256": "4dc980416b808636eef5d9408f2e617a7d8bfb506c19bc11080153cd4b26398b",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T01:00:39.000Z"
+          },
+          {
+            "index": 1,
+            "request_sha256": "789dd0546c58d1642b570573c1f4bde7ccbadef2847a1fe089bad4eb52b1340a",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T01:00:41.000Z"
+          },
+          {
+            "index": 2,
+            "request_sha256": "85f0309e02057639fd62f79c16a1cdcc5b9825552a1ca283714d047a6bd7ed1c",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T01:00:43.000Z"
+          },
+          {
+            "index": 3,
+            "request_sha256": "3ad874a7fec3bb09f579e7833b9def985a5f9df7b7ecbb5aed3a6988ebdc8cad",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T01:00:46.000Z"
+          },
+          {
+            "index": 4,
+            "request_sha256": "62d9bf5c414710e4d024f4d23c704f3738cd3b0f9d8116c08b5a4b8a23cd38ef",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T01:00:48.000Z"
+          },
+          {
+            "index": 5,
+            "request_sha256": "18ff205ad1c24858bb1837e91897e508bd3ce9e4a6e0be4cea6c27198e14dd10",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T01:00:50.000Z"
+          }
+        ],
+        "balance": {
+          "credits": 252.9,
+          "normalized_decimal": "252.90",
+          "provider_observed_at": "2026-08-14T01:01:00.000Z"
+        }
+      },
+      "paid_request": {
+        "request_sha256": "bcabef4c32709f2403e1cfbab9c5d7a0be2cefc75dc13a16047bb7548926500e",
+        "prepared_at": "2026-08-14T01:01:00.000Z"
+      },
+      "submission": {
+        "observed_at": "2026-08-14T01:01:38.000Z",
+        "expected_count": 6,
+        "submitted_count": 6,
+        "failed_count": 0,
+        "topology_valid": true,
+        "complete": true,
+        "missing_asset_ids": [],
+        "jobs": [
+          {
+            "index": 0,
+            "asset_id": "heart__still",
+            "job_id": "b06ca279-13ce-455f-90a3-478c2860e45c",
+            "status": "pending",
+            "canonical_request_sha256": "3e4588bb32e18b7091a2051e0c640936222805d25419278f8df693e65c20b927"
+          },
+          {
+            "index": 1,
+            "asset_id": "heart__burn",
+            "job_id": "ec118f11-d36d-4357-a89b-4b9de2b7c8e4",
+            "status": "pending",
+            "canonical_request_sha256": "fd3274fcf771755575d05f760e439e299897acb922c3d176c9c409fd02571aef"
+          },
+          {
+            "index": 2,
+            "asset_id": "heart__scatter",
+            "job_id": "fca472bc-73ad-485b-b65b-f04f6bea62f8",
+            "status": "pending",
+            "canonical_request_sha256": "1020668970db97ab10b3607fcb8029facdf2189dde2f39b9ef8e612b6b2bbe8e"
+          },
+          {
+            "index": 3,
+            "asset_id": "heart__rot",
+            "job_id": "7d56c25b-6ff2-4b5a-8cac-11c504774ac3",
+            "status": "pending",
+            "canonical_request_sha256": "e6e3bd083f61395214e9e17a60f936a762b21d0928f2fabc232ea56039f0304e"
+          },
+          {
+            "index": 4,
+            "asset_id": "heart__wash",
+            "job_id": "f71da0b3-0465-41a8-8e1a-2d4d96a425fa",
+            "status": "pending",
+            "canonical_request_sha256": "babd5470fb8907aa2c91b9e077936ffee3920b816766c9f26d66357b31a7472a"
+          },
+          {
+            "index": 5,
+            "asset_id": "heart__join",
+            "job_id": "c6e8ed43-719c-4f8d-a0ba-2f728f06c2a1",
+            "status": "pending",
+            "canonical_request_sha256": "dc6891dc8a7097f84712e1d488d4e6dddf4eb483f29bd2050b5f0d60731b7736"
+          }
+        ]
+      },
+      "balance_after": {
+        "credits": 243.9,
+        "normalized_decimal": "243.90",
+        "observed_at": "2026-08-14T01:02:34.000Z",
+        "provider_observed_at": "2026-08-14T01:02:34.000Z",
+        "delta_decimal": "9.00",
+        "delta_units": 900,
+        "charged_job_count": 6
+      }
+    }
+  ]
+}
