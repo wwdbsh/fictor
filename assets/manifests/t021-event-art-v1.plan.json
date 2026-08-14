@@ -1,0 +1,916 @@
+{
+  "schema_version": 1,
+  "plan_version": "t021-event-art-v1",
+  "issue_number": 23,
+  "issue_contract_sha256": "9f83f23ac3872814a96819771f9b23a98082899b7488f86c662a388d9f61186f",
+  "state": "HOLD_FOR_EXACT_SCOPED_USER_APPROVAL",
+  "remote_execution_allowed_without_approval": false,
+  "scope": {
+    "task_key": "T021",
+    "category": "EVENT",
+    "asset_count": 20,
+    "base_types": [
+      "cache",
+      "workshop",
+      "collapse",
+      "fictor",
+      "record",
+      "oddity"
+    ],
+    "base_type_count": 6,
+    "variant_count": 14,
+    "event_variant_expansion_allowed": false,
+    "style_redecision_allowed": false,
+    "manifest_id_change_allowed": false,
+    "other_categories_allowed": false
+  },
+  "selection": {
+    "expression": "core.assets.filter(category === 'EVENT'), manifest order",
+    "id_list_encoding": "UTF-8_IDS_JOINED_BY_NEWLINE_WITH_TRAILING_NEWLINE",
+    "id_list_sha256": "dbe722ae258ed1d73d4e925148e05c6c8cc25d3b58b69feb69d74a70fc2e5b71",
+    "first_id": "event__cache",
+    "last_id": "event__collapse__wash",
+    "unique_ids": true,
+    "unique_paths": true
+  },
+  "sources": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    },
+    "risk_disclosure": {
+      "path": "assets/evidence/t021-event-art-risk-disclosure-v1.json",
+      "sha256": "c91aad0b06b309ccb7f5bd7c1d64ad010c5ffddc301bafe6892be6a47e7d0f88",
+      "text_sha256": "8a08ae69e5da63808734b8280dee2432433614d80191c3907e99421b5975a06d"
+    },
+    "provider_schema": {
+      "path": "assets/evidence/t021-event-art-higgsfield-schema-v1.json",
+      "sha256": "bc270a74e9ee7d22c4517ce14aeeb3e6d0509211fa048fa51db00b81dd955908"
+    },
+    "forensics": {
+      "path": "assets/evidence/t021-event-art-forensics-v1.json",
+      "sha256": "3ccd70306199c094fc07f05fd84c3ec4a22ebe4434b5e79ce71864e7586854d1"
+    },
+    "implementation_binding": {
+      "path": "assets/evidence/t021-event-art-implementation-binding-v1.json",
+      "sha256": "40241468fedfc41657512fda7263cf9921d23a996317d6ef1af2608baf792268",
+      "files": {
+        "controller": {
+          "path": "scripts/assets/t021-event-art-production-v1-controller.ts",
+          "sha256": "7efaa6c6720338eac1488a972fc5554acdaec8c4e4e054b237a029b82881f722"
+        },
+        "preparation": {
+          "path": "scripts/assets/t021-event-art-production-v1-cli.ts",
+          "sha256": "af6b60ba027f30774b1f1fb59a7dfb22f9c9ca53fafa16ed03dd75a2c44b8026"
+        },
+        "production": {
+          "path": "scripts/assets/t021-event-art-production-v1-ops.ts",
+          "sha256": "b17f09f2cda314e5ef4f6a50eaedd355ffa384c079765b7ff356d8ca74183472"
+        },
+        "contract": {
+          "path": "scripts/assets/t021-event-art-production-v1.ts",
+          "sha256": "c80b2fae1b6d43d4e6d7eb4805d8c94bcb18545b8187b2defced128ceedff55b"
+        },
+        "provider_transport": {
+          "path": "scripts/assets/provider-transport.ts",
+          "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+        },
+        "t020_contract": {
+          "path": "scripts/assets/t020-world-art-production-v1.ts",
+          "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+        },
+        "t020_production": {
+          "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+          "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+        },
+        "filesystem": {
+          "path": "scripts/assets/filesystem.ts",
+          "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+        },
+        "filesystem_types": {
+          "path": "scripts/assets/types.ts",
+          "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+        },
+        "schema_contracts": {
+          "path": "src/data/schema/contracts.ts",
+          "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+        }
+      }
+    }
+  },
+  "provider_contract": {
+    "tool": "generate_image_batch",
+    "requested_model": "nano_banana_2",
+    "expected_provider_reported_model_for_canary_and_drift": "nano_banana_flash",
+    "model_canary_applies_to_every_batch": true,
+    "aspect_ratio_per_asset": true,
+    "aspect_homogeneous_batches": true,
+    "resolution": "1k",
+    "count_per_asset": 1,
+    "use_unlim": false,
+    "batch_max": 12,
+    "response_topology": "INDEXED_JOB_ONE_TO_ONE_PER_ASSET"
+  },
+  "reference_binding": {
+    "role": "image",
+    "source_job_id": "e0f36c95-2e1b-4e38-9931-7e10e562f209",
+    "reference_id": "fictor-copperplate-media-master",
+    "revision": 1,
+    "source_sha256": "3cadedb377db1e299bf2ac355404df3c8c092a3d229665c5e519243bbb5efde3",
+    "lock_scope": "MEDIA_ONLY",
+    "reference_instruction": "Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio."
+  },
+  "prompt_contract": {
+    "core_prompt_preserved_verbatim": true,
+    "reference_instruction": "Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.",
+    "no_copy_boundary": "MEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+    "deterministic_text_only": true
+  },
+  "budget": {
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "billing_uses_credits_exact_only": true,
+    "paid_request_count": 20,
+    "paid_batch_count": 2,
+    "paid_batch_sizes": [
+      12,
+      8
+    ],
+    "total_credit_cap_decimal": "30.00",
+    "total_credit_cap_units": 3000,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false
+  },
+  "cumulative_budget": {
+    "balance_at_disclosure_decimal": "282.90",
+    "balance_at_disclosure_units": 28290,
+    "this_task_cap_decimal": "30.00",
+    "projected_balance_after_t021_decimal": "252.90",
+    "remaining_plan_after_t021_decimal": "249.00",
+    "remaining_plan_breakdown": [
+      {
+        "task": "T019",
+        "credit_units": 900,
+        "credit_decimal": "9.00"
+      },
+      {
+        "task": "T016",
+        "credit_units": 24000,
+        "credit_decimal": "240.00"
+      }
+    ],
+    "headroom_after_t021_decimal": "3.90",
+    "a_single_lost_batch_breaks_the_remaining_plan": true,
+    "max_single_batch_exposure_decimal": "18.00"
+  },
+  "retry_policy": {
+    "automatic_paid_retry_allowed": false,
+    "automatic_paid_retry_count": 0,
+    "ambiguous_or_partial_submission_retry_allowed": false,
+    "single_submission_per_batch": true,
+    "ambiguous_submission_windows": 2,
+    "ambiguous_window_max_exposure_decimal": "18.00",
+    "operator_recovery_only_for_durable_job_ids": true,
+    "operator_gated_resume_never_resubmits": true,
+    "fail_stop_scope": "BATCH"
+  },
+  "recovery_policy": {
+    "local_root": "public/assets",
+    "backup_root": "assets/backups/t021-event-art",
+    "provider_native_unmodified": true,
+    "crop_or_resize_allowed": false,
+    "aspect_ratio_source": "PER_ASSET_FROM_PINNED_CORE_MANIFEST",
+    "aspect_expectation": {
+      "criterion": "RATIO_ONLY_NO_ABSOLUTE_DIMENSION_REQUIREMENT",
+      "tolerance_ppm_by_aspect": {
+        "3:4": 5000
+      },
+      "declared_aspects": [
+        "3:4"
+      ],
+      "undeclared_aspect_throws": true,
+      "provider_dimension_grid_px": 32,
+      "resolution": "1k",
+      "aspects_in_this_task": [
+        "3:4"
+      ],
+      "observed_3_4": {
+        "width": 896,
+        "height": 1200,
+        "aspect_error_ppm": 4445,
+        "source": "T015 and T020 deliveries",
+        "provider_validated": true
+      },
+      "t020_16_9_tolerance_deliberately_not_declared_here": {
+        "tolerance_ppm": 12500,
+        "reason": "16:9-SPECIFIC_GRID_ALLOWANCE_MUST_NOT_LEAK_INTO_3_4"
+      },
+      "out_of_tolerance_terminal_code": "ASPECT_MISMATCH",
+      "out_of_tolerance_blocks_all_later_batches": true
+    },
+    "production_jobs_wait_input": "STDIN_ONLY",
+    "signed_urls_or_raw_errors_persisted": false
+  },
+  "immutable_forensics": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    }
+  },
+  "model_canary": {
+    "expected_provider_reported_model": "nano_banana_flash",
+    "applies_to_every_batch": true,
+    "canary_batch_id": "event-art-001",
+    "blocks_batch_id_on_drift": "event-art-002",
+    "drift_still_costs_batch_spend": true
+  },
+  "approval_gate": {
+    "pending_disclosure_packet_path": "assets/evidence/t021-event-art-disclosure-presentation-v1.pending.json",
+    "disclosure_presentation_path": "assets/evidence/t021-event-art-disclosure-presentation-v1.json",
+    "controller_disclosure_attestation_path": "assets/evidence/t021-event-art-controller-disclosure-attestation-v1.json",
+    "controller_approval_attestation_path": "assets/evidence/t021-event-art-controller-approval-attestation-v1.json",
+    "approval_path": "assets/evidence/t021-event-art-approval-v1.json",
+    "status": "MISSING_NOT_AUTHORIZED",
+    "exact_phrase": "T021 이벤트 세계 아트 20장 생성을 승인한다. 한도 30.00 크레딧.",
+    "prior_task_approval_inherited": false,
+    "committed_clean_runtime_binding_required": true
+  },
+  "assets": [
+    {
+      "index": 0,
+      "id": "event__cache",
+      "category": "EVENT",
+      "event_type": "cache",
+      "ground": null,
+      "path": "events/event__cache.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=CACHE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "1a35b3669045772a4386c3bc84181a3a2a2f6b13b3819b732f9cf79f2268b9b7",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "6d5432dff77ded6e57b36f81607d733860ac802e5acc8e4ecfea2847884d1700",
+      "request": {
+        "index": 0,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "5a46cb7b3ba0be7f23a39863fcaaf235884714b2af26ecdf6cdf7d325e662a66"
+    },
+    {
+      "index": 1,
+      "id": "event__workshop",
+      "category": "EVENT",
+      "event_type": "workshop",
+      "ground": null,
+      "path": "events/event__workshop.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=workshop encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=OCHRE; event_type=WORKSHOP. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "3f87bdf317dd7afa9b2b939183787421aadcef82a2a21b7fda0a8c2e86576506",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=workshop encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=OCHRE; event_type=WORKSHOP. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "ef9e79dd4581da99dcdc6baea279154cce54d4f467ad203ee0289f236f119b25",
+      "request": {
+        "index": 1,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=workshop encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=OCHRE; event_type=WORKSHOP. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "f1cb51de470172525b7f4ad55201611cc2e8da2ef2a1d4d773128efedf026063"
+    },
+    {
+      "index": 2,
+      "id": "event__collapse",
+      "category": "EVENT",
+      "event_type": "collapse",
+      "ground": null,
+      "path": "events/event__collapse.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "da098cde49c0ad7cb2024c732101bb15434e9eca7866ea11d93d16d8459e30aa",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "50a6a99fd2b8d32150d344a77b6176bb0fb53e2ce9545fe55e59c379d3cfce21",
+      "request": {
+        "index": 2,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "daa6e5dac8f6d5ad276692dc01f85a4bf0a6e58e1d33f275d554823c83843328"
+    },
+    {
+      "index": 3,
+      "id": "event__fictor",
+      "category": "EVENT",
+      "event_type": "fictor",
+      "ground": null,
+      "path": "events/event__fictor.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=fictor encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=FICTOR. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "f75e88ee9288db51e2560f2ee9ce7009b3130c196d98889dc95fc098662bdbfc",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=fictor encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=FICTOR. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "e452f719c11f658035486c7bd634a159e7497b53543de091cfd7285678c844af",
+      "request": {
+        "index": 3,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=fictor encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=FICTOR. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "17dfecdda7e3657d966f51dd6da347a0b28f46de4e15c3bff07b5f3ed4f21ceb"
+    },
+    {
+      "index": 4,
+      "id": "event__record",
+      "category": "EVENT",
+      "event_type": "record",
+      "ground": null,
+      "path": "events/event__record.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=record encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=RECORD. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "2a212e0564c54b33cac08b10b1218399285a7a5e7c1f71a52ad535bf0472495a",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=record encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=RECORD. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "ef96d8bc60436f36789376ccf411156b748dd49a6965482d6efe5d9d0b9937fa",
+      "request": {
+        "index": 4,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=record encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=RECORD. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "65e788852fd23d43ca8cb741840792b2a2148659328add6ffd330f4cd7c3ce72"
+    },
+    {
+      "index": 5,
+      "id": "event__oddity",
+      "category": "EVENT",
+      "event_type": "oddity",
+      "ground": null,
+      "path": "events/event__oddity.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=ODDITY. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "63513ace61bf84e118b16ae219d911c78a3849bfcf23937f8352198614048f99",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "23cc4c0ad79b4f32f1e9aa1e75fc96935366ad13dc8c5da81e343ddb3b5cf24f",
+      "request": {
+        "index": 5,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "fdad1eec37ca6b885eb38156003a5e121eef292de79dcdb8181eb74405665048"
+    },
+    {
+      "index": 6,
+      "id": "event__cache__still",
+      "category": "EVENT",
+      "event_type": "cache",
+      "ground": "still",
+      "path": "events/event__cache__still.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the still ground; colors=TEAL; density=MID; paper=OCHRE; attribute=STILL; event_type=CACHE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "d67c4230bb74ca04ec486781e161fd1d76e8bfc0c910ffd12bc474521ea9652e",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the still ground; colors=TEAL; density=MID; paper=OCHRE; attribute=STILL; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "f38e43c4255d24312c279f04d4f022e2841b2cab641cd33ea3f1b36a1dd7038a",
+      "request": {
+        "index": 6,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the still ground; colors=TEAL; density=MID; paper=OCHRE; attribute=STILL; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "b4a8eae9bcada6b38099014f48bbc58879ef8a09b022b9e238d5c93484a90e2b"
+    },
+    {
+      "index": 7,
+      "id": "event__cache__burn",
+      "category": "EVENT",
+      "event_type": "cache",
+      "ground": "burn",
+      "path": "events/event__cache__burn.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the burn ground; colors=VERMILION; density=MID; paper=CREAM; attribute=BURN; event_type=CACHE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "3285dcbb1c329c341c6f8e5ba5623f6abe0c9469587a79f59d784171220d670e",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the burn ground; colors=VERMILION; density=MID; paper=CREAM; attribute=BURN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "06beaeb42310a21fc1f740e5fafed146390981b65651a5ec62db238ad0884531",
+      "request": {
+        "index": 7,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the burn ground; colors=VERMILION; density=MID; paper=CREAM; attribute=BURN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "56c4c33d6be733d76ae76e45801da58ae9f5fa7131e38cb41334b7ac33b404bf"
+    },
+    {
+      "index": 8,
+      "id": "event__cache__scatter",
+      "category": "EVENT",
+      "event_type": "cache",
+      "ground": "scatter",
+      "path": "events/event__cache__scatter.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the scatter ground; colors=SULPHUR; density=MID; paper=SCORCHED_BROWN; attribute=SCATTER; event_type=CACHE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "b76d01a468b62983e7016cdf34f6bd031dad6e8aab9be8f71cec02c0f8cffda2",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the scatter ground; colors=SULPHUR; density=MID; paper=SCORCHED_BROWN; attribute=SCATTER; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "e5b907a6577aa0fe2f489c2f0a3feffd52f674546ab541cba5a9757f4d4a07b6",
+      "request": {
+        "index": 8,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the scatter ground; colors=SULPHUR; density=MID; paper=SCORCHED_BROWN; attribute=SCATTER; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "5e8843aa41b1b3d0f34a00a7bdddbd39eade4c2fa931a489bdedad2df4a7dc66"
+    },
+    {
+      "index": 9,
+      "id": "event__cache__rot",
+      "category": "EVENT",
+      "event_type": "cache",
+      "ground": "rot",
+      "path": "events/event__cache__rot.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=CACHE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "595e15b2e19248d7cda8312a16e1e444e36ae345061a16a3f847762b058073d8",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "14dbc381e03dad0d87a50fafda0e53cc3f3b0c067023505352e37fad4f25ec54",
+      "request": {
+        "index": 9,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "3fcc9cfe37e7407a21635a33052c9e20a384dc10b87f0e8f77966839762c0e1d"
+    },
+    {
+      "index": 10,
+      "id": "event__cache__wash",
+      "category": "EVENT",
+      "event_type": "cache",
+      "ground": "wash",
+      "path": "events/event__cache__wash.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=CACHE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "24fce8dce29b3e62ece1268fe50b2b4473af2ef167d01bbc923d3810b592a682",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "49efc6f9c629ff9e9695b9db9d6f8f13f49fb49c8ec496ef03ffc0907fa32c66",
+      "request": {
+        "index": 10,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "d45c4137e044bf7b8722fe6df94cfb59394ced355173d3ed7009655a542daa91"
+    },
+    {
+      "index": 11,
+      "id": "event__cache__join",
+      "category": "EVENT",
+      "event_type": "cache",
+      "ground": "join",
+      "path": "events/event__cache__join.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=CACHE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "42bbebf49fb687f136cbb2ff26cadad242427e3735b5b2a3d36d23aeac0c22bb",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "be981453ababac4dd3fa4ab5d68dda51aac53411b85215a83762d4ec614bb53e",
+      "request": {
+        "index": 11,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "726086bb04efd146b23a118549279ccb3db0baf8013bb84dd53c7317b51e2137"
+    },
+    {
+      "index": 12,
+      "id": "event__oddity__still",
+      "category": "EVENT",
+      "event_type": "oddity",
+      "ground": "still",
+      "path": "events/event__oddity__still.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the still ground; colors=TEAL; density=MID; paper=SCORCHED_BROWN; attribute=STILL; event_type=ODDITY. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "d468794865cd6f18ceb94bcbb2d7b7c41364f860054e20ed361bae419ca678b3",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the still ground; colors=TEAL; density=MID; paper=SCORCHED_BROWN; attribute=STILL; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "d338887f12cb0873183dea2fe5993b7e945ec4afd3297d9ebf2b4809d13b2a59",
+      "request": {
+        "index": 12,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the still ground; colors=TEAL; density=MID; paper=SCORCHED_BROWN; attribute=STILL; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "229a5e1e55cea0f421fe50f3acc71f9f9e5dd3487074fde4ed373dc94862b587"
+    },
+    {
+      "index": 13,
+      "id": "event__oddity__burn",
+      "category": "EVENT",
+      "event_type": "oddity",
+      "ground": "burn",
+      "path": "events/event__oddity__burn.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the burn ground; colors=VERMILION; density=MID; paper=SCORCHED_BROWN; attribute=BURN; event_type=ODDITY. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "5688126ea1455fd85cb4101c873a80926425aa67685cdefea03457628f4ad661",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the burn ground; colors=VERMILION; density=MID; paper=SCORCHED_BROWN; attribute=BURN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "2d429cfa7a77a018d6312ad042adaa4ac59041c12b7c5984331ba839da1b8ce3",
+      "request": {
+        "index": 13,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the burn ground; colors=VERMILION; density=MID; paper=SCORCHED_BROWN; attribute=BURN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "0d23b53998cdb57101da2aed89f2ae15a834cf778e5e052c87c7264c1f03df48"
+    },
+    {
+      "index": 14,
+      "id": "event__oddity__scatter",
+      "category": "EVENT",
+      "event_type": "oddity",
+      "ground": "scatter",
+      "path": "events/event__oddity__scatter.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the scatter ground; colors=SULPHUR; density=MID; paper=CREAM; attribute=SCATTER; event_type=ODDITY. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "b28129de32cccd44cc073507a2dc577a640612e41aca7cb88c4cb5e78313bf0b",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the scatter ground; colors=SULPHUR; density=MID; paper=CREAM; attribute=SCATTER; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "80fed21c12e598127cf8ce8d64af132719de935230931028f1a30c4d8525156e",
+      "request": {
+        "index": 14,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the scatter ground; colors=SULPHUR; density=MID; paper=CREAM; attribute=SCATTER; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "84c8e8d8245a354c3d1fdbed681532adb750896c21f7bdc1789a5b20657b1205"
+    },
+    {
+      "index": 15,
+      "id": "event__oddity__rot",
+      "category": "EVENT",
+      "event_type": "oddity",
+      "ground": "rot",
+      "path": "events/event__oddity__rot.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=ODDITY. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "56965e5aeae32654522388c1c4b53787fe5c7c7ece4e5514d0acc2b88f558ee2",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "3e98698080f96898522ae9d6efef696643d64f94ff6fa8c2e84404443e688499",
+      "request": {
+        "index": 15,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "f15dabe3f7ad55f13e6ce69daba4966edb31da446f4f9241361a02ce2eb82c22"
+    },
+    {
+      "index": 16,
+      "id": "event__oddity__wash",
+      "category": "EVENT",
+      "event_type": "oddity",
+      "ground": "wash",
+      "path": "events/event__oddity__wash.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=SCORCHED_BROWN; attribute=WASH; event_type=ODDITY. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "9d4dd28ad468e13a99e7342ab0eefd86bfc1455b8463753d67bc04d816682b53",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=SCORCHED_BROWN; attribute=WASH; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "aeaadf620f9436f4fb53655a761bf890e010c801356ba1a3ea55b0d4b1bfdbdb",
+      "request": {
+        "index": 16,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=SCORCHED_BROWN; attribute=WASH; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "7c449df0c9fa575c488d0607345235da2236777f8bc3e1bdf8a3253a9073a668"
+    },
+    {
+      "index": 17,
+      "id": "event__oddity__join",
+      "category": "EVENT",
+      "event_type": "oddity",
+      "ground": "join",
+      "path": "events/event__oddity__join.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=ODDITY. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "38d854a59ad0dd909a88baef5759f3fe637380858cf5882102e8f57b45235d6f",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "650e560b7ca8d505eb3146e768ecb6bef0414e9ce03f1c83e87b7237b42816ec",
+      "request": {
+        "index": 17,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "c2fb448ae6b6fc2b1aa2b659de4aa8807905cc9bb618ed9dd72be43dcea224cb"
+    },
+    {
+      "index": 18,
+      "id": "event__collapse__burn",
+      "category": "EVENT",
+      "event_type": "collapse",
+      "ground": "burn",
+      "path": "events/event__collapse__burn.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the burn ground; colors=VERMILION; density=MID; paper=BLUE_GREY; attribute=BURN; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "b79850bbe668b69ad4771846a54e188fa968514cbf175ec8d832a6b5872d045e",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the burn ground; colors=VERMILION; density=MID; paper=BLUE_GREY; attribute=BURN; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "8c57b7c4757da5b3a64f4b002bbf55988baf4344975ab1e88380347811f2f93b",
+      "request": {
+        "index": 18,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the burn ground; colors=VERMILION; density=MID; paper=BLUE_GREY; attribute=BURN; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "a4cf9330be8bf1c944d3698097d04e9b08f9942b372a82b087bb19660a48135c"
+    },
+    {
+      "index": 19,
+      "id": "event__collapse__wash",
+      "category": "EVENT",
+      "event_type": "collapse",
+      "ground": "wash",
+      "path": "events/event__collapse__wash.png",
+      "aspect_ratio": "3:4",
+      "core_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.",
+      "core_prompt_sha256": "29d75324bec071cdbcfec921d736a733d691e30a515f4a0676da453e5696d698",
+      "effective_prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+      "effective_prompt_sha256": "89cca821e4904ba7fd8da34b11d4a530e1eb21df09b2f21110e965108599e451",
+      "request": {
+        "index": 19,
+        "params": {
+          "model": "nano_banana_2",
+          "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+          "aspect_ratio": "3:4",
+          "resolution": "1k",
+          "count": 1,
+          "use_unlim": false,
+          "medias": [
+            {
+              "role": "image",
+              "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+            }
+          ]
+        }
+      },
+      "canonical_request_sha256": "46aabf51bdb4c31d474b51e0a6c448bed85c74f75b4bf7d2fd623c07292a1266"
+    }
+  ],
+  "batches": [
+    {
+      "id": "event-art-001",
+      "index": 0,
+      "aspect_ratio": "3:4",
+      "asset_ids": [
+        "event__cache",
+        "event__workshop",
+        "event__collapse",
+        "event__fictor",
+        "event__record",
+        "event__oddity",
+        "event__cache__still",
+        "event__cache__burn",
+        "event__cache__scatter",
+        "event__cache__rot",
+        "event__cache__wash",
+        "event__cache__join"
+      ],
+      "size": 12
+    },
+    {
+      "id": "event-art-002",
+      "index": 1,
+      "aspect_ratio": "3:4",
+      "asset_ids": [
+        "event__oddity__still",
+        "event__oddity__burn",
+        "event__oddity__scatter",
+        "event__oddity__rot",
+        "event__oddity__wash",
+        "event__oddity__join",
+        "event__collapse__burn",
+        "event__collapse__wash"
+      ],
+      "size": 8
+    }
+  ]
+}

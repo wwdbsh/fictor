@@ -1,0 +1,1414 @@
+{
+  "schema_version": 1,
+  "journal_version": "t021-event-art-operations-v1",
+  "redacted": true,
+  "plan_sha256": "4024351cd765c2d178836debfe5bf14e4c9ca92a256770996531743da23b76f6",
+  "disclosure_presentation_evidence_sha256": "3b663648daddd779549bafd25a592e2746536c0c6488f2ed01d5c086bf768067",
+  "approval_evidence_sha256": "574f04fa59face245871ae3f10d4ae48dec4013e56c76313a72a8f5486462e82",
+  "immutable_forensics": {
+    "core_plan": {
+      "path": "assets/manifests/core-v1.plan.json",
+      "sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f"
+    },
+    "master_style": {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d"
+    },
+    "t014_approval": {
+      "path": "assets/manifests/material-style-approval-v1.json",
+      "sha256": "72f5e863806cdee5b7638d8bb1cd9f1fab2c20feb6aeae3c53ba7ef6be872c96"
+    }
+  },
+  "run_state": "COMPLETE",
+  "fail_stop_batch_id": null,
+  "initial_balance": {
+    "credits": 282.9,
+    "normalized_decimal": "282.90",
+    "provider_observed_at": "2026-08-14T00:17:07.000Z"
+  },
+  "total_credit_cap_units": 3000,
+  "automatic_paid_retry_reserve_decimal": "0.00",
+  "paid_retry_count": 0,
+  "local_root": "public/assets",
+  "backup_root": "assets/backups/t021-event-art",
+  "expected_provider_reported_model": "nano_banana_flash",
+  "resumes": [],
+  "batches": [
+    {
+      "batch_id": "event-art-001",
+      "asset_ids": [
+        "event__cache",
+        "event__workshop",
+        "event__collapse",
+        "event__fictor",
+        "event__record",
+        "event__oddity",
+        "event__cache__still",
+        "event__cache__burn",
+        "event__cache__scatter",
+        "event__cache__rot",
+        "event__cache__wash",
+        "event__cache__join"
+      ],
+      "aspect_ratio": "3:4",
+      "state": "COMPLETE",
+      "transitions": [
+        {
+          "state": "PREFLIGHT_REQUESTED",
+          "observed_at": "2026-08-14T00:17:08.000Z"
+        },
+        {
+          "state": "PREFLIGHT_VERIFIED",
+          "observed_at": "2026-08-14T00:17:56.000Z"
+        },
+        {
+          "state": "SUBMITTING",
+          "observed_at": "2026-08-14T00:17:56.000Z"
+        },
+        {
+          "state": "SUBMITTED",
+          "observed_at": "2026-08-14T00:18:56.000Z"
+        },
+        {
+          "state": "RECOVERY_OPEN",
+          "observed_at": "2026-08-14T00:18:57.000Z"
+        },
+        {
+          "state": "RECOVERING",
+          "observed_at": "2026-08-14T00:20:02.000Z"
+        },
+        {
+          "state": "RECOVERED",
+          "observed_at": "2026-08-14T00:20:02.000Z"
+        },
+        {
+          "state": "COMPLETE",
+          "observed_at": "2026-08-14T00:20:40.000Z"
+        }
+      ],
+      "resets": [],
+      "recovery_gates": [
+        {
+          "opened_at": "2026-08-14T00:18:57.000Z",
+          "exact_operator_phrase_sha256": "8435adcae0879f793b7206911b5318769ac211ea332404f8b46687b4a9f4f2ce",
+          "no_new_paid_submit": true
+        }
+      ],
+      "job_polls": [
+        {
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "all_terminal": true,
+          "jobs": [
+            {
+              "index": 0,
+              "job_id": "846fdf9e-08c1-47ad-ae72-10dd715918e5",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 1,
+              "job_id": "a8effdf6-6f46-4598-8d0a-08a057fb242a",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 2,
+              "job_id": "70318302-0daf-44f6-b3da-6b55b4cf7dbc",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 3,
+              "job_id": "26bd4307-bf32-4044-a1e1-bef0bb275bf2",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 4,
+              "job_id": "53851425-d9de-4c6b-8519-3c878c830ed8",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 5,
+              "job_id": "51b2d158-60a1-416f-bab4-764603946760",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 6,
+              "job_id": "d9d1da52-67fa-40a6-ba78-e5d7ddd4b2c1",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 7,
+              "job_id": "04b0f84d-62a8-4882-978f-8eb4078de047",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 8,
+              "job_id": "ba5e8c5c-4254-4d13-b42d-97679af508dd",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 9,
+              "job_id": "9fc1aa22-1a50-40a1-8c73-d57f349f5b3e",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 10,
+              "job_id": "7c6a4cb9-d11a-4ec3-b08c-363f24948451",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 11,
+              "job_id": "499efb5c-060b-4b05-ba15-a6ebb15a9047",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            }
+          ]
+        }
+      ],
+      "recoveries": [
+        {
+          "asset_id": "event__cache",
+          "provider_job_index": 0,
+          "provider_job_id": "846fdf9e-08c1-47ad-ae72-10dd715918e5",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__cache.png",
+          "backup_relative_path": "events/event__cache.png",
+          "aspect_ratio": "3:4",
+          "sha256": "43b6aa25903d3bc420d146922a201987bfd5a42aadc277e0f5fbaf0ab013d62a",
+          "size_bytes": 3131564,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__workshop",
+          "provider_job_index": 1,
+          "provider_job_id": "a8effdf6-6f46-4598-8d0a-08a057fb242a",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__workshop.png",
+          "backup_relative_path": "events/event__workshop.png",
+          "aspect_ratio": "3:4",
+          "sha256": "0de206c5fe3ce95909d3711fdafc324a223227892ba5d0187ac0e2554c526028",
+          "size_bytes": 2173162,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__collapse",
+          "provider_job_index": 2,
+          "provider_job_id": "70318302-0daf-44f6-b3da-6b55b4cf7dbc",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__collapse.png",
+          "backup_relative_path": "events/event__collapse.png",
+          "aspect_ratio": "3:4",
+          "sha256": "4c8cb202bfe0c082105811eb54ab6e71477b0b20689924daf31af61487fb7c94",
+          "size_bytes": 1739882,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__fictor",
+          "provider_job_index": 3,
+          "provider_job_id": "26bd4307-bf32-4044-a1e1-bef0bb275bf2",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__fictor.png",
+          "backup_relative_path": "events/event__fictor.png",
+          "aspect_ratio": "3:4",
+          "sha256": "fdac21b47a93d9c24991a69951badf642fa5a811ae7548760d9f0d378c94cb5d",
+          "size_bytes": 3003886,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__record",
+          "provider_job_index": 4,
+          "provider_job_id": "53851425-d9de-4c6b-8519-3c878c830ed8",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__record.png",
+          "backup_relative_path": "events/event__record.png",
+          "aspect_ratio": "3:4",
+          "sha256": "c30dec9acce3a0ed1a4b2a1f1f5085c4739c7c6f0638466127ef33c69b896357",
+          "size_bytes": 1697247,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__oddity",
+          "provider_job_index": 5,
+          "provider_job_id": "51b2d158-60a1-416f-bab4-764603946760",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__oddity.png",
+          "backup_relative_path": "events/event__oddity.png",
+          "aspect_ratio": "3:4",
+          "sha256": "c127831206dcb512fce330cd12223fb489024f03735b0a3130f000a4d73f517d",
+          "size_bytes": 2177420,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__cache__still",
+          "provider_job_index": 6,
+          "provider_job_id": "d9d1da52-67fa-40a6-ba78-e5d7ddd4b2c1",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__cache__still.png",
+          "backup_relative_path": "events/event__cache__still.png",
+          "aspect_ratio": "3:4",
+          "sha256": "b2ce5f357726f0271b1a6a78c838bb8baebb1bc11165a45453205f85b1f07f5b",
+          "size_bytes": 2430152,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__cache__burn",
+          "provider_job_index": 7,
+          "provider_job_id": "04b0f84d-62a8-4882-978f-8eb4078de047",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__cache__burn.png",
+          "backup_relative_path": "events/event__cache__burn.png",
+          "aspect_ratio": "3:4",
+          "sha256": "8fd80924938e41f6b1d9ef5be3138c34bbab7e8e0ed365d3aa5aaf9130b6b930",
+          "size_bytes": 1826045,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__cache__scatter",
+          "provider_job_index": 8,
+          "provider_job_id": "ba5e8c5c-4254-4d13-b42d-97679af508dd",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__cache__scatter.png",
+          "backup_relative_path": "events/event__cache__scatter.png",
+          "aspect_ratio": "3:4",
+          "sha256": "a75656ed17e0ef644f32bbcbeb3675406ea1cde1d32ad394241945d40e557e68",
+          "size_bytes": 2091974,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__cache__rot",
+          "provider_job_index": 9,
+          "provider_job_id": "9fc1aa22-1a50-40a1-8c73-d57f349f5b3e",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__cache__rot.png",
+          "backup_relative_path": "events/event__cache__rot.png",
+          "aspect_ratio": "3:4",
+          "sha256": "9244e431cb8f18062712b70b9c661c6b77110711a418292bb6efbd8b981113cc",
+          "size_bytes": 2277846,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__cache__wash",
+          "provider_job_index": 10,
+          "provider_job_id": "7c6a4cb9-d11a-4ec3-b08c-363f24948451",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__cache__wash.png",
+          "backup_relative_path": "events/event__cache__wash.png",
+          "aspect_ratio": "3:4",
+          "sha256": "5659928bc96ab37ec798ba860e42cb4ccfbe8e985522dfc142d5cf1bdf48fa93",
+          "size_bytes": 2016594,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__cache__join",
+          "provider_job_index": 11,
+          "provider_job_id": "499efb5c-060b-4b05-ba15-a6ebb15a9047",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:20:02.000Z",
+          "local_relative_path": "events/event__cache__join.png",
+          "backup_relative_path": "events/event__cache__join.png",
+          "aspect_ratio": "3:4",
+          "sha256": "0fd325c42ee3416953295f3d6ef2017c6ca30fe21b437a8a0f2add7c99a30a23",
+          "size_bytes": 2042122,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        }
+      ],
+      "terminals": [],
+      "discharges": [],
+      "preflight": {
+        "requests": [
+          {
+            "index": 0,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 1,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=workshop encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=OCHRE; event_type=WORKSHOP. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 2,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 3,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=fictor encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=FICTOR. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 4,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=record encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=CREAM; event_type=RECORD. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 5,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter common to all grounds; colors=ACHROMATIC; density=MID; paper=SCORCHED_BROWN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 6,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the still ground; colors=TEAL; density=MID; paper=OCHRE; attribute=STILL; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 7,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the burn ground; colors=VERMILION; density=MID; paper=CREAM; attribute=BURN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 8,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the scatter ground; colors=SULPHUR; density=MID; paper=SCORCHED_BROWN; attribute=SCATTER; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 9,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 10,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 11,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=cache encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=CACHE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          }
+        ],
+        "requests_sha256": "ba80071ff8dfdac59c031858509e9a06cef827b6d7fe91213f74fabbf1437770",
+        "requested_at": "2026-08-14T00:17:08.000Z",
+        "costs": [
+          {
+            "index": 0,
+            "request_sha256": "1d6ee05b9bdc91ea277c2db270274f5115942fbc09755239da07bee00b2d128f",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:15.000Z"
+          },
+          {
+            "index": 1,
+            "request_sha256": "637f68be7a2311bc130c33594522f8f44fe0ad84ef446ab67f21a9ea935e02e4",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:17.000Z"
+          },
+          {
+            "index": 2,
+            "request_sha256": "109366d859dd1fff024232fa087a7f3cc7e1280fe7f6fb3d07f199464ca94def",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:20.000Z"
+          },
+          {
+            "index": 3,
+            "request_sha256": "36e7b6f35029cbf72a47563ceeefa99a8402d84ac27e79766b421789ef354d10",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:22.000Z"
+          },
+          {
+            "index": 4,
+            "request_sha256": "d4aa199a3a26d4a6e964ea1d72bc9563046b49f5d5b80a20103060a6f5faabaa",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:24.000Z"
+          },
+          {
+            "index": 5,
+            "request_sha256": "4edecfa28073556a9b35b2a92bde1c4bba3c377ec905e8c61db693ac490395f8",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:26.000Z"
+          },
+          {
+            "index": 6,
+            "request_sha256": "b40b704f2be06ff8803bb59dad9944ad2137fd383a39ba6c06a6b0dbf64a152d",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:34.000Z"
+          },
+          {
+            "index": 7,
+            "request_sha256": "3b509a1ef2f42d6d5203a8e317b84872a7508fb142787839cace4bcc05dff79e",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:36.000Z"
+          },
+          {
+            "index": 8,
+            "request_sha256": "ff99c1986b2f6f0b4511e45190a842f17ceb0302c4587e586fda1d42096121fa",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:38.000Z"
+          },
+          {
+            "index": 9,
+            "request_sha256": "df9432534a0f8577c91492d33db6d7b3f2f33f0757f8e0891a75f9e001c2b931",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:40.000Z"
+          },
+          {
+            "index": 10,
+            "request_sha256": "92451597197daf0e047ddbe494b10f90906b07f48d3dcb15028c25768e4c0082",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:42.000Z"
+          },
+          {
+            "index": 11,
+            "request_sha256": "5b0d4a5cf56311844f30f35ca0a0a3ee5c9cf679aefcab80493ba706371d42ad",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:17:44.000Z"
+          }
+        ],
+        "balance": {
+          "credits": 282.9,
+          "normalized_decimal": "282.90",
+          "provider_observed_at": "2026-08-14T00:17:56.000Z"
+        }
+      },
+      "paid_request": {
+        "request_sha256": "12b0bac5e3646bceea0b5c59e51a2d10b98e00a2c3317a75c06f0f64556ae6d8",
+        "prepared_at": "2026-08-14T00:17:56.000Z"
+      },
+      "submission": {
+        "observed_at": "2026-08-14T00:18:56.000Z",
+        "expected_count": 12,
+        "submitted_count": 12,
+        "failed_count": 0,
+        "topology_valid": true,
+        "complete": true,
+        "missing_asset_ids": [],
+        "jobs": [
+          {
+            "index": 0,
+            "asset_id": "event__cache",
+            "job_id": "846fdf9e-08c1-47ad-ae72-10dd715918e5",
+            "status": "pending",
+            "canonical_request_sha256": "5a46cb7b3ba0be7f23a39863fcaaf235884714b2af26ecdf6cdf7d325e662a66"
+          },
+          {
+            "index": 1,
+            "asset_id": "event__workshop",
+            "job_id": "a8effdf6-6f46-4598-8d0a-08a057fb242a",
+            "status": "pending",
+            "canonical_request_sha256": "f1cb51de470172525b7f4ad55201611cc2e8da2ef2a1d4d773128efedf026063"
+          },
+          {
+            "index": 2,
+            "asset_id": "event__collapse",
+            "job_id": "70318302-0daf-44f6-b3da-6b55b4cf7dbc",
+            "status": "pending",
+            "canonical_request_sha256": "daa6e5dac8f6d5ad276692dc01f85a4bf0a6e58e1d33f275d554823c83843328"
+          },
+          {
+            "index": 3,
+            "asset_id": "event__fictor",
+            "job_id": "26bd4307-bf32-4044-a1e1-bef0bb275bf2",
+            "status": "pending",
+            "canonical_request_sha256": "17dfecdda7e3657d966f51dd6da347a0b28f46de4e15c3bff07b5f3ed4f21ceb"
+          },
+          {
+            "index": 4,
+            "asset_id": "event__record",
+            "job_id": "53851425-d9de-4c6b-8519-3c878c830ed8",
+            "status": "pending",
+            "canonical_request_sha256": "65e788852fd23d43ca8cb741840792b2a2148659328add6ffd330f4cd7c3ce72"
+          },
+          {
+            "index": 5,
+            "asset_id": "event__oddity",
+            "job_id": "51b2d158-60a1-416f-bab4-764603946760",
+            "status": "pending",
+            "canonical_request_sha256": "fdad1eec37ca6b885eb38156003a5e121eef292de79dcdb8181eb74405665048"
+          },
+          {
+            "index": 6,
+            "asset_id": "event__cache__still",
+            "job_id": "d9d1da52-67fa-40a6-ba78-e5d7ddd4b2c1",
+            "status": "pending",
+            "canonical_request_sha256": "b4a8eae9bcada6b38099014f48bbc58879ef8a09b022b9e238d5c93484a90e2b"
+          },
+          {
+            "index": 7,
+            "asset_id": "event__cache__burn",
+            "job_id": "04b0f84d-62a8-4882-978f-8eb4078de047",
+            "status": "pending",
+            "canonical_request_sha256": "56c4c33d6be733d76ae76e45801da58ae9f5fa7131e38cb41334b7ac33b404bf"
+          },
+          {
+            "index": 8,
+            "asset_id": "event__cache__scatter",
+            "job_id": "ba5e8c5c-4254-4d13-b42d-97679af508dd",
+            "status": "pending",
+            "canonical_request_sha256": "5e8843aa41b1b3d0f34a00a7bdddbd39eade4c2fa931a489bdedad2df4a7dc66"
+          },
+          {
+            "index": 9,
+            "asset_id": "event__cache__rot",
+            "job_id": "9fc1aa22-1a50-40a1-8c73-d57f349f5b3e",
+            "status": "pending",
+            "canonical_request_sha256": "3fcc9cfe37e7407a21635a33052c9e20a384dc10b87f0e8f77966839762c0e1d"
+          },
+          {
+            "index": 10,
+            "asset_id": "event__cache__wash",
+            "job_id": "7c6a4cb9-d11a-4ec3-b08c-363f24948451",
+            "status": "pending",
+            "canonical_request_sha256": "d45c4137e044bf7b8722fe6df94cfb59394ced355173d3ed7009655a542daa91"
+          },
+          {
+            "index": 11,
+            "asset_id": "event__cache__join",
+            "job_id": "499efb5c-060b-4b05-ba15-a6ebb15a9047",
+            "status": "pending",
+            "canonical_request_sha256": "726086bb04efd146b23a118549279ccb3db0baf8013bb84dd53c7317b51e2137"
+          }
+        ]
+      },
+      "balance_after": {
+        "credits": 264.9,
+        "normalized_decimal": "264.90",
+        "observed_at": "2026-08-14T00:20:40.000Z",
+        "provider_observed_at": "2026-08-14T00:20:40.000Z",
+        "delta_decimal": "18.00",
+        "delta_units": 1800,
+        "charged_job_count": 12
+      }
+    },
+    {
+      "batch_id": "event-art-002",
+      "asset_ids": [
+        "event__oddity__still",
+        "event__oddity__burn",
+        "event__oddity__scatter",
+        "event__oddity__rot",
+        "event__oddity__wash",
+        "event__oddity__join",
+        "event__collapse__burn",
+        "event__collapse__wash"
+      ],
+      "aspect_ratio": "3:4",
+      "state": "COMPLETE",
+      "transitions": [
+        {
+          "state": "PREFLIGHT_REQUESTED",
+          "observed_at": "2026-08-14T00:20:42.000Z"
+        },
+        {
+          "state": "PREFLIGHT_VERIFIED",
+          "observed_at": "2026-08-14T00:21:18.000Z"
+        },
+        {
+          "state": "SUBMITTING",
+          "observed_at": "2026-08-14T00:21:19.000Z"
+        },
+        {
+          "state": "SUBMITTED",
+          "observed_at": "2026-08-14T00:22:05.000Z"
+        },
+        {
+          "state": "RECOVERY_OPEN",
+          "observed_at": "2026-08-14T00:22:07.000Z"
+        },
+        {
+          "state": "RECOVERING",
+          "observed_at": "2026-08-14T00:22:31.000Z"
+        },
+        {
+          "state": "RECOVERED",
+          "observed_at": "2026-08-14T00:22:31.000Z"
+        },
+        {
+          "state": "COMPLETE",
+          "observed_at": "2026-08-14T00:23:00.000Z"
+        }
+      ],
+      "resets": [],
+      "recovery_gates": [
+        {
+          "opened_at": "2026-08-14T00:22:07.000Z",
+          "exact_operator_phrase_sha256": "8435adcae0879f793b7206911b5318769ac211ea332404f8b46687b4a9f4f2ce",
+          "no_new_paid_submit": true
+        }
+      ],
+      "job_polls": [
+        {
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "all_terminal": true,
+          "jobs": [
+            {
+              "index": 12,
+              "job_id": "f1749a7d-9cca-4aae-adb4-e1cb7fd6809f",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 13,
+              "job_id": "489dda76-a746-42f3-9860-907987af15b6",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 14,
+              "job_id": "e9eb59ef-1610-4174-9208-68e534db5310",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 15,
+              "job_id": "8576b022-925a-4cd6-96d3-b45f5710a791",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 16,
+              "job_id": "0593c034-738f-4350-af63-305cd5b3c6fe",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 17,
+              "job_id": "d17e6795-b14e-443a-b057-08a98ceb6ff5",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 18,
+              "job_id": "bd43e856-d247-4982-8bf6-3196398bcc25",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            },
+            {
+              "index": 19,
+              "job_id": "ce4ae24e-2dd8-496e-bf17-7d0950fddf85",
+              "status": "completed",
+              "model": "nano_banana_flash",
+              "download_available": true,
+              "lookup_retryable": null
+            }
+          ]
+        }
+      ],
+      "recoveries": [
+        {
+          "asset_id": "event__oddity__still",
+          "provider_job_index": 12,
+          "provider_job_id": "f1749a7d-9cca-4aae-adb4-e1cb7fd6809f",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__oddity__still.png",
+          "backup_relative_path": "events/event__oddity__still.png",
+          "aspect_ratio": "3:4",
+          "sha256": "e34908ba1c3ef84db6a2e898fcc34f04f0bd66b86442bfd232ad6aa2d5a98609",
+          "size_bytes": 2165378,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__oddity__burn",
+          "provider_job_index": 13,
+          "provider_job_id": "489dda76-a746-42f3-9860-907987af15b6",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__oddity__burn.png",
+          "backup_relative_path": "events/event__oddity__burn.png",
+          "aspect_ratio": "3:4",
+          "sha256": "ab90e051d782727e007fa3fe636acb7fc981e07c2e1ccdffaf21a65ffc8ed621",
+          "size_bytes": 1981122,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__oddity__scatter",
+          "provider_job_index": 14,
+          "provider_job_id": "e9eb59ef-1610-4174-9208-68e534db5310",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__oddity__scatter.png",
+          "backup_relative_path": "events/event__oddity__scatter.png",
+          "aspect_ratio": "3:4",
+          "sha256": "10264095a510eea024583d28fecdc7e6c3734ff873d085aacfd60a9edb64de71",
+          "size_bytes": 2396584,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__oddity__rot",
+          "provider_job_index": 15,
+          "provider_job_id": "8576b022-925a-4cd6-96d3-b45f5710a791",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__oddity__rot.png",
+          "backup_relative_path": "events/event__oddity__rot.png",
+          "aspect_ratio": "3:4",
+          "sha256": "87e7cf9b72ff494e75a29f26c56d7fcfc903f5c9ddb91fff34ad1cf4efa21951",
+          "size_bytes": 1884310,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__oddity__wash",
+          "provider_job_index": 16,
+          "provider_job_id": "0593c034-738f-4350-af63-305cd5b3c6fe",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__oddity__wash.png",
+          "backup_relative_path": "events/event__oddity__wash.png",
+          "aspect_ratio": "3:4",
+          "sha256": "5cf5be8b99ac3e2d0ad07319e2b0763f7a532fe53616e2b0bff6b29331999bd0",
+          "size_bytes": 1931004,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__oddity__join",
+          "provider_job_index": 17,
+          "provider_job_id": "d17e6795-b14e-443a-b057-08a98ceb6ff5",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__oddity__join.png",
+          "backup_relative_path": "events/event__oddity__join.png",
+          "aspect_ratio": "3:4",
+          "sha256": "34fec78c0f51ff9796e369b5cad3f124f3a6d8245fe08fde26bd10f59011344f",
+          "size_bytes": 1764696,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__collapse__burn",
+          "provider_job_index": 18,
+          "provider_job_id": "bd43e856-d247-4982-8bf6-3196398bcc25",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__collapse__burn.png",
+          "backup_relative_path": "events/event__collapse__burn.png",
+          "aspect_ratio": "3:4",
+          "sha256": "9b10b7c8d6515c3420582a2533990c47a3ec236a83470e0c744d3cd52000434f",
+          "size_bytes": 1930926,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        },
+        {
+          "asset_id": "event__collapse__wash",
+          "provider_job_index": 19,
+          "provider_job_id": "ce4ae24e-2dd8-496e-bf17-7d0950fddf85",
+          "source": "JOBS_HANDOFF_STDIN",
+          "observed_at": "2026-08-14T00:22:31.000Z",
+          "local_relative_path": "events/event__collapse__wash.png",
+          "backup_relative_path": "events/event__collapse__wash.png",
+          "aspect_ratio": "3:4",
+          "sha256": "2fbb930d45b5d5db51a5b04dc4c642f73f0c01319b0dabb9ab05772897cf0de8",
+          "size_bytes": 1838632,
+          "actual_width": 896,
+          "actual_height": 1200,
+          "aspect_error_ppm": 4445,
+          "provider_native_unmodified": true
+        }
+      ],
+      "terminals": [],
+      "discharges": [],
+      "preflight": {
+        "requests": [
+          {
+            "index": 12,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the still ground; colors=TEAL; density=MID; paper=SCORCHED_BROWN; attribute=STILL; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 13,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the burn ground; colors=VERMILION; density=MID; paper=SCORCHED_BROWN; attribute=BURN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 14,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the scatter ground; colors=SULPHUR; density=MID; paper=CREAM; attribute=SCATTER; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 15,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the rot ground; colors=ACID_GREEN; density=MID; paper=BLUE_GREY; attribute=ROT; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 16,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=SCORCHED_BROWN; attribute=WASH; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 17,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=oddity encounter in the join ground; colors=MAGENTA; density=MID; paper=OCHRE; attribute=JOIN; event_type=ODDITY. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 18,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the burn ground; colors=VERMILION; density=MID; paper=BLUE_GREY; attribute=BURN; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          },
+          {
+            "index": 19,
+            "params": {
+              "model": "nano_banana_2",
+              "prompt": "Antique copperplate engraving plate, 17th century manuscript style, fine cross-hatching and line work, aged paper, single centered subject, strong readable silhouette at small size. composition=SEQUENCE; subject=collapse encounter in the wash ground; colors=ULTRAMARINE; density=MID; paper=CREAM; attribute=WASH; event_type=COLLAPSE. No text, lettering, border, UI, or watermark.\n\nMaster-style reference instruction: Use this local master image as a MEDIA_ONLY reference for 17th-century copperplate line treatment; do not copy its subject, geometry, pose, composition, whitespace, colors, paper tone, density, representation, or aspect ratio.\nMEDIA_ONLY no-copy boundary: preserve only the approved copperplate line treatment; derive this event asset's subject, geometry, pose, composition, whitespace, attribute colors, paper tone, density, representation, and aspect from the core event prompt, never from the reference subject. Event plates are 3:4 specimen studies; the reference image's own aspect is never inherited.",
+              "aspect_ratio": "3:4",
+              "resolution": "1k",
+              "count": 1,
+              "use_unlim": false,
+              "medias": [
+                {
+                  "role": "image",
+                  "value": "e0f36c95-2e1b-4e38-9931-7e10e562f209"
+                }
+              ],
+              "get_cost": true
+            }
+          }
+        ],
+        "requests_sha256": "c8170f6b123a5bb11abdace4e0a16533bccdf1cc03c4da16f13159f5103cd29a",
+        "requested_at": "2026-08-14T00:20:42.000Z",
+        "costs": [
+          {
+            "index": 12,
+            "request_sha256": "4db32a8c26f01c1f45e15278f2d8209b86174b924c8520b5d18924bdbac6bbd7",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:20:51.000Z"
+          },
+          {
+            "index": 13,
+            "request_sha256": "9b0d688ef6ab04843f2797a076efedaf5355bf8987ec28f2a31d50bd31778f25",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:20:53.000Z"
+          },
+          {
+            "index": 14,
+            "request_sha256": "6f574146edb9c3d6c8f26af3f396e811b8bb4173de9ac75a785013af31856849",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:20:55.000Z"
+          },
+          {
+            "index": 15,
+            "request_sha256": "fa25dcc61985e61f7cc7b7a855f8ed3b5dea4cb4fa008a26c04c2f40aa53227b",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:20:57.000Z"
+          },
+          {
+            "index": 16,
+            "request_sha256": "eb06bbc01276fe96e7f4b752439309b660ff5a879c97a2946d352ff005b24f4b",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:21:00.000Z"
+          },
+          {
+            "index": 17,
+            "request_sha256": "dfa1e8160e382df873a2e52364064cfd7fbd7e718dcb1b66950a18dcb53b3950",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:21:02.000Z"
+          },
+          {
+            "index": 18,
+            "request_sha256": "1b0c39b274d97d42f9c1a382fd1a37c90cba801a4f74910f5181a60e546d517a",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:21:04.000Z"
+          },
+          {
+            "index": 19,
+            "request_sha256": "a29bd3e123ed7cb6a958c12336e24a9d98cb47b5b4a70715d957b4ca4c521bc0",
+            "credits": 1,
+            "credits_decimal": "1.00",
+            "credits_exact": 1.5,
+            "credits_exact_decimal": "1.50",
+            "provider_observed_at": "2026-08-14T00:21:07.000Z"
+          }
+        ],
+        "balance": {
+          "credits": 264.9,
+          "normalized_decimal": "264.90",
+          "provider_observed_at": "2026-08-14T00:21:18.000Z"
+        }
+      },
+      "paid_request": {
+        "request_sha256": "1557fbca0415819b7701b9eb48258b192b59419e74e3a3ce175872350c9f2a99",
+        "prepared_at": "2026-08-14T00:21:19.000Z"
+      },
+      "submission": {
+        "observed_at": "2026-08-14T00:22:05.000Z",
+        "expected_count": 8,
+        "submitted_count": 8,
+        "failed_count": 0,
+        "topology_valid": true,
+        "complete": true,
+        "missing_asset_ids": [],
+        "jobs": [
+          {
+            "index": 12,
+            "asset_id": "event__oddity__still",
+            "job_id": "f1749a7d-9cca-4aae-adb4-e1cb7fd6809f",
+            "status": "pending",
+            "canonical_request_sha256": "229a5e1e55cea0f421fe50f3acc71f9f9e5dd3487074fde4ed373dc94862b587"
+          },
+          {
+            "index": 13,
+            "asset_id": "event__oddity__burn",
+            "job_id": "489dda76-a746-42f3-9860-907987af15b6",
+            "status": "pending",
+            "canonical_request_sha256": "0d23b53998cdb57101da2aed89f2ae15a834cf778e5e052c87c7264c1f03df48"
+          },
+          {
+            "index": 14,
+            "asset_id": "event__oddity__scatter",
+            "job_id": "e9eb59ef-1610-4174-9208-68e534db5310",
+            "status": "pending",
+            "canonical_request_sha256": "84c8e8d8245a354c3d1fdbed681532adb750896c21f7bdc1789a5b20657b1205"
+          },
+          {
+            "index": 15,
+            "asset_id": "event__oddity__rot",
+            "job_id": "8576b022-925a-4cd6-96d3-b45f5710a791",
+            "status": "pending",
+            "canonical_request_sha256": "f15dabe3f7ad55f13e6ce69daba4966edb31da446f4f9241361a02ce2eb82c22"
+          },
+          {
+            "index": 16,
+            "asset_id": "event__oddity__wash",
+            "job_id": "0593c034-738f-4350-af63-305cd5b3c6fe",
+            "status": "pending",
+            "canonical_request_sha256": "7c449df0c9fa575c488d0607345235da2236777f8bc3e1bdf8a3253a9073a668"
+          },
+          {
+            "index": 17,
+            "asset_id": "event__oddity__join",
+            "job_id": "d17e6795-b14e-443a-b057-08a98ceb6ff5",
+            "status": "pending",
+            "canonical_request_sha256": "c2fb448ae6b6fc2b1aa2b659de4aa8807905cc9bb618ed9dd72be43dcea224cb"
+          },
+          {
+            "index": 18,
+            "asset_id": "event__collapse__burn",
+            "job_id": "bd43e856-d247-4982-8bf6-3196398bcc25",
+            "status": "pending",
+            "canonical_request_sha256": "a4cf9330be8bf1c944d3698097d04e9b08f9942b372a82b087bb19660a48135c"
+          },
+          {
+            "index": 19,
+            "asset_id": "event__collapse__wash",
+            "job_id": "ce4ae24e-2dd8-496e-bf17-7d0950fddf85",
+            "status": "pending",
+            "canonical_request_sha256": "46aabf51bdb4c31d474b51e0a6c448bed85c74f75b4bf7d2fd623c07292a1266"
+          }
+        ]
+      },
+      "balance_after": {
+        "credits": 252.9,
+        "normalized_decimal": "252.90",
+        "observed_at": "2026-08-14T00:23:00.000Z",
+        "provider_observed_at": "2026-08-14T00:23:00.000Z",
+        "delta_decimal": "12.00",
+        "delta_units": 1200,
+        "charged_job_count": 8
+      }
+    }
+  ]
+}
