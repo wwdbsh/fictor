@@ -20,6 +20,7 @@ const HEART_ID_SET = new Set<string>(HEART_IDS);
 export interface GameSession {
   profile: PersistentProfileV1;
   runtimeState: ForgeRuntimeStateV1;
+  persistenceGeneration: string | null;
   persistenceRevision: number;
   writeBlocked: boolean;
   loadIssues: SaveLoadIssue[];
@@ -50,6 +51,7 @@ function cloneSession(store: VersionedSaveStore, session: GameSession): GameSess
   return {
     profile,
     runtimeState,
+    persistenceGeneration: session.persistenceGeneration,
     persistenceRevision: session.persistenceRevision,
     writeBlocked: session.writeBlocked,
     loadIssues: [...session.loadIssues],
@@ -63,10 +65,16 @@ function persist(
 ): SessionMutationResult {
   const persistence: SaveWriteResult = session.writeBlocked
     ? { ok: false, persisted: false, reason: "WRITE_BLOCKED" }
-    : store.save(session.profile, session.runtimeState, session.persistenceRevision);
+    : store.save(
+      session.profile,
+      session.runtimeState,
+      session.persistenceGeneration,
+      session.persistenceRevision,
+    );
   return {
     session: {
       ...session,
+      persistenceGeneration: persistence.ok ? persistence.generation : session.persistenceGeneration,
       persistenceRevision: persistence.ok ? persistence.revision : session.persistenceRevision,
       writeBlocked: session.writeBlocked || (!persistence.ok && persistence.reason === "WRITE_BLOCKED"),
     },
@@ -85,6 +93,7 @@ export function loadGameSession(store: VersionedSaveStore, strictStarterTemplate
   return {
     profile: loaded.profile,
     runtimeState: loaded.runtimeState,
+    persistenceGeneration: loaded.generation,
     persistenceRevision: loaded.revision,
     writeBlocked: loaded.writeBlocked,
     loadIssues: loaded.issues,

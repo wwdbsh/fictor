@@ -8,6 +8,7 @@ import {
   runtimeReferencesAllowed,
   serializeSaveEnvelope,
   snapshotPersistenceCatalog,
+  isValidSaveGeneration,
   type PersistenceCatalogSnapshot,
 } from "./codec";
 import {
@@ -16,6 +17,7 @@ import {
   type PersistenceCatalog,
   type PersistentProfileV1,
   type SaveEnvelopeV1,
+  type SaveGenerationFactory,
   type SaveLoadIssue,
   type SaveLoadResult,
   type SaveResetResult,
@@ -44,6 +46,7 @@ function safeInitialized(
   return {
     profile,
     runtimeState: hydrateStarter(starter, profile, catalog),
+    generation: null,
     revision: 0,
     source: "SAFE_INITIALIZED",
     writeBlocked,
@@ -51,17 +54,26 @@ function safeInitialized(
   };
 }
 
+export function browserSaveGenerationFactory(): string {
+  return globalThis.crypto.randomUUID();
+}
+
 export class VersionedSaveStore {
   readonly key: string;
   private readonly catalog: PersistenceCatalogSnapshot;
 
-  constructor(private readonly storage: StorageLike, catalog: PersistenceCatalog, key: string = FICTOR_SAVE_KEY) {
+  constructor(
+    private readonly storage: StorageLike,
+    catalog: PersistenceCatalog,
+    private readonly generationFactory: SaveGenerationFactory = browserSaveGenerationFactory,
+    key: string = FICTOR_SAVE_KEY,
+  ) {
     this.catalog = snapshotPersistenceCatalog(catalog);
     this.key = key;
   }
 
   decodeProfile(candidate: unknown): PersistentProfileV1 | null {
-    const classified = classifyPersistentProfile(candidate, this.catalog.allowedRecipeIds);
+    const classified = classifyPersistentProfile(candidate);
     return classified.kind === "VALID" ? classified.value : null;
   }
 
@@ -84,6 +96,7 @@ export class VersionedSaveStore {
       return {
         profile,
         runtimeState: hydrateStarter(starter, profile, this.catalog),
+        generation: null,
         revision: 0,
         source: "EMPTY",
         writeBlocked: false,
@@ -100,7 +113,7 @@ export class VersionedSaveStore {
     if (outer.kind === "UNSUPPORTED") return safeInitialized(starter, this.catalog, "UNSUPPORTED_VERSION", true);
     if (outer.kind === "INVALID") return safeInitialized(starter, this.catalog, "INVALID_ENVELOPE", true);
 
-    const profileResult = classifyPersistentProfile(outer.profile, this.catalog.allowedRecipeIds);
+    const profileResult = classifyPersistentProfile(outer.profile);
     const provisionalProfile = profileResult.kind === "VALID" ? profileResult.value : createDefaultProfile();
     const runResult = classifyRunProjection(outer.run, provisionalProfile.discoveredRecipeIds, this.catalog);
     if (profileResult.kind === "UNSUPPORTED" || runResult.kind === "UNSUPPORTED") {
@@ -114,6 +127,7 @@ export class VersionedSaveStore {
     return {
       profile,
       runtimeState: runResult.kind === "VALID" ? runResult.value : hydrateStarter(starter, profile, this.catalog),
+      generation: outer.saveGeneration,
       revision: outer.saveRevision,
       source: issues.length === 0 ? "SAVED" : "RECOVERED",
       writeBlocked: false,
@@ -121,8 +135,13 @@ export class VersionedSaveStore {
     };
   }
 
-  save(rawProfile: unknown, rawRuntimeState: unknown, expectedRevision: number): SaveWriteResult {
-    const profileResult = classifyPersistentProfile(rawProfile, this.catalog.allowedRecipeIds);
+  save(
+    rawProfile: unknown,
+    rawRuntimeState: unknown,
+    expectedGeneration: string | null,
+    expectedRevision: number,
+  ): SaveWriteResult {
+    const profileResult = classifyPersistentProfile(rawProfile);
     if (profileResult.kind !== "VALID") return { ok: false, persisted: false, reason: "INVALID_PROFILE" };
     const profile = profileResult.value;
     const runtimeState = this.decodeRuntime(rawRuntimeState);
@@ -139,6 +158,7 @@ export class VersionedSaveStore {
     } catch {
       return { ok: false, persisted: false, reason: "READ_FAILED" };
     }
+    let currentGeneration: string | null = null;
     let currentRevision = 0;
     if (currentBytes !== null) {
       let current: unknown;
@@ -149,20 +169,39 @@ export class VersionedSaveStore {
       }
       const outer = parseKnownEnvelope(current);
       if (outer.kind !== "KNOWN") return { ok: false, persisted: false, reason: "WRITE_BLOCKED" };
-      const currentProfile = classifyPersistentProfile(outer.profile, this.catalog.allowedRecipeIds);
+      const currentProfile = classifyPersistentProfile(outer.profile);
       const currentRecipes = currentProfile.kind === "VALID" ? currentProfile.value.discoveredRecipeIds : [];
       const currentRun = classifyRunProjection(outer.run, currentRecipes, this.catalog);
       if (currentProfile.kind === "UNSUPPORTED" || currentRun.kind === "UNSUPPORTED") {
         return { ok: false, persisted: false, reason: "WRITE_BLOCKED" };
       }
+      currentGeneration = outer.saveGeneration;
       currentRevision = outer.saveRevision;
     }
-    if (currentRevision !== expectedRevision) return { ok: false, persisted: false, reason: "STALE_WRITE" };
+    if (currentGeneration !== expectedGeneration || currentRevision !== expectedRevision) {
+      return { ok: false, persisted: false, reason: "STALE_WRITE" };
+    }
     if (currentRevision === Number.MAX_SAFE_INTEGER) return { ok: false, persisted: false, reason: "REVISION_EXHAUSTED" };
+
+    let saveGeneration = currentGeneration;
+    let saveRevision = currentRevision + 1;
+    if (currentGeneration === null) {
+      let generated: string;
+      try {
+        generated = this.generationFactory();
+      } catch {
+        return { ok: false, persisted: false, reason: "GENERATION_FAILED" };
+      }
+      if (!isValidSaveGeneration(generated)) return { ok: false, persisted: false, reason: "GENERATION_FAILED" };
+      saveGeneration = generated;
+      saveRevision = 0;
+    }
+    if (saveGeneration === null) return { ok: false, persisted: false, reason: "GENERATION_FAILED" };
 
     const envelope: SaveEnvelopeV1 = {
       schemaVersion: SAVE_SCHEMA_VERSION,
-      saveRevision: currentRevision + 1,
+      saveGeneration,
+      saveRevision,
       profile,
       run: projectRuntimeState(runtimeState),
     };
@@ -172,7 +211,13 @@ export class VersionedSaveStore {
     } catch {
       return { ok: false, persisted: false, reason: "WRITE_FAILED" };
     }
-    return { ok: true, persisted: true, revision: envelope.saveRevision, bytes };
+    return {
+      ok: true,
+      persisted: true,
+      generation: envelope.saveGeneration,
+      revision: envelope.saveRevision,
+      bytes,
+    };
   }
 
   reset(rawStarter: unknown): SaveResetResult {
@@ -184,23 +229,28 @@ export class VersionedSaveStore {
     } catch {
       return { ok: false, persisted: false, reason: "READ_FAILED" };
     }
-    let nextRevision = 0;
+    let currentGeneration: string | null = null;
     if (currentBytes !== null) {
       try {
         const outer = parseKnownEnvelope(JSON.parse(currentBytes) as unknown);
-        if (outer.kind === "KNOWN") {
-          if (outer.saveRevision === Number.MAX_SAFE_INTEGER) return { ok: false, persisted: false, reason: "REVISION_EXHAUSTED" };
-          nextRevision = outer.saveRevision + 1;
-        }
-      } catch {
-        nextRevision = 0;
-      }
+        if (outer.kind === "KNOWN") currentGeneration = outer.saveGeneration;
+      } catch { /* A reset may replace malformed bytes. */ }
+    }
+    let nextGeneration: string;
+    try {
+      nextGeneration = this.generationFactory();
+    } catch {
+      return { ok: false, persisted: false, reason: "GENERATION_FAILED" };
+    }
+    if (!isValidSaveGeneration(nextGeneration) || nextGeneration === currentGeneration) {
+      return { ok: false, persisted: false, reason: "GENERATION_FAILED" };
     }
     const profile = createDefaultProfile();
     const runtimeState = hydrateStarter(starter, profile, this.catalog);
     const envelope: SaveEnvelopeV1 = {
       schemaVersion: SAVE_SCHEMA_VERSION,
-      saveRevision: nextRevision,
+      saveGeneration: nextGeneration,
+      saveRevision: 0,
       profile,
       run: projectRuntimeState(runtimeState),
     };
@@ -217,7 +267,8 @@ export class VersionedSaveStore {
       value: {
         profile,
         runtimeState,
-        revision: nextRevision,
+        generation: nextGeneration,
+        revision: 0,
         source: "SAVED",
         writeBlocked: false,
         issues: [],

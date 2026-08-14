@@ -9,6 +9,7 @@ import {
 import {
   HEART_IDS,
   PROFILE_SCHEMA_VERSION,
+  SAVE_GENERATION_MAX_LENGTH,
   SAVE_SCHEMA_VERSION,
   type HeartId,
   type PersistenceCatalog,
@@ -28,18 +29,25 @@ const MATERIAL_IDS = [
   ...Array.from({ length: 6 }, (_, index) => `odd_${String(index + 1).padStart(2, "0")}`),
 ].sort();
 const MATERIAL_ID_SET = new Set(MATERIAL_IDS);
+const RECIPE_CARD_ENTRIES: Array<readonly [string, string]> = [];
+for (let left = 0; left < MATERIAL_IDS.length; left += 1) {
+  for (let right = left + 1; right < MATERIAL_IDS.length; right += 1) {
+    const recipeId = `${MATERIAL_IDS[left]}|${MATERIAL_IDS[right]}`;
+    RECIPE_CARD_ENTRIES.push([recipeId, `forge__${MATERIAL_IDS[left]}__${MATERIAL_IDS[right]}`]);
+  }
+}
+const RECIPE_CARD_MAP = new Map(RECIPE_CARD_ENTRIES);
+const FORGE_CARD_RECIPE_MAP = new Map(RECIPE_CARD_ENTRIES.map(([recipeId, cardId]) => [cardId, recipeId]));
 const HEART_ID_SET = new Set<string>(HEART_IDS);
 const MAX_RECIPE_COUNT = (MATERIAL_IDS.length * (MATERIAL_IDS.length - 1)) / 2;
 const SAFE_INSTANCE_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 const SAFE_CATALOG_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+const SAFE_SAVE_GENERATION = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 
 class SnapshotError extends Error {}
 
 export interface PersistenceCatalogSnapshot {
   sourceHash: typeof FORGE_RUNTIME_SOURCE_HASH;
-  recipeCards: ReadonlyMap<string, string>;
-  allowedRecipeIds: ReadonlySet<string>;
-  allowedCardIds: ReadonlySet<string>;
   allowedEnemyIds: ReadonlySet<string>;
   allowedIntentIds: ReadonlySet<string>;
   allowedDisplayTexts: ReadonlySet<string>;
@@ -154,7 +162,7 @@ function strictCatalogRecord(candidate: unknown): UnknownRecord {
     throw new SnapshotError();
   }
   if (prototype !== Object.prototype && prototype !== null) throw new SnapshotError();
-  const expected = ["sourceHash", "allowedRecipeCards", "allowedCardIds", "allowedEnemyIds", "allowedIntentIds", "allowedDisplayTexts"];
+  const expected = ["sourceHash", "allowedEnemyIds", "allowedIntentIds", "allowedDisplayTexts"];
   if (keys.some((key) => typeof key === "symbol") || keys.length !== expected.length || !(keys as string[]).every((key) => expected.includes(key))) throw new SnapshotError();
   const result: UnknownRecord = {};
   for (const key of keys as string[]) {
@@ -174,27 +182,14 @@ export function snapshotPersistenceCatalog(candidate: PersistenceCatalog): Persi
   try {
     const record = strictCatalogRecord(candidate);
     if (record.sourceHash !== FORGE_RUNTIME_SOURCE_HASH) throw new SnapshotError();
-    const allowedCardIds = strictCollection(record.allowedCardIds, (value) => SAFE_CATALOG_ID.test(value));
     const allowedEnemyIds = strictCollection(record.allowedEnemyIds, (value) => SAFE_CATALOG_ID.test(value));
     const allowedIntentIds = strictCollection(record.allowedIntentIds, (value) => SAFE_CATALOG_ID.test(value));
     const allowedDisplayTexts = strictCollection(
       record.allowedDisplayTexts,
       (value) => value.length > 0 && value.length <= 128 && !value.includes("@") && !/[\u0000-\u001f\u007f]/.test(value),
     );
-    const pairSnapshot = snapshotValue(record.allowedRecipeCards, new Set());
-    if (!Array.isArray(pairSnapshot) || pairSnapshot.length > MAX_RECIPE_COUNT) throw new SnapshotError();
-    const recipeCards = new Map<string, string>();
-    const cardSet = new Set(allowedCardIds);
-    for (const pair of pairSnapshot) {
-      if (!Array.isArray(pair) || pair.length !== 2 || typeof pair[0] !== "string" || typeof pair[1] !== "string") throw new SnapshotError();
-      if (!isCanonicalRecipeId(pair[0]) || !cardSet.has(pair[1]) || recipeCards.has(pair[0])) throw new SnapshotError();
-      recipeCards.set(pair[0], pair[1]);
-    }
     return {
       sourceHash: FORGE_RUNTIME_SOURCE_HASH,
-      recipeCards,
-      allowedRecipeIds: new Set(recipeCards.keys()),
-      allowedCardIds: cardSet,
       allowedEnemyIds: new Set(allowedEnemyIds),
       allowedIntentIds: new Set(allowedIntentIds),
       allowedDisplayTexts: new Set(allowedDisplayTexts),
@@ -210,11 +205,27 @@ export function isCanonicalRecipeId(value: unknown): value is string {
   return parts.length === 2 && parts[0] < parts[1] && MATERIAL_ID_SET.has(parts[0]) && MATERIAL_ID_SET.has(parts[1]);
 }
 
+export function canonicalRecipeCardEntries(): Array<readonly [recipeId: string, cardId: string]> {
+  return RECIPE_CARD_ENTRIES.map(([recipeId, cardId]) => [recipeId, cardId] as const);
+}
+
+export function canonicalCardIdForRecipe(recipeId: string): string | null {
+  return RECIPE_CARD_MAP.get(recipeId) ?? null;
+}
+
+export function canonicalRecipeIdForCard(cardId: string): string | null {
+  return FORGE_CARD_RECIPE_MAP.get(cardId) ?? null;
+}
+
+export function isValidSaveGeneration(value: unknown): value is string {
+  return typeof value === "string" && value.length <= SAVE_GENERATION_MAX_LENGTH && SAFE_SAVE_GENERATION.test(value);
+}
+
 export function createDefaultProfile(): PersistentProfileV1 {
   return { schemaVersion: PROFILE_SCHEMA_VERSION, discoveredRecipeIds: [], ownedHeartIds: [], featureFlags: { heartForge: false } };
 }
 
-export function classifyPersistentProfile(candidate: unknown, allowedRecipeIds: ReadonlySet<string>): ClassifiedDecode<PersistentProfileV1> {
+export function classifyPersistentProfile(candidate: unknown): ClassifiedDecode<PersistentProfileV1> {
   const captured = snapshot(candidate);
   if (captured === null || typeof captured !== "object" || Array.isArray(captured)) return { kind: "INVALID" };
   if (!("schemaVersion" in captured)) return { kind: "INVALID" };
@@ -222,7 +233,7 @@ export function classifyPersistentProfile(candidate: unknown, allowedRecipeIds: 
   if (!exactRecord(captured, ["schemaVersion", "discoveredRecipeIds", "ownedHeartIds", "featureFlags"])) return { kind: "INVALID" };
   const profile = captured as UnknownRecord;
   if (!Array.isArray(profile.discoveredRecipeIds) || profile.discoveredRecipeIds.length > MAX_RECIPE_COUNT) return { kind: "INVALID" };
-  if (!profile.discoveredRecipeIds.every((id: unknown) => typeof id === "string" && isCanonicalRecipeId(id) && allowedRecipeIds.has(id))
+  if (!profile.discoveredRecipeIds.every((id: unknown) => typeof id === "string" && RECIPE_CARD_MAP.has(id))
     || !isSortedUnique(profile.discoveredRecipeIds as string[])) return { kind: "INVALID" };
   if (!Array.isArray(profile.ownedHeartIds)
     || !profile.ownedHeartIds.every((id: unknown) => typeof id === "string" && HEART_ID_SET.has(id))
@@ -239,8 +250,8 @@ export function classifyPersistentProfile(candidate: unknown, allowedRecipeIds: 
   };
 }
 
-export function decodePersistentProfile(candidate: unknown, allowedRecipeIds: ReadonlySet<string>): PersistentProfileV1 | null {
-  const classified = classifyPersistentProfile(candidate, allowedRecipeIds);
+export function decodePersistentProfile(candidate: unknown): PersistentProfileV1 | null {
+  const classified = classifyPersistentProfile(candidate);
   return classified.kind === "VALID" ? classified.value : null;
 }
 
@@ -264,8 +275,11 @@ function safeInstanceId(value: string): boolean {
 
 export function runtimeReferencesAllowed(runtime: ForgeRuntimeStateV1, catalog: PersistenceCatalogSnapshot): boolean {
   if (runtime.sourceHash !== catalog.sourceHash) return false;
-  if (runtime.profile.discoveredRecipeIds.some((id) => !catalog.allowedRecipeIds.has(id))) return false;
-  if (runtime.run.ownedInstances.some((item) => !safeInstanceId(item.instanceId) || !catalog.allowedCardIds.has(item.cardId))) return false;
+  if (runtime.profile.discoveredRecipeIds.some((id) => !RECIPE_CARD_MAP.has(id))) return false;
+  const discoveries = new Set(runtime.profile.discoveredRecipeIds);
+  const cardAllowed = (cardId: string): boolean => MATERIAL_ID_SET.has(cardId)
+    || (FORGE_CARD_RECIPE_MAP.has(cardId) && discoveries.has(FORGE_CARD_RECIPE_MAP.get(cardId)!));
+  if (runtime.run.ownedInstances.some((item) => !safeInstanceId(item.instanceId) || !cardAllowed(item.cardId))) return false;
   if (runtime.run.deck.some((id) => !safeInstanceId(id))) return false;
   const active = runtime.run.activeCombat;
   if (!active) return true;
@@ -273,17 +287,16 @@ export function runtimeReferencesAllowed(runtime: ForgeRuntimeStateV1, catalog: 
   if (active.state.enemy.intents.some((intent) =>
     !catalog.allowedIntentIds.has(intent.intentId) || !catalog.allowedDisplayTexts.has(intent.labelKo),
   )) return false;
-  if (active.state.cards.some((card) => !catalog.allowedCardIds.has(card.cardId))) return false;
-  if (active.state.instances.some((item) => !safeInstanceId(item.instanceId) || !catalog.allowedCardIds.has(item.cardId))) return false;
+  if (active.state.cards.some((card) => !cardAllowed(card.cardId))) return false;
+  if (active.state.instances.some((item) => !safeInstanceId(item.instanceId) || !cardAllowed(item.cardId))) return false;
   if ([active.state.zones.deck, active.state.zones.hand, active.state.zones.discard, active.state.zones.exile]
     .some((zone) => zone.some((id) => !safeInstanceId(id)))) return false;
   if (active.enrolledPersistentInstanceIds.some((id) => !safeInstanceId(id))) return false;
-  if (active.isolatedMaterials.some((item) => !safeInstanceId(item.instance.instanceId) || !catalog.allowedCardIds.has(item.instance.cardId))) return false;
-  return active.ephemeralResults.every((item) =>
-    safeInstanceId(item.instanceId)
-    && catalog.allowedCardIds.has(item.cardId)
-    && catalog.recipeCards.get(item.recipeId) === item.cardId,
-  );
+  if (active.isolatedMaterials.some((item) => !safeInstanceId(item.instance.instanceId) || !cardAllowed(item.instance.cardId))) return false;
+  return active.ephemeralResults.every((item) => {
+    const recipeId = FORGE_CARD_RECIPE_MAP.get(item.cardId);
+    return safeInstanceId(item.instanceId) && recipeId === item.recipeId && discoveries.has(item.recipeId);
+  });
 }
 
 export function classifyRunProjection(
@@ -326,14 +339,22 @@ export function decodeRunProjection(candidate: unknown, discoveredRecipeIds: rea
 }
 
 export function parseKnownEnvelope(candidate: unknown):
-  | { kind: "KNOWN"; saveRevision: number; profile: unknown; run: unknown }
+  | { kind: "KNOWN"; saveGeneration: string; saveRevision: number; profile: unknown; run: unknown }
   | { kind: "UNSUPPORTED" }
   | { kind: "INVALID" } {
   const captured = snapshot(candidate);
   if (captured === null || typeof captured !== "object" || Array.isArray(captured)) return { kind: "INVALID" };
   if ((captured as UnknownRecord).schemaVersion !== SAVE_SCHEMA_VERSION) return "schemaVersion" in captured ? { kind: "UNSUPPORTED" } : { kind: "INVALID" };
-  if (!exactRecord(captured, ["schemaVersion", "saveRevision", "profile", "run"]) || !isSafeRevision(captured.saveRevision)) return { kind: "INVALID" };
-  return { kind: "KNOWN", saveRevision: captured.saveRevision, profile: captured.profile, run: captured.run };
+  if (!exactRecord(captured, ["schemaVersion", "saveGeneration", "saveRevision", "profile", "run"])
+    || !isValidSaveGeneration(captured.saveGeneration)
+    || !isSafeRevision(captured.saveRevision)) return { kind: "INVALID" };
+  return {
+    kind: "KNOWN",
+    saveGeneration: captured.saveGeneration,
+    saveRevision: captured.saveRevision,
+    profile: captured.profile,
+    run: captured.run,
+  };
 }
 
 export function serializeSaveEnvelope(envelope: SaveEnvelopeV1): string {

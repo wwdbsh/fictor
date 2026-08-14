@@ -6,6 +6,7 @@ import {
 export const FICTOR_SAVE_KEY = "fictor.save.v1" as const;
 export const SAVE_SCHEMA_VERSION = 1 as const;
 export const PROFILE_SCHEMA_VERSION = 1 as const;
+export const SAVE_GENERATION_MAX_LENGTH = 128 as const;
 
 export const HEART_IDS = [
   "heart__still",
@@ -26,8 +27,6 @@ export interface StorageLike {
 
 export interface PersistenceCatalog {
   sourceHash: typeof FORGE_RUNTIME_SOURCE_HASH;
-  allowedRecipeCards: readonly (readonly [recipeId: string, cardId: string])[];
-  allowedCardIds: readonly string[] | ReadonlySet<string>;
   allowedEnemyIds: readonly string[] | ReadonlySet<string>;
   allowedIntentIds: readonly string[] | ReadonlySet<string>;
   allowedDisplayTexts: readonly string[] | ReadonlySet<string>;
@@ -53,6 +52,7 @@ export interface RunProjectionV1 {
 
 export interface SaveEnvelopeV1 {
   schemaVersion: typeof SAVE_SCHEMA_VERSION;
+  saveGeneration: string;
   saveRevision: number;
   profile: PersistentProfileV1;
   run: RunProjectionV1;
@@ -69,6 +69,7 @@ export type SaveLoadIssue =
 export interface SaveLoadResult {
   profile: PersistentProfileV1;
   runtimeState: ForgeRuntimeStateV1;
+  generation: string | null;
   revision: number;
   source: "EMPTY" | "SAVED" | "RECOVERED" | "SAFE_INITIALIZED";
   writeBlocked: boolean;
@@ -83,12 +84,15 @@ export type SaveFailureCode =
   | "WRITE_FAILED"
   | "WRITE_BLOCKED"
   | "STALE_WRITE"
-  | "REVISION_EXHAUSTED";
+  | "REVISION_EXHAUSTED"
+  | "GENERATION_FAILED";
 
 export type SaveWriteResult =
-  | { ok: true; persisted: true; revision: number; bytes: string }
+  | { ok: true; persisted: true; generation: string; revision: number; bytes: string }
   | { ok: false; persisted: false; reason: SaveFailureCode };
 
 export type SaveResetResult =
   | { ok: true; persisted: true; value: SaveLoadResult; bytes: string }
-  | { ok: false; persisted: false; reason: "INVALID_RUNTIME" | "READ_FAILED" | "WRITE_FAILED" | "REVISION_EXHAUSTED" };
+  | { ok: false; persisted: false; reason: "INVALID_RUNTIME" | "READ_FAILED" | "WRITE_FAILED" | "GENERATION_FAILED" };
+
+export type SaveGenerationFactory = () => string;

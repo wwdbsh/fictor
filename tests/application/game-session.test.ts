@@ -86,8 +86,6 @@ function context(): ForgeResolverContextV1 {
 function catalog(): PersistenceCatalog {
   return {
     sourceHash: FORGE_RUNTIME_SOURCE_HASH,
-    allowedRecipeCards: [[RECIPE, RESULT_CARD]],
-    allowedCardIds: [FIRST_CARD, SECOND_CARD, RESULT_CARD],
     allowedEnemyIds: ["enemy_fixture"],
     allowedIntentIds: ["intent_attack", "intent_attack_2"],
     allowedDisplayTexts: ["내리치기"],
@@ -95,7 +93,8 @@ function catalog(): PersistenceCatalog {
 }
 
 function storeFor(storage: MemoryStorage): VersionedSaveStore {
-  return new VersionedSaveStore(storage, catalog());
+  let sequence = 0;
+  return new VersionedSaveStore(storage, catalog(), () => `generation-${sequence += 1}`);
 }
 
 function workshopStarter(fuel = 4): ForgeRuntimeStateV1 {
@@ -177,7 +176,7 @@ describe("game session", () => {
     const staleSession = loadGameSession(store, workshopStarter());
     const currentSession = loadGameSession(store, workshopStarter());
     const reset = startNewRun(store, currentSession, workshopStarter(9));
-    expect(reset.persistence).toMatchObject({ ok: true, revision: 1 });
+    expect(reset.persistence).toMatchObject({ ok: true, generation: "generation-1", revision: 0 });
 
     const stale = executeForgeRuntimeCommand(
       store,

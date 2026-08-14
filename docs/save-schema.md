@@ -16,7 +16,8 @@
 ```ts
 interface SaveEnvelopeV1 {
   schemaVersion: 1;
-  saveRevision: number; // 저장 계보용 safe integer. ForgeRuntime revision과 별개다.
+  saveGeneration: string; // 재사용하지 않는 1~128자 bounded ASCII 저장 계보 토큰
+  saveRevision: number;   // generation 내부 safe integer. ForgeRuntime revision과 별개다.
   profile: {
     schemaVersion: 1;
     discoveredRecipeIds: string[];
@@ -41,18 +42,19 @@ interface SaveEnvelopeV1 {
 
 레시피와 심장 배열은 정렬된 고유 집합이다. 레시피는 `lowMaterialId|highMaterialId` 형식이며 최대 1,326개다. 심장은 획득 기록만 제공하고 소비나 심장 빚기 명령은 없다. `heartForge`는 반드시 literal `false`이며 누락이나 `true`는 알려진 v1 profile의 손상이다.
 
-## 주입 카탈로그와 문자열 경계
+## 내부 canonical 권한과 주입 encounter 카탈로그
 
-저장 어댑터 생성 시 다음 검토 카탈로그를 주입한다.
+recipe/card 권한은 호출자가 주입하지 않는다. persistence가 pinned `FORGE_RUNTIME_SOURCE_HASH` 아래에서 다음을 결정론적으로 파생한다.
 
-- 공식 ForgeRuntime `sourceHash`
-- `recipeId → canonical result cardId` 쌍
-- 허용된 card, enemy, intent ID 집합
-- 허용된 전투 표시 문자열의 정확한 집합
+- 명세의 정확한 52개 material ID
+- 52C2의 정렬된 1,326개 `low|high` recipe ID
+- 각 recipe에 유일한 `forge__${low}__${high}` card ID
 
-카탈로그는 생성 즉시 descriptor 기반으로 복제하고 공식 source hash에 묶는다. 반사 오류의 원문은 외부로 노출하지 않고 일반 `TypeError`만 발생시킨다. production 런타임은 source/generated 데이터 파일을 import하지 않는다.
+material card만 발견 없이 저장할 수 있다. 소유 카드, 전투 card definition/instance, 격리 재료, 즉석 결과에 forge card가 있으면 그 카드에서 역산한 canonical recipe가 영구 profile의 `discoveredRecipeIds`에 반드시 있어야 한다. 즉석 결과의 `recipeId`도 카드에서 역산한 recipe와 정확히 같아야 한다. 따라서 공방 결과를 발견 기록 없이 영구 덱에 넣거나 recipe/card를 잘못 짝짓는 것은 불가능하다. material도 canonical forge card도 아닌 card ID는 거부한다.
 
-저장되는 모든 instance ID는 1~128자의 ASCII 영숫자로 시작하고 이후 영숫자, `_`, `-`만 허용한다. `@`는 허용되지 않는다. 소유 카드, 전투 카드/인스턴스, 덱과 zone, 격리 재료, 즉석 결과를 모두 검사한다. enemy/intent ID와 `labelKo`는 각각 주입 집합에 정확히 있어야 한다. 즉석 결과의 `recipeId`와 `cardId`는 독립 집합 확인이 아니라 주입된 정확한 recipe-card 쌍과 일치해야 한다. 따라서 이메일 형태 instance/label, 미검토 텍스트와 ID, 잘못 짝지은 recipe/card는 저장되지 않는다.
+호출자는 공식 source hash와 encounter별 enemy ID, intent ID, 표시 문자열 allowlist만 주입한다. 이 카탈로그는 생성 즉시 descriptor 기반으로 복제하고 공식 source hash에 묶는다. 반사 오류 원문은 노출하지 않고 일반 `TypeError`만 발생시킨다. production 런타임은 source/generated 데이터 파일을 import하지 않는다.
+
+저장되는 모든 instance ID는 1~128자의 ASCII 영숫자로 시작하고 이후 영숫자, `_`, `-`만 허용한다. `@`는 허용되지 않는다. 소유 카드, 전투 카드/인스턴스, 덱과 zone, 격리 재료, 즉석 결과를 모두 검사한다. enemy/intent ID와 `labelKo`는 각각 주입 집합에 정확히 있어야 한다. 따라서 이메일 형태 instance/label과 미검토 encounter 문자열은 저장되지 않는다.
 
 ## VALID, INVALID, UNSUPPORTED
 
@@ -64,14 +66,16 @@ interface SaveEnvelopeV1 {
 
 버전 필드가 누락되거나 현재 버전 내부 값이 malformed인 경우는 UNSUPPORTED가 아니라 INVALID다. 과거/미래 버전 자동 마이그레이션은 없으며 이 프로젝트 이전에는 legacy 저장 스키마가 없다.
 
-잘못된 JSON, `null`, 배열, 외곽 키나 revision 손상도 기본 profile/starter로 안전 초기화한다. 해석할 수 없거나 UNSUPPORTED인 원본 바이트는 그대로 보존한다. 오직 명시적인 `reset(starter)`만 새 v1 envelope로 교체할 수 있다.
+잘못된 JSON, `null`, 배열, 외곽 키, generation 또는 revision 손상도 기본 profile/starter로 안전 초기화한다. 이때 load 결과의 generation은 `null`이다. 해석할 수 없거나 UNSUPPORTED인 원본 바이트는 그대로 보존한다. 오직 명시적인 `reset(starter)`만 새 v1 envelope로 교체할 수 있다.
 
 ## 실패, 동시성, reset
 
 `getItem`과 `setItem` 예외는 외부로 던지지 않고 내용 없는 `READ_FAILED`, `WRITE_FAILED` 코드로 반환한다. quota 실패를 포함해 저장 실패 시 성공한 게임 전이의 메모리 상태는 유지하지만 `persisted: false`이며 저장되었다고 표시하지 않는다.
 
-저장 직전에 현재 envelope의 `saveRevision`을 다시 읽고 호출자가 로드한 revision과 다르면 `STALE_WRITE`다. 이는 단일 탭 중심 best-effort 충돌 탐지이며 `localStorage`에는 완전한 compare-and-swap이 없으므로 다중 탭 쓰기를 완전히 직렬화하지 않는다.
+저장 직전에 현재 envelope의 `(saveGeneration, saveRevision)`을 다시 읽고 호출자가 로드한 두 값과 하나라도 다르면 `STALE_WRITE`다. 빈 저장소에서 load한 세션은 `(null, 0)`을 갖는다. 첫 save는 generation factory로 새 generation을 발급하고 revision 0에서 시작한다. 따라서 같은 빈 상태를 보았던 다른 세션은 숫자 revision이 같더라도 stale이다. 이후 같은 generation의 save만 revision을 1씩 증가시킨다.
 
-reset도 현재 바이트를 먼저 읽는다. 알려진 outer envelope이면 현재 `saveRevision + 1`을 사용하므로 reset 전 세션이 같은 숫자로 되살아나는 ABA를 막는다. safe integer 최댓값에서는 `REVISION_EXHAUSTED`, 읽기 실패에서는 `READ_FAILED`로 reset을 거부한다. 외곽이 손상됐거나 지원하지 않는 버전은 그 상태에서 로드한 세션 자체가 write-blocked이므로 명시적 reset이 새 revision 계보를 0에서 만들 수 있다.
+모든 명시적 reset은 현재 바이트의 종류와 무관하게 새 generation을 발급하고 revision 0에서 시작한다. 따라서 기존 정상 envelope뿐 아니라 빈 저장소, 잘못된 JSON, 지원하지 않는 outer 버전에서 reset 전에 열린 세션도 reset 이후 save하면 `STALE_WRITE`다. reset은 먼저 storage를 읽으며 읽기 실패는 `READ_FAILED`다. generation factory가 예외를 던지거나 1~128자 ASCII ID 규칙을 어기거나 현재 generation을 재사용하면 `GENERATION_FAILED`다.
+
+`VersionedSaveStore`는 테스트에서 결정론적 sequence factory를 주입할 수 있다. 기본 browser factory는 `crypto.randomUUID()`를 사용한다. factory는 호출마다 재사용되지 않는 값을 반환해야 한다.
 
 게임 진행 롤백이나 public remove API는 제공하지 않는다. reset은 도감, 심장, 런을 모두 초기화하는 복구 불가능한 교체이므로 UI에서 별도 확인이 필요하다. payload에는 자유 텍스트, 이름, 이메일, 토큰, 기기 식별자 등 PII를 넣지 않는다.

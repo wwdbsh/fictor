@@ -1,14 +1,22 @@
 import { describe, expect, it } from "vitest";
 
+import canonicalGenerated from "../../src/data/generated/cards.generated.json";
+import { generateCatalogPayloads } from "../../src/data/generator/generate-catalog";
+import lawsSource from "../../src/data/source/laws.json";
+import materialsSource from "../../src/data/source/materials.json";
+import resultClassesSource from "../../src/data/source/resultClasses.json";
 import {
   createCombatState,
   FORGE_RUNTIME_ENGINE_VERSION,
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
   FORGE_RUNTIME_SOURCE_HASH,
+  type ForgeInputs,
+  type ForgeMaterial,
   type ForgeRuntimeStateV1,
 } from "../../src/domain";
 import {
+  canonicalRecipeCardEntries,
   FICTOR_SAVE_KEY,
   VersionedSaveStore,
   classifyPersistentProfile,
@@ -41,12 +49,19 @@ const RESULT_CARD = "forge__ore_burn__ore_still";
 function catalog(): PersistenceCatalog {
   return {
     sourceHash: FORGE_RUNTIME_SOURCE_HASH,
-    allowedRecipeCards: [[RECIPE, RESULT_CARD]],
-    allowedCardIds: ["ore_burn", "ore_still", "burn_01", RESULT_CARD],
     allowedEnemyIds: ["enemy_fixture"],
     allowedIntentIds: ["intent_attack", "intent_attack_2"],
     allowedDisplayTexts: ["내리치기"],
   };
+}
+
+function generationSequence(...values: string[]) {
+  let index = 0;
+  return () => values[index++] ?? `generation-${index}`;
+}
+
+function createStore(storage: MemoryStorage, factory = generationSequence("generation-1", "generation-2", "generation-3")) {
+  return new VersionedSaveStore(storage, catalog(), factory);
 }
 
 function starter(active = false): ForgeRuntimeStateV1 {
@@ -87,16 +102,31 @@ function starter(active = false): ForgeRuntimeStateV1 {
 
 function savedFixture() {
   const storage = new MemoryStorage();
-  const store = new VersionedSaveStore(storage, catalog());
+  const store = createStore(storage);
   const profile = { ...createDefaultProfile(), discoveredRecipeIds: [RECIPE], ownedHeartIds: ["heart__still" as const] };
   const runtime = starter();
   runtime.profile.discoveredRecipeIds = [RECIPE];
   runtime.run.fuel = 1;
-  expect(store.save(profile, runtime, 0)).toMatchObject({ ok: true, revision: 1 });
+  expect(store.save(profile, runtime, null, 0)).toMatchObject({ ok: true, generation: "generation-1", revision: 0 });
   return { storage, store, profile, runtime };
 }
 
 describe("VersionedSaveStore", () => {
+  it("derives all 1,326 recipe-card pairs exactly from canonical source and generator output", () => {
+    const authority = canonicalRecipeCardEntries();
+    const generated = generateCatalogPayloads(
+      materialsSource as unknown as ForgeMaterial[],
+      { laws: lawsSource, resultClasses: resultClassesSource } as unknown as ForgeInputs,
+    ).cards;
+    expect(authority).toHaveLength(1326);
+    expect(new Set(authority.map(([recipeId]) => recipeId)).size).toBe(1326);
+    expect(new Set(authority.map(([, cardId]) => cardId)).size).toBe(1326);
+    expect(authority).toEqual(generated.map(({ recipe_id, card_id }) => [recipe_id, card_id]));
+    expect(authority).toEqual(canonicalGenerated.items.map(({ recipe_id, card_id }) => [recipe_id, card_id]));
+    const materialIds = new Set(authority.flatMap(([recipeId]) => recipeId.split("|")));
+    expect([...materialIds].sort()).toEqual(materialsSource.map(({ id }) => id).sort());
+  });
+
   it("round-trips deterministic detached bytes without runtime.profile", () => {
     const { storage, store, profile, runtime } = savedFixture();
     const bytes = storage.getItem(FICTOR_SAVE_KEY)!;
@@ -106,7 +136,7 @@ describe("VersionedSaveStore", () => {
     profile.discoveredRecipeIds.length = 0;
     runtime.run.fuel = 99;
     const loaded = store.load(starter());
-    expect(loaded).toMatchObject({ source: "SAVED", revision: 1, writeBlocked: false, issues: [] });
+    expect(loaded).toMatchObject({ source: "SAVED", generation: "generation-1", revision: 0, writeBlocked: false, issues: [] });
     expect(loaded.profile.discoveredRecipeIds).toEqual([RECIPE]);
     expect(loaded.runtimeState.profile.discoveredRecipeIds).toEqual([RECIPE]);
     expect(loaded.runtimeState.run.fuel).toBe(1);
@@ -121,7 +151,7 @@ describe("VersionedSaveStore", () => {
     expect(runOnly).toMatchObject({ source: "RECOVERED", issues: ["INVALID_PROFILE"], writeBlocked: false });
     expect(runOnly.profile).toEqual(createDefaultProfile());
     expect(runOnly.runtimeState.run.fuel).toBe(1);
-    expect(profileFixture.store.save(runOnly.profile, runOnly.runtimeState, runOnly.revision)).toMatchObject({ ok: true, revision: 2 });
+    expect(profileFixture.store.save(runOnly.profile, runOnly.runtimeState, runOnly.generation, runOnly.revision)).toMatchObject({ ok: true, revision: 1 });
 
     const runFixture = savedFixture();
     const badRun = JSON.parse(runFixture.storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
@@ -143,7 +173,7 @@ describe("VersionedSaveStore", () => {
     expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", issues: ["UNSUPPORTED_VERSION"], writeBlocked: true });
     expect(loaded.profile).toEqual(createDefaultProfile());
     expect(loaded.runtimeState.run).toEqual(starter().run);
-    expect(store.save(loaded.profile, loaded.runtimeState, loaded.revision)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
+    expect(store.save(loaded.profile, loaded.runtimeState, loaded.generation, loaded.revision)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
     expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
   });
 
@@ -160,7 +190,7 @@ describe("VersionedSaveStore", () => {
     storage.setItem(FICTOR_SAVE_KEY, bytes);
     const loaded = store.load(starter());
     expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", issues: ["UNSUPPORTED_VERSION"], writeBlocked: true });
-    expect(store.save(loaded.profile, loaded.runtimeState, loaded.revision)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
+    expect(store.save(loaded.profile, loaded.runtimeState, loaded.generation, loaded.revision)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
     expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
   });
 
@@ -169,55 +199,87 @@ describe("VersionedSaveStore", () => {
     (_label, bytes) => {
       const storage = new MemoryStorage();
       storage.setItem(FICTOR_SAVE_KEY, bytes);
-      const store = new VersionedSaveStore(storage, catalog());
+      const store = createStore(storage);
       const loaded = store.load(starter());
       expect(loaded).toMatchObject({ source: "SAFE_INITIALIZED", writeBlocked: true });
-      expect(store.save(loaded.profile, loaded.runtimeState, 0)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
+      expect(store.save(loaded.profile, loaded.runtimeState, loaded.generation, 0)).toMatchObject({ ok: false, reason: "WRITE_BLOCKED" });
       expect(storage.getItem(FICTOR_SAVE_KEY)).toBe(bytes);
     },
   );
 
-  it("increments a known revision on reset and rejects a pre-reset stale session", () => {
+  it("replaces a known generation on reset and rejects a pre-reset stale session", () => {
     const storage = new MemoryStorage();
-    const first = new VersionedSaveStore(storage, catalog());
-    const second = new VersionedSaveStore(storage, catalog());
+    const factory = generationSequence("generation-first", "generation-reset");
+    const first = createStore(storage, factory);
+    const second = createStore(storage, factory);
     const before = first.load(starter());
-    expect(first.save(before.profile, before.runtimeState, 0)).toMatchObject({ ok: true, revision: 1 });
+    expect(first.save(before.profile, before.runtimeState, before.generation, 0)).toMatchObject({ ok: true, generation: "generation-first", revision: 0 });
     const stale = second.load(starter());
     const reset = first.reset(starter());
-    expect(reset).toMatchObject({ ok: true, value: { revision: 2 } });
-    expect(second.save(stale.profile, stale.runtimeState, stale.revision)).toEqual({ ok: false, persisted: false, reason: "STALE_WRITE" });
+    expect(reset).toMatchObject({ ok: true, value: { generation: "generation-reset", revision: 0 } });
+    expect(second.save(stale.profile, stale.runtimeState, stale.generation, stale.revision)).toEqual({ ok: false, persisted: false, reason: "STALE_WRITE" });
+  });
+
+  it.each([
+    ["empty", null],
+    ["invalid JSON", "{"],
+    ["unsupported outer", JSON.stringify({ schemaVersion: 9, opaque: true })],
+  ])("a fresh reset generation makes a pre-reset %s session stale", (_label, initialBytes) => {
+    const storage = new MemoryStorage();
+    if (initialBytes !== null) storage.setItem(FICTOR_SAVE_KEY, initialBytes);
+    const store = createStore(storage, generationSequence("reset-generation"));
+    const stale = store.load(starter());
+    expect(stale.generation).toBeNull();
+    expect(store.reset(starter())).toMatchObject({ ok: true, value: { generation: "reset-generation", revision: 0 } });
+    expect(store.save(stale.profile, stale.runtimeState, stale.generation, stale.revision)).toEqual({
+      ok: false,
+      persisted: false,
+      reason: "STALE_WRITE",
+    });
+  });
+
+  it("a first save from empty mints identity and rejects another empty session", () => {
+    const storage = new MemoryStorage();
+    const store = createStore(storage, generationSequence("first-generation"));
+    const first = store.load(starter());
+    const stale = store.load(starter());
+    expect(store.save(first.profile, first.runtimeState, first.generation, first.revision)).toMatchObject({
+      ok: true,
+      generation: "first-generation",
+      revision: 0,
+    });
+    expect(store.save(stale.profile, stale.runtimeState, stale.generation, stale.revision)).toEqual({
+      ok: false,
+      persisted: false,
+      reason: "STALE_WRITE",
+    });
   });
 
   it("lets explicit reset replace unsupported bytes with a fresh token", () => {
     const storage = new MemoryStorage();
     storage.setItem(FICTOR_SAVE_KEY, JSON.stringify({ schemaVersion: 9, opaque: true }));
-    const store = new VersionedSaveStore(storage, catalog());
+    const store = createStore(storage);
     expect(store.load(starter()).writeBlocked).toBe(true);
-    expect(store.reset(starter())).toMatchObject({ ok: true, value: { revision: 0, writeBlocked: false } });
+    expect(store.reset(starter())).toMatchObject({ ok: true, value: { generation: "generation-1", revision: 0, writeBlocked: false } });
   });
 
-  it("returns typed reset read/write/max failures", () => {
+  it("returns typed reset read/write/generation failures", () => {
     const storage = new MemoryStorage();
-    const store = new VersionedSaveStore(storage, catalog());
+    const store = createStore(storage);
     storage.failGet = true;
     expect(store.reset(starter())).toEqual({ ok: false, persisted: false, reason: "READ_FAILED" });
     storage.failGet = false;
-    expect(store.save(createDefaultProfile(), starter(), 0)).toMatchObject({ ok: true });
-    const max = JSON.parse(storage.getItem(FICTOR_SAVE_KEY)!) as SaveEnvelopeV1;
-    max.saveRevision = Number.MAX_SAFE_INTEGER;
-    storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(max));
-    expect(store.reset(starter())).toEqual({ ok: false, persisted: false, reason: "REVISION_EXHAUSTED" });
-    max.saveRevision = 4;
-    storage.setItem(FICTOR_SAVE_KEY, JSON.stringify(max));
+    expect(store.save(createDefaultProfile(), starter(), null, 0)).toMatchObject({ ok: true });
     storage.failSet = true;
     expect(store.reset(starter())).toEqual({ ok: false, persisted: false, reason: "WRITE_FAILED" });
+    storage.failSet = false;
+    const duplicate = createStore(storage, () => "generation-1");
+    expect(duplicate.reset(starter())).toEqual({ ok: false, persisted: false, reason: "GENERATION_FAILED" });
   });
 
   it("takes one strict profile snapshot and rejects accessors, symbols, sparse arrays, prototypes, and traps", () => {
-    const allowed = new Set([RECIPE]);
     const base = { ...createDefaultProfile(), discoveredRecipeIds: [RECIPE] };
-    expect(decodePersistentProfile(base, allowed)).not.toBeNull();
+    expect(decodePersistentProfile(base)).not.toBeNull();
     const accessor = { ...base } as Record<string, unknown>;
     Object.defineProperty(accessor, "schemaVersion", { enumerable: true, get: () => 1 });
     const symbol = { ...base, [Symbol("hidden")]: true };
@@ -225,7 +287,7 @@ describe("VersionedSaveStore", () => {
     const inherited = Object.assign(Object.create({ inherited: true }), base);
     const trapped = new Proxy(base, { ownKeys() { throw new Error("secret trap"); } });
     for (const candidate of [accessor, symbol, sparse, inherited, trapped]) {
-      expect(classifyPersistentProfile(candidate, allowed)).toEqual({ kind: "INVALID" });
+      expect(classifyPersistentProfile(candidate)).toEqual({ kind: "INVALID" });
     }
     let reads = 0;
     const proxied = new Proxy(base, {
@@ -234,13 +296,13 @@ describe("VersionedSaveStore", () => {
         return Reflect.getOwnPropertyDescriptor(target, key);
       },
     });
-    expect(classifyPersistentProfile(proxied, allowed).kind).toBe("VALID");
+    expect(classifyPersistentProfile(proxied).kind).toBe("VALID");
     expect(reads).toBe(1);
   });
 
   it("rejects PII-like and unreviewed runtime refs plus wrong recipe-card pairs", () => {
     const storage = new MemoryStorage();
-    const store = new VersionedSaveStore(storage, catalog());
+    const store = createStore(storage);
     const mutations: Array<(state: ForgeRuntimeStateV1) => void> = [
       (state) => {
         state.run.ownedInstances[0].instanceId = "person@example.com";
@@ -259,15 +321,31 @@ describe("VersionedSaveStore", () => {
     for (const mutate of mutations) {
       const state = starter(true);
       mutate(state);
-      expect(store.save(createDefaultProfile(), state, 0)).toEqual({ ok: false, persisted: false, reason: "INVALID_RUNTIME" });
+      expect(store.save(createDefaultProfile(), state, null, 0)).toEqual({ ok: false, persisted: false, reason: "INVALID_RUNTIME" });
     }
+  });
+
+  it("rejects a permanent workshop result until its canonical recipe is discovered", () => {
+    const storage = new MemoryStorage();
+    const store = createStore(storage);
+    const state = starter();
+    state.run.ownedInstances = [{ instanceId: "workshop-result", cardId: RESULT_CARD }];
+    state.run.deck = ["workshop-result"];
+    expect(store.save(createDefaultProfile(), state, null, 0)).toEqual({
+      ok: false,
+      persisted: false,
+      reason: "INVALID_RUNTIME",
+    });
+    state.profile.discoveredRecipeIds = [RECIPE];
+    const profile = { ...createDefaultProfile(), discoveredRecipeIds: [RECIPE] };
+    expect(store.save(profile, state, null, 0)).toMatchObject({ ok: true, generation: "generation-1", revision: 0 });
   });
 
   it("snapshots a source-bound catalog and masks reflection trap details", () => {
     const storage = new MemoryStorage();
     const input = catalog();
-    const store = new VersionedSaveStore(storage, input);
-    (input.allowedCardIds as string[])[0] = "mutated";
+    const store = new VersionedSaveStore(storage, input, generationSequence("generation-1"));
+    (input.allowedEnemyIds as string[])[0] = "mutated";
     expect(store.load(starter()).source).toBe("EMPTY");
     const wrongSource = { ...catalog(), sourceHash: "f".repeat(64) } as PersistenceCatalog;
     expect(() => new VersionedSaveStore(storage, wrongSource)).toThrowError(new TypeError("invalid persistence catalog"));
