@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t016-canonical-cards-approval-v1",
+  "secret_free": true,
+  "decision": "APPROVE_T016_CANONICAL_COVERAGE_EXACTLY_160_ASSETS_240_00_CREDIT_CAP",
+  "source": "controller approval attestation",
+  "exact_user_quote": "T016 canonical 선별 카드 160장 생성을 승인한다. 한도 240.00 크레딧.",
+  "approved_at": "2026-08-14T02:54:52.000Z",
+  "disclosed_at": "2026-08-14T02:41:50.000Z",
+  "plan_sha256": "e3925eb033eb852ac8f1e7f8765991ae749a9c508c8aee48601d58bd4a61044e",
+  "disclosure_presentation_evidence_sha256": "98c537badfff4b1cc365bad5eb98009ea3da7e14f8376d1d73de32347708e380",
+  "risk_disclosure_evidence_sha256": "4e94032401eaf3eb8bd0becaeaff84e82d90628b9b058459ae5b61e64ea91dbf",
+  "risk_disclosure_text_sha256": "b7fe6d5b19fcc4e43efcb9cbdc06187733856a52d6233ff7105498932c5d1ade",
+  "provider_schema_evidence_sha256": "d1907861c91d57a2357ba9a39a02e25ebf246073bc20e5024ae2a892b3196a36",
+  "forensics_evidence_sha256": "7728e83cb71c87696a02e6c77d31e179f6baa0f2de84a2ee843c815ac2b6e1b7",
+  "controller_disclosure_attestation_sha256": "5509a9135845c17acb0819c290496773ec5c088df4c2e6531b85b0ccac6cadce",
+  "controller_approval_attestation_path": "assets/evidence/t016-canonical-cards-controller-approval-attestation-v1.json",
+  "controller_approval_attestation_sha256": "94b177ba532198b78cdf82e08ec557be7ad8497a8a8fc0e922fdb96346d58408",
+  "implementation_binding_sha256": "2489ab80ff53d58e7958804dd6af7f751879772bb3d92e282b89497e46a9daa8",
+  "implementation_files": {
+    "controller": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-controller.ts",
+      "sha256": "baa725bc7af0be007b5c8b11d139f37a2d86c95d53b572478eea81acc36a8e24"
+    },
+    "preparation": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-cli.ts",
+      "sha256": "5f1556b12a9985313a887ab453f37d33d42c188cd92187f936d75dea4ebd55a3"
+    },
+    "production": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-ops.ts",
+      "sha256": "3cb40c920cb6a71e2fb8463032ebc9c611608b776e24c0ed34fbca6adfcf7504"
+    },
+    "contract": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1.ts",
+      "sha256": "bc7696a14c3e07d89de676eab46d70acc8bf94cf701e5d381f97a5f95af981e0"
+    },
+    "selection": {
+      "path": "scripts/assets/t016-canonical-selection-v1.ts",
+      "sha256": "c74716573fc978e88b3ce6cc94e245d2e21eb34359f8d4e3ac35cd51004010b0"
+    },
+    "provider_transport": {
+      "path": "scripts/assets/provider-transport.ts",
+      "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+    },
+    "t020_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "t020_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  },
+  "core_plan_sha256": "54e3af3f68d53b17ba360e92050c361f87cb5bbc676899a0c671a95117fd3c0f",
+  "balance_disclosure": {
+    "balance_observation_present": true,
+    "observed_balance_decimal": "243.90",
+    "observed_balance_units": 24390,
+    "provider_observed_at": "2026-08-14T02:41:41.000Z",
+    "total_credit_cap_decimal": "240.00",
+    "projected_remainder_decimal": "3.90",
+    "covers_total_cap": true,
+    "remaining_plan_after_t016_decimal": "0.00",
+    "headroom_after_t016_decimal": "3.90",
+    "covers_remaining_plan": true,
+    "balance_disclosure_incomplete": false
+  },
+  "scope": {
+    "task_key": "T016",
+    "category": "CANONICAL",
+    "asset_count": 160,
+    "aspect_ratio": "3:4",
+    "selection_kind": "COVERAGE_NOT_FREQUENCY",
+    "selection_artifact_path": "assets/manifests/t016-canonical-selection-v1.json",
+    "selection_list_sha256": "d161c90456757ca5f00957b563fd80ace2b3e9a19a0fa5d03e61675e37d264f0",
+    "candidate_pool": 994,
+    "total_canonical": 1326,
+    "t015_already_made": 332,
+    "frequency_score_available": false,
+    "is_final_paid_task": true,
+    "batch_count": 14,
+    "batch_sizes": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      4
+    ],
+    "batch_max": 12,
+    "aspect_homogeneous_batches": true,
+    "unit_cost_decimal": "1.50",
+    "unit_cost_units": 150,
+    "total_credit_cap_decimal": "240.00",
+    "total_credit_cap_units": 24000,
+    "legacy_committed_units": 0,
+    "automatic_paid_retry_reserve_decimal": "0.00",
+    "automatic_paid_retry_count": 0,
+    "max_batch_exposure_decimal": "18.00",
+    "ambiguous_submission_windows": 14,
+    "aspect_tolerance_ppm_3_4": 5000,
+    "aspect_3_4_provider_validated": true,
+    "declared_aspects": [
+      "3:4"
+    ],
+    "balance_at_disclosure_decimal": "243.90",
+    "remaining_plan_after_t016_decimal": "0.00",
+    "remaining_plan_breakdown": [],
+    "headroom_after_t016_decimal": "3.90",
+    "a_single_lost_batch_breaks_the_remaining_plan": true,
+    "model_canary_applies_to_every_batch": true,
+    "contract_drift_blocks_all_later_batches": true,
+    "credit_expiry_date": "2026-08-17",
+    "credit_expiry_hour_known": false,
+    "unmade_generation_allowed": false,
+    "style_redecision_allowed": false,
+    "other_categories_allowed": false,
+    "prior_task_approval_inherited": false
+  },
+  "prior_task_approval_inherited": false,
+  "acknowledges_prior_approvals_not_inherited": true,
+  "committed_clean_runtime_binding_required": true,
+  "automatic_paid_retry_count": 0
+}

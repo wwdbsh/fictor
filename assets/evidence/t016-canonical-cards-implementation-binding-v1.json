@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "manifest_version": "t016-canonical-cards-implementation-binding-v1",
+  "issue_number": 18,
+  "issue_contract_sha256": "ecdba1e3f0a94c7b25d8e61f3ab07c9d4e82f5163b0da97e4c1852f6bd390a7e",
+  "files": {
+    "controller": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-controller.ts",
+      "sha256": "baa725bc7af0be007b5c8b11d139f37a2d86c95d53b572478eea81acc36a8e24"
+    },
+    "preparation": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-cli.ts",
+      "sha256": "5f1556b12a9985313a887ab453f37d33d42c188cd92187f936d75dea4ebd55a3"
+    },
+    "production": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1-ops.ts",
+      "sha256": "3cb40c920cb6a71e2fb8463032ebc9c611608b776e24c0ed34fbca6adfcf7504"
+    },
+    "contract": {
+      "path": "scripts/assets/t016-canonical-cards-production-v1.ts",
+      "sha256": "bc7696a14c3e07d89de676eab46d70acc8bf94cf701e5d381f97a5f95af981e0"
+    },
+    "selection": {
+      "path": "scripts/assets/t016-canonical-selection-v1.ts",
+      "sha256": "c74716573fc978e88b3ce6cc94e245d2e21eb34359f8d4e3ac35cd51004010b0"
+    },
+    "provider_transport": {
+      "path": "scripts/assets/provider-transport.ts",
+      "sha256": "55b857932a1a41a85a1e219e772eed1bd2b804a4bdb6798101dbac79c6cc5c78"
+    },
+    "t020_contract": {
+      "path": "scripts/assets/t020-world-art-production-v1.ts",
+      "sha256": "8fe2a175fa77a691320500a1874cd7381029fd378067d1f04012344d64a3a8a7"
+    },
+    "t020_production": {
+      "path": "scripts/assets/t020-world-art-production-v1-ops.ts",
+      "sha256": "860e18dd00f4b44d4872f77127f209bad255fe90480d8b0855aa39e0056cac5d"
+    },
+    "filesystem": {
+      "path": "scripts/assets/filesystem.ts",
+      "sha256": "efddc7e7a5547a1bb3de49aaa4ba963c7c2411dff270707dc0276c8530a0b024"
+    },
+    "filesystem_types": {
+      "path": "scripts/assets/types.ts",
+      "sha256": "c68564528fa39b2ebfd87d3133ec2d4d7c5e6cacb77b1443f4992f5eadc22ff6"
+    },
+    "schema_contracts": {
+      "path": "src/data/schema/contracts.ts",
+      "sha256": "d46beb03bf161487ccfa38297008412f35192f876c5fc7fc1525e7d275d636a0"
+    }
+  }
+}
