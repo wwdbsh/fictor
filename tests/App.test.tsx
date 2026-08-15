@@ -3,7 +3,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { createStillkinTrack1UiSession, type Track1UiActionDescriptor, type Track1UiProjection } from "../src/application";
 import { FICTOR_SAVE_V2_KEY, type StorageLike } from "../src/persistence";
@@ -63,6 +63,7 @@ function asBetween(projection: Track1UiProjection) {
   return projection;
 }
 
+beforeEach(() => window.history.replaceState({}, "", "/fictor-test/"));
 afterEach(cleanup);
 
 describe("Track-1 App", () => {

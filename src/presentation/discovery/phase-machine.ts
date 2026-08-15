@@ -14,6 +14,13 @@ export function discoveryPhaseAt(elapsedMs: number): DiscoveryPhase {
   return "FINAL";
 }
 
+export function discoveryPhaseDeadlineMs(phase: DiscoveryPhase): number | null {
+  if (phase === "BURNING") return 900;
+  if (phase === "REVEALING") return 2_100;
+  if (phase === "PRINTING") return 3_000;
+  return null;
+}
+
 export function nextDiscoveryPhase(phase: DiscoveryPhase): DiscoveryPhase {
   if (phase === "BURNING") return "REVEALING";
   if (phase === "REVEALING") return "PRINTING";

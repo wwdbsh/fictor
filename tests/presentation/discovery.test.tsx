@@ -90,6 +90,22 @@ describe("discovery phase machine", () => {
     expect(phaseTimerCalls).toHaveLength(4);
   });
 
+  it("derives a delayed wake from absolute monotonic elapsed time and jumps directly to FINAL", () => {
+    let elapsed = 0;
+    const clock = () => elapsed;
+    const timerSpy = vi.spyOn(window, "setTimeout");
+    render(<FirstDiscoveryOverlay presentation={presentation()} onDismiss={() => undefined} clock={clock} />);
+    expect(screen.getByRole("dialog")).toHaveAttribute("data-discovery-phase", "BURNING");
+    const phaseTimers = timerSpy.mock.calls.filter(([, delay]) => delay === 900);
+    expect(phaseTimers).toHaveLength(1);
+
+    elapsed = 3_500;
+    act(() => { if (typeof phaseTimers[0][0] === "function") phaseTimers[0][0](); });
+    expect(screen.getByRole("dialog", { name: "새 제법 발견" })).toHaveAttribute("data-discovery-phase", "FINAL");
+    expect(screen.getByRole("button", { name: "계속" })).toBeEnabled();
+    expect(timerSpy.mock.calls.filter(([, delay]) => delay === 900 || delay === 1_200)).toHaveLength(1);
+  });
+
   it("skips or handles Escape by showing the informative final state without dismissing", () => {
     const onDismiss = vi.fn();
     render(<FirstDiscoveryOverlay presentation={presentation()} onDismiss={onDismiss} />);
@@ -112,6 +128,8 @@ describe("discovery phase machine", () => {
 
   it("jumps monotonically to FINAL when reduced motion turns on and never replays when it turns off", () => {
     let matches = false;
+    let elapsed = 0;
+    const clock = () => elapsed;
     const listeners = new Set<() => void>();
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
@@ -126,15 +144,16 @@ describe("discovery phase machine", () => {
         dispatchEvent: vi.fn(),
       })),
     });
-    render(<FirstDiscoveryOverlay presentation={presentation()} onDismiss={() => undefined} />);
-    act(() => vi.advanceTimersByTime(900));
-    expect(screen.getByRole("dialog")).toHaveAttribute("data-discovery-phase", "REVEALING");
+    render(<FirstDiscoveryOverlay presentation={presentation()} onDismiss={() => undefined} clock={clock} />);
+    elapsed = 2_800;
+    expect(screen.getByRole("dialog")).toHaveAttribute("data-discovery-phase", "BURNING");
 
     act(() => { matches = true; listeners.forEach((listener) => listener()); });
     expect(screen.getByRole("dialog", { name: "새 제법 발견" })).toHaveAttribute("data-discovery-phase", "FINAL");
     expect(screen.getByRole("button", { name: "계속" })).toBeEnabled();
 
     act(() => { matches = false; listeners.forEach((listener) => listener()); });
+    elapsed = 8_000;
     act(() => vi.advanceTimersByTime(3_000));
     expect(screen.getByRole("dialog", { name: "새 제법 발견" })).toHaveAttribute("data-discovery-phase", "FINAL");
   });

@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { T030_TRACK1_ASSET_MANIFEST, track1AssetRecordForUrl } from "../../src/presentation/assets";
+import { T030_TRACK1_ASSET_MANIFEST, track1AssetRecordForUrl, type AssetUrlContext } from "../../src/presentation/assets";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 
@@ -28,7 +28,19 @@ describe("Track 1 visible asset manifest", () => {
       expect(auditedByPath.get(asset.path)).toMatchObject({ id: asset.id, sha256: asset.sha256, bytes: asset.bytes });
       expect(statSync(resolve(repositoryRoot, "public/assets", asset.path)).size).toBe(asset.bytes);
     }
-    expect(track1AssetRecordForUrl("/nested/fictor/assets/backgrounds/background__still__depth_01.png?cache=1")?.id).toBe("background__still__depth_01");
-    expect(track1AssetRecordForUrl("https://example.invalid/assets/cards/ore_still.png")).toBeNull();
+    const nestedContext: AssetUrlContext = { origin: "https://fictor.test", basePath: "/nested/fictor/" };
+    expect(track1AssetRecordForUrl("/nested/fictor/assets/backgrounds/background__still__depth_01.png?cache=1", nestedContext)?.id).toBe("background__still__depth_01");
+    expect(track1AssetRecordForUrl("https://example.invalid/nested/fictor/assets/cards/ore_still.png", nestedContext)).toBeNull();
+  });
+
+  it("binds every production AssetImage caller to an explicit static or dynamic role", () => {
+    const sources = [
+      readFileSync(resolve(repositoryRoot, "src/presentation/App.tsx"), "utf8"),
+      readFileSync(resolve(repositoryRoot, "src/presentation/discovery/DiscoveryPresentation.tsx"), "utf8"),
+    ].join("\n");
+    const calls = [...sources.matchAll(/<AssetImage\b[^>]*>/gs)].map((match) => match[0]);
+    expect(calls.length).toBeGreaterThan(0);
+    expect(calls.filter((call) => !/\bassetRole="(?:STATIC_MANIFEST|HAND|REWARD|DISCOVERY_RESULT)"/.test(call))).toEqual([]);
+    expect(new Set(calls.flatMap((call) => call.match(/assetRole="([A-Z_]+)"/)?.slice(1) ?? []))).toEqual(new Set(["STATIC_MANIFEST", "HAND", "REWARD", "DISCOVERY_RESULT"]));
   });
 });

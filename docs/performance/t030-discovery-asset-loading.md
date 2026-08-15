@@ -10,8 +10,10 @@
 초기 화면은 현재 보이는 깊이 1 배경만 요청한다. preloader는 없으며 미래 깊이, 적, 사건, 도감의
 미발견 도판을 요청하지 않는다. `AssetImage`는 현재 렌더된 primary 도판만 요청하고, 실패할 때만 정확히
 한 번 fallback을 요청한다. 두 요청이 모두 실패하면 네트워크 재시도 없이 이름이 있는 CSS placeholder를
-표시한다. 외부 protocol URL, protocol-relative URL, backslash, NUL, 상위 경로 순회는 `img src`에
-들어가기 전에 fail-closed로 차단한다. primary가 차단되어도 안전한 local fallback은 한 번만 허용한다.
+표시한다. 모든 literal ASCII control, 외부 protocol URL, protocol-relative URL, backslash, NUL과
+encoded·double-encoded 상위 경로 순회는 `img src`에 들어가기 전에 fail-closed로 차단한다. URL은 현재
+origin과 문서 base path를 기준으로 정규화하며, 동일 origin의 `${basePath}assets/` 아래 PNG만 허용한다.
+primary가 차단되어도 슬롯 정책이 허용하는 안전한 local fallback은 한 번만 사용한다.
 
 브라우저에는 T022 audit JSON을 싣지 않는다. 대신
 `src/presentation/assets/track1-asset-manifest.ts`의 현재 Track 1 고정 surface 13개만
@@ -20,6 +22,9 @@ T022 contract SHA와 manifest SHA에 고정한다. Node test가 원본 T022 reco
 bitset 결속을 그대로 사용한다. 동적 `HAND`, `REWARD`, `DISCOVERY_RESULT` 슬롯은 T029 browser runtime
 packet을 authority로 선언하며, 요청 PNG는 T022 present 또는 명시적 fallback이어야 한다. 발견 결과만
 첫 재료 도판 뒤 named CSS placeholder를, 나머지 두 슬롯은 named CSS placeholder를 사용한다.
+모든 production `AssetImage` 호출은 `STATIC_MANIFEST`, `HAND`, `REWARD`, `DISCOVERY_RESULT` 중 하나에
+타입으로 결속된다. 정적 역할은 pinned 13개 record와 일치해야 하며, HAND/REWARD는 fallback을 받지 않고
+DISCOVERY_RESULT만 첫 재료 fallback을 한 번 허용한다. 미결속·잘못된 역할은 placeholder로 닫힌다.
 
 ## 예산과 관찰값
 
@@ -28,7 +33,7 @@ packet을 authority로 선언하며, 요청 PNG는 T022 present 또는 명시적
 | 초기 image request | 정확히 1 | 1 | PASS |
 | 초기 asset raw bytes | ≤ 2,296,255 | 2,296,255 | PASS |
 | 초기 non-current asset | 0 | 0 | PASS |
-| production JavaScript raw bytes | ≤ 409,600 | 375,044 | PASS |
+| production JavaScript raw bytes | ≤ 409,600 | 377,977 | PASS |
 | production CSS raw bytes | ≤ 32,768 | 28,028 | PASS |
 
 관찰 명령은 `npm run build` 뒤 `npm run smoke:static`이다. smoke는 외부/API/WebSocket 요청 0,
@@ -37,12 +42,16 @@ packet을 authority로 선언하며, 요청 PNG는 T022 present 또는 명시적
 JS/CSS 예산 테스트는 `dist`의 모든 hashed 파일을 합산하지 않고 현재 `dist/index.html`이 고유하게 참조하는
 `./assets/*.js`와 `./assets/*.css`만 존재 확인 후 합산한다. 따라서 stale 또는 동시 build 산출물은 예산에
 혼입되지 않으며, 중복·누락 참조는 실패한다.
+별도 Chromium negative probe는 newline-scheme, protocol-relative, encoded traversal 입력을 production
+`AssetImage`에 전달하고 세 경우 모두 `img`가 생기지 않으며 unsafe image request가 0임을 확인한다.
 
 ## 발견 연출 수명
 
 FIRST presentation은 저장 성공 뒤에만 React local state로 생긴다. `BURNING` 0–899ms,
 `REVEALING` 900–2099ms, `PRINTING` 2100–2999ms, `FINAL` 3000ms 이후를 각각 한 timer로 진행하고
-phase cleanup과 `presentationId` guard를 둔다. `FINAL`은 자동으로 사라지지 않는 의도적 terminal state다.
+phase cleanup과 `presentationId` guard를 둔다. 각 wake는 `performance.now()`로 기록한 시작점의 절대 경과
+시간을 phase-machine에 다시 넣는다. 따라서 background suspend 뒤 첫 callback이 3초를 넘겨 실행되면
+중간 timer를 다시 기다리지 않고 바로 FINAL로 이동한다. `FINAL`은 자동으로 사라지지 않는 의도적 terminal state다.
 완전한 결과 정보와 native `계속` 버튼을 제공해 사용자가 확인한 뒤 underlay lock을 해제한다. skip과
 Escape는 이 FINAL로 바로 이동한다. reduced motion은 처음부터 FINAL이며, 실행 중 설정이 켜져도 FINAL로만
 단조 이동하고 다시 꺼져도 연출을 재생하지 않는다.

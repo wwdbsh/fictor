@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { createReadStream, existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, isAbsolute, relative, resolve, sep } from "node:path";
 import process from "node:process";
@@ -21,6 +21,22 @@ const contentTypes = new Map([
 ]);
 
 const auditManifestPath = resolve(process.cwd(), "assets/manifests/t022-m2-assets-audit-v1.json");
+
+function currentIndexBundleFiles() {
+  const indexHtml = readFileSync(resolve(distDirectory, "index.html"), "utf8");
+  const references = [...indexHtml.matchAll(/\b(?:src|href)=["']([^"']+)["']/g)]
+    .map((match) => match[1])
+    .filter((reference) => /\.(?:js|css)(?:[?#]|$)/.test(reference));
+  if (references.length === 0) throw new Error("dist/index.html에 JS/CSS entrypoint 참조가 없습니다.");
+  const invalid = references.filter((reference) => !/^\.\/assets\/[^/?#]+\.(?:js|css)$/.test(reference));
+  if (invalid.length > 0) throw new Error(`dist/index.html bundle 참조 형식이 잘못되었습니다: ${invalid.join(", ")}`);
+  if (new Set(references).size !== references.length) throw new Error(`dist/index.html bundle 참조가 중복되었습니다: ${references.join(", ")}`);
+  return references.map((reference) => {
+    const filePath = resolve(distDirectory, reference);
+    if (!existsSync(filePath) || !statSync(filePath).isFile()) throw new Error(`dist/index.html 참조 파일이 없습니다: ${reference}`);
+    return filePath;
+  });
+}
 
 async function verifyMountedPngs(origin) {
   const manifest = JSON.parse(readFileSync(auditManifestPath, "utf8"));
@@ -206,12 +222,40 @@ async function main() {
     const initialAssetBytes = statSync(resolve(distDirectory, "assets/backgrounds/background__still__depth_01.png")).size;
     if (initialAssetBytes > 2_296_255) throw new Error(`초기 asset budget 초과: ${initialAssetBytes}`);
 
-    const bundleFiles = readdirSync(resolve(distDirectory, "assets"));
-    const javascriptBytes = bundleFiles.filter((name) => extname(name) === ".js").reduce((sum, name) => sum + statSync(resolve(distDirectory, "assets", name)).size, 0);
-    const cssBytes = bundleFiles.filter((name) => extname(name) === ".css").reduce((sum, name) => sum + statSync(resolve(distDirectory, "assets", name)).size, 0);
+    const bundleFiles = currentIndexBundleFiles();
+    const javascriptBytes = bundleFiles.filter((path) => extname(path) === ".js").reduce((sum, path) => sum + statSync(path).size, 0);
+    const cssBytes = bundleFiles.filter((path) => extname(path) === ".css").reduce((sum, path) => sum + statSync(path).size, 0);
     if (javascriptBytes > 409_600 || cssBytes > 32_768) {
       throw new Error(`bundle budget 초과: js=${javascriptBytes}, css=${cssBytes}`);
     }
+
+    const verifyUnsafeAssetPolicy = async () => {
+      const probePage = await browser.newPage();
+      const imageRequests = [];
+      try {
+        await probePage.setRequestInterception(true);
+        probePage.on("request", (request) => {
+          if (request.resourceType() === "image") imageRequests.push(request.url());
+          const requestOrigin = new URL(request.url()).origin;
+          void (requestOrigin === origin ? request.continue() : request.abort());
+        });
+        const response = await probePage.goto(`${pageUrl}?t030-asset-policy-probe=1`, { waitUntil: "networkidle0" });
+        if (response === null || !response.ok()) throw new Error(`asset policy probe 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
+        await probePage.waitForSelector('[data-asset-policy-probe="ready"]');
+        const probeState = await probePage.$eval('[data-asset-policy-probe="ready"]', (element) => ({
+          placeholders: element.querySelectorAll("[data-asset-placeholder]").length,
+          images: element.querySelectorAll("img").length,
+        }));
+        const unexpected = imageRequests.filter((requestUrl) => new URL(requestUrl).pathname !== `${mountPath}assets/backgrounds/background__still__depth_01.png`);
+        if (probeState.placeholders !== 3 || probeState.images !== 0 || unexpected.length > 0) {
+          throw new Error(`unsafe asset 요청 차단 실패: state=${JSON.stringify(probeState)}, requests=${imageRequests.join(", ")}`);
+        }
+        return { cases: ["NEWLINE_SCHEME", "PROTOCOL_RELATIVE", "ENCODED_TRAVERSAL"], unsafeImageRequests: 0 };
+      } finally {
+        await probePage.close();
+      }
+    };
+    const unsafeAssetPolicy = await verifyUnsafeAssetPolicy();
 
     async function clickAndWait(selector) {
       const before = await page.$eval("main", (element) => element.getAttribute("data-screen-key"));
@@ -456,6 +500,7 @@ async function main() {
         webSocketRequests: 0,
         browserImageRequests: browserImageRequests.length,
         performanceBudgets: { initialRequests: 1, initialAssetBytes, javascriptBytes, cssBytes, noncurrentInitialAssets: 0 },
+        unsafeAssetPolicy,
         discoveryCheckpoints,
         corePath: "instant discovery -> Codex -> reload -> full run -> restart -> paid workshop same recipe",
         instantDiscovery: { ...instantDiscovery, reloaded: reloadedAfterInstant, codexBeforePaid, codexAfterPaid, fuelAfterPaid },

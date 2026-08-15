@@ -1,4 +1,4 @@
-import { isSafeLocalAssetUrl } from "./asset-url";
+import { resolveSafeLocalAssetUrl, type AssetUrlContext } from "./asset-url";
 
 export type Track1DynamicAssetSlot = "HAND" | "REWARD" | "DISCOVERY_RESULT";
 export type Track1DynamicAssetFallback = "NAMED_CSS_PLACEHOLDER" | "FIRST_MATERIAL_THEN_NAMED_CSS_PLACEHOLDER";
@@ -40,8 +40,9 @@ export const T030_TRACK1_ASSET_MANIFEST = Object.freeze({
 
 export type Track1AssetRecord = (typeof T030_TRACK1_ASSET_MANIFEST.assets)[number];
 
-export function track1AssetRecordForUrl(src: string): Track1AssetRecord | null {
-  if (!isSafeLocalAssetUrl(src)) return null;
-  const normalized = src.split(/[?#]/, 1)[0];
+export function track1AssetRecordForUrl(src: string, context?: AssetUrlContext): Track1AssetRecord | null {
+  const safeUrl = resolveSafeLocalAssetUrl(src, context);
+  if (!safeUrl) return null;
+  const normalized = safeUrl.split(/[?#]/, 1)[0];
   return T030_TRACK1_ASSET_MANIFEST.assets.find(({ path }) => normalized.endsWith(`/assets/${path}`)) ?? null;
 }

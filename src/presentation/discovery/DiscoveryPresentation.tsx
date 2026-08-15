@@ -2,7 +2,7 @@ import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from "rea
 
 import type { Track1UiForgePresentation } from "../../application";
 import { AssetImage } from "../assets";
-import { useDiscoveryPhase } from "./use-discovery-phase";
+import { useDiscoveryPhase, type DiscoveryClock } from "./use-discovery-phase";
 
 const MODE_LABELS = {
   INSTANT: "즉석 빚기 · 전투 한정",
@@ -20,6 +20,7 @@ function ResultArt({ presentation }: { presentation: Track1UiForgePresentation }
   const { canonical } = presentation;
   return (
     <AssetImage
+      assetRole="DISCOVERY_RESULT"
       src={canonical.result.artSrc}
       fallbackSrc={canonical.materials[0].artSrc}
       placeholderLabel={canonical.result.nameKo}
@@ -28,8 +29,8 @@ function ResultArt({ presentation }: { presentation: Track1UiForgePresentation }
   );
 }
 
-export function FirstDiscoveryOverlay({ presentation, onDismiss }: { presentation: Track1UiForgePresentation; onDismiss: () => void }) {
-  const [phase, skip] = useDiscoveryPhase(presentation.presentationId);
+export function FirstDiscoveryOverlay({ presentation, onDismiss, clock }: { presentation: Track1UiForgePresentation; onDismiss: () => void; clock?: DiscoveryClock }) {
+  const [phase, skip] = useDiscoveryPhase(presentation.presentationId, clock);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
   const continueRef = useRef<HTMLButtonElement>(null);
@@ -71,7 +72,7 @@ export function FirstDiscoveryOverlay({ presentation, onDismiss }: { presentatio
           <div className="discovery-materials" aria-label="사용한 재료">
             {canonical.materials.map((material) => (
               <figure key={material.materialId}>
-                <AssetImage src={material.artSrc} placeholderLabel={material.nameKo} alt="" />
+                <AssetImage assetRole="HAND" src={material.artSrc} placeholderLabel={material.nameKo} alt="" />
                 <figcaption>{material.nameKo}</figcaption>
               </figure>
             ))}
