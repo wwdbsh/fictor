@@ -31,6 +31,12 @@ LAW/CATALYST forge 결과는 resolver의 exact `combat_effect`와 첫 `effective
 전까지 shared no-op으로 남긴다. 다른 effect를 damage로 재분류하지 않는다. EQUIPMENT 결과는 owned/deck에
 남지만 passive 전투 계약 전에는 combat enrollment에서 제외한다. Stillkin block retention 1/2를 적용한다.
 
+instant LAW/CATALYST 결과는 canonical projection으로 실제 ephemeral combat instance와 hand card가 되며,
+ledger location은 현재 zone과 exact하게 동기화된다. cleanup은 결과 instance/zone과 고아 card/program을
+제거하고 재료를 한 번 복구한다. instant EQUIPMENT는 `EQUIPMENT` overlay로만 기록되어 플레이할 수 없다.
+과거 T024 overlay-only runtime snapshot도 boundary에서 계속 유효하지만 controller가 새로 만드는 playable
+instant 결과는 항상 represented 형태다.
+
 controller는 public caller input이 아닌 enabled content registry의 `GROUND_STILL` descriptor를 실제 조회해
 depth, route encounter 종류/ID, 여섯 event type, boss-heart asset 관계를 config와 교차 검증한다.
 

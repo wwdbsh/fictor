@@ -39,6 +39,13 @@ LAW/CATALYST 결과는 recipe pair를 resolver context에서 다시 `resolveForg
 shared no-op(`targetRule: NONE`, `operations: []`)으로 정직하게 표시한다. EQUIPMENT 결과는 runtime의
 owned/deck에는 보존하지만 passive 전투 계약이 없으므로 combat cards/instances/deck/enrollment에서 제외한다.
 
+즉석 빚기의 LAW/CATALYST 결과는 ledger event만 만드는 overlay가 아니라 같은 dispatch에서 canonical
+card/program definition과 ephemeral instance를 실제 combat hand에 등록한다. 이후 play/draw/discard/exile
+이동마다 ledger location이 실제 단일 zone과 일치해야 하며 v2 reload도 이 결속을 다시 검증한다. 전투 종료
+cleanup은 represented 결과를 모든 zone/instance에서 제거하고 더 이상 참조되지 않는 card/program도 정리한
+뒤 격리했던 두 재료를 정확히 한 번 복구한다. 즉석 EQUIPMENT는 passive combat body가 없으므로 실제
+instance를 만들지 않고 `EQUIPMENT` ledger/event overlay로만 남겼다가 같은 cleanup에서 제거한다.
+
 ## 보상과 이벤트
 
 - 일반 보상은 `ore_still`, `still_01`, `still_02` 중 하나다.

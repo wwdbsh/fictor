@@ -14,6 +14,7 @@ import {
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SOURCE_HASH,
   FORGE_RUNTIME_FUEL_COST,
+  resolveForgeCard,
   type ForgeMaterial,
   type ForgeResolverContextV1,
   type ForgeResultClass,
@@ -68,22 +69,27 @@ function enter(value: StillkinTrack1Controller): StillkinTrack1Snapshot {
   return result.snapshot;
 }
 
+function nextCombatCommand(snapshot: StillkinTrack1Snapshot) {
+  const binding = snapshot.flow.combatBinding!;
+  const active = snapshot.runtime.run.activeCombat!;
+  const instanceId = active.state.zones.hand[0];
+  const instance = active.state.instances.find((item) => item.instanceId === instanceId);
+  const card = active.state.cards.find((item) => item.cardId === instance?.cardId);
+  const program = active.state.programs.find((item) => item.effectId === card?.effectId);
+  return active.state.phase === "TURN_READY"
+    ? { type: "START_TURN" as const }
+    : active.state.player.energy > 0 && active.state.zones.hand.length > 0
+      ? { type: "PLAY_CARD" as const, instanceId, target: program?.targetRule.kind === "NONE" ? null : { kind: "ENEMY" as const, enemyId: binding.encounterId } }
+      : { type: "END_TURN" as const };
+}
+
 function winCombat(value: StillkinTrack1Controller): StillkinTrack1Snapshot {
   let snapshot = value.snapshot();
   let steps = 0;
   while (snapshot.flow.phase === "IN_COMBAT") {
     expect(steps++).toBeLessThan(1_000);
     const binding = snapshot.flow.combatBinding!;
-    const active = snapshot.runtime.run.activeCombat!;
-    const instanceId = active.state.zones.hand[0];
-    const instance = active.state.instances.find((item) => item.instanceId === instanceId);
-    const card = active.state.cards.find((item) => item.cardId === instance?.cardId);
-    const program = active.state.programs.find((item) => item.effectId === card?.effectId);
-    const combatCommand = active.state.phase === "TURN_READY"
-      ? { type: "START_TURN" as const }
-      : active.state.player.energy > 0 && active.state.zones.hand.length > 0
-        ? { type: "PLAY_CARD" as const, instanceId, target: program?.targetRule.kind === "NONE" ? null : { kind: "ENEMY" as const, enemyId: binding.encounterId } }
-        : { type: "END_TURN" as const };
+    const combatCommand = nextCombatCommand(snapshot);
     const result = value.dispatch({ type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: combatCommand });
     expect(result.applied).toBe(true);
     snapshot = result.snapshot;
@@ -123,6 +129,178 @@ describe("Stillkin literal Track-1 controller", () => {
     expect(STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers.cacheMaterialIds).toHaveLength(2);
     expect(STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers.fictor.at(-1)).toEqual({ choiceId: "fictor-skip", kind: "SKIP" });
     expect(sha256Hex(canonicalSerialize(STILLKIN_TRACK1_PROVISIONAL_CONFIG))).toBe(STILLKIN_TRACK1_CONFIG_HASH);
+  });
+
+  it("represents an instant forge in hand, reloads it, plays it, and cleans it atomically", () => {
+    const { storage, value } = controller();
+    let snapshot = enter(value);
+    const binding = snapshot.flow.combatBinding!;
+    snapshot = value.dispatch({ type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: { type: "START_TURN" } }).snapshot;
+    let pair: [NonNullable<(typeof snapshot.runtime.run.activeCombat)>["state"]["instances"][number], NonNullable<(typeof snapshot.runtime.run.activeCombat)>["state"]["instances"][number]] | null = null;
+    for (let turn = 0; turn < 8 && pair === null; turn += 1) {
+      const active = snapshot.runtime.run.activeCombat!;
+      const hand = active.state.zones.hand.map((instanceId) => active.state.instances.find((item) => item.instanceId === instanceId)!);
+      for (let left = 0; left < hand.length && pair === null; left += 1) {
+        const right = hand.slice(left + 1).find((item) => item.cardId !== hand[left].cardId);
+        if (right) pair = [hand[left], right];
+      }
+      if (pair === null) {
+        snapshot = value.dispatch({ type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: { type: "END_TURN" } }).snapshot;
+        snapshot = value.dispatch({ type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: { type: "START_TURN" } }).snapshot;
+      }
+    }
+    expect(pair).not.toBeNull();
+    const [first, second] = pair!;
+    const resolver = context();
+    const expected = resolveForgeCard(
+      resolver.materials.find(({ id }) => id === first.cardId)!,
+      resolver.materials.find(({ id }) => id === second.cardId)!,
+      resolver.inputs,
+    );
+
+    const beforeRejected = snapshot;
+    expect(value.dispatch({ type: "FORGE_INSTANT", expectedRevision: snapshot.flow.revision, ...binding, materialInstanceIds: [first.instanceId, first.instanceId] }))
+      .toMatchObject({ applied: false, reason: "RUNTIME_REJECTED", snapshot: beforeRejected });
+    const forged = value.dispatch({ type: "FORGE_INSTANT", expectedRevision: snapshot.flow.revision, ...binding, materialInstanceIds: [first.instanceId, second.instanceId] });
+    expect(forged.applied).toBe(true);
+    const created = forged.events.find((event) => event.type === "FORGE_RESULT_CREATED") as Extract<(typeof forged.events)[number], { type: "FORGE_RESULT_CREATED" }>;
+    expect(created).toMatchObject({ mode: "INSTANT", cardId: expected.card_id, recipeId: expected.recipe_id, location: "HAND" });
+    const forgedActive = forged.snapshot.runtime.run.activeCombat!;
+    expect(forgedActive.ephemeralResults).toContainEqual({ instanceId: created.instanceId, cardId: expected.card_id, recipeId: expected.recipe_id, location: "HAND" });
+    expect(forgedActive.state.instances).toContainEqual({ instanceId: created.instanceId, cardId: expected.card_id });
+    expect(forgedActive.state.zones.hand).toContain(created.instanceId);
+    expect(forgedActive.state.cards.find(({ cardId }) => cardId === expected.card_id)).toMatchObject({
+      effectId: expected.combat_effect,
+      resonanceAttribute: expected.effective_attributes[0],
+      cost: 1,
+      power: 10,
+    });
+    expect(forgedActive.state.instances.some(({ instanceId }) => [first.instanceId, second.instanceId].includes(instanceId))).toBe(false);
+    expect(value.dispatch({ type: "FORGE_INSTANT", expectedRevision: snapshot.flow.revision, ...binding, materialInstanceIds: [first.instanceId, second.instanceId] }))
+      .toMatchObject({ applied: false, reason: "STALE_REVISION" });
+
+    const reloaded = createStillkinTrack1Controller({ storage, resolverContext: context(), generationFactory: () => "unused" });
+    expect(reloaded.load()).toMatchObject({ source: "SAVED", snapshot: { flow: { phase: "IN_COMBAT" } } });
+    const bytes = storage.values.get(FICTOR_SAVE_V2_KEY)!;
+    const mutations: Array<(envelope: any) => void> = [
+      (envelope) => { envelope.runtime.run.activeCombat.ephemeralResults[0].location = "DISCARD"; },
+      (envelope) => { envelope.runtime.run.activeCombat.state.instances.find((item: any) => item.instanceId === created.instanceId).cardId = "ore_still"; },
+      (envelope) => { envelope.runtime.run.activeCombat.state.cards.find((item: any) => item.cardId === expected.card_id).effectId = "DELAYED_EXPLOSION"; },
+      (envelope) => { envelope.runtime.run.activeCombat.state.zones.discard.push(created.instanceId); },
+    ];
+    for (const mutate of mutations) {
+      const tamperedStorage = new MemoryStorage();
+      const envelope = JSON.parse(bytes);
+      mutate(envelope);
+      tamperedStorage.values.set(FICTOR_SAVE_V2_KEY, JSON.stringify(envelope));
+      const tampered = createStillkinTrack1Controller({ storage: tamperedStorage, resolverContext: context(), generationFactory: () => "unused" });
+      expect(tampered.load()).toMatchObject({ source: "SAFE_INITIALIZED", snapshot: { persistence: { writeBlocked: true, issues: ["INVALID_RUN"] } } });
+    }
+
+    snapshot = forged.snapshot;
+    const resultProgram = forgedActive.state.programs.find(({ effectId }) => effectId === expected.combat_effect)!;
+    const played = value.dispatch({
+      type: "APPLY_COMBAT",
+      expectedRevision: snapshot.flow.revision,
+      ...binding,
+      command: { type: "PLAY_CARD", instanceId: created.instanceId, target: resultProgram.targetRule.kind === "NONE" ? null : { kind: "ENEMY", enemyId: binding.encounterId } },
+    });
+    expect(played.applied).toBe(true);
+    expect(played.snapshot.runtime.run.activeCombat!.state.zones.discard).toContain(created.instanceId);
+    expect(played.snapshot.runtime.run.activeCombat!.ephemeralResults[0].location).toBe("DISCARD");
+
+    snapshot = played.snapshot;
+    let terminalEvents: typeof played.events = [];
+    while (snapshot.flow.phase === "IN_COMBAT") {
+      const result = value.dispatch({ type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...snapshot.flow.combatBinding!, command: nextCombatCommand(snapshot) });
+      expect(result.applied).toBe(true);
+      snapshot = result.snapshot;
+      if (snapshot.flow.phase !== "IN_COMBAT") terminalEvents = result.events;
+    }
+    expect(terminalEvents).toContainEqual({
+      type: "INSTANT_FORGE_CLEANED",
+      restoredInstanceIds: [first.instanceId, second.instanceId],
+      removedEphemeralInstanceIds: [created.instanceId],
+    });
+    expect(snapshot.runtime.run.activeCombat).toBeNull();
+    expect(snapshot.runtime.run.ownedInstances.filter(({ instanceId }) => [first.instanceId, second.instanceId].includes(instanceId))).toHaveLength(2);
+    expect(snapshot.runtime.run.deck.filter((instanceId) => [first.instanceId, second.instanceId].includes(instanceId))).toHaveLength(2);
+    expect(snapshot.runtime.run.ownedInstances.some(({ instanceId }) => instanceId === created.instanceId)).toBe(false);
+  });
+
+  it("keeps an instant equipment result as a non-playable EQUIPMENT overlay through cleanup", () => {
+    const original = controller();
+    let snapshot = enter(original.value);
+    snapshot = winCombat(original.value);
+    snapshot = original.value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "normal-ore" }).snapshot;
+    snapshot = resolveSimpleEvent(original.value, "take-cache");
+    snapshot = enter(original.value);
+    snapshot = original.value.dispatch({ type: "RESOLVE_EVENT", ...base(snapshot), choiceId: "use-workshop" }).snapshot;
+    const freeLeft = snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === "ore_still")!;
+    const freeRight = snapshot.runtime.run.ownedInstances.find(({ cardId }) => cardId === "still_01")!;
+    snapshot = original.value.dispatch({ type: "USE_FREE_WORKSHOP", ...base(snapshot), materialInstanceIds: [freeLeft.instanceId, freeRight.instanceId] }).snapshot;
+    snapshot = original.value.dispatch({ type: "LEAVE_EVENT", ...base(snapshot) }).snapshot;
+    snapshot = winCombatAfterEnter(original.value);
+    snapshot = original.value.dispatch({ type: "CHOOSE_REWARD", ...base(snapshot), choiceId: "elite-tool-01" }).snapshot;
+    snapshot = resolveSimpleEvent(original.value, "risk-collapse");
+    snapshot = enter(original.value);
+    snapshot = original.value.dispatch({ type: "RESOLVE_EVENT", ...base(snapshot), choiceId: "fictor-tool-02" }).snapshot;
+    snapshot = original.value.dispatch({ type: "LEAVE_EVENT", ...base(snapshot) }).snapshot;
+    snapshot = resolveSimpleEvent(original.value, "read-record");
+    resolveSimpleEvent(original.value, "take-oddity");
+
+    const betweenBossBytes = original.storage.values.get(FICTOR_SAVE_V2_KEY)!;
+    let selected: { storage: MemoryStorage; value: StillkinTrack1Controller; snapshot: StillkinTrack1Snapshot; tools: [string, string] } | null = null;
+    const baseEnvelope = JSON.parse(betweenBossBytes);
+    const deck = baseEnvelope.runtime.run.deck as string[];
+    for (let rotation = 0; rotation < deck.length && selected === null; rotation += 1) {
+      const storage = new MemoryStorage();
+      const envelope = JSON.parse(betweenBossBytes);
+      envelope.runtime.run.deck = [...deck.slice(rotation), ...deck.slice(0, rotation)];
+      storage.values.set(FICTOR_SAVE_V2_KEY, JSON.stringify(envelope));
+      const value = createStillkinTrack1Controller({ storage, resolverContext: context(), generationFactory: () => "unused" });
+      let candidate = value.load().snapshot;
+      candidate = enter(value);
+      candidate = value.dispatch({ type: "APPLY_COMBAT", expectedRevision: candidate.flow.revision, ...candidate.flow.combatBinding!, command: { type: "START_TURN" } }).snapshot;
+      const active = candidate.runtime.run.activeCombat!;
+      const toolInstances = active.state.zones.hand
+        .map((instanceId) => active.state.instances.find((item) => item.instanceId === instanceId)!)
+        .filter(({ cardId }) => cardId === "tool_01" || cardId === "tool_02");
+      if (new Set(toolInstances.map(({ cardId }) => cardId)).size === 2) {
+        selected = { storage, value, snapshot: candidate, tools: [toolInstances[0].instanceId, toolInstances[1].instanceId] };
+      }
+    }
+    expect(selected).not.toBeNull();
+    const chosen = selected!;
+    const binding = chosen.snapshot.flow.combatBinding!;
+    const forged = chosen.value.dispatch({
+      type: "FORGE_INSTANT",
+      expectedRevision: chosen.snapshot.flow.revision,
+      ...binding,
+      materialInstanceIds: chosen.tools,
+    });
+    expect(forged.applied).toBe(true);
+    const created = forged.events.find((event) => event.type === "FORGE_RESULT_CREATED") as Extract<(typeof forged.events)[number], { type: "FORGE_RESULT_CREATED" }>;
+    expect(created).toMatchObject({ mode: "INSTANT", cardId: "forge__tool_01__tool_02", location: "EQUIPMENT" });
+    const active = forged.snapshot.runtime.run.activeCombat!;
+    expect(active.ephemeralResults).toContainEqual(expect.objectContaining({ instanceId: created.instanceId, location: "EQUIPMENT" }));
+    expect(active.state.instances.some(({ instanceId }) => instanceId === created.instanceId)).toBe(false);
+    expect(Object.values(active.state.zones).flat()).not.toContain(created.instanceId);
+    expect(active.state.cards.some(({ cardId }) => cardId === created.cardId)).toBe(false);
+    const reloaded = createStillkinTrack1Controller({ storage: chosen.storage, resolverContext: context(), generationFactory: () => "unused" });
+    expect(reloaded.load()).toMatchObject({ source: "SAVED", snapshot: { flow: { phase: "IN_COMBAT" } } });
+
+    snapshot = forged.snapshot;
+    let terminalEvents: typeof forged.events = [];
+    while (snapshot.flow.phase === "IN_COMBAT") {
+      const result = chosen.value.dispatch({ type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...snapshot.flow.combatBinding!, command: nextCombatCommand(snapshot) });
+      expect(result.applied).toBe(true);
+      snapshot = result.snapshot;
+      if (snapshot.flow.phase !== "IN_COMBAT") terminalEvents = result.events;
+    }
+    expect(terminalEvents).toContainEqual(expect.objectContaining({ type: "INSTANT_FORGE_CLEANED", removedEphemeralInstanceIds: [created.instanceId] }));
+    expect(snapshot.runtime.run.activeCombat).toBeNull();
+    expect(snapshot.runtime.run.ownedInstances.filter(({ cardId }) => cardId === "tool_01" || cardId === "tool_02")).toHaveLength(2);
   });
 
   it("owns combat authority, completes the literal route, and preserves paid/free forge economics", () => {

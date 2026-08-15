@@ -104,7 +104,7 @@ export type ForgeRuntimeEvent =
       instanceId: string;
       cardId: string;
       recipeId: string;
-      location: "HAND" | "DECK";
+      location: "HAND" | "DECK" | "EQUIPMENT";
     }
   | { type: "RECIPE_DISCOVERED"; recipeId: string }
   | {

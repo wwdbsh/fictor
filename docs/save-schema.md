@@ -19,6 +19,9 @@ interface SaveEnvelopeV2 {
 workshop entitlement, 다음 encounter nonce 및 현재 combat binding을 포함한다. runtime의
 `activeCombat` 유무와 binding enemy가 일치하지 않으면 로드하지 않는다. 지원하지 않거나 손상된 v2는
 안전 초기화하되 write-block하며 원본을 덮어쓰지 않는다.
+represented instant result는 ephemeral ledger의 card/instance/location과 combat의 정확히 한 zone이
+일치해야 한다. legacy overlay-only result는 zone/instance 어디에도 나타나지 않아야 하며 EQUIPMENT는
+항상 overlay-only다.
 
 저장 직전에 v2를 다시 읽어 `(saveGeneration, saveRevision)`을 비교한다. 이는 같은 탭/프로세스에서의
 stale 보호이지 browser `localStorage`의 진정한 multi-tab CAS라고 주장하지 않는다. quota/read/stale/

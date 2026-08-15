@@ -8,7 +8,7 @@ import {
   type EffectProgram,
   type EnemyIntent,
 } from "../../domain/combat";
-import { resolveForgeCard } from "../../domain/forge";
+import { resolveForgeCard, type GeneratedCard } from "../../domain/forge";
 import {
   decodeForgeResolverContext,
   decodeForgeRuntimeState,
@@ -18,6 +18,8 @@ import {
   FORGE_RUNTIME_SCHEMA_VERSION,
   FORGE_RUNTIME_SOURCE_HASH,
   reduceForgeRuntime,
+  type ForgeRuntimeEvent,
+  type ForgeRuntimeReducerResult,
   type ForgeResolverContextV1,
   type ForgeRuntimeStateV1,
 } from "../../domain/forge-runtime";
@@ -327,51 +329,135 @@ function enemyIntents(kind: "NORMAL" | "ELITE" | "BOSS"): EnemyIntent[] {
 
 const COMBAT_EFFECT_ID_SET = new Set<string>(COMBAT_EFFECT_IDS);
 
+function canonicalResolvedCard(cardId: string, context: ForgeResolverContextV1): GeneratedCard {
+  const recipeId = canonicalRecipeIdForCard(cardId);
+  if (recipeId === null) throw new Error(`not a canonical forge card: ${cardId}`);
+  const [leftId, rightId] = recipeId.split("|");
+  const left = context.materials.find(({ id }) => id === leftId);
+  const right = context.materials.find(({ id }) => id === rightId);
+  if (!left || !right) throw new Error(`missing canonical recipe material: ${recipeId}`);
+  const resolved = resolveForgeCard(left, right, context.inputs);
+  if (resolved.card_id !== cardId || resolved.recipe_id !== recipeId) throw new Error(`canonical recipe projection mismatch: ${cardId}`);
+  return resolved;
+}
+
+function programForEffect(effectId: CombatEffectId): EffectProgram {
+  return effectId === "DELAYED_EXPLOSION"
+    ? { effectId, targetRule: { kind: "REQUIRED", allowed: "ENEMY" }, playedCardDestination: "DISCARD", operations: [{ kind: "DAMAGE", target: { kind: "SELECTED" }, amount: { kind: "EFFECT_POWER", multiplier: 1 } }] }
+    : { effectId, targetRule: { kind: "NONE" }, playedCardDestination: "DISCARD", operations: [] };
+}
+
+function playableResolvedCard(resolved: GeneratedCard): { card: CardDefinition; program: EffectProgram } | null {
+  if (resolved.branch === "EQUIPMENT") return null;
+  if (!resolved.combat_effect || !COMBAT_EFFECT_ID_SET.has(resolved.combat_effect) || !resolved.effective_attributes[0]) {
+    throw new Error(`invalid canonical combat projection: ${resolved.card_id}`);
+  }
+  const effectId = resolved.combat_effect as CombatEffectId;
+  return {
+    card: {
+      cardId: resolved.card_id,
+      effectId,
+      cost: CONFIG.combat.forgedCard.cost,
+      power: CONFIG.combat.forgedCard.power,
+      resonanceAttribute: resolved.effective_attributes[0],
+    },
+    program: programForEffect(effectId),
+  };
+}
+
+function representInstantForge(
+  result: ForgeRuntimeReducerResult,
+  context: ForgeResolverContextV1,
+): { state: ForgeRuntimeStateV1; events: ForgeRuntimeEvent[] } | null {
+  if (!result.state || !result.resolvedCard || !result.state.run.activeCombat) return null;
+  const createdEvents = result.events.filter((event): event is Extract<ForgeRuntimeEvent, { type: "FORGE_RESULT_CREATED" }> =>
+    event.type === "FORGE_RESULT_CREATED" && event.mode === "INSTANT");
+  if (createdEvents.length !== 1) return null;
+  const created = createdEvents[0];
+  const canonical = canonicalResolvedCard(created.cardId, context);
+  if (canonicalSerialize(canonical) !== canonicalSerialize(result.resolvedCard)
+    || canonical.card_id !== created.cardId || canonical.recipe_id !== created.recipeId) return null;
+
+  const state = clone(result.state);
+  const active = state.run.activeCombat!;
+  const ledgers = active.ephemeralResults.filter(({ instanceId }) => instanceId === created.instanceId);
+  if (ledgers.length !== 1 || ledgers[0].cardId !== created.cardId || ledgers[0].recipeId !== created.recipeId
+    || ledgers[0].location !== "HAND" || active.state.instances.some(({ instanceId }) => instanceId === created.instanceId)
+    || Object.values(active.state.zones).some((zone) => zone.includes(created.instanceId))) return null;
+
+  const playable = playableResolvedCard(canonical);
+  let events = clone(result.events);
+  if (!playable) {
+    ledgers[0].location = "EQUIPMENT";
+    events = events.map((event) => event.type === "FORGE_RESULT_CREATED" && event.mode === "INSTANT" && event.instanceId === created.instanceId
+      ? { ...event, location: "EQUIPMENT" }
+      : event);
+  } else {
+    const existingCard = active.state.cards.find(({ cardId }) => cardId === playable.card.cardId);
+    if (existingCard && canonicalSerialize(existingCard) !== canonicalSerialize(playable.card)) return null;
+    if (!existingCard) active.state.cards.push(playable.card);
+    const existingProgram = active.state.programs.find(({ effectId }) => effectId === playable.program.effectId);
+    if (existingProgram && canonicalSerialize(existingProgram) !== canonicalSerialize(playable.program)) return null;
+    if (!existingProgram) active.state.programs.push(playable.program);
+    active.state.instances.push({ instanceId: created.instanceId, cardId: created.cardId });
+    active.state.zones.hand.push(created.instanceId);
+  }
+  const decoded = decodeForgeRuntimeState(state);
+  return decoded.valid ? { state: decoded.value, events } : null;
+}
+
 function combatProjection(runtime: ForgeRuntimeStateV1, context: ForgeResolverContextV1): Pick<CombatSetup, "cards" | "instances" | "deck" | "programs"> {
   const cards: CardDefinition[] = [];
   const playableCardIds = new Set<string>();
   const equipmentCardIds = new Set<string>();
+  const programs: EffectProgram[] = [];
+  const programEffectIds = new Set<CombatEffectId>();
+
+  const addPlayable = (card: CardDefinition, program: EffectProgram) => {
+    if (!playableCardIds.has(card.cardId)) {
+      cards.push(card);
+      playableCardIds.add(card.cardId);
+    }
+    if (!programEffectIds.has(program.effectId)) {
+      programs.push(program);
+      programEffectIds.add(program.effectId);
+    }
+  };
 
   for (const { cardId } of runtime.run.ownedInstances) {
     if (playableCardIds.has(cardId) || equipmentCardIds.has(cardId)) continue;
     const recipeId = canonicalRecipeIdForCard(cardId);
     if (recipeId === null) {
       if (!context.materials.some(({ id }) => id === cardId)) throw new Error(`unknown Track-1 material projection: ${cardId}`);
-      cards.push({ cardId, ...CONFIG.combat.baselineMaterial });
-      playableCardIds.add(cardId);
+      const card = { cardId, ...CONFIG.combat.baselineMaterial } as CardDefinition;
+      addPlayable(card, programForEffect(card.effectId));
       continue;
     }
 
-    const [leftId, rightId] = recipeId.split("|");
-    const left = context.materials.find(({ id }) => id === leftId);
-    const right = context.materials.find(({ id }) => id === rightId);
-    if (!left || !right) throw new Error(`missing canonical recipe material: ${recipeId}`);
-    const resolved = resolveForgeCard(left, right, context.inputs);
-    if (resolved.card_id !== cardId || resolved.recipe_id !== recipeId) throw new Error(`canonical recipe projection mismatch: ${cardId}`);
-    if (resolved.branch === "EQUIPMENT") {
+    const resolved = canonicalResolvedCard(cardId, context);
+    const playable = playableResolvedCard(resolved);
+    if (!playable) {
       equipmentCardIds.add(cardId);
       continue;
     }
-    if (!resolved.combat_effect || !COMBAT_EFFECT_ID_SET.has(resolved.combat_effect) || !resolved.effective_attributes[0]) {
-      throw new Error(`invalid canonical combat projection: ${cardId}`);
+    addPlayable(playable.card, playable.program);
+  }
+
+  const active = runtime.run.activeCombat;
+  if (active) {
+    for (const ephemeral of active.ephemeralResults) {
+      if (!active.state.instances.some(({ instanceId }) => instanceId === ephemeral.instanceId)) continue;
+      const resolved = canonicalResolvedCard(ephemeral.cardId, context);
+      if (resolved.recipe_id !== ephemeral.recipeId) throw new Error(`ephemeral recipe projection mismatch: ${ephemeral.instanceId}`);
+      const playable = playableResolvedCard(resolved);
+      if (!playable) throw new Error(`represented equipment is not playable: ${ephemeral.instanceId}`);
+      addPlayable(playable.card, playable.program);
     }
-    cards.push({
-      cardId,
-      effectId: resolved.combat_effect as CombatEffectId,
-      cost: CONFIG.combat.forgedCard.cost,
-      power: CONFIG.combat.forgedCard.power,
-      resonanceAttribute: resolved.effective_attributes[0],
-    });
-    playableCardIds.add(cardId);
   }
 
   const instances = runtime.run.ownedInstances.filter(({ cardId }) => playableCardIds.has(cardId)).map((instance) => ({ ...instance }));
   const playableInstanceIds = new Set(instances.map(({ instanceId }) => instanceId));
   const deck = runtime.run.deck.filter((instanceId) => playableInstanceIds.has(instanceId));
-  const effectIds = [...new Set(cards.map(({ effectId }) => effectId))];
-  const programs: EffectProgram[] = effectIds.map((effectId) => effectId === "DELAYED_EXPLOSION"
-    ? { effectId, targetRule: { kind: "REQUIRED", allowed: "ENEMY" }, playedCardDestination: "DISCARD", operations: [{ kind: "DAMAGE", target: { kind: "SELECTED" }, amount: { kind: "EFFECT_POWER", multiplier: 1 } }] }
-    : { effectId, targetRule: { kind: "NONE" }, playedCardDestination: "DISCARD", operations: [] });
   return { cards, instances, deck, programs };
 }
 
@@ -688,10 +774,14 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
         const result = reduceForgeRuntime(candidate.runtime, runtimeCommand, options.context);
         if (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED")) failure = "RUNTIME_REJECTED";
         else {
-          candidate.runtime = result.state;
-          events.push(...result.events);
+          const represented = command.type === "FORGE_INSTANT" ? representInstantForge(result, options.context) : { state: result.state, events: result.events };
+          if (!represented) failure = "RUNTIME_REJECTED";
+          else {
+            candidate.runtime = represented.state;
+            events.push(...represented.events);
+          }
           const active = candidate.runtime.run.activeCombat;
-          if (command.type === "APPLY_COMBAT" && active && active.state.status !== "ONGOING") {
+          if (!failure && command.type === "APPLY_COMBAT" && active && active.state.status !== "ONGOING") {
             const status = active.state.status;
             candidate.flow.playerHp = Math.max(0, active.state.player.hp);
             const cleared = decodeForgeRuntimeState({ ...candidate.runtime, run: { ...candidate.runtime.run, activeCombat: null } });
@@ -721,8 +811,8 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
               }
             }
           }
-          if (result.state.profile.discoveredRecipeIds.length !== candidate.profile.discoveredRecipeIds.length) {
-            const profile = classifyPersistentProfile({ ...candidate.profile, discoveredRecipeIds: [...result.state.profile.discoveredRecipeIds] });
+          if (!failure && candidate.runtime.profile.discoveredRecipeIds.length !== candidate.profile.discoveredRecipeIds.length) {
+            const profile = classifyPersistentProfile({ ...candidate.profile, discoveredRecipeIds: [...candidate.runtime.profile.discoveredRecipeIds] });
             if (profile.kind !== "VALID") failure = "PROFILE_SYNC_FAILED";
             else candidate.profile = profile.value;
           }

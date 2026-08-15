@@ -225,9 +225,17 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
   if (!mayHaveAction && active.forgeActionsRemaining !== 0) errors.push(`${location}.forgeActionsRemaining must be zero outside an ongoing player action`);
   uniqueStrings(active.enrolledPersistentInstanceIds, `${location}.enrolledPersistentInstanceIds`, errors);
   const ownedById = new Map(owned.map((instance) => [instance.instanceId, instance]));
+  const ephemeralById = new Map(active.ephemeralResults.map((item) => [item.instanceId, item]));
   for (const id of active.enrolledPersistentInstanceIds) if (!ownedById.has(id)) errors.push(`${location} enrolls an unowned instance: ${id}`);
   const persistentIds: string[] = [];
   for (const instance of active.state.instances) {
+    const ephemeral = ephemeralById.get(instance.instanceId);
+    if (ephemeral) {
+      if (ephemeral.location === "EQUIPMENT" || ephemeral.cardId !== instance.cardId) {
+        errors.push(`${location}.state ephemeral instance does not match ledger authority: ${instance.instanceId}`);
+      }
+      continue;
+    }
     persistentIds.push(instance.instanceId);
     const ownedInstance = ownedById.get(instance.instanceId);
     if (!ownedInstance || ownedInstance.cardId !== instance.cardId) errors.push(`${location}.state instance does not match owned authority: ${instance.instanceId}`);
@@ -245,6 +253,23 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
   const ephemeralIds = active.ephemeralResults.map((item) => item.instanceId);
   uniqueStrings(ephemeralIds, `${location}.ephemeralResults instance ids`, errors);
   for (const id of ephemeralIds) if (reserved.has(id)) errors.push(`${location}.ephemeral result id collides: ${id}`);
+  const zoneEntries = [
+    ["HAND", active.state.zones.hand],
+    ["DECK", active.state.zones.deck],
+    ["DISCARD", active.state.zones.discard],
+    ["EXILE", active.state.zones.exile],
+  ] as const;
+  for (const ephemeral of active.ephemeralResults) {
+    const represented = active.state.instances.filter(({ instanceId }) => instanceId === ephemeral.instanceId);
+    const memberships = zoneEntries.flatMap(([zone, ids]) => ids.filter((id) => id === ephemeral.instanceId).map(() => zone));
+    if (represented.length === 0) {
+      if (memberships.length !== 0) errors.push(`${location}.overlay-only ephemeral result is present in a combat zone: ${ephemeral.instanceId}`);
+      continue;
+    }
+    if (represented.length !== 1 || ephemeral.location === "EQUIPMENT" || memberships.length !== 1 || memberships[0] !== ephemeral.location) {
+      errors.push(`${location}.represented ephemeral result must occupy its exact combat zone once: ${ephemeral.instanceId}`);
+    }
+  }
   return errors.length === 0;
 }
 
