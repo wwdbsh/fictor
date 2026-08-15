@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "completed_at": "2026-08-15T06:38:54.000Z",
+  "executor": {
+    "kind": "CODEX",
+    "label": "Codex Puppeteer QA fallback"
+  },
+  "qa_environment": {
+    "browser_name": "Chrome for Testing (Puppeteer)",
+    "browser_version": "151.0.7922.71",
+    "os_name": "macOS",
+    "os_version": "26.5.2 (25F84)",
+    "viewport_css_px": "1536x1024",
+    "reduced_motion": false
+  },
+  "recording": {
+    "captured_by": "CODEX",
+    "capture_tool": "Puppeteer ScreenRecorder (VP9 WebM)",
+    "started_at": "2026-08-15T06:11:18.000Z",
+    "finished_at": "2026-08-15T06:16:39.000Z",
+    "continuous": true,
+    "provenance_notes_ko": "인앱 Browser plugin에 연결 가능한 브라우저 인스턴스가 없어, Codex가 하나의 Puppeteer 지속 세션으로 깨끗한 정적 빌드 UI를 직접 조작하고 연속 녹화했다. 사람 수동 테스트로 주장하지 않으며 영상은 편집하지 않았다."
+  },
+  "video_path": "docs/playtests/t031/t031-stillkin-full-run.webm",
+  "checklist": [
+    { "id": "LOSS_RESTART", "status": "PASS", "notes_ko": "실제 화면에서 20턴 패배 후 RUN_LOST를 확인하고 재시작 직후 HP 30, 연료 4, 덱 30장, 첫 노드를 확인했다." },
+    { "id": "INSTANT_LIFETIME", "status": "PASS", "notes_ko": "전투 중 ore_still과 still_01을 즉석 빚어 굳은 서리꽃 발견 연출을 확인했고, 전투 종료 뒤 결과 소멸과 재료 복구를 저장 상태 검증과 함께 확인했다." },
+    { "id": "WORKSHOP_CANONICAL", "status": "PASS", "notes_ko": "무료 공방은 연료 4를 유지하고, 재시작 뒤 유료 공방은 연료 4에서 3으로 감소했으며 같은 조합이 같은 굳은 서리꽃 결과와 반복 발견 안내를 냈다." },
+    { "id": "REWARD_RESTRICTIONS", "status": "PASS", "notes_ko": "일반 보상은 재료 3개 중 선택, 엘리트 보상은 도구와 기괴 산물만 노출되며 Tier2와 장비 직접 보상이 없음을 확인했다." },
+    { "id": "BOSS_VICTORY_RESTART", "status": "PASS", "notes_ko": "보스 어름, 처음 멈춘 신과의 전투, 신의 심장 획득, RUN_WON 승리 화면, 이후 새 런 재시작을 연속 확인했다." }
+  ],
+  "notes_ko": "깨끗한 후보 커밋 A 정적 빌드에서 실제 UI 전체 경로를 연속 조작했다. 콘솔 경고·오류와 페이지 오류는 0건이었고, 영상은 1536x1024 VP9 WebM 7,134프레임으로 ffmpeg 전체 디코딩을 통과했다. completed_at은 영상 종료 뒤 후보 A2의 아홉 명령을 순차 재검증하고 체크리스트 증거를 최종 확정한 시각이다."
+}

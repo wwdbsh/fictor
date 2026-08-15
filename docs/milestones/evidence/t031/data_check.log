@@ -1,0 +1,5 @@
+
+> fictor@0.0.0 gen:data:check
+> tsx scripts/gen-data.ts --check
+
+{"command":"gen:data:check","generator_version":"canonical-v1","source_hash":"7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720","cards":1326,"equipment":45,"written":[]}
