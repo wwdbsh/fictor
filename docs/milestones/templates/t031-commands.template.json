@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "commands": [
+    { "id": "clean_install", "command": "npm ci", "log_path": "docs/milestones/evidence/t031/clean_install.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "generate_data", "command": "npm run gen:data", "log_path": "docs/milestones/evidence/t031/generate_data.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "generated_diff", "command": "git diff --exit-code -- src/data/generated", "log_path": "docs/milestones/evidence/t031/generated_diff.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "data_check", "command": "npm run gen:data:check", "log_path": "docs/milestones/evidence/t031/data_check.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "t022_audit", "command": "npx tsx scripts/assets/t022-m2-assets-audit-v1-cli.ts check", "log_path": "docs/milestones/evidence/t031/t022_audit.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "tests", "command": "npm test", "log_path": "docs/milestones/evidence/t031/tests.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "typecheck", "command": "npm run typecheck", "log_path": "docs/milestones/evidence/t031/typecheck.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "build", "command": "npm run build", "log_path": "docs/milestones/evidence/t031/build.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" },
+    { "id": "smoke", "command": "npm run smoke:static", "log_path": "docs/milestones/evidence/t031/smoke.log", "exit_code": null, "started_at": "REPLACE_WITH_UTC_ISO", "finished_at": "REPLACE_WITH_UTC_ISO" }
+  ]
+}

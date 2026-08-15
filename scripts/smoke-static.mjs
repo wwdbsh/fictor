@@ -161,6 +161,7 @@ async function main() {
     const webSocketRequests = [];
     const browserImageRequests = [];
     const discoveryCheckpoints = [];
+    const saveCheckpoints = [];
 
     const disableSandbox = process.env.PUPPETEER_DISABLE_SANDBOX === "true";
     browser = await puppeteer.launch({
@@ -203,6 +204,35 @@ async function main() {
       webSocketRequests.push(url);
     });
 
+    const readCanonicalSaveV2 = async (targetPage, label) => {
+      const envelope = await targetPage.evaluate(() => {
+        const bytes = window.localStorage.getItem("fictor.save.v2");
+        return bytes === null ? null : JSON.parse(bytes);
+      });
+      const exactKeys = (value, keys) => value !== null && typeof value === "object" && !Array.isArray(value)
+        && Object.keys(value).sort().join("|") === [...keys].sort().join("|");
+      if (!exactKeys(envelope, ["schemaVersion", "saveGeneration", "saveRevision", "profile", "runtime", "flow"])
+        || envelope.schemaVersion !== 2 || !Number.isSafeInteger(envelope.saveRevision)
+        || typeof envelope.saveGeneration !== "string" || envelope.saveGeneration.length === 0
+        || !exactKeys(envelope.profile, ["schemaVersion", "discoveredRecipeIds", "ownedHeartIds", "featureFlags"])
+        || !exactKeys(envelope.runtime, ["schemaVersion", "engineVersion", "resolverVersion", "sourceHash", "revision", "run"])
+        || !exactKeys(envelope.runtime.run, ["fuel", "nextInstanceSequence", "ownedInstances", "deck", "activeCombat"])
+        || !exactKeys(envelope.flow, ["schemaVersion", "controllerVersion", "revision", "runSequence", "runId", "scenarioId", "scenarioHash", "configId", "configHash", "phase", "nextNodeIndex", "currentNodeIndex", "pendingOfferId", "workshopEntitlementNodeId", "nextEncounterNonce", "combatBinding", "playerHp", "randomState"])) {
+        throw new Error(`${label} canonical v2 save envelope가 exact tracked schema와 일치하지 않습니다.`);
+      }
+      saveCheckpoints.push({ label, saveRevision: envelope.saveRevision, flowRevision: envelope.flow.revision, phase: envelope.flow.phase });
+      return envelope;
+    };
+
+    const assertFreshStarterVisible = async (targetPage, label) => {
+      const values = await targetPage.$$eval(".stats-strip div", (items) => Object.fromEntries(items.map((item) => [item.querySelector("dt")?.textContent?.trim(), item.querySelector("dd")?.textContent?.trim()])));
+      const firstNode = await targetPage.$eval(".journey-node:first-child", (node) => ({ label: node.querySelector("small")?.textContent?.trim(), current: node.classList.contains("is-current") }));
+      if (values["체력"] !== "30 / 30" || values["연료"] !== "4" || values["덱"] !== "30장" || firstNode.label !== "첫 조우" || !firstNode.current) {
+        throw new Error(`${label} starter가 HP30/fuel4/deck30/first node와 일치하지 않습니다: ${JSON.stringify({ values, firstNode })}`);
+      }
+      return { hp: 30, fuel: 4, deck: 30, firstNode: "d1-normal-swarm" };
+    };
+
     const navigationResponse = await page.goto(pageUrl, { waitUntil: "networkidle0" });
     if (navigationResponse === null || !navigationResponse.ok()) {
       throw new Error(`문서 응답 실패: ${navigationResponse?.status() ?? "응답 없음"}`);
@@ -215,6 +245,7 @@ async function main() {
     if (heading !== "어름의 터 · 깊이 1 / 3" || status !== "진행 기록을 불러왔습니다.") {
       throw new Error(`한국어 bootstrap 문구가 일치하지 않습니다: ${heading} / ${status}`);
     }
+    const initialStarter = await assertFreshStarterVisible(page, "main fresh win");
     const initialImagePaths = browserImageRequests.map((value) => new URL(value).pathname);
     if (initialImagePaths.length !== 1 || initialImagePaths[0] !== `${mountPath}assets/backgrounds/background__still__depth_01.png`) {
       throw new Error(`초기 화면 밖 asset이 요청되었습니다: ${initialImagePaths.join(", ")}`);
@@ -228,6 +259,67 @@ async function main() {
     if (javascriptBytes > 409_600 || cssBytes > 32_768) {
       throw new Error(`bundle budget 초과: js=${javascriptBytes}, css=${cssBytes}`);
     }
+
+    const verifyFreshLossAndRestart = async () => {
+      const context = await browser.createBrowserContext();
+      const lossPage = await context.newPage();
+      const lossWebSockets = [];
+      const lossDevtools = await lossPage.createCDPSession();
+      await lossDevtools.send("Network.enable");
+      lossPage.on("console", (message) => { if (message.type() === "error") browserErrors.push(`loss console: ${message.text()}`); });
+      lossPage.on("pageerror", (error) => browserErrors.push(`loss page: ${error.message}`));
+      lossPage.on("requestfailed", (request) => browserErrors.push(`loss request: ${request.url()} (${request.failure()?.errorText ?? "unknown"})`));
+      lossPage.on("request", (request) => {
+        const requestUrl = new URL(request.url());
+        if (requestUrl.origin !== origin) externalRequests.push(request.url());
+        if (["fetch", "xhr"].includes(request.resourceType())) apiRequests.push(request.url());
+      });
+      lossPage.on("response", (response) => { if (!response.ok()) failedResponses.push(`${response.status()} ${response.url()}`); });
+      lossDevtools.on("Network.webSocketCreated", ({ url }) => lossWebSockets.push(url));
+      const clickLossAndWait = async (selector) => {
+        const before = await lossPage.$eval("main", (element) => element.getAttribute("data-screen-key"));
+        await lossPage.click(selector);
+        await lossPage.waitForFunction((screenKey) => {
+          const main = document.querySelector("main");
+          return main?.getAttribute("aria-busy") === "false" && main.getAttribute("data-screen-key") !== screenKey;
+        }, {}, before);
+      };
+      try {
+        const response = await lossPage.goto(pageUrl, { waitUntil: "networkidle0" });
+        if (response === null || !response.ok()) throw new Error(`loss 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
+        await lossPage.waitForSelector("main.phase-between_nodes");
+        const starter = await assertFreshStarterVisible(lossPage, "fresh loss");
+        await clickLossAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
+        let turns = 0;
+        while (await lossPage.$("main.phase-in_combat")) {
+          if (turns++ > 100) throw new Error("fresh loss smoke가 RUN_LOST에 도달하지 못했습니다.");
+          const start = await lossPage.$('button[data-action-kind="START_TURN"]:not([disabled])');
+          const end = await lossPage.$('button[data-action-kind="END_TURN"]:not([disabled])');
+          if (start) await clickLossAndWait('button[data-action-kind="START_TURN"]');
+          else if (end) await clickLossAndWait('button[data-action-kind="END_TURN"]');
+          else throw new Error("fresh loss smoke에서 공개 턴 행동을 찾지 못했습니다.");
+        }
+        await lossPage.waitForSelector("main.phase-run_lost");
+        const lostSave = await readCanonicalSaveV2(lossPage, "fresh-loss-terminal");
+        if (lostSave.flow.phase !== "RUN_LOST" || lostSave.flow.playerHp !== 0 || lostSave.runtime.run.activeCombat !== null) {
+          throw new Error(`loss terminal save가 정리되지 않았습니다: ${JSON.stringify({ phase: lostSave.flow.phase, hp: lostSave.flow.playerHp, activeCombat: lostSave.runtime.run.activeCombat !== null })}`);
+        }
+        await clickLossAndWait('button[data-action-kind="RESTART"]');
+        await lossPage.waitForSelector("main.phase-between_nodes");
+        const restarted = await assertFreshStarterVisible(lossPage, "loss restart");
+        const restartSave = await readCanonicalSaveV2(lossPage, "fresh-loss-restart");
+        if (restartSave.flow.phase !== "BETWEEN_NODES" || restartSave.flow.nextNodeIndex !== 0 || restartSave.flow.currentNodeIndex !== null
+          || restartSave.flow.playerHp !== 30 || restartSave.runtime.run.fuel !== 4 || restartSave.runtime.run.deck.length !== 30
+          || restartSave.runtime.run.ownedInstances.length !== 30 || restartSave.runtime.run.activeCombat !== null) {
+          throw new Error(`loss restart save가 starter와 일치하지 않습니다: ${JSON.stringify({ flow: restartSave.flow, fuel: restartSave.runtime.run.fuel, deck: restartSave.runtime.run.deck.length, owned: restartSave.runtime.run.ownedInstances.length })}`);
+        }
+        if (lossWebSockets.length > 0) webSocketRequests.push(...lossWebSockets);
+        return { isolatedContext: true, lossPhase: "RUN_LOST", restartPhase: "BETWEEN_NODES", starter, restarted, turns };
+      } finally {
+        await context.close();
+      }
+    };
+    const lossRestart = await verifyFreshLossAndRestart();
 
     const verifyUnsafeAssetPolicy = async () => {
       const probePage = await browser.newPage();
@@ -342,7 +434,19 @@ async function main() {
         const resultName = await page.$eval(".instant-preview .preview-result strong", (element) => element.textContent?.trim());
         await clickAndWait(".instant-preview .primary-cta");
         const ephemeralCardId = await page.$eval('button.combat-card[data-card-id^="forge__"]', (element) => element.getAttribute("data-card-id"));
-        instantDiscovery = { materialIds: pair, resultName, ephemeralCardId };
+        const instantSave = await readCanonicalSaveV2(page, "instant-created");
+        const active = instantSave.runtime.run.activeCombat;
+        const recipeId = [...pair].sort().join("|");
+        const isolated = active?.isolatedMaterials ?? [];
+        const ephemeral = active?.ephemeralResults ?? [];
+        const isolatedCardIds = isolated.map(({ instance }) => instance.cardId).sort();
+        if (instantSave.flow.phase !== "IN_COMBAT" || active?.forgeActionsRemaining !== 0 || isolated.length !== 2 || ephemeral.length !== 1
+          || isolatedCardIds.join("|") !== [...pair].sort().join("|") || ephemeral[0].cardId !== ephemeralCardId
+          || ephemeral[0].recipeId !== recipeId || ephemeral[0].location !== "HAND"
+          || !instantSave.profile.discoveredRecipeIds.includes(recipeId) || instantSave.runtime.run.ownedInstances.length !== 30) {
+          throw new Error(`즉석 빚기 v2 수명/행동/격리 상태가 다릅니다: ${JSON.stringify({ phase: instantSave.flow.phase, remaining: active?.forgeActionsRemaining, isolatedCardIds, ephemeral, discovered: instantSave.profile.discoveredRecipeIds, owned: instantSave.runtime.run.ownedInstances.length })}`);
+        }
+        instantDiscovery = { materialIds: pair, materialInstanceIds: isolated.map(({ instance }) => instance.instanceId), resultName, recipeId, ephemeralCardId, ephemeralInstanceId: ephemeral[0].instanceId };
         await settleFirstDiscovery("instant");
         const imagesBeforeCodex = browserImageRequests.length;
         await page.click(".codex-open");
@@ -374,6 +478,17 @@ async function main() {
     }
     if (!instantDiscovery || !reloadedAfterInstant) throw new Error("즉석 발견 → 도감 → reload smoke가 실행되지 않았습니다.");
     await page.waitForSelector("main.phase-awaiting_reward");
+    const instantCleaned = await readCanonicalSaveV2(page, "instant-cleaned-after-combat");
+    const cleanedOwnedIds = new Set(instantCleaned.runtime.run.ownedInstances.map(({ instanceId }) => instanceId));
+    const cleanedDeckIds = new Set(instantCleaned.runtime.run.deck);
+    if (instantCleaned.runtime.run.activeCombat !== null || instantDiscovery.materialInstanceIds.some((id) => !cleanedOwnedIds.has(id) || !cleanedDeckIds.has(id))
+      || cleanedOwnedIds.has(instantDiscovery.ephemeralInstanceId) || cleanedDeckIds.has(instantDiscovery.ephemeralInstanceId)) {
+      throw new Error(`즉석 전투 종료 복구/결과 제거가 다릅니다: ${JSON.stringify({ activeCombat: instantCleaned.runtime.run.activeCombat, materialInstanceIds: instantDiscovery.materialInstanceIds, result: instantDiscovery.ephemeralInstanceId })}`);
+    }
+    const normalReward = await page.$$eval(".reward-card", (cards) => cards.map((card) => ({ name: card.querySelector("h3")?.textContent?.trim(), kind: card.querySelector("p")?.textContent?.trim() })));
+    if (normalReward.length !== 3 || normalReward.some(({ kind }) => kind !== "재료 · 어름") || normalReward.some(({ name, kind }) => /forge__|장비|빚기 결과/i.test(`${name} ${kind}`))) {
+      throw new Error(`일반 보상이 material 3 제한과 다릅니다: ${JSON.stringify(normalReward)}`);
+    }
     await clickAndWait(".reward-card button");
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
     await page.waitForSelector("main.phase-in_event");
@@ -383,20 +498,37 @@ async function main() {
     await page.waitForSelector("main.phase-in_event");
     await clickAndWait(".event-choice");
     await page.waitForSelector(".workshop-materials");
-    const selected = await page.$$eval(".workshop-materials button", (buttons) => {
+    const freeBefore = await readCanonicalSaveV2(page, "free-workshop-before");
+    const freeSelected = await page.$$eval(".workshop-materials button", (buttons) => {
       const ore = buttons.find((button) => button.getAttribute("data-material-card-id") === "ore_still");
       const still03 = buttons.find((button) => button.getAttribute("data-material-card-id") === "still_03");
-      if (!(ore instanceof HTMLButtonElement) || !(still03 instanceof HTMLButtonElement)) return false;
+      if (!(ore instanceof HTMLButtonElement) || !(still03 instanceof HTMLButtonElement)) return null;
       ore.click();
       still03.click();
-      return true;
+      return {
+        cardIds: [ore.getAttribute("data-material-card-id"), still03.getAttribute("data-material-card-id")],
+        instanceIds: [ore.getAttribute("data-material-instance-id"), still03.getAttribute("data-material-instance-id")],
+      };
     });
-    if (!selected) throw new Error("공방에서 ore_still + still_03 재료를 찾지 못했습니다.");
+    if (!freeSelected) throw new Error("공방에서 ore_still + still_03 재료를 찾지 못했습니다.");
+    // The UI intentionally exposes card IDs but not persistence instance IDs. Bind the two
+    // selected material definitions to their unique current owned instances in canonical v2.
+    freeSelected.instanceIds = freeSelected.cardIds.map((cardId) => freeBefore.runtime.run.ownedInstances.find(({ instanceId, cardId: ownedCardId }) => ownedCardId === cardId && !freeSelected.instanceIds.includes(instanceId))?.instanceId ?? null);
+    if (freeSelected.instanceIds.some((id) => id === null)) throw new Error(`무료 공방 재료 instance를 v2 owned state에서 결속하지 못했습니다: ${JSON.stringify(freeSelected)}`);
     await page.waitForSelector('.resolved-screen .primary-cta:not([disabled])');
     await page.click('.resolved-screen .primary-cta:not([disabled])');
     await page.waitForSelector('.forge-dialog[role="dialog"]');
     await clickAndWait('.forge-dialog .primary-cta:not([disabled])');
     await settleFirstDiscovery("free-workshop");
+    const freeAfter = await readCanonicalSaveV2(page, "free-workshop-after");
+    const freeOwnedIds = new Set(freeAfter.runtime.run.ownedInstances.map(({ instanceId }) => instanceId));
+    const freeResult = freeAfter.runtime.run.ownedInstances.filter(({ cardId }) => cardId === "forge__ore_still__still_03");
+    if (freeBefore.runtime.run.fuel !== 4 || freeAfter.runtime.run.fuel !== freeBefore.runtime.run.fuel
+      || freeSelected.instanceIds.some((id) => freeOwnedIds.has(id)) || freeResult.length !== 1
+      || freeAfter.runtime.run.ownedInstances.length !== freeBefore.runtime.run.ownedInstances.length - 1
+      || freeAfter.runtime.run.deck.length !== freeBefore.runtime.run.deck.length - 1) {
+      throw new Error(`무료 공방 영구 소모/연료/결과가 다릅니다: ${JSON.stringify({ beforeFuel: freeBefore.runtime.run.fuel, afterFuel: freeAfter.runtime.run.fuel, beforeOwned: freeBefore.runtime.run.ownedInstances.length, afterOwned: freeAfter.runtime.run.ownedInstances.length, resultCount: freeResult.length, selected: freeSelected.instanceIds })}`);
+    }
     await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
     await page.waitForSelector('img[alt="눌린 불의 잔해"]');
@@ -427,6 +559,13 @@ async function main() {
 
     await winVisibleCombat();
     await page.waitForSelector("main.phase-awaiting_reward");
+    const eliteRewardSave = await readCanonicalSaveV2(page, "elite-reward");
+    const eliteReward = await page.$$eval(".reward-card", (cards) => cards.map((card) => ({ name: card.querySelector("h3")?.textContent?.trim(), kind: card.querySelector("p")?.textContent?.trim() })));
+    if (eliteRewardSave.flow.pendingOfferId !== "elite-d2" || eliteReward.length !== 2
+      || eliteReward.map(({ kind }) => kind).sort().join("|") !== ["기괴 산물 · 어름", "도구 · 어름"].sort().join("|")
+      || eliteReward.some(({ name, kind }) => /forge__|장비|빚기 결과/i.test(`${name} ${kind}`))) {
+      throw new Error(`엘리트 보상이 tool-or-oddity 제한과 다릅니다: ${JSON.stringify({ pending: eliteRewardSave.flow.pendingOfferId, eliteReward })}`);
+    }
     await clickAndWait(".reward-card:nth-child(2) button");
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]'); // COLLAPSE
     await clickAndWait(".event-choice");
@@ -442,21 +581,42 @@ async function main() {
     await clickAndWait(".event-choice");
     await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]'); // BOSS
+    const bossBefore = await readCanonicalSaveV2(page, "boss-entered");
+    if (bossBefore.flow.phase !== "IN_COMBAT" || bossBefore.flow.combatBinding?.encounterId !== "the_stilling" || bossBefore.profile.ownedHeartIds.length !== 0) {
+      throw new Error(`보스 진입/heart 사전 상태가 다릅니다: ${JSON.stringify({ phase: bossBefore.flow.phase, binding: bossBefore.flow.combatBinding, hearts: bossBefore.profile.ownedHeartIds })}`);
+    }
     await winVisibleCombat();
     await page.waitForSelector("main.phase-run_won");
+    const wonSave = await readCanonicalSaveV2(page, "boss-victory");
+    if (wonSave.flow.phase !== "RUN_WON" || wonSave.runtime.run.activeCombat !== null
+      || wonSave.profile.ownedHeartIds.join("|") !== "heart__still") {
+      throw new Error(`보스 heart/victory save가 다릅니다: ${JSON.stringify({ phase: wonSave.flow.phase, hearts: wonSave.profile.ownedHeartIds, activeCombat: wonSave.runtime.run.activeCombat !== null })}`);
+    }
+    const discoveriesAtVictory = [...wonSave.profile.discoveredRecipeIds];
     await clickAndWait('button[data-action-kind="RESTART"]');
     await page.waitForSelector("main.phase-between_nodes");
+    const wonRestartStarter = await assertFreshStarterVisible(page, "victory restart");
+    const wonRestartSave = await readCanonicalSaveV2(page, "boss-victory-restart");
+    if (wonRestartSave.flow.phase !== "BETWEEN_NODES" || wonRestartSave.runtime.run.fuel !== 4
+      || wonRestartSave.runtime.run.deck.length !== 30 || wonRestartSave.runtime.run.ownedInstances.length !== 30
+      || wonRestartSave.profile.ownedHeartIds.join("|") !== "heart__still"
+      || wonRestartSave.profile.discoveredRecipeIds.join("|") !== discoveriesAtVictory.join("|")) {
+      throw new Error(`승리 재시작 starter/profile 상태가 다릅니다: ${JSON.stringify({ phase: wonRestartSave.flow.phase, fuel: wonRestartSave.runtime.run.fuel, deck: wonRestartSave.runtime.run.deck.length, owned: wonRestartSave.runtime.run.ownedInstances.length, hearts: wonRestartSave.profile.ownedHeartIds, discoveries: wonRestartSave.profile.discoveredRecipeIds })}`);
+    }
 
     const codexBeforePaid = await page.$eval(".codex-open", (element) => element.getAttribute("aria-label"));
+    const paidBefore = await readCanonicalSaveV2(page, "paid-workshop-before");
     await page.click('.journey-actions > button:not(.primary-cta)');
     await page.waitForSelector('.forge-panel[aria-label="공방 빚기"]');
     const paidSelected = await page.$$eval(".workshop-materials button", (buttons, materialIds) => {
       const selectedButtons = materialIds.map((id) => buttons.find((button) => button.getAttribute("data-material-card-id") === id));
-      if (!selectedButtons.every((candidate) => candidate instanceof HTMLButtonElement)) return false;
+      if (!selectedButtons.every((candidate) => candidate instanceof HTMLButtonElement)) return null;
       selectedButtons.forEach((candidate) => candidate.click());
-      return true;
+      return selectedButtons.map((candidate) => candidate.getAttribute("data-material-card-id"));
     }, instantDiscovery.materialIds);
     if (!paidSelected) throw new Error("새 런 공방에서 즉석 발견과 같은 재료를 찾지 못했습니다.");
+    const paidMaterialInstanceIds = paidSelected.map((cardId) => paidBefore.runtime.run.ownedInstances.find(({ cardId: ownedCardId }) => ownedCardId === cardId)?.instanceId ?? null);
+    if (paidMaterialInstanceIds.some((id) => id === null)) throw new Error(`유료 공방 재료 instance를 v2 owned state에서 결속하지 못했습니다: ${JSON.stringify(paidSelected)}`);
     await page.waitForSelector('.forge-panel .preview-result strong');
     const paidResultName = await page.$eval('.forge-panel .preview-result strong', (element) => element.textContent?.trim());
     if (paidResultName !== instantDiscovery.resultName) throw new Error(`즉석/공방 canonical 결과가 다릅니다: ${instantDiscovery.resultName} / ${paidResultName}`);
@@ -474,6 +634,16 @@ async function main() {
     if (codexAfterPaid !== codexBeforePaid) throw new Error(`같은 recipe의 공방 빚기가 도감 항목을 중복했습니다: ${codexBeforePaid} / ${codexAfterPaid}`);
     const fuelAfterPaid = await page.$$eval(".stats-strip div", (items) => items.find((item) => item.querySelector("dt")?.textContent === "연료")?.querySelector("dd")?.textContent?.trim());
     if (fuelAfterPaid !== "3") throw new Error(`새 런 유료 공방 연료 결과가 다릅니다: ${fuelAfterPaid}`);
+    const paidAfter = await readCanonicalSaveV2(page, "paid-workshop-after");
+    const paidOwnedIds = new Set(paidAfter.runtime.run.ownedInstances.map(({ instanceId }) => instanceId));
+    const paidResults = paidAfter.runtime.run.ownedInstances.filter(({ cardId }) => cardId === instantDiscovery.ephemeralCardId);
+    if (paidBefore.runtime.run.fuel !== 4 || paidAfter.runtime.run.fuel !== 3
+      || paidMaterialInstanceIds.some((id) => paidOwnedIds.has(id)) || paidResults.length !== 1
+      || paidAfter.runtime.run.ownedInstances.length !== paidBefore.runtime.run.ownedInstances.length - 1
+      || paidAfter.runtime.run.deck.length !== paidBefore.runtime.run.deck.length - 1
+      || paidAfter.profile.discoveredRecipeIds.join("|") !== paidBefore.profile.discoveredRecipeIds.join("|")) {
+      throw new Error(`유료 공방 연료/영구 소모/canonical/도감 중복 상태가 다릅니다: ${JSON.stringify({ beforeFuel: paidBefore.runtime.run.fuel, afterFuel: paidAfter.runtime.run.fuel, selected: paidMaterialInstanceIds, resultCard: instantDiscovery.ephemeralCardId, resultCount: paidResults.length, beforeDiscoveries: paidBefore.profile.discoveredRecipeIds, afterDiscoveries: paidAfter.profile.discoveredRecipeIds })}`);
+    }
 
     if (browserErrors.length > 0) {
       throw new Error(`브라우저 오류:\n${browserErrors.join("\n")}`);
@@ -507,7 +677,17 @@ async function main() {
         performanceBudgets: { initialRequests: 1, initialAssetBytes, javascriptBytes, cssBytes, noncurrentInitialAssets: 0 },
         unsafeAssetPolicy,
         discoveryCheckpoints,
-        corePath: "instant discovery -> Codex -> reload -> full run -> restart -> paid workshop same recipe",
+        saveCheckpoints,
+        lossRestart,
+        initialStarter,
+        wonRestartStarter,
+        rewardRestrictions: { normal: normalReward, elite: eliteReward, forgeOrEquipmentDirect: 0 },
+        workshopInvariants: {
+          free: { fuelBefore: freeBefore.runtime.run.fuel, fuelAfter: freeAfter.runtime.run.fuel, permanentMaterialsConsumed: 2, permanentResultsAdded: 1 },
+          paid: { fuelBefore: paidBefore.runtime.run.fuel, fuelAfter: paidAfter.runtime.run.fuel, permanentMaterialsConsumed: 2, permanentResultsAdded: 1, canonicalCardId: instantDiscovery.ephemeralCardId, duplicateDiscoveries: 0 },
+        },
+        boss: { heartId: "heart__still", phase: wonSave.flow.phase, restartPhase: wonRestartSave.flow.phase },
+        corePath: "isolated fresh loss -> RUN_LOST -> restart; instant discovery -> Codex -> reload -> full run -> boss victory -> restart -> paid workshop same recipe",
         instantDiscovery: { ...instantDiscovery, reloaded: reloadedAfterInstant, codexBeforePaid, codexAfterPaid, fuelAfterPaid },
         missingCanonicalFallback: { cardId: "forge__ore_still__still_03", assetPath: new URL(fallbackAssetUrl).pathname, httpStatus: fallbackAssetResponse.status },
         staticAssets,

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "completed_at": "REPLACE_WITH_UTC_ISO_AFTER_ACTUAL_PLAY",
+  "executor": {
+    "kind": "REPLACE_WITH_CODEX_HUMAN_OR_OTHER",
+    "label": "REPLACE_WITH_ACTUAL_EXECUTOR_LABEL"
+  },
+  "qa_environment": {
+    "browser_name": "REPLACE_WITH_BROWSER",
+    "browser_version": "REPLACE_WITH_EXACT_VERSION",
+    "os_name": "REPLACE_WITH_OS",
+    "os_version": "REPLACE_WITH_OS_VERSION",
+    "viewport_css_px": "REPLACE_WITH_WIDTHxHEIGHT",
+    "reduced_motion": false
+  },
+  "recording": {
+    "captured_by": "REPLACE_WITH_CODEX_HUMAN_OR_OTHER",
+    "capture_tool": "REPLACE_WITH_CAPTURE_TOOL",
+    "started_at": "REPLACE_WITH_UTC_ISO",
+    "finished_at": "REPLACE_WITH_UTC_ISO",
+    "continuous": true,
+    "provenance_notes_ko": "실제로 Browser와 녹화를 조작한 주체와 편집 여부를 기록한다. Codex가 수행했다면 CODEX로 기록한다."
+  },
+  "video_path": "docs/playtests/t031/REPLACE_WITH_ACTUAL_VIDEO.webm",
+  "checklist": [
+    { "id": "LOSS_RESTART", "status": "PENDING", "notes_ko": "실제 패배와 새 런 초기 상태를 확인한 뒤 기록한다." },
+    { "id": "INSTANT_LIFETIME", "status": "PENDING", "notes_ko": "즉석 결과와 재료 복구를 실제 화면에서 확인한 뒤 기록한다." },
+    { "id": "WORKSHOP_CANONICAL", "status": "PENDING", "notes_ko": "무료·유료 공방 비용과 동일 결과를 확인한 뒤 기록한다." },
+    { "id": "REWARD_RESTRICTIONS", "status": "PENDING", "notes_ko": "일반·엘리트 보상 제한을 확인한 뒤 기록한다." },
+    { "id": "BOSS_VICTORY_RESTART", "status": "PENDING", "notes_ko": "보스 심장·승리·재시작을 확인한 뒤 기록한다." }
+  ],
+  "notes_ko": "이 템플릿은 증거가 아니다. 실제 수동 플레이 전에는 PASS로 바꾸지 않는다."
+}
