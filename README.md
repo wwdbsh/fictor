@@ -98,6 +98,38 @@ M1 Phase 0의 최종 데이터와 승인 대응은 [불변 데이터 마일스�
 T031 M3 후보는 [마일스톤 문서](docs/milestones/README.md)의 candidate Commit A → evidence Commit B
 신뢰 경계를 따릅니다. 실제 수동 완주 영상이 없는 candidate는 완료 증거로 기록하지 않습니다.
 
+### macOS 테스트 임시 디렉터리 복구
+
+T015 v4 회귀 테스트는 macOS 사용자 임시 디렉터리에 테스트 전용 fixture를 만들고 테스트 종료 시
+자동 삭제합니다. 강제 종료 뒤 잔여물을 확인할 때는 먼저 모든 Vitest 프로세스가 끝났는지 확인한 다음,
+정확한 T015 접두사만 미리 출력합니다.
+
+```bash
+pgrep -fl 'vitest|canonical-shard-1-production-v4'
+fictor_tmp_root="$(getconf DARWIN_USER_TEMP_DIR)"
+find "$fictor_tmp_root" -maxdepth 1 -type d \( \
+  -name 'fictor-t015-v4-*' -o \
+  -name 'fictor-t015-v4-anchor-*' -o \
+  -name 'fictor-t015-v4-lock-*' -o \
+  -name 'fictor-t015-v43-*' \
+\) -print
+```
+
+출력 대상이 모두 종료된 T015 테스트 fixture임을 확인한 뒤에만 사용자가 다음 정리 명령을 실행합니다.
+
+```bash
+find "$fictor_tmp_root" -maxdepth 1 -type d \( \
+  -name 'fictor-t015-v4-*' -o \
+  -name 'fictor-t015-v4-anchor-*' -o \
+  -name 'fictor-t015-v4-lock-*' -o \
+  -name 'fictor-t015-v43-*' \
+\) -exec rm -rf -- {} +
+```
+
+이 절차는 `/private/tmp`, `fictor-t028-*`, `showcase-capture`, 저장소의 `assets/runs` 또는
+`assets/backups`를 정리하지 않습니다. 이 경로들은 별도 실행·증거 경계이므로 광역 `fictor-*` 패턴으로
+삭제하지 않습니다.
+
 ## 구현 문서
 
 - [구현 지시서](fictor-codex-spec.md)
