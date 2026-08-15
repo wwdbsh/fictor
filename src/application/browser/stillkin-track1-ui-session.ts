@@ -6,6 +6,7 @@ import type { StillkinTrack1Command, StillkinTrack1Snapshot } from "../run";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
 import { browserPacketHasCanonicalArt, type BrowserMaterialDisplay } from "./runtime-packet";
 import { buildCanonicalForgePreview, projectCanonicalCodex } from "./forge-codex-preview";
+import { buildForgePresentation } from "./forge-result-presentation";
 import type {
   StillkinTrack1UiSession,
   Track1UiActionDescriptor,
@@ -458,11 +459,11 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     snapshot() { return project(ensureLoaded()); },
     dispatch(action): Track1UiDispatchResult {
       const snapshot = ensureLoaded();
-      if (latchedBlockingIssuesKo) return { applied: false, projection: project(snapshot) };
+      if (latchedBlockingIssuesKo) return { applied: false, projection: project(snapshot), forgePresentation: null };
       const command = commandByDescriptor.get(action);
       if (!command || action.disabled) {
         feedback = failureFeedback("INVALID_ACTION");
-        return { applied: false, projection: project(snapshot) };
+        return { applied: false, projection: project(snapshot), forgePresentation: null };
       }
       const result = controller.dispatch(command);
       if (!result.applied) {
@@ -473,11 +474,14 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
             ? ISSUE_MESSAGES.READ_FAILED
             : "저장 기록이 외부에서 손상되었거나 지원하지 않는 형식으로 바뀌었습니다."];
         }
-        return { applied: false, projection: project(snapshot) };
+        return { applied: false, projection: project(snapshot), forgePresentation: null };
       }
       acceptedSnapshot = result.snapshot;
       feedback = commandFeedback(result.events);
-      return { applied: true, projection: project(acceptedSnapshot) };
+      const forgePresentation = result.persistence?.ok
+        ? buildForgePresentation(result.events, baseUrl, `${acceptedSnapshot.flow.runId}:${acceptedSnapshot.flow.revision}`)
+        : null;
+      return { applied: true, projection: project(acceptedSnapshot), forgePresentation };
     },
     previewForge(mode, materialInstanceIds) {
       const snapshot = ensureLoaded();

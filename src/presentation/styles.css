@@ -24,6 +24,23 @@ button, [tabindex] { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, [tabindex]:focus-visible { outline: 0.2rem solid #00a7a7; outline-offset: 0.2rem; }
 button:disabled { cursor: not-allowed; opacity: 0.48; }
 
+.asset-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 4rem;
+  place-content: center;
+  gap: 0.2rem;
+  padding: 0.5rem;
+  border: 1px dashed var(--line);
+  background: repeating-linear-gradient(-45deg, rgba(16,54,65,.06) 0 5px, rgba(246,241,230,.5) 5px 10px);
+  color: var(--ink-muted);
+  text-align: center;
+  font-family: system-ui, sans-serif;
+  font-size: 0.68rem;
+}
+.asset-placeholder strong { color: var(--ink); font: 700 0.78rem/1.25 Georgia, "Noto Serif KR", "Batang", serif; }
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -428,6 +445,94 @@ button.codex-entry { cursor: pointer; }
 .available-modes span { padding: 0.45rem; border: 1px solid var(--line); }
 .available-modes small { margin-top: 0.4rem; color: var(--ink-muted); }
 
+/* Forge discovery */
+.discovery-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  overflow: auto;
+  background: rgba(5, 20, 24, 0.88);
+  color: var(--ink);
+}
+.discovery-record {
+  width: min(58rem, 96vw);
+  min-height: min(42rem, 92svh);
+  padding: clamp(1.2rem, 3vw, 2.4rem);
+  border: 4px double #d6c096;
+  background: var(--paper-light);
+  box-shadow: 0 1.5rem 5rem rgba(0,0,0,.62), inset 0 0 0 .5rem rgba(16,54,65,.07);
+  text-align: center;
+}
+.discovery-phase-label { min-height: 1.4rem; margin: 0; color: var(--rust-dark); font: 700 .78rem/1.4 system-ui, sans-serif; letter-spacing: .12em; }
+.discovery-record h2 { margin: .25rem 0 1rem; font-size: clamp(1.9rem, 4vw, 3.1rem); letter-spacing: .08em; }
+.discovery-stage { position: relative; display: grid; grid-template-columns: minmax(12rem, 1fr) auto minmax(12rem, 1fr); align-items: center; gap: clamp(.5rem, 2vw, 1.5rem); min-height: 24rem; }
+.discovery-materials { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.discovery-materials figure, .discovery-result { position: relative; min-width: 0; margin: 0; }
+.discovery-materials figure { padding: .5rem; border: 1px solid var(--line); background: var(--paper); }
+.discovery-materials img, .discovery-materials .asset-placeholder { height: clamp(9rem, 25vh, 14rem); object-fit: contain; mix-blend-mode: multiply; }
+.discovery-materials figcaption { margin-top: .35rem; font-weight: 700; }
+.discovery-forge-mark { font-size: 2.5rem; color: var(--rust); }
+.discovery-result { padding: .8rem; border: 3px double var(--ink); background: var(--paper); box-shadow: var(--shadow); }
+.discovery-result > img, .discovery-result > .asset-placeholder { width: 100%; height: clamp(14rem, 36vh, 21rem); object-fit: contain; mix-blend-mode: multiply; }
+.discovery-result figcaption { display: grid; gap: .25rem; margin-top: .4rem; }
+.discovery-result figcaption strong { color: var(--rust-dark); font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
+.discovery-result figcaption span, .discovery-result figcaption small { font: .75rem/1.4 system-ui, sans-serif; }
+.discovery-result figcaption small { color: var(--rust-dark); }
+.discovery-card-back { position: absolute; inset: .8rem .8rem 4.9rem; z-index: 2; display: grid; place-content: center; border: 3px double #d6c096; background: #173941; color: #eee2c8; letter-spacing: .2em; }
+.discovery-skip { min-height: 2.75rem; margin-top: 1rem; padding: .55rem 1rem; border: 1px solid #817a6b; background: transparent; color: var(--ink); cursor: pointer; font-size: .8rem; }
+.discovery-final-copy { display: grid; justify-items: center; gap: .35rem; }
+.discovery-final-copy p { margin: 0; line-height: 1.5; }
+.discovery-final-copy p + p { color: var(--ink-muted); font: .78rem/1.4 system-ui, sans-serif; }
+.discovery-final-copy .action-button { min-width: 10rem; margin-top: .55rem; }
+
+.discovery-overlay.phase-burning .discovery-result { opacity: 0; }
+.discovery-overlay.phase-burning .discovery-materials figure { animation: discovery-burn 900ms ease-in forwards; }
+.discovery-overlay.phase-burning .discovery-materials figure:nth-child(2) { animation-delay: 80ms; }
+.discovery-overlay.phase-revealing .discovery-materials { opacity: .22; filter: sepia(.8); }
+.discovery-overlay.phase-revealing .discovery-result { animation: discovery-reveal 1200ms cubic-bezier(.2,.8,.2,1) both; }
+.discovery-overlay.phase-revealing .discovery-result > img,
+.discovery-overlay.phase-revealing .discovery-result > .asset-placeholder,
+.discovery-overlay.phase-revealing .discovery-result figcaption { opacity: 0; }
+.discovery-overlay.phase-printing .discovery-materials { opacity: .18; }
+.discovery-overlay.phase-printing .discovery-card-back, .discovery-overlay.phase-final .discovery-card-back { display: none; }
+.discovery-overlay.phase-printing .discovery-result figcaption { animation: discovery-print 900ms steps(8, end) both; }
+
+@keyframes discovery-burn {
+  0% { opacity: 1; filter: sepia(0); transform: translateY(0); }
+  70% { opacity: .55; filter: sepia(1) saturate(1.6); transform: translateY(-.25rem); }
+  100% { opacity: .12; filter: sepia(1) brightness(.65); transform: translateY(.6rem) scale(.94); }
+}
+@keyframes discovery-reveal {
+  0% { opacity: 0; transform: rotateY(90deg) scale(.86); }
+  100% { opacity: 1; transform: rotateY(0) scale(1); }
+}
+@keyframes discovery-print { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0); } }
+
+.discovery-toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 4rem minmax(10rem, 1fr) auto;
+  align-items: center;
+  gap: .7rem;
+  width: min(25rem, calc(100vw - 2rem));
+  padding: .65rem;
+  border: 2px solid var(--ink);
+  background: var(--paper-light);
+  color: var(--ink);
+  box-shadow: 0 .8rem 2rem rgba(9,31,37,.4);
+}
+.discovery-toast > img, .discovery-toast > .asset-placeholder { width: 4rem; height: 4.8rem; object-fit: contain; mix-blend-mode: multiply; }
+.discovery-toast > div { display: grid; gap: .15rem; min-width: 0; }
+.discovery-toast > div span { overflow: hidden; color: var(--rust-dark); text-overflow: ellipsis; white-space: nowrap; }
+.discovery-toast small { color: var(--ink-muted); font: .68rem/1.3 system-ui, sans-serif; }
+.discovery-toast button { align-self: start; padding: .35rem; border: 0; background: transparent; color: var(--ink-muted); cursor: pointer; font-size: .7rem; }
+
 /* Blocking and terminal */
 .blocked-screen, .terminal-screen { display: grid; place-content: center; text-align: center; }
 .blocked-record {
@@ -505,6 +610,16 @@ button.codex-entry { cursor: pointer; }
   .codex-heading h2 { font-size: 1.8rem; }
   .codex-list { min-height: 48rem; padding-inline: 0.25rem; }
   .codex-grid { grid-template-columns: repeat(3, minmax(4.6rem, 1fr)); grid-auto-rows: 7rem; }
+  .discovery-overlay { padding: .35rem; }
+  .discovery-record { min-height: calc(100svh - .7rem); padding: 1rem .65rem; }
+  .discovery-stage { grid-template-columns: 1fr; min-height: 0; }
+  .discovery-materials { width: min(19rem, 100%); margin: auto; }
+  .discovery-materials img, .discovery-materials .asset-placeholder { height: 7rem; }
+  .discovery-forge-mark { line-height: .7; }
+  .discovery-result { width: min(15rem, 75vw); margin: auto; }
+  .discovery-result > img, .discovery-result > .asset-placeholder { height: 12rem; }
+  .discovery-card-back { inset: .8rem .8rem 4.4rem; }
+  .discovery-toast { right: .5rem; bottom: .5rem; width: calc(100vw - 1rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {
