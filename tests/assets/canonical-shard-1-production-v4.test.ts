@@ -2,7 +2,7 @@ import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync,
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
-import { beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, onTestFinished, test } from "vitest";
 
 import {
   T015_V4_ADDITIONAL_CAP_UNITS, T015_V4_BINDING_PATH, T015_V4_CANARY_BATCH_ID, T015_V4_CANARY_BLOCKED_BATCH_ID, T015_V4_CORE_PLAN_PATH,
@@ -60,8 +60,72 @@ test("reports the T015 v4 owner-journal trust boundary", () => {
 });
 
 interface Prepared { root: string; plan: T015V4Plan }
-function fixture(startUnits = START_UNITS): Prepared {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v4-"));
+type TemporaryRootScope = "test" | "suite";
+type RemoveTemporaryRoot = (root: string) => void;
+
+const testTemporaryRoots = new Set<string>();
+const suiteTemporaryRoots = new Set<string>();
+
+function cleanupTemporaryRoots(roots: readonly string[], remove: RemoveTemporaryRoot): Error[] {
+  const failures: Error[] = [];
+  for (const root of roots) {
+    try {
+      remove(root);
+    } catch (error) {
+      failures.push(new Error(`Failed to clean temporary T015 test root: ${root}`, { cause: error }));
+    }
+  }
+  return failures;
+}
+
+function cleanupRegisteredTemporaryRoots(roots: readonly string[]): Error[] {
+  const failures = cleanupTemporaryRoots(roots, (root) => rmSync(root, { recursive: true, force: true }));
+  for (const root of roots) {
+    if (!existsSync(root)) {
+      testTemporaryRoots.delete(root);
+      suiteTemporaryRoots.delete(root);
+    }
+  }
+  return failures;
+}
+
+function throwCleanupFailures(failures: readonly Error[]): void {
+  if (failures.length > 0) throw new AggregateError(failures, "T015 temporary test cleanup failed");
+}
+
+function temporaryRoot(prefix: string, scope: TemporaryRootScope = "test"): string {
+  const root = mkdtempSync(resolve(tmpdir(), prefix));
+  const roots = scope === "suite" ? suiteTemporaryRoots : testTemporaryRoots;
+  roots.add(root);
+  if (scope === "test") {
+    onTestFinished(() => throwCleanupFailures(cleanupRegisteredTemporaryRoots([root])));
+  }
+  return root;
+}
+
+afterAll(() => {
+  throwCleanupFailures(cleanupRegisteredTemporaryRoots([...testTemporaryRoots, ...suiteTemporaryRoots]));
+});
+
+test("cleans owned temporary roots idempotently and continues after a removal failure", () => {
+  const owned = temporaryRoot("fictor-t015-v4-cleanup-");
+  expect(existsSync(owned)).toBe(true);
+  expect(cleanupRegisteredTemporaryRoots([owned])).toEqual([]);
+  expect(cleanupRegisteredTemporaryRoots([owned])).toEqual([]);
+  expect(existsSync(owned)).toBe(false);
+
+  const attempts: string[] = [];
+  const failures = cleanupTemporaryRoots(["first", "second"], (root) => {
+    attempts.push(root);
+    if (root === "first") throw new Error("forced cleanup failure");
+  });
+  expect(attempts).toEqual(["first", "second"]);
+  expect(failures).toHaveLength(1);
+  expect(failures[0].message).toContain("first");
+});
+
+function fixture(startUnits = START_UNITS, scope: TemporaryRootScope = "test"): Prepared {
+  const root = temporaryRoot("fictor-t015-v4-", scope);
   mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
   copyFileSync(resolve(repositoryRoot, T015_V4_CORE_PLAN_PATH), resolve(root, T015_V4_CORE_PLAN_PATH));
   const anchor = json(root, "initial-balance.json", { credits: startUnits / 100, provider_observed_at: at(-120) });
@@ -213,7 +277,7 @@ ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 paid state machine", () => 
   });
 
   test("refuses an init balance that cannot cover the 480.00 additional cap", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v4-anchor-"));
+    const root = temporaryRoot("fictor-t015-v4-anchor-");
     const anchor = json(root, "initial-balance.json", { credits: 479.99, provider_observed_at: at(-120) });
     expect(() => runT015V4OpsInternal(["init", "--observed-at", at(-60), "--balance-file", anchor], root, cachedPlan, presentation, approval)).toThrow(/does not cover the 480.00 additional cap/);
   });
@@ -606,7 +670,7 @@ ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 secure download", () => {
 
 ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 runner lock and committed-clean scope", () => {
   test("takes over a stale lock atomically and never lets two callers hold it at once", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v4-lock-"));
+    const root = temporaryRoot("fictor-t015-v4-lock-");
     mkdirSync(resolve(root, "assets/runs/t015-canonical-shard-1"), { recursive: true });
     const directory = resolve(root, `${T015_V4_LOCK_PATH}.d`);
     mkdirSync(directory, { recursive: true });
@@ -873,20 +937,23 @@ async function loseBatch(prepared: Prepared, batchIndex: number, beforeUnits: nu
  * loss, exactly the seven disclosed indices unrecovered, 313/320 delivered for 469.50.
  * Built once and copied per test — driving it costs about twenty seconds.
  */
-let settledRoot: string | undefined;
+let settledRootPromise: Promise<string> | undefined;
 async function settledRun(): Promise<Prepared> {
-  if (settledRoot === undefined) {
-    const built = fixture();
-    const losses = lossPlan(built.plan);
-    let balance = START_UNITS;
-    for (let index = 0; index < T015_V4_PAID_BATCH_COUNT; index += 1) {
-      const offsets = losses.get(index);
-      balance = offsets ? await loseBatch(built, index, balance, offsets) : await completeBatch(built, index, balance);
-    }
-    copyLegacyAssets(built);
-    settledRoot = built.root;
+  if (settledRootPromise === undefined) {
+    settledRootPromise = (async () => {
+      const built = fixture(START_UNITS, "suite");
+      const losses = lossPlan(built.plan);
+      let balance = START_UNITS;
+      for (let index = 0; index < T015_V4_PAID_BATCH_COUNT; index += 1) {
+        const offsets = losses.get(index);
+        balance = offsets ? await loseBatch(built, index, balance, offsets) : await completeBatch(built, index, balance);
+      }
+      copyLegacyAssets(built);
+      return built.root;
+    })();
   }
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v43-"));
+  const settledRoot = await settledRootPromise;
+  const root = temporaryRoot("fictor-t015-v43-");
   cpSync(settledRoot, root, { recursive: true });
   return { root, plan: cachedPlan };
 }
