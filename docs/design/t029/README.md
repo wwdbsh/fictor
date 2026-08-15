@@ -6,7 +6,7 @@
 - 승인 시각 가이드: `forge-codex-concept.png` (1536×1024). 실제 화면은 T028의 냉청색 기록지/상아 카드/청록 ink/rust CTA token을 확장한다.
 - 유일한 상태 authority는 T027 `createStillkinTrack1Controller`다. UI는 controller command, revision, run/encounter binding, fuel/free 값을 만들지 않는다.
 - application facade는 현재 snapshot의 instance id만 받는다. 즉석은 현재 hand raw materials, 유료 공방은 `BETWEEN_NODES` owned raw materials, 무료 공방은 현재 `WORKSHOP` entitlement의 owned raw materials만 허용하며 동일 definition은 거부한다.
-- 공방 preview와 review는 inert capability다. dialog confirm 시점에만 내부 WeakMap command에 연결된 opaque action descriptor가 생기며 stale/forged capability는 실패한다. 취소는 dispatch와 write가 모두 0이다.
+- 공방 preview와 review는 inert capability다. dialog confirm 시점에만 내부 WeakMap command에 연결된 opaque action descriptor가 생긴다. WeakMap authority는 revision/runId/focus key/screen key를 모두 확인하므로 새 run의 같은 revision에서도 old-run review는 실패한다. 취소는 dispatch와 write가 모두 0이다.
 - `heartForge=false`를 유지하며 심장 빚기 affordance는 없다.
 - T027/controller, `src/domain/forge-runtime`, persistence codec/schema, Track 1 config/hash/route, source/generated JSON, generated runtime packet, `package.json`은 변경하지 않았다.
 
@@ -22,16 +22,17 @@ lexical 첫 재료의 실제 도판으로 바꾸고 `재료 도판` 표식을 �
 발생하지 않는다. 미발견 도감 항목은 preview와 recipe id를 projection에서 `null`로 가리고 image를 렌더하지
 않는다.
 
-도감의 `즉석 빚기`/`공방 빚기`는 별도 저장 provenance가 아니라 같은 recipe를 발견하는 두 경로다. profile
-schema에는 recipe key 하나만 남으므로 동일 recipe를 어느 방식으로 다시 빚어도 항목은 하나다. surface
-open/close, 48개 pagination, 선택은 모두 React-local이다.
+도감의 `availableModes`는 별도 저장 provenance가 아니라 같은 recipe를 빚을 수 있는 `즉석 빚기`/`공방
+빚기` 두 방식이다. profile schema에는 recipe key 하나만 남으므로 동일 recipe를 어느 방식으로 다시 빚어도
+항목은 하나다. surface open/close, 48개 pagination, 선택은 모두 React-local이다.
 
 ## 상호작용과 접근성
 
 - 전투: `즉석 빚기` 선택 모드를 명시적으로 켜며 selectable raw material button에 `aria-pressed`를 쓴다. 선택 모드 밖 card click은 기존 play action이다.
+- 즉석 장비: 도구 두 장의 결과는 손에 놓이지 않고 전투 동안만 보유된다고 알리며, cleanup 때 결과 제거와 재료 복구를 함께 알린다.
 - 공방: 유료/무료가 같은 `ForgePanel`과 canonical preview를 사용한다. paid는 연료 0에서 disabled, free entitlement는 연료 0에서도 실행 가능하다.
 - 확인 dialog: `role=dialog`, 연결된 heading, heading initial focus, native cancel/confirm, Escape 취소, 두 action 사이 Tab loop, 취소 후 review trigger focus return을 제공한다.
-- 도감: native open/close/entry/page buttons, SVG chevron, heading initial focus, Escape close 후 header trigger focus return을 제공한다.
+- 도감: native open/close/entry/page buttons, SVG chevron, heading initial focus, 내부 Tab loop, Escape close 후 header trigger focus return을 제공한다. 열린 동안 game underlay는 `inert`/`aria-hidden`이며 현재 screen key마다 snapshot을 remount한다.
 - 반응형: 1536 desktop open-book, 900 stacked panel, 390 single-column/3-column Codex grid를 사용한다.
 
 ## Fidelity ledger

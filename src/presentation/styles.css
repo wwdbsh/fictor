@@ -423,10 +423,10 @@ button.codex-entry { cursor: pointer; }
 .codex-detail .canonical-preview { grid-template-columns: 1fr; }
 .codex-detail .preview-equals { transform: rotate(90deg); }
 .codex-detail-empty { display: grid; place-content: center; padding: 2rem; color: var(--ink-muted); text-align: center; }
-.discovery-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--line); }
-.discovery-methods strong, .discovery-methods small { grid-column: 1 / -1; }
-.discovery-methods span { padding: 0.45rem; border: 1px solid var(--line); }
-.discovery-methods small { margin-top: 0.4rem; color: var(--ink-muted); }
+.available-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--line); }
+.available-modes strong, .available-modes small { grid-column: 1 / -1; }
+.available-modes span { padding: 0.45rem; border: 1px solid var(--line); }
+.available-modes small { margin-top: 0.4rem; color: var(--ink-muted); }
 
 /* Blocking and terminal */
 .blocked-screen, .terminal-screen { display: grid; place-content: center; text-align: center; }

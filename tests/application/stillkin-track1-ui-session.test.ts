@@ -85,6 +85,34 @@ function firstDistinct<T extends { cardId: string; instanceId: string }>(items: 
   return [left, right];
 }
 
+function reachBossWithTools(session: StillkinTrack1UiSession): Track1UiProjection {
+  let projection = winCombat(session, enter(session, session.snapshot()));
+  projection = apply(session, asPhase(projection, "AWAITING_REWARD").choices[0].action);
+  projection = resolveAndLeave(session, enter(session, projection)); // cache
+
+  projection = enter(session, projection); // free workshop
+  projection = apply(session, asPhase(projection, "IN_EVENT").choices[0].action);
+  const workshop = asPhase(projection, "EVENT_RESOLVED");
+  const [left, right] = firstDistinct(workshop.workshopMaterials);
+  const freePreview = session.previewForge("WORKSHOP_FREE", [left.instanceId, right.instanceId])!;
+  projection = apply(session, session.confirmForgeReview(session.reviewWorkshopForge(freePreview)!)!);
+  projection = apply(session, asPhase(projection, "EVENT_RESOLVED").leaveAction!);
+
+  projection = winCombat(session, enter(session, projection)); // elite
+  const toolReward = asPhase(projection, "AWAITING_REWARD").choices.find(({ kindLabelKo }) => kindLabelKo === "도구");
+  if (!toolReward) throw new Error("elite tool reward unavailable");
+  projection = apply(session, toolReward.action);
+  projection = resolveAndLeave(session, enter(session, projection)); // collapse
+
+  const fictor = asPhase(enter(session, projection), "IN_EVENT");
+  const toolChoice = fictor.choices.find(({ labelKo }) => labelKo === "집게 받기");
+  if (!toolChoice) throw new Error("FICTOR tool choice unavailable");
+  projection = apply(session, toolChoice.action);
+  projection = apply(session, asPhase(projection, "EVENT_RESOLVED").leaveAction!);
+  projection = resolveAndLeave(session, enter(session, projection)); // record
+  return resolveAndLeave(session, enter(session, projection)); // oddity, then boss threshold
+}
+
 describe("Stillkin Track-1 browser UI session", () => {
   it("builds one canonical preview for instant, paid, free, and reversed pairs", () => {
     const instantSession = create().session;
@@ -134,6 +162,21 @@ describe("Stillkin Track-1 browser UI session", () => {
     expect(storage.setCalls).toBe(writesBefore + 1);
   });
 
+  it("cannot mint a descriptor from an old run review after restart resets the revision", () => {
+    const { session } = create();
+    const between = asPhase(session.snapshot(), "BETWEEN_NODES");
+    const [left, right] = firstDistinct(between.workshopMaterials);
+    const oldPreview = session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+    const oldReview = session.reviewWorkshopForge(oldPreview)!;
+
+    let projection: Track1UiProjection = enter(session, between);
+    while (projection.phase === "IN_COMBAT") projection = apply(session, projection.primaryAction!);
+    projection = apply(session, asPhase(projection, "RUN_LOST").action);
+    expect(projection.phase).toBe("BETWEEN_NODES");
+    expect(projection.screenKey).toContain(":0:BETWEEN_NODES");
+    expect(session.confirmForgeReview(oldReview)).toBeNull();
+  });
+
   it("forges instantly into the hand, records one discovery, then reports cleanup and restoration", () => {
     const { storage, session } = create();
     const available = combatWithDistinctForgePair(session, session.snapshot());
@@ -154,6 +197,44 @@ describe("Stillkin Track-1 browser UI session", () => {
     expect(envelope.runtime.run.activeCombat).toBeNull();
     expect(envelope.runtime.run.deck).toEqual(expect.arrayContaining([left.instanceId, right.instanceId]));
     expect(envelope.runtime.run.ownedInstances.some(({ cardId }: { cardId: string }) => cardId === preview.canonical.cardId)).toBe(false);
+  });
+
+  it("holds a legal instant tool-pair result as combat-only equipment and reports cleanup", () => {
+    const original = create(new MemoryStorage(), "tool-route-generation");
+    reachBossWithTools(original.session);
+    const betweenBossBytes = original.storage.values.get(FICTOR_SAVE_V2_KEY)!;
+    const baseEnvelope = JSON.parse(betweenBossBytes);
+    const deck = baseEnvelope.runtime.run.deck as string[];
+    let selected: { storage: MemoryStorage; session: StillkinTrack1UiSession; combat: Extract<Track1UiProjection, { phase: "IN_COMBAT" }>; tools: [typeof deck[number], typeof deck[number]] } | null = null;
+
+    for (let rotation = 0; rotation < deck.length && selected === null; rotation += 1) {
+      const storage = new MemoryStorage();
+      const envelope = JSON.parse(betweenBossBytes);
+      envelope.runtime.run.deck = [...deck.slice(rotation), ...deck.slice(0, rotation)];
+      storage.values.set(FICTOR_SAVE_V2_KEY, JSON.stringify(envelope));
+      const session = createStillkinTrack1UiSession({ storage, baseUrl: "/preview/subpath/", generationFactory: () => "tool-combat-generation" });
+      let projection = session.load();
+      projection = enter(session, projection);
+      projection = apply(session, asPhase(projection, "IN_COMBAT").primaryAction!);
+      const combat = asPhase(projection, "IN_COMBAT");
+      const toolCards = combat.hand.filter(({ cardId }) => cardId === "tool_01" || cardId === "tool_02");
+      if (new Set(toolCards.map(({ cardId }) => cardId)).size === 2) selected = { storage, session, combat, tools: [toolCards[0].instanceId, toolCards[1].instanceId] };
+    }
+
+    expect(selected).not.toBeNull();
+    const chosen = selected!;
+    const preview = chosen.session.previewForge("INSTANT", chosen.tools)!;
+    expect(preview.canonical.result.branch).toBe("EQUIPMENT");
+    let projection = apply(chosen.session, chosen.session.describeInstantForgeAction(preview)!);
+    const forged = asPhase(projection, "IN_COMBAT");
+    expect(forged.feedback?.messageKo).toContain("전투 동안만 보유하며 손에 놓이지 않습니다");
+    expect(forged.hand.some(({ cardId }) => cardId === preview.canonical.cardId)).toBe(false);
+
+    projection = winCombat(chosen.session, projection);
+    expect(projection.feedback?.messageKo).toContain("즉석 결과가 사라지고 사용한 재료가 덱으로 복구");
+    const saved = JSON.parse(chosen.storage.values.get(FICTOR_SAVE_V2_KEY)!);
+    expect(saved.runtime.run.deck).toEqual(expect.arrayContaining(chosen.tools));
+    expect(saved.runtime.run.ownedInstances.some(({ cardId }: { cardId: string }) => cardId === preview.canonical.cardId)).toBe(false);
   });
 
   it("derives a lexical 1326-entry masked Codex without exposing heart forge", () => {
@@ -177,7 +258,7 @@ describe("Stillkin Track-1 browser UI session", () => {
     codex = session.codexSnapshot();
     expect(codex.discoveredCount).toBe(1);
     expect(codex.entries.filter(({ discovered }) => discovered)).toEqual([
-      expect.objectContaining({ recipeId: preview.canonical.recipeId, discoverySources: ["INSTANT", "WORKSHOP"] }),
+      expect.objectContaining({ recipeId: preview.canonical.recipeId, availableModes: ["INSTANT", "WORKSHOP"] }),
     ]);
     const reloaded = createStillkinTrack1UiSession({ storage, baseUrl: "/preview/subpath/", generationFactory: () => "reloaded-generation" });
     reloaded.load();

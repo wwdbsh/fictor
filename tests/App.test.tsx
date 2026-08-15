@@ -79,23 +79,46 @@ describe("Track-1 App", () => {
   });
 
   it("opens a paginated masked Codex and restores focus when closed", async () => {
-    mounted();
+    const { storage } = mounted();
+    const underlay = screen.getByRole("main");
+    const backgroundAction = screen.getByRole("button", { name: "다음 기록으로" });
+    const screenKey = underlay.getAttribute("data-screen-key");
     const open = screen.getByRole("button", { name: "도감 열기 · 발견 0 / 1326" });
     fireEvent.click(open);
     const dialog = screen.getByRole("dialog", { name: "도감" });
     expect(dialog).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "도감" })).toHaveFocus());
+    expect(underlay).toHaveAttribute("inert");
+    expect(underlay).toHaveAttribute("aria-hidden", "true");
+    fireEvent.click(backgroundAction);
+    expect(storage.setCalls).toBe(0);
+    expect(underlay).toHaveAttribute("data-screen-key", screenKey);
+    const codexHeading = screen.getByRole("heading", { level: 2, name: "도감" });
+    await waitFor(() => expect(codexHeading).toHaveFocus());
     expect(document.querySelectorAll(".codex-entry")).toHaveLength(48);
     expect(document.querySelectorAll(".codex-entry.is-masked")).toHaveLength(48);
     expect(screen.getByText("1 / 28")).toBeVisible();
+    const close = screen.getByRole("button", { name: "도감 닫기" });
+    const next = screen.getByRole("button", { name: "다음 도감 페이지" });
+    fireEvent.keyDown(codexHeading, { key: "Tab" });
+    expect(close).toHaveFocus();
+    fireEvent.keyDown(close, { key: "Tab", shiftKey: true });
+    expect(next).toHaveFocus();
+    fireEvent.keyDown(next, { key: "Tab" });
+    expect(close).toHaveFocus();
     fireEvent.click(screen.getByRole("button", { name: "다음 도감 페이지" }));
     expect(screen.getByText("2 / 28")).toBeVisible();
     fireEvent.keyDown(dialog, { key: "Escape" });
     await waitFor(() => expect(open).toHaveFocus());
+    expect(underlay).not.toHaveAttribute("inert");
+    expect(underlay).not.toHaveAttribute("aria-hidden");
   });
 
   it("requires review and confirmation for irreversible workshop forging, with cancel focus return", async () => {
     const { storage } = mounted();
+    const codexOpen = screen.getByRole("button", { name: "도감 열기 · 발견 0 / 1326" });
+    fireEvent.click(codexOpen);
+    expect(screen.getByText("발견한 기록 0 / 1326")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "도감 닫기" }));
     fireEvent.click(screen.getByRole("button", { name: "공방 열기" }));
     const materialButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".workshop-materials button"));
     const left = materialButtons[0];
@@ -125,6 +148,9 @@ describe("Track-1 App", () => {
     fireEvent.click(screen.getByRole("button", { name: "영구 소모 확인" }));
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("영구 소모되고 결과가 덱에 편입"));
     expect(storage.setCalls).toBe(1);
+    const refreshedOpen = screen.getByRole("button", { name: "도감 열기 · 발견 1 / 1326" });
+    fireEvent.click(refreshedOpen);
+    expect(screen.getByText("발견한 기록 1 / 1326")).toBeVisible();
   });
 
   it("separates instant-forge selection from card play and puts the canonical result in hand", async () => {

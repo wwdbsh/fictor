@@ -133,7 +133,7 @@ export interface Track1UiCodexEntry {
   readonly discovered: boolean;
   readonly recipeId: string | null;
   readonly preview: Track1UiForgeCanonicalPreview | null;
-  readonly discoverySources: readonly ["INSTANT", "WORKSHOP"] | null;
+  readonly availableModes: readonly ["INSTANT", "WORKSHOP"] | null;
 }
 
 export interface Track1UiCodexSnapshot {

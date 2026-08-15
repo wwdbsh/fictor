@@ -75,19 +75,23 @@ T022 489장 availability bitset 기반 art fallback은 모드와 입력 순서�
 
 즉석 빚기는 ongoing `PLAYER_ACTION`의 현재 손에 있는 raw material, 서로 다른 definition 두 장만
 선택한다. React는 명시적인 선택 모드에서만 카드 클릭을 재료 선택으로 해석하므로 카드 사용과 충돌하지
-않는다. 성공하면 canonical 결과가 같은 손에 나타나며 terminal cleanup feedback은 결과 제거와 두 재료의
+않는다. 일반 결과는 같은 손에 나타난다. 도구 두 장의 `EQUIPMENT` 결과는 손에 놓이지 않고 전투 동안만
+보유된다는 별도 feedback을 표시한다. terminal cleanup feedback은 어느 branch든 결과 제거와 두 재료의
 deck 복구를 함께 알린다.
 
 유료 공방은 `BETWEEN_NODES`, 무료 공방은 해당 `WORKSHOP` entitlement가 남은 `EVENT_RESOLVED`에서만
 열린다. 선택/preview/review는 어떤 dispatch나 localStorage write도 하지 않는다. review capability와
 실행 action은 application 내부 WeakMap에 묶이고, 사용자가 dialog의 영구 소모·결과·연료 전후를 확인한 뒤
-confirm한 순간에만 executable descriptor가 생성된다. 취소·위조 capability·revision이 바뀐 stale review는
-명령을 만들 수 없다. caller가 fuel/free boolean을 전달하는 seam은 없다.
+confirm한 순간에만 executable descriptor가 생성된다. authority는 revision뿐 아니라 runId, focus key,
+screen key를 함께 묶으므로 취소·위조 capability·화면이 바뀐 stale review와 새 run에서 우연히 같은
+revision이 된 old-run review도 명령을 만들 수 없다. caller가 fuel/free boolean을 전달하는 seam은 없다.
 
 도감 surface는 browser session의 현재 profile snapshot에서 발견 여부만 읽고, 페이지·선택·열림 상태는
 React-local이다. 52C2 1,326개 canonical record는 application module에서 한 번 결정론적으로 파생하며,
 48개씩 lexical 순서로 표시한다. 미발견 항목은 recipe/material/result를 모두 가리고 이미지 URL도 요청하지
-않는다. 발견 항목의 `즉석 빚기`와 `공방 빚기` 표시는 영구 저장하지 않는 역사적 provenance가 아니라 같은
-recipe key를 발견할 수 있는 두 canonical 경로다. 어느 경로에서 발견해도 항목은 하나뿐이다.
+않는다. 발견 항목의 `availableModes`와 `빚을 수 있는 방식` 표시는 영구 저장하지 않는 역사적 provenance가
+아니라 같은 recipe key를 빚을 수 있는 두 canonical 방식이다. 어느 방식에서 발견해도 항목은 하나뿐이다.
+도감을 열면 현재 projection의 screen key로 snapshot을 새로 만들며, 열린 동안 game underlay 전체가
+`inert`/`aria-hidden`이 된다. Tab은 modal 내부에서 순환하므로 도감 뒤 action은 dispatch될 수 없다.
 
 Track 1의 `heartForge`는 계속 `false`이며 심장 빚기 선택지나 action은 브라우저 facade와 UI에 없다.

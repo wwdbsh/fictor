@@ -124,6 +124,34 @@ function focusKey(snapshot: StillkinTrack1Snapshot): string {
   return `${snapshot.flow.runId}:${snapshot.persistence.writeBlocked ? "BLOCKED" : snapshot.flow.phase}:${node?.nodeId ?? "none"}`;
 }
 
+function screenKey(snapshot: StillkinTrack1Snapshot): string {
+  return `${snapshot.flow.runId}:${snapshot.flow.revision}:${snapshot.flow.phase}`;
+}
+
+interface ForgeAuthorityIdentity {
+  readonly revision: number;
+  readonly runId: string;
+  readonly focusKey: string;
+  readonly screenKey: string;
+}
+
+function forgeAuthorityIdentity(snapshot: StillkinTrack1Snapshot): ForgeAuthorityIdentity {
+  return {
+    revision: snapshot.flow.revision,
+    runId: snapshot.flow.runId,
+    focusKey: focusKey(snapshot),
+    screenKey: screenKey(snapshot),
+  };
+}
+
+function matchesForgeAuthority(authority: ForgeAuthorityIdentity, snapshot: StillkinTrack1Snapshot): boolean {
+  const current = forgeAuthorityIdentity(snapshot);
+  return authority.revision === current.revision
+    && authority.runId === current.runId
+    && authority.focusKey === current.focusKey
+    && authority.screenKey === current.screenKey;
+}
+
 function displayMap(items: readonly BrowserMaterialDisplay[]): Map<string, BrowserMaterialDisplay> {
   return new Map(items.map((item) => [item.id, item]));
 }
@@ -163,7 +191,8 @@ function commandFeedback(events: readonly { type: string }[]): Feedback {
   if (last === "RUN_LOST") return { tone: "STATUS", messageKo: "런이 끝났습니다." };
   if (events.some(({ type }) => type === "REWARD_AVAILABLE")) return { tone: "STATUS", messageKo: "전투 보상이 도착했습니다." };
   if (events.some(({ type }) => type === "WORKSHOP_ENTITLEMENT_GRANTED")) return { tone: "STATUS", messageKo: "연료 없이 한 번 빚을 수 있습니다." };
-  const created = events.find((event): event is { type: "FORGE_RESULT_CREATED"; mode: "INSTANT" | "WORKSHOP" } => event.type === "FORGE_RESULT_CREATED" && "mode" in event);
+  const created = events.find((event): event is { type: "FORGE_RESULT_CREATED"; mode: "INSTANT" | "WORKSHOP"; location: "HAND" | "DECK" | "EQUIPMENT" } => event.type === "FORGE_RESULT_CREATED" && "mode" in event && "location" in event);
+  if (created?.mode === "INSTANT" && created.location === "EQUIPMENT") return { tone: "STATUS", messageKo: "즉석 장비 결과는 전투 동안만 보유하며 손에 놓이지 않습니다. 전투 종료 시 장비 결과는 사라지고 재료는 복구됩니다." };
   if (created?.mode === "INSTANT") return { tone: "STATUS", messageKo: "즉석 결과가 손에 놓였습니다. 전투 종료 시 결과는 사라지고 재료는 복구됩니다." };
   if (created?.mode === "WORKSHOP") return { tone: "STATUS", messageKo: "두 재료가 영구 소모되고 결과가 덱에 편입되었습니다." };
   if (events.some(({ type }) => type === "CARD_PLAYED")) return { tone: "STATUS", messageKo: "카드를 사용했습니다." };
@@ -189,8 +218,8 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     ...(options.generationFactory ? { generationFactory: options.generationFactory } : {}),
   });
   const commandByDescriptor = new WeakMap<Track1UiActionDescriptor, StillkinTrack1Command>();
-  const previewAuthority = new WeakMap<Track1UiForgePreview, { revision: number; mode: Track1UiForgeMode; command: StillkinTrack1Command }>();
-  const reviewAuthority = new WeakMap<Track1UiForgeReview, { revision: number; mode: "WORKSHOP_PAID" | "WORKSHOP_FREE"; command: StillkinTrack1Command }>();
+  const previewAuthority = new WeakMap<Track1UiForgePreview, ForgeAuthorityIdentity & { mode: Track1UiForgeMode; command: StillkinTrack1Command }>();
+  const reviewAuthority = new WeakMap<Track1UiForgeReview, ForgeAuthorityIdentity & { mode: "WORKSHOP_PAID" | "WORKSHOP_FREE"; command: StillkinTrack1Command }>();
   let acceptedSnapshot: StillkinTrack1Snapshot | null = null;
   let feedback: Feedback = null;
   let latchedBlockingIssuesKo: readonly string[] | null = null;
@@ -279,7 +308,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   const project = (snapshot: StillkinTrack1Snapshot): Track1UiProjection => {
     const depth = currentDepth(snapshot);
     const shared = {
-      screenKey: `${snapshot.flow.runId}:${snapshot.flow.revision}:${snapshot.flow.phase}`,
+      screenKey: screenKey(snapshot),
       focusKey: focusKey(snapshot),
       headingKo: `어름의 터 · 깊이 ${depth} / 3`,
       focusHeadingKo: `어름의 터 · 깊이 ${depth} / 3`,
@@ -504,32 +533,32 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         executable,
         disabledReasonKo,
       });
-      previewAuthority.set(preview, { revision: snapshot.flow.revision, mode, command });
+      previewAuthority.set(preview, { ...forgeAuthorityIdentity(snapshot), mode, command });
       return preview;
     },
     describeInstantForgeAction(preview) {
       const snapshot = ensureLoaded();
       const authority = previewAuthority.get(preview);
-      if (!authority || authority.mode !== "INSTANT" || authority.revision !== snapshot.flow.revision || !preview.executable) return null;
+      if (!authority || authority.mode !== "INSTANT" || !matchesForgeAuthority(authority, snapshot) || !preview.executable) return null;
       return bind(`instant-forge:${preview.previewId}`, "FORGE_INSTANT", "즉석 빚기", authority.command);
     },
     reviewWorkshopForge(preview) {
       const snapshot = ensureLoaded();
       const authority = previewAuthority.get(preview);
-      if (!authority || authority.mode === "INSTANT" || authority.revision !== snapshot.flow.revision || !preview.executable) return null;
+      if (!authority || authority.mode === "INSTANT" || !matchesForgeAuthority(authority, snapshot) || !preview.executable) return null;
       const review: Track1UiForgeReview = Object.freeze({
         reviewId: `forge-review:${preview.previewId}`,
         preview,
         headingKo: authority.mode === "WORKSHOP_PAID" ? "공방 빚기 최종 확인" : "무료 공방 빚기 최종 확인",
         warningKo: "선택한 두 재료는 영구적으로 소모되며 되돌릴 수 없습니다.",
       });
-      reviewAuthority.set(review, { revision: authority.revision, mode: authority.mode, command: authority.command });
+      reviewAuthority.set(review, { ...authority, mode: authority.mode, command: authority.command });
       return review;
     },
     confirmForgeReview(review) {
       const snapshot = ensureLoaded();
       const authority = reviewAuthority.get(review);
-      if (!authority || authority.revision !== snapshot.flow.revision) return null;
+      if (!authority || !matchesForgeAuthority(authority, snapshot)) return null;
       return bind(
         `confirm:${review.reviewId}`,
         authority.mode === "WORKSHOP_PAID" ? "FORGE_WORKSHOP" : "USE_FREE_WORKSHOP",
@@ -552,7 +581,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
             discovered: isDiscovered,
             recipeId: isDiscovered ? canonical.recipeId : null,
             preview: isDiscovered ? canonical : null,
-            discoverySources: isDiscovered ? Object.freeze(["INSTANT", "WORKSHOP"] as const) : null,
+            availableModes: isDiscovered ? Object.freeze(["INSTANT", "WORKSHOP"] as const) : null,
           });
         })),
       });
