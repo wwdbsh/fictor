@@ -1,0 +1,12 @@
+
+> fictor@0.0.0 test
+> vitest run
+
+
+ RUN  v4.1.10 /private/tmp/fictor-t031-rc.52OjLf/repo
+
+
+ Test Files  48 passed (48)
+      Tests  687 passed | 88 skipped (775)
+   Start at  15:36:56
+   Duration  62.72s (transform 7.00s, setup 0ms, import 9.70s, tests 372.38s, environment 1.83s)

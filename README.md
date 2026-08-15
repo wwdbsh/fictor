@@ -43,6 +43,7 @@ npm run typecheck    # TypeScript 검사
 npm run build        # 타입 검사 후 dist/ 정적 빌드
 npm run smoke:static # 기존 dist/를 실제 Chromium에서 검사
 npm run verify       # 생성물 freshness, 테스트, 빌드, 브라우저 smoke 전체 검증
+npx tsx scripts/t031-m3-candidate-audit-cli.ts audit # T031 dist/secret 후보 감사(읽기 전용)
 ```
 
 개발 서버는 `npm run dev`로 실행합니다. 제출용 빌드는 `npm run build`로 만들며, 생성된 `dist/`는 별도 런타임 서버 없이 정적 파일 호스트에 배포할 수 있습니다. 로컬에서 정적 결과를 직접 확인하려면 `npx vite preview`처럼 정적 파일을 제공하는 도구를 사용할 수 있습니다.
@@ -93,6 +94,9 @@ main (composition root)
 M1 Phase 0의 최종 데이터와 승인 대응은 [불변 데이터 마일스톤](docs/milestones/README.md)에
 고정되어 있습니다. `npm run milestone:phase0:check`는 기록된 경로·수량·hash뿐 아니라 실제 source,
 재생성 catalog, CSV ID·이름, effective 승인 상태 1,326건을 쓰기 없이 함께 검증합니다.
+
+T031 M3 후보는 [마일스톤 문서](docs/milestones/README.md)의 candidate Commit A → evidence Commit B
+신뢰 경계를 따릅니다. 실제 수동 완주 영상이 없는 candidate는 완료 증거로 기록하지 않습니다.
 
 ## 구현 문서
 

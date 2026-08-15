@@ -1,0 +1,18 @@
+{
+  "audit_manifest_file_sha256": "6faaf7799f9f93a41936bfd7f2ed58276d1bb955e4cace1923654005db60e356",
+  "audit_manifest_path": "assets/manifests/t031-m3-candidate-audit-v1.json",
+  "candidate_parent_revision": "ba0ffbbd0a4cdcf336fc04970a89ddfefb547e1a",
+  "candidate_revision": "be79bfbd8d4524523fc89c6a1d0308f62c78d000",
+  "candidate_tree_sha1": "49c58f13a6c9434e2bbf35cca6a8b3d143f8729b",
+  "contract_sha256": "82f1de075d2ee7fc83e0bb841cb1ab73f158989a867d7e435bcf3488fd9b809c",
+  "dist_tree_sha256": "f48c65f7c7c282b0ad1a397499d6671145c88ecb63b2f5cdb625dd86b9a0a422",
+  "known_issue_count": 2,
+  "manual_video_path": "docs/playtests/t031/t031-stillkin-full-run.webm",
+  "manual_video_sha256": "41c9157e60510929ccc1e809aed1184e6a44cdfcb34572403f0d38093231065b",
+  "milestone_id": "M3_VERTICAL_SLICE",
+  "recorded_at": "2026-08-15T06:38:54.000Z",
+  "release_or_submission_performed": false,
+  "schema_version": 1,
+  "status": "VERIFIED",
+  "task_key": "T031"
+}

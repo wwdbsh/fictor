@@ -20,6 +20,16 @@ import {
 import { checkT015V4Preparation } from "../../scripts/assets/canonical-shard-1-production-v4-cli";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const ownerJournalPaths = [
+  "assets/runs/t015-canonical-shard-1/operations-v1.json",
+  "assets/runs/t015-canonical-shard-1/operations-v2.json",
+  "assets/runs/t015-canonical-shard-1/operations-v3.json",
+  T015_V4_ORIGINAL_JOURNAL_PATH,
+  T015_V4_LEGACY_JOURNAL_PATH,
+  T015_V4_JOURNAL_PATH,
+] as const;
+const ownerJournalsPresent = ownerJournalPaths.every((path) => existsSync(resolve(repositoryRoot, path)));
+const ownerDescribe = describe.skipIf(!ownerJournalsPresent);
 const EPOCH = Date.parse("2026-08-14T00:00:00.000Z");
 const presentation = { evidence_version: "t015-v4-test-presentation" } as unknown as T015V4Presentation;
 const approval = { evidence_version: "t015-v4-test-approval" } as unknown as T015V4Approval;
@@ -41,7 +51,13 @@ function withOwnProtoKey<T extends Record<string, unknown>>(value: T): T { Objec
 function summaryOf(statuses: readonly string[]) { const active = ["pending", "waiting", "queued", "in_progress", "ip_detect"]; const failed = ["failed", "canceled", "nsfw", "ip_detected"]; return { active: statuses.filter((status) => active.includes(status)).length, completed: statuses.filter((status) => status === "completed").length, errors: statuses.filter((status) => status === "lookup_failed").length, failed: statuses.filter((status) => failed.includes(status)).length, total: statuses.length }; }
 
 let cachedPlan: T015V4Plan;
-beforeAll(() => { cachedPlan = buildT015V4Plan(repositoryRoot); });
+beforeAll(() => { if (ownerJournalsPresent) cachedPlan = buildT015V4Plan(repositoryRoot); });
+
+test("reports the T015 v4 owner-journal trust boundary", () => {
+  const boundary = { suite: "T015_V4_OWNER_ONLY", owner_journals_present: ownerJournalsPresent, disposition: ownerJournalsPresent ? "EXECUTED" : "SKIPPED_OWNER_EVIDENCE_ABSENT", required_paths: ownerJournalPaths };
+  console.info(`T015_TRUST_BOUNDARY ${JSON.stringify(boundary)}`);
+  expect(boundary.disposition).toBe(ownerJournalsPresent ? "EXECUTED" : "SKIPPED_OWNER_EVIDENCE_ABSENT");
+});
 
 interface Prepared { root: string; plan: T015V4Plan }
 function fixture(startUnits = START_UNITS): Prepared {
@@ -102,7 +118,7 @@ function submitting(prepared: Prepared, batchIndex: number, beforeUnits: number,
   ops(prepared, ["prepare", "--batch", prepared.plan.batches[batchIndex].id, "--observed-at", at(base + 40)]);
 }
 
-describe("T015 v4 plan identity", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 plan identity", () => {
   test("slices exactly CANONICAL 12..331 out of the byte-pinned v2 plan with unchanged request hashes", () => {
     const plan = buildT015V4Plan(repositoryRoot);
     const pinned = loadPinnedT015V2Plan(repositoryRoot);
@@ -175,7 +191,7 @@ describe("T015 v4 plan identity", () => {
   });
 });
 
-describe("T015 v4 paid state machine", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 paid state machine", () => {
   test("anchors the run on an absolute init balance and walks a batch to COMPLETE with an exact 12x1.50 delta", async () => {
     const prepared = fixture();
     expect(journalOf(prepared).initial_balance).toMatchObject({ normalized_decimal: "500.00" });
@@ -399,7 +415,7 @@ describe("T015 v4 paid state machine", () => {
   });
 });
 
-describe("T015 v4 zero-spend re-run and loss discharge", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 zero-spend re-run and loss discharge", () => {
   test("BL-2: a zero-spend fail-stop resumes, resets, re-runs 002 to COMPLETE, and unblocks 003", async () => {
     const prepared = fixture();
     ops(prepared, ["preflight-request", "--batch", T015_V4_CANARY_BATCH_ID, "--observed-at", at(0)]);
@@ -507,7 +523,7 @@ describe("T015 v4 zero-spend re-run and loss discharge", () => {
   });
 });
 
-describe("T015 v4 operator-gated resume", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 operator-gated resume", () => {
   async function signalFailStop(): Promise<Prepared> {
     const prepared = fixture();
     const batch = prepared.plan.batches[0];
@@ -564,7 +580,7 @@ describe("T015 v4 operator-gated resume", () => {
   });
 });
 
-describe("T015 v4 secure download", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 secure download", () => {
   const pinned: T015V4Dependencies["resolve"] = async () => [{ address: "18.65.3.2", family: 4 }];
   const url = "https://d111111abcdef8.cloudfront.net/a.png";
   test("accepts a pinned 200 image/png with a matching content-length", async () => {
@@ -588,7 +604,7 @@ describe("T015 v4 secure download", () => {
   });
 });
 
-describe("T015 v4 runner lock and committed-clean scope", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 runner lock and committed-clean scope", () => {
   test("takes over a stale lock atomically and never lets two callers hold it at once", () => {
     const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v4-lock-"));
     mkdirSync(resolve(root, "assets/runs/t015-canonical-shard-1"), { recursive: true });
@@ -616,7 +632,7 @@ describe("T015 v4 runner lock and committed-clean scope", () => {
   });
 });
 
-describe("T015 v4 final audit", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 final audit", () => {
   test("closes 320 paid plus 12 pinned v3 assets at exactly 480.00 + 18.00 = 498.00", async () => {
     const prepared = fixture();
     let balance = START_UNITS;
@@ -661,7 +677,7 @@ describe("T015 v4 final audit", () => {
   }, 300_000);
 });
 
-describe("T015 v4 closure after a mid-run stop", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4 closure after a mid-run stop", () => {
   test("closes with losses while the untouched batches stay unstarted", async () => {
     const prepared = fixture();
     await completeBatch(prepared, 0, START_UNITS);
@@ -720,7 +736,7 @@ async function supersededRecoveryFailure(prepared: Prepared, batchIndex: number,
   await expect(runT015V4JobsHandoffInternal(["jobs-handoff", "--batch", batch.id, "--observed-at", at(base + 90)], JSON.stringify(repoll), prepared.root, prepared.plan, presentation, approval, deps())).rejects.toThrow(/GENERATION_FAILED/);
 }
 
-describe("T015 v4.2 superseded RECOVERY_FAILED discharge", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4.2 superseded RECOVERY_FAILED discharge", () => {
   test("D1 regression: 004's history discharges with loss 0.00 when the observed delta equals what was recovered", async () => {
     const prepared = fixture();
     await supersededRecoveryFailure(prepared, 0, START_UNITS, 0);
@@ -764,7 +780,7 @@ describe("T015 v4.2 superseded RECOVERY_FAILED discharge", () => {
   });
 });
 
-describe("T015 v4.2 jobs_wait topology tolerance", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4.2 jobs_wait topology tolerance", () => {
   test("D2 regression: a non-completed job may carry model and a stale result_url, and is never downloaded", async () => {
     const prepared = fixture();
     const batch = prepared.plan.batches[0];
@@ -914,7 +930,7 @@ async function runRemediation(prepared: Prepared, beforeUnits: number, failedOff
   return after;
 }
 
-describe("T015 v4.3 derived loss ledger", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4.3 derived loss ledger", () => {
   test("derives exactly the seven disclosed indices from the settled journal", async () => {
     const prepared = await settledRun();
     const lost = t015V4LostIndices(journalOf(prepared));
@@ -941,7 +957,7 @@ describe("T015 v4.3 derived loss ledger", () => {
   });
 });
 
-describe("T015 v4.3 zero-loss closure", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4.3 zero-loss closure", () => {
   test("D3 regression: a run with discharged batches and 0.00 monetary loss can close", async () => {
     const prepared = await settledRun();
     const journal = journalOf(prepared);
@@ -972,7 +988,7 @@ describe("T015 v4.3 zero-loss closure", () => {
   }, 300_000);
 });
 
-describe("T015 v4.3 remediation batch", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4.3 remediation batch", () => {
   test("regenerates all seven indices and closes at exactly 480.00 + 18.00 = 498.00", async () => {
     const prepared = await settledRun();
     const before = statusT015V4(journalOf(prepared));
@@ -1025,7 +1041,7 @@ describe("T015 v4.3 remediation batch", () => {
   });
 });
 
-describe("T015 v4.3 journal migration", () => {
+ownerDescribe("[OWNER_ONLY:T015_V4_JOURNALS] T015 v4.3 journal migration", () => {
   test("imports every record verbatim, appends r01, and chains both migration pins", async () => {
     const prepared = await settledRun();
     const before = statusT015V4(journalOf(prepared));

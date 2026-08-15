@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "issues": [
+    {
+      "id": "T015_OWNER_JOURNALS",
+      "status": "OPEN",
+      "summary_ko": "T015 원격 실행 journal과 owner backup은 clean checkout에 포함되지 않는다.",
+      "mitigation_ko": "npm test는 owner-only suite를 명시적으로 skip하며 tracked T022 audit를 별도 필수 명령으로 실행한다."
+    },
+    {
+      "id": "T027_PROVISIONAL_BALANCE",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "Track 1 전투 수치는 2026-08-21 플레이 전 잠정 실행값이다.",
+      "mitigation_ko": "수동 완주 영상과 known issues에 잠정 상태를 유지하고 최종 밸런스 승인으로 표현하지 않는다."
+    }
+  ]
+}
