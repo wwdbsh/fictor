@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { T030_TRACK1_ASSET_MANIFEST, track1AssetRecordForUrl, type AssetUrlContext } from "../../src/presentation/assets";
+import { T030_TRACK1_ASSET_MANIFEST, track1AssetRecordForUrl, track1DynamicAssetPolicy, type AssetUrlContext, type Track1DynamicAssetPolicy } from "../../src/presentation/assets";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 
@@ -30,7 +30,19 @@ describe("Track 1 visible asset manifest", () => {
     }
     const nestedContext: AssetUrlContext = { origin: "https://fictor.test", basePath: "/nested/fictor/" };
     expect(track1AssetRecordForUrl("/nested/fictor/assets/backgrounds/background__still__depth_01.png?cache=1", nestedContext)?.id).toBe("background__still__depth_01");
+    expect(track1AssetRecordForUrl("/nested/fictor/assets/nested/fictor/assets/backgrounds/background__still__depth_01.png", nestedContext)).toBeNull();
     expect(track1AssetRecordForUrl("https://example.invalid/nested/fictor/assets/cards/ore_still.png", nestedContext)).toBeNull();
+  });
+
+  it("fails dynamic policy lookup closed on authority, PNG rule, fallback, or cardinality drift", () => {
+    const valid = track1DynamicAssetPolicy("DISCOVERY_RESULT");
+    expect(valid).toEqual(T030_TRACK1_ASSET_MANIFEST.dynamicSlots[2]);
+    const drift = (overrides: Record<string, unknown>) => [{ ...valid!, ...overrides }] as unknown as readonly Track1DynamicAssetPolicy[];
+    expect(track1DynamicAssetPolicy("DISCOVERY_RESULT", drift({ authority: "OTHER" }))).toBeNull();
+    expect(track1DynamicAssetPolicy("DISCOVERY_RESULT", drift({ requestedPngPolicy: "ANY_PNG" }))).toBeNull();
+    expect(track1DynamicAssetPolicy("DISCOVERY_RESULT", drift({ fallback: "NAMED_CSS_PLACEHOLDER" }))).toBeNull();
+    expect(track1DynamicAssetPolicy("DISCOVERY_RESULT", [valid!, valid!])).toBeNull();
+    expect(track1DynamicAssetPolicy("UNBOUND")).toBeNull();
   });
 
   it("binds every production AssetImage caller to an explicit static or dynamic role", () => {

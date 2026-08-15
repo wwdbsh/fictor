@@ -1,4 +1,4 @@
-import { resolveSafeLocalAssetUrl, type AssetUrlContext } from "./asset-url";
+import { resolveCanonicalAssetPrefix, resolveSafeLocalAssetUrl, type AssetUrlContext } from "./asset-url";
 
 export type Track1DynamicAssetSlot = "HAND" | "REWARD" | "DISCOVERY_RESULT";
 export type Track1DynamicAssetFallback = "NAMED_CSS_PLACEHOLDER" | "FIRST_MATERIAL_THEN_NAMED_CSS_PLACEHOLDER";
@@ -40,9 +40,29 @@ export const T030_TRACK1_ASSET_MANIFEST = Object.freeze({
 
 export type Track1AssetRecord = (typeof T030_TRACK1_ASSET_MANIFEST.assets)[number];
 
+const expectedFallbackBySlot: Readonly<Record<Track1DynamicAssetSlot, Track1DynamicAssetFallback>> = Object.freeze({
+  HAND: "NAMED_CSS_PLACEHOLDER",
+  REWARD: "NAMED_CSS_PLACEHOLDER",
+  DISCOVERY_RESULT: "FIRST_MATERIAL_THEN_NAMED_CSS_PLACEHOLDER",
+});
+
+export function track1DynamicAssetPolicy(slot: unknown, policies: readonly Track1DynamicAssetPolicy[] = T030_TRACK1_ASSET_MANIFEST.dynamicSlots): Track1DynamicAssetPolicy | null {
+  if (slot !== "HAND" && slot !== "REWARD" && slot !== "DISCOVERY_RESULT") return null;
+  const matches = policies.filter((policy) => policy.slot === slot);
+  if (matches.length !== 1) return null;
+  const policy = matches[0];
+  if (
+    policy.authority !== "T029_BROWSER_RUNTIME_PACKET" ||
+    policy.requestedPngPolicy !== "T022_PRESENT_OR_EXPLICIT_FALLBACK" ||
+    policy.fallback !== expectedFallbackBySlot[slot]
+  ) return null;
+  return policy;
+}
+
 export function track1AssetRecordForUrl(src: string, context?: AssetUrlContext): Track1AssetRecord | null {
   const safeUrl = resolveSafeLocalAssetUrl(src, context);
-  if (!safeUrl) return null;
-  const normalized = safeUrl.split(/[?#]/, 1)[0];
-  return T030_TRACK1_ASSET_MANIFEST.assets.find(({ path }) => normalized.endsWith(`/assets/${path}`)) ?? null;
+  const assetPrefix = resolveCanonicalAssetPrefix(context);
+  if (!safeUrl || !assetPrefix) return null;
+  const pathname = safeUrl.split(/[?#]/, 1)[0];
+  return T030_TRACK1_ASSET_MANIFEST.assets.find(({ path }) => pathname === `${assetPrefix}${path}`) ?? null;
 }

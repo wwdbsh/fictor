@@ -50,6 +50,7 @@ describe("AssetImage", () => {
     "ht\ntps://example.invalid/card.png",
     "/assets/%2e%2e/cards/ore_still.png",
     "/assets/%252e%252e/cards/ore_still.png",
+    "/assets/%252525252e%252525252e/cards/ore_still.png",
   ])("blocks an unsafe primary before it reaches img src: %s", (unsafeSrc) => {
     expect(isSafeLocalAssetUrl(unsafeSrc)).toBe(false);
     render(<AssetImage assetRole="HAND" src={unsafeSrc} placeholderLabel="차단된 도판" alt="차단된 도판" />);
@@ -103,5 +104,28 @@ describe("AssetImage", () => {
   it("requires STATIC_MANIFEST sources to bind an exact pinned record", () => {
     render(<AssetImage assetRole="STATIC_MANIFEST" src="/assets/cards/not-pinned.png" placeholderLabel="정적 미결속" alt="정적 미결속" />);
     expect(screen.getByRole("img", { name: "정적 미결속" })).toHaveClass("asset-placeholder");
+  });
+
+  it("strips every image URL-bearing escape hatch before spreading native props", () => {
+    const RuntimeAssetImage = AssetImage as unknown as ComponentType<Record<string, unknown>>;
+    render(
+      <RuntimeAssetImage
+        assetRole="HAND"
+        src="/assets/cards/ore_still.png"
+        srcSet="//example.invalid/external-srcset.png 2x"
+        sizes="100vw"
+        useMap="https://example.invalid/map"
+        style={{ backgroundImage: "url(https://example.invalid/background.png)" }}
+        dangerouslySetInnerHTML={{ __html: "<source srcset='https://example.invalid/source.png'>" }}
+        placeholderLabel="굳은 광석"
+        alt="굳은 광석"
+      />,
+    );
+    const image = screen.getByRole("img", { name: "굳은 광석" });
+    expect(image).toHaveAttribute("src", "/assets/cards/ore_still.png");
+    expect(image).not.toHaveAttribute("srcset");
+    expect(image).not.toHaveAttribute("sizes");
+    expect(image).not.toHaveAttribute("usemap");
+    expect(image).not.toHaveAttribute("style");
   });
 });

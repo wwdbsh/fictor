@@ -14,6 +14,8 @@
 encoded·double-encoded 상위 경로 순회는 `img src`에 들어가기 전에 fail-closed로 차단한다. URL은 현재
 origin과 문서 base path를 기준으로 정규화하며, 동일 origin의 `${basePath}assets/` 아래 PNG만 허용한다.
 primary가 차단되어도 슬롯 정책이 허용하는 안전한 local fallback은 한 번만 사용한다.
+bounded decode 뒤 `%`가 남는 다중 encoding도 차단하며, native prop spread에서는 `srcSet`, `sizes`,
+`useMap`, inline style과 raw HTML을 제거해 우회 이미지 요청을 만들 수 없게 한다.
 
 브라우저에는 T022 audit JSON을 싣지 않는다. 대신
 `src/presentation/assets/track1-asset-manifest.ts`의 현재 Track 1 고정 surface 13개만
@@ -25,6 +27,9 @@ packet을 authority로 선언하며, 요청 PNG는 T022 present 또는 명시적
 모든 production `AssetImage` 호출은 `STATIC_MANIFEST`, `HAND`, `REWARD`, `DISCOVERY_RESULT` 중 하나에
 타입으로 결속된다. 정적 역할은 pinned 13개 record와 일치해야 하며, HAND/REWARD는 fallback을 받지 않고
 DISCOVERY_RESULT만 첫 재료 fallback을 한 번 허용한다. 미결속·잘못된 역할은 placeholder로 닫힌다.
+정적 record는 canonical `${assetPrefix}${record.path}` pathname과 완전히 같아야 한다. 동적 정책 lookup은
+manifest의 authority, requested-PNG 규칙, 슬롯별 fallback 및 단일 record cardinality를 모두 확인하며
+어느 필드든 drift하면 fail-closed로 처리한다.
 
 ## 예산과 관찰값
 
@@ -33,7 +38,7 @@ DISCOVERY_RESULT만 첫 재료 fallback을 한 번 허용한다. 미결속·잘�
 | 초기 image request | 정확히 1 | 1 | PASS |
 | 초기 asset raw bytes | ≤ 2,296,255 | 2,296,255 | PASS |
 | 초기 non-current asset | 0 | 0 | PASS |
-| production JavaScript raw bytes | ≤ 409,600 | 377,977 | PASS |
+| production JavaScript raw bytes | ≤ 409,600 | 378,744 | PASS |
 | production CSS raw bytes | ≤ 32,768 | 28,028 | PASS |
 
 관찰 명령은 `npm run build` 뒤 `npm run smoke:static`이다. smoke는 외부/API/WebSocket 요청 0,
@@ -42,8 +47,9 @@ DISCOVERY_RESULT만 첫 재료 fallback을 한 번 허용한다. 미결속·잘�
 JS/CSS 예산 테스트는 `dist`의 모든 hashed 파일을 합산하지 않고 현재 `dist/index.html`이 고유하게 참조하는
 `./assets/*.js`와 `./assets/*.css`만 존재 확인 후 합산한다. 따라서 stale 또는 동시 build 산출물은 예산에
 혼입되지 않으며, 중복·누락 참조는 실패한다.
-별도 Chromium negative probe는 newline-scheme, protocol-relative, encoded traversal 입력을 production
-`AssetImage`에 전달하고 세 경우 모두 `img`가 생기지 않으며 unsafe image request가 0임을 확인한다.
+bundle exclusion test는 격리된 임시 outDir에서 빌드해 공유 `dist`와 경쟁하지 않는다. 별도 Chromium
+negative probe는 newline-scheme, protocol-relative, 5단계 encoded traversal 및 external `srcSet`을
+production `AssetImage`에 전달하고 unsafe image request가 0임을 확인한다.
 
 ## 발견 연출 수명
 

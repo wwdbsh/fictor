@@ -42,6 +42,10 @@ function normalizedContext(context: AssetUrlContext): { origin: string; assetPre
   }
 }
 
+export function resolveCanonicalAssetPrefix(context: AssetUrlContext = currentAssetUrlContext()): string | null {
+  return normalizedContext(context)?.assetPrefix ?? null;
+}
+
 export function currentAssetUrlContext(): AssetUrlContext {
   if (typeof window !== "undefined" && window.location.origin !== "null") {
     const pathname = window.location.pathname;
@@ -61,7 +65,7 @@ export function resolveSafeLocalAssetUrl(value: string, context: AssetUrlContext
     const url = new URL(value, normalized.resolutionBase);
     if (url.origin !== normalized.origin || (url.protocol !== "http:" && url.protocol !== "https:")) return null;
     const decodedPath = decodedPathname(url.pathname);
-    if (!decodedPath || ASCII_CONTROL.test(decodedPath) || decodedPath.includes("\\")) return null;
+    if (!decodedPath || decodedPath.includes("%") || ASCII_CONTROL.test(decodedPath) || decodedPath.includes("\\")) return null;
     if (decodedPath.split("/").some((segment) => segment === "." || segment === "..")) return null;
     if (!url.pathname.startsWith(normalized.assetPrefix) || !decodedPath.startsWith(normalized.assetPrefix)) return null;
     if (!decodedPath.toLowerCase().endsWith(".png")) return null;

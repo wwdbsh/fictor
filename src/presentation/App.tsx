@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from "react";
+import { useEffect, useRef, useState, type ComponentType, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from "react";
 
 import type {
   StillkinTrack1UiSession,
@@ -60,11 +60,13 @@ function Feedback({ projection, busy }: { projection: Track1UiProjection; busy: 
 
 function AssetPolicySmokeProbe() {
   if (typeof window === "undefined" || new URLSearchParams(window.location.search).get("t030-asset-policy-probe") !== "1") return null;
+  const RuntimeAssetImage = AssetImage as unknown as ComponentType<Record<string, unknown>>;
   return (
     <div hidden data-asset-policy-probe="ready">
       <AssetImage assetRole="HAND" src={"ht\ntps://blocked.invalid/newline.png"} placeholderLabel="newline scheme" alt="" />
       <AssetImage assetRole="HAND" src="//blocked.invalid/protocol-relative.png" placeholderLabel="protocol relative" alt="" />
-      <AssetImage assetRole="HAND" src={`${import.meta.env.BASE_URL}assets/%2e%2e/cards/ore_still.png`} placeholderLabel="encoded traversal" alt="" />
+      <AssetImage assetRole="HAND" src={`${import.meta.env.BASE_URL}assets/%252525252e%252525252e/cards/ore_still.png`} placeholderLabel="encoded traversal" alt="" />
+      <RuntimeAssetImage assetRole="HAND" src={`${import.meta.env.BASE_URL}assets/cards/ore_still.png`} srcSet="//blocked.invalid/external-srcset.png 2x" placeholderLabel="external srcset" alt="" />
     </div>
   );
 }

@@ -1,12 +1,12 @@
 import { useEffect, useState, type ImgHTMLAttributes } from "react";
 
 import { currentAssetUrlContext, resolveSafeLocalAssetUrl } from "./asset-url";
-import { track1AssetRecordForUrl, type Track1DynamicAssetSlot } from "./track1-asset-manifest";
+import { track1AssetRecordForUrl, track1DynamicAssetPolicy, type Track1DynamicAssetSlot } from "./track1-asset-manifest";
 
 type ImageAttempt = "PRIMARY" | "FALLBACK" | "PLACEHOLDER";
 export type AssetImageRole = "STATIC_MANIFEST" | Track1DynamicAssetSlot;
 
-type CommonAssetImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "onError"> & {
+type CommonAssetImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "srcSet" | "sizes" | "useMap" | "style" | "dangerouslySetInnerHTML" | "onError"> & {
   readonly src: string;
   readonly placeholderLabel: string;
 };
@@ -46,16 +46,30 @@ function placeholder(className: string | undefined, placeholderLabel: string, al
 
 /** Enforces the declared Track 1 slot policy before any URL can reach img src. */
 export function AssetImage(props: AssetImageProps) {
-  const { src, placeholderLabel, alt = "", className, assetRole, fallbackSrc = null, ...imageProps } = props;
+  const {
+    src,
+    placeholderLabel,
+    alt = "",
+    className,
+    assetRole,
+    fallbackSrc = null,
+    srcSet: _srcSet,
+    sizes: _sizes,
+    useMap: _useMap,
+    style: _style,
+    dangerouslySetInnerHTML: _dangerouslySetInnerHTML,
+    ...imageProps
+  } = props as AssetImageProps & Pick<ImgHTMLAttributes<HTMLImageElement>, "srcSet" | "sizes" | "useMap" | "style" | "dangerouslySetInnerHTML">;
   const context = currentAssetUrlContext();
   const resolvedPrimary = resolveSafeLocalAssetUrl(src, context);
-  const validRole = assetRole === "STATIC_MANIFEST" || assetRole === "HAND" || assetRole === "REWARD" || assetRole === "DISCOVERY_RESULT";
+  const dynamicPolicy = track1DynamicAssetPolicy(assetRole);
+  const validRole = assetRole === "STATIC_MANIFEST" || dynamicPolicy !== null;
   const staticRecord = assetRole === "STATIC_MANIFEST" && resolvedPrimary
     ? track1AssetRecordForUrl(resolvedPrimary, context)
     : null;
   const safePrimarySrc = validRole && (assetRole !== "STATIC_MANIFEST" || staticRecord) ? resolvedPrimary : null;
   const resolvedFallback = typeof fallbackSrc === "string" ? resolveSafeLocalAssetUrl(fallbackSrc, context) : null;
-  const safeFallbackSrc = assetRole === "DISCOVERY_RESULT" && resolvedFallback && resolvedFallback !== safePrimarySrc
+  const safeFallbackSrc = dynamicPolicy?.fallback === "FIRST_MATERIAL_THEN_NAMED_CSS_PLACEHOLDER" && resolvedFallback && resolvedFallback !== safePrimarySrc
     ? resolvedFallback
     : null;
   const identity = `${String(assetRole)}\u0000${src}\u0000${fallbackSrc ?? ""}`;

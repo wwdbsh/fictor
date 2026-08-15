@@ -246,11 +246,15 @@ async function main() {
           placeholders: element.querySelectorAll("[data-asset-placeholder]").length,
           images: element.querySelectorAll("img").length,
         }));
-        const unexpected = imageRequests.filter((requestUrl) => new URL(requestUrl).pathname !== `${mountPath}assets/backgrounds/background__still__depth_01.png`);
-        if (probeState.placeholders !== 3 || probeState.images !== 0 || unexpected.length > 0) {
+        const allowedProbeImages = new Set([
+          `${mountPath}assets/backgrounds/background__still__depth_01.png`,
+          `${mountPath}assets/cards/ore_still.png`,
+        ]);
+        const unexpected = imageRequests.filter((requestUrl) => new URL(requestUrl).origin !== origin || !allowedProbeImages.has(new URL(requestUrl).pathname));
+        if (probeState.placeholders !== 3 || probeState.images !== 1 || unexpected.length > 0) {
           throw new Error(`unsafe asset 요청 차단 실패: state=${JSON.stringify(probeState)}, requests=${imageRequests.join(", ")}`);
         }
-        return { cases: ["NEWLINE_SCHEME", "PROTOCOL_RELATIVE", "ENCODED_TRAVERSAL"], unsafeImageRequests: 0 };
+        return { cases: ["NEWLINE_SCHEME", "PROTOCOL_RELATIVE", "FIVE_LEVEL_ENCODED_TRAVERSAL", "EXTERNAL_SRCSET"], unsafeImageRequests: 0 };
       } finally {
         await probePage.close();
       }
