@@ -47,6 +47,7 @@ export interface Track1UiCard {
   readonly cardId: string;
   readonly nameKo: string;
   readonly artSrc: string;
+  readonly artFallbackLabelKo: string | null;
   readonly cost: number | null;
   readonly power: number | null;
   readonly effectLabelKo: string;
@@ -78,7 +79,10 @@ export interface Track1UiWorkshopMaterial {
 interface Track1UiBaseProjection {
   readonly phase: Track1UiPhase;
   readonly screenKey: string;
+  /** Stable across revisions within one meaningful screen; presentation focus follows this key. */
+  readonly focusKey: string;
   readonly headingKo: string;
+  readonly focusHeadingKo: string;
   readonly depth: 1 | 2 | 3;
   readonly stats: Track1UiStats;
   readonly journey: readonly Track1UiJourneyNode[];

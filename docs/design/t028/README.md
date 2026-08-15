@@ -6,7 +6,7 @@
 - 게임 상태의 유일한 authority는 T027 `createStillkinTrack1Controller`다.
 - presentation은 application의 `Track1UiProjection`과 opaque `Track1UiActionDescriptor`만 사용한다. `expectedRevision`, `runId`, encounter binding은 application facade가 채운다.
 - 실패한 dispatch의 snapshot은 채택하지 않는다. 성공한 dispatch의 snapshot만 다음 UI projection의 입력이 된다.
-- corrupt/unsupported/write-blocked save는 자동 삭제하지 않고 blocking UI로 표시한다.
+- corrupt/unsupported/write-blocked save는 초기 load뿐 아니라 활성 화면 중 외부 bytes 변경에서도 자동 삭제하지 않고 latched blocking UI로 표시한다. 일반 write failure/stale write는 기존 화면 rollback을 유지한다.
 - 독립 빚기·도감 UI는 제외한다. `WORKSHOP` entitlement 정산에 필요한 서로 다른 재료 2장 선택기만 `EVENT_RESOLVED`에 둔다.
 - config/hash/save schema는 변경하지 않는다. `package.json`도 T015 immutable binding SHA `a1e0807b75b2a18c3d927f107993c1d683daae49949ed2ecd0478d89252c3b1b`를 보존한다.
 
@@ -26,6 +26,7 @@
 - 서체: 제목·기록·버튼은 Georgia → `Noto Serif KR` → 바탕체 fallback. 상태문은 system UI.
 - 컨테이너: 전투는 landscape art 위 HUD와 손패, 보상은 열린 여백 위 3장 선택, 이벤트는 좌측 실제 art/우측 선택지의 펼친 기록지.
 - 컨트롤: 모든 상호작용은 native `button`, 최소 높이 44px, `:focus-visible` teal outline, 상태는 `role=status`, 실패·blocking은 `role=alert`.
+- 포커스: 화면 의미 전환은 stable `focusKey`로 제목에 이동한다. 동일 전투 revision에서는 제목을 탈취하지 않으며, 사용 카드 제거 뒤 다음 카드 또는 턴 종료로 복구한다.
 - 모션: 카드 hover/focus의 짧은 상승만 사용하고 `prefers-reduced-motion`에서 사실상 제거한다.
 - 반응형: 1024px 미만에서는 전투 HUD·손패·통계를 세로 적층하고 손패/보상은 가로 scroll, 이벤트 기록지는 단일 열로 전환한다.
 
@@ -34,13 +35,15 @@
 - 공통: `FICTOR · 픽토르`, `어름의 터 · 깊이 N / 3`, 저장 상태.
 - 전투: controller가 제공한 적 의도, 체력·방어·에너지·덱·버린 카드, controller card name/수치, `턴 시작`, `턴 종료`.
 - 보상: `전투에서 살아남았습니다.`, `재료 하나를 골라 덱에 넣으세요.`, 실제 reward choice 이름.
-- 이벤트: canonical event명과 controller-bound choice. FICTOR의 `아무것도 고르지 않고 떠나기`는 0 연료 경로다.
+- 이벤트: canonical event명과 controller-bound choice. FICTOR의 유료 선택은 `연료 1`, skip은 `연료 없음`을 시각·accessible name에 함께 표시한다.
 - 공방 예외: `서로 다른 재료 두 장을 골라 연료 없이 빚으세요.`, `두 재료 빚기`.
 - 종료: 승리/패배 기록과 `새 런`.
 
 ## Browser runtime packet
 
-`scripts/gen-browser-runtime-packet.ts`는 handwritten source 3개를 읽어 `src/application/browser/runtime-packet.generated.ts`를 결정론적으로 만든다. packet은 T027 resolver에 필요한 exact 52 materials/21 laws/34 result classes 최소 projection과 UI material display를 포함한다. source hash가 `FORGE_RUNTIME_SOURCE_HASH`와 다르면 생성 자체가 실패한다.
+`scripts/gen-browser-runtime-packet.ts`는 handwritten source 3개와 verified T022 asset manifest를 읽어 `src/application/browser/runtime-packet.generated.ts`를 결정론적으로 만든다. packet은 T027 resolver에 필요한 exact 52 materials/21 laws/34 result classes 최소 projection과 UI material display를 포함한다. source hash가 `FORGE_RUNTIME_SOURCE_HASH`와 다르면 생성 자체가 실패한다.
+
+T022가 확인한 canonical 489장 availability는 raw canonical ID 목록 대신 충돌 없는 52×52 material-pair bitset과 manifest SHA로 결속한다. 따라서 canonical catalog를 browser graph에 싣지 않으면서도 존재 여부를 exact 판정한다. 미생성 canonical 결과는 정렬상 첫 구성 재료의 실제 card art로 표시하고 `재료 도판` 표식을 함께 노출한다. `ore_still + still_03` 공방 결과는 다음 elite 손패에서 `/assets/cards/ore_still.png` HTTP 200과 failed response 0으로 smoke 검증한다.
 
 T015 binding 때문에 npm script는 추가하지 않았다. freshness 명령은 다음과 같다.
 
@@ -65,7 +68,7 @@ Above-the-fold diff: 브랜드, 깊이, 핵심 상태 제목/의도, 기본 CTA�
 
 ## 시각·상호작용 검증
 
-- in-app Browser 도구는 현재 실행 환경에 callable surface가 없고 catalog의 skill 경로도 설치본과 일치하지 않아 Puppeteer Chromium fallback을 사용했다.
+- in-app Browser runtime은 연결됐지만 사용 가능한 브라우저 인스턴스가 0개여서 Puppeteer Chromium fallback을 사용했다.
 - `node scripts/capture-t028-ui.mjs http://127.0.0.1:5173/`로 1536×1024 전투/보상/FICTOR와 900×1000 전투를 캡처했다.
 - 승인 콘셉트 3장과 최신 구현 캡처 4장을 같은 QA pass에서 `view_image(original)`로 확인했다.
 - 점검 항목: copy hierarchy, layout anatomy, serif scale, 네 color tokens, 실제 asset framing, control geometry, 900px stacking, 상태 전환 focus.

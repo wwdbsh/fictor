@@ -6,7 +6,8 @@ import { FICTOR_SAVE_V2_KEY, type StorageLike } from "../../src/persistence";
 class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>();
   failSet = false;
-  getItem(key: string) { return this.values.get(key) ?? null; }
+  failGet = false;
+  getItem(key: string) { if (this.failGet) throw new Error("read"); return this.values.get(key) ?? null; }
   setItem(key: string, value: string) { if (this.failSet) throw new Error("quota"); this.values.set(key, value); }
   removeItem(key: string) { this.values.delete(key); }
 }
@@ -55,11 +56,22 @@ function resolveAndLeave(session: StillkinTrack1UiSession, projection: Track1UiP
   return projection;
 }
 
+function currentJourneyNode(projection: Track1UiProjection) {
+  const current = projection.journey.filter(({ status }) => status === "CURRENT");
+  expect(current).toHaveLength(1);
+  return current[0];
+}
+
 describe("Stillkin Track-1 browser UI session", () => {
   it("plays the real first combat through reward, cache, free workshop picker, and next encounter", () => {
     const { session } = create();
-    let projection = enter(session, session.snapshot());
+    const between = session.snapshot();
+    expect(currentJourneyNode(between).nodeId).toBe("d1-normal-swarm");
+    expect(between.journey.filter(({ status }) => status === "COMPLETED")).toHaveLength(0);
+    let projection = enter(session, between);
     let combat = asPhase(projection, "IN_COMBAT");
+    expect(currentJourneyNode(combat).nodeId).toBe("d1-normal-swarm");
+    expect(combat.journey.find(({ nodeId }) => nodeId === "d1-cache")?.status).toBe("UPCOMING");
     expect(combat.backgroundSrc).toBe("/preview/subpath/assets/backgrounds/background__still__depth_01.png");
     expect(combat.enemy.artSrc).toBe("/preview/subpath/assets/enemies/enemy__still__swarm.png");
 
@@ -77,13 +89,14 @@ describe("Stillkin Track-1 browser UI session", () => {
     expect(workshopEvent.eventType).toBe("WORKSHOP");
     projection = apply(session, workshopEvent.choices[0].action);
     let workshop = asPhase(projection, "EVENT_RESOLVED");
-    const pair = workshop.workshopMaterials.find((left) => workshop.workshopMaterials.some((right) => right.cardId !== left.cardId));
+    const pair = workshop.workshopMaterials.find(({ cardId }) => cardId === "ore_still");
+    const other = workshop.workshopMaterials.find(({ cardId }) => cardId === "still_03");
     expect(pair).toBeDefined();
-    const other = workshop.workshopMaterials.find(({ cardId }) => cardId !== pair!.cardId)!;
+    expect(other).toBeDefined();
     expect(session.describeWorkshopAction([pair!.instanceId])).toBeNull();
     const duplicate = workshop.workshopMaterials.find(({ cardId, instanceId }) => cardId === pair!.cardId && instanceId !== pair!.instanceId);
     expect(session.describeWorkshopAction([pair!.instanceId, duplicate?.instanceId ?? pair!.instanceId])).toBeNull();
-    const freeForge = session.describeWorkshopAction([pair!.instanceId, other.instanceId]);
+    const freeForge = session.describeWorkshopAction([pair!.instanceId, other!.instanceId]);
     expect(freeForge).not.toBeNull();
     projection = apply(session, freeForge!);
     workshop = asPhase(projection, "EVENT_RESOLVED");
@@ -93,6 +106,21 @@ describe("Stillkin Track-1 browser UI session", () => {
     projection = enter(session, projection);
     combat = asPhase(projection, "IN_COMBAT");
     expect(combat.enemy.id).toBe("elite__still__burn");
+    let fallbackCard: Extract<Track1UiProjection, { phase: "IN_COMBAT" }>["hand"][number] | undefined;
+    for (let turns = 0; turns < 12 && combat.phase === "IN_COMBAT"; turns += 1) {
+      if (combat.primaryAction?.kind === "START_TURN") combat = asPhase(apply(session, combat.primaryAction), "IN_COMBAT");
+      fallbackCard = combat.hand.find(({ cardId }) => cardId === "forge__ore_still__still_03");
+      if (fallbackCard) break;
+      if (!combat.primaryAction) break;
+      const advanced = apply(session, combat.primaryAction);
+      if (advanced.phase !== "IN_COMBAT") break;
+      combat = advanced;
+    }
+    expect(fallbackCard).toMatchObject({
+      cardId: "forge__ore_still__still_03",
+      artSrc: "/preview/subpath/assets/cards/ore_still.png",
+      artFallbackLabelKo: "굳은 조각 재료 도판",
+    });
   });
 
   it("preserves the accepted snapshot across write and stale-write failures", () => {
@@ -125,6 +153,34 @@ describe("Stillkin Track-1 browser UI session", () => {
     }
   });
 
+  it("latches a blocking projection when active-run bytes become corrupt, unsupported, or unreadable", () => {
+    for (const mutation of [
+      () => "{bad",
+      (bytes: string) => JSON.stringify({ ...JSON.parse(bytes), schemaVersion: "fictor-save-v999" }),
+    ]) {
+      const storage = new MemoryStorage();
+      const created = create(storage, `runtime-block-${storage.values.size}`);
+      const combat = asPhase(enter(created.session, created.projection), "IN_COMBAT");
+      const original = storage.values.get(FICTOR_SAVE_V2_KEY)!;
+      const poisoned = mutation(original);
+      storage.values.set(FICTOR_SAVE_V2_KEY, poisoned);
+      const rejected = created.session.dispatch(combat.primaryAction!);
+      expect(rejected.applied).toBe(false);
+      expect(rejected.projection.phase).toBe("BLOCKED");
+      expect(storage.values.get(FICTOR_SAVE_V2_KEY)).toBe(poisoned);
+      expect(created.session.dispatch(combat.primaryAction!).projection.phase).toBe("BLOCKED");
+    }
+
+    const storage = new MemoryStorage();
+    const created = create(storage, "runtime-read-block");
+    const combat = asPhase(enter(created.session, created.projection), "IN_COMBAT");
+    storage.failGet = true;
+    const rejected = created.session.dispatch(combat.primaryAction!);
+    expect(rejected.applied).toBe(false);
+    expect(rejected.projection.phase).toBe("BLOCKED");
+    expect((rejected.projection as Extract<Track1UiProjection, { phase: "BLOCKED" }>).issuesKo).toContain("브라우저 저장소를 읽을 수 없습니다.");
+  });
+
   it("supports defeat and restart using only bound UI actions", () => {
     const { session } = create();
     let projection = enter(session, session.snapshot());
@@ -134,6 +190,7 @@ describe("Stillkin Track-1 browser UI session", () => {
       projection = apply(session, projection.primaryAction!);
     }
     const lost = asPhase(projection, "RUN_LOST");
+    expect(currentJourneyNode(lost).nodeId).toBe("d1-normal-swarm");
     const previousKey = lost.screenKey;
     projection = apply(session, lost.action);
     expect(projection.phase).toBe("BETWEEN_NODES");
@@ -160,9 +217,20 @@ describe("Stillkin Track-1 browser UI session", () => {
     projection = enter(session, projection); // FICTOR
     const fictor = asPhase(projection, "IN_EVENT");
     expect(fictor.eventType).toBe("FICTOR");
+    expect(currentJourneyNode(fictor).nodeId).toBe("d2-fictor");
+    expect(fictor.journey.filter(({ status }) => status === "COMPLETED").map(({ nodeId }) => nodeId)).toEqual([
+      "d1-normal-swarm",
+      "d1-cache",
+      "d1-workshop",
+      "d2-elite",
+      "d2-collapse",
+    ]);
+    expect(fictor.journey.find(({ nodeId }) => nodeId === "d2-record")?.status).toBe("UPCOMING");
     const fuel = fictor.stats.fuel;
     const skip = fictor.choices.find(({ choiceId }) => choiceId === "fictor-skip");
+    expect(fictor.choices.filter(({ choiceId }) => choiceId !== "fictor-skip").map(({ price }) => price)).toEqual([1, 1, 1]);
     expect(skip).toBeDefined();
+    expect(skip?.price).toBe(0);
     projection = apply(session, skip!.action);
     expect(projection.phase).toBe("EVENT_RESOLVED");
     expect(projection.stats.fuel).toBe(fuel);

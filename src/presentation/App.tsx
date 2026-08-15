@@ -38,7 +38,8 @@ function Feedback({ projection, busy }: { projection: Track1UiProjection; busy: 
   );
 }
 
-function ActionButton({ action, busy, onAction, className = "" }: { action: Track1UiActionDescriptor; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void; className?: string }) {
+function ActionButton({ action, busy, onAction, className = "", detailKo, disabledReasonKo }: { action: Track1UiActionDescriptor; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void; className?: string; detailKo?: string; disabledReasonKo?: string }) {
+  const accessibleLabel = [action.labelKo, detailKo, action.disabled ? disabledReasonKo : undefined].filter(Boolean).join(" · ");
   return (
     <button
       type="button"
@@ -46,8 +47,10 @@ function ActionButton({ action, busy, onAction, className = "" }: { action: Trac
       disabled={busy || action.disabled}
       onClick={() => onAction(action)}
       data-action-kind={action.kind}
+      aria-label={accessibleLabel || undefined}
     >
-      {action.labelKo}
+      <span>{action.labelKo}</span>
+      {detailKo && <small>{detailKo}</small>}
     </button>
   );
 }
@@ -107,24 +110,34 @@ function JourneyScreen({ projection, busy, onAction }: { projection: Extract<Tra
   );
 }
 
-function CombatCard({ card, busy, onAction }: { card: Track1UiCard; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void }) {
+function CombatCard({ card, handIndex, busy, onAction }: { card: Track1UiCard; handIndex: number; busy: boolean; onAction: (action: Track1UiActionDescriptor, handIndex: number) => void }) {
   const content: ReactNode = (
     <>
       <span className="card-cost">{card.cost ?? "—"}</span>
       <strong>{card.nameKo}</strong>
       <img src={card.artSrc} alt="" />
+      {card.artFallbackLabelKo && <span className="card-art-note">{card.artFallbackLabelKo}</span>}
       <span className="card-rule">{card.effectLabelKo}</span>
       <span className="card-power">{card.power ?? "—"}</span>
     </>
   );
   return card.action ? (
-    <button type="button" className="combat-card" disabled={busy || card.action.disabled} onClick={() => onAction(card.action!)} aria-label={card.action.labelKo}>
+    <button
+      type="button"
+      className="combat-card"
+      disabled={busy || card.action.disabled}
+      onClick={() => onAction(card.action!, handIndex)}
+      aria-label={card.action.labelKo}
+      data-card-instance-id={card.instanceId}
+      data-card-id={card.cardId}
+      data-hand-index={handIndex}
+    >
       {content}
     </button>
   ) : <article className="combat-card">{content}</article>;
 }
 
-function CombatScreen({ projection, busy, onAction }: { projection: Extract<Track1UiProjection, { phase: "IN_COMBAT" }>; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void }) {
+function CombatScreen({ projection, busy, onAction, onCardAction }: { projection: Extract<Track1UiProjection, { phase: "IN_COMBAT" }>; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void; onCardAction: (action: Track1UiActionDescriptor, handIndex: number) => void }) {
   return (
     <section className="combat-screen page-screen art-screen">
       <img className="screen-background" src={projection.backgroundSrc} alt="" />
@@ -141,7 +154,7 @@ function CombatScreen({ projection, busy, onAction }: { projection: Extract<Trac
       </div>
       <p className="combat-instruction">{projection.instructionKo}</p>
       <div className="hand" aria-label="손패">
-        {projection.hand.length > 0 ? projection.hand.map((card) => <CombatCard key={card.instanceId} card={card} busy={busy} onAction={onAction} />) : <p className="empty-hand">손에 든 카드가 없습니다.</p>}
+        {projection.hand.length > 0 ? projection.hand.map((card, index) => <CombatCard key={card.instanceId} card={card} handIndex={index} busy={busy} onAction={onCardAction} />) : <p className="empty-hand">손에 든 카드가 없습니다.</p>}
       </div>
       <aside className="combat-left-stats">
         <span>체력 {projection.stats.hp} / {projection.stats.maxHp}</span>
@@ -190,7 +203,15 @@ function EventScreen({ projection, busy, onAction }: { projection: Extract<Track
           <p>{projection.descriptionKo}</p>
           <div className="event-choices">
             {projection.choices.map((choice) => (
-              <ActionButton key={choice.choiceId} action={choice.action} busy={busy} onAction={onAction} className="event-choice" />
+              <ActionButton
+                key={choice.choiceId}
+                action={choice.action}
+                busy={busy}
+                onAction={onAction}
+                className="event-choice"
+                detailKo={projection.eventType === "FICTOR" ? (choice.price === 0 ? "연료 없음" : `연료 ${choice.price}`) : undefined}
+                disabledReasonKo={projection.eventType === "FICTOR" ? "연료 부족" : undefined}
+              />
             ))}
           </div>
         </div>
@@ -217,7 +238,7 @@ function EventResolvedScreen({ projection, session, busy, onAction }: { projecti
               <p>서로 다른 재료 두 장을 골라 연료 없이 빚으세요.</p>
               <div className="workshop-materials" aria-label="공방 재료 선택">
                 {projection.workshopMaterials.map((material) => (
-                  <button key={material.instanceId} type="button" aria-pressed={selected.includes(material.instanceId)} onClick={() => toggle(material.instanceId)} disabled={busy}>
+                  <button key={material.instanceId} type="button" data-material-card-id={material.cardId} aria-pressed={selected.includes(material.instanceId)} onClick={() => toggle(material.instanceId)} disabled={busy}>
                     <img src={material.artSrc} alt="" /><span>{material.nameKo}</span>
                   </button>
                 ))}
@@ -257,6 +278,8 @@ export function App({ session, initialProjection }: AppProps) {
   const [pendingAction, setPendingAction] = useState<Track1UiActionDescriptor | null>(null);
   const processedAction = useRef<Track1UiActionDescriptor | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
+  const shell = useRef<HTMLElement>(null);
+  const combatFocusRequest = useRef<{ focusKey: string; handIndex: number } | null>(null);
 
   useEffect(() => {
     if (!pendingAction || processedAction.current === pendingAction) return;
@@ -268,20 +291,35 @@ export function App({ session, initialProjection }: AppProps) {
 
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
-  }, [projection.screenKey]);
+  }, [projection.focusKey]);
+
+  useEffect(() => {
+    const request = combatFocusRequest.current;
+    if (!request) return;
+    combatFocusRequest.current = null;
+    if (projection.phase !== "IN_COMBAT" || projection.focusKey !== request.focusKey) return;
+    const nextCard = shell.current?.querySelector<HTMLButtonElement>(`button.combat-card[data-hand-index="${request.handIndex}"]:not(:disabled)`);
+    const endTurn = shell.current?.querySelector<HTMLButtonElement>('button[data-action-kind="END_TURN"]:not(:disabled)');
+    (nextCard ?? endTurn)?.focus({ preventScroll: true });
+  }, [projection]);
 
   const onAction = (action: Track1UiActionDescriptor) => {
     if (!pendingAction) setPendingAction(action);
   };
+  const onCombatCardAction = (action: Track1UiActionDescriptor, handIndex: number) => {
+    if (pendingAction) return;
+    combatFocusRequest.current = { focusKey: projection.focusKey, handIndex };
+    setPendingAction(action);
+  };
   const busy = pendingAction !== null;
 
   return (
-    <main className={`game-shell phase-${projection.phase.toLowerCase()}`} aria-busy={busy} data-screen-key={projection.screenKey}>
+    <main ref={shell} className={`game-shell phase-${projection.phase.toLowerCase()}`} aria-busy={busy} data-screen-key={projection.screenKey}>
       <ScreenHeader projection={projection} />
-      <h1 className="sr-only focus-heading" ref={heading} tabIndex={-1}>{projection.headingKo}</h1>
+      <h1 className="sr-only focus-heading" ref={heading} tabIndex={-1}>{projection.focusHeadingKo}</h1>
       {projection.phase === "BLOCKED" && <BlockedScreen projection={projection} />}
       {projection.phase === "BETWEEN_NODES" && <JourneyScreen projection={projection} busy={busy} onAction={onAction} />}
-      {projection.phase === "IN_COMBAT" && <CombatScreen projection={projection} busy={busy} onAction={onAction} />}
+      {projection.phase === "IN_COMBAT" && <CombatScreen projection={projection} busy={busy} onAction={onAction} onCardAction={onCombatCardAction} />}
       {projection.phase === "AWAITING_REWARD" && <RewardScreen projection={projection} busy={busy} onAction={onAction} />}
       {projection.phase === "IN_EVENT" && <EventScreen projection={projection} busy={busy} onAction={onAction} />}
       {projection.phase === "EVENT_RESOLVED" && <EventResolvedScreen projection={projection} session={session} busy={busy} onAction={onAction} />}

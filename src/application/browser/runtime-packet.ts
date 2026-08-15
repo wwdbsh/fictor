@@ -22,6 +22,20 @@ export interface BrowserRuntimePacketV1 {
     readonly laws: 21;
     readonly resultClasses: 34;
   };
+  readonly assetAvailability: {
+    readonly manifestSha256: string;
+    readonly canonicalCardCount: 489;
+    /** Exact 52×52 material-index membership matrix, packed least-significant bit first. */
+    readonly materialPairBitsetHex: string;
+  };
   readonly resolverContext: ForgeResolverContextV1;
   readonly materialDisplay: readonly BrowserMaterialDisplay[];
+}
+
+export function browserPacketHasCanonicalArt(packet: BrowserRuntimePacketV1, materialIds: readonly [string, string]): boolean {
+  const indexes = materialIds.map((id) => packet.resolverContext.materials.findIndex((material) => material.id === id)).sort((left, right) => left - right);
+  if (indexes[0] < 0 || indexes[1] < 0) return false;
+  const index = indexes[0] * packet.resolverContext.materials.length + indexes[1];
+  const byte = Number.parseInt(packet.assetAvailability.materialPairBitsetHex.slice(Math.floor(index / 8) * 2, Math.floor(index / 8) * 2 + 2), 16);
+  return Number.isFinite(byte) && (byte & (1 << (index % 8))) !== 0;
 }

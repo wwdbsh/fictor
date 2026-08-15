@@ -240,20 +240,43 @@ async function main() {
     await clickAndWait(".event-choice");
     await page.waitForSelector(".workshop-materials");
     const selected = await page.$$eval(".workshop-materials button", (buttons) => {
-      const first = buttons[0];
-      const firstName = first?.textContent?.trim();
-      const second = buttons.find((button) => button.textContent?.trim() !== firstName);
-      if (!(first instanceof HTMLButtonElement) || !(second instanceof HTMLButtonElement)) return false;
-      first.click();
-      second.click();
+      const ore = buttons.find((button) => button.getAttribute("data-material-card-id") === "ore_still");
+      const still03 = buttons.find((button) => button.getAttribute("data-material-card-id") === "still_03");
+      if (!(ore instanceof HTMLButtonElement) || !(still03 instanceof HTMLButtonElement)) return false;
+      ore.click();
+      still03.click();
       return true;
     });
-    if (!selected) throw new Error("공방에서 서로 다른 재료 두 장을 찾지 못했습니다.");
+    if (!selected) throw new Error("공방에서 ore_still + still_03 재료를 찾지 못했습니다.");
     await page.waitForSelector('.resolved-screen .primary-cta:not([disabled])');
     await clickAndWait('.resolved-screen .primary-cta:not([disabled])');
     await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
     await page.waitForSelector('img[alt="눌린 불의 잔해"]');
+    let fallbackAssetUrl = "";
+    const observedEliteHands = [];
+    for (let actions = 0; actions < 24 && await page.$("main.phase-in_combat"); actions += 1) {
+      observedEliteHands.push(await page.$$eval("button.combat-card", (cards) => cards.map((card) => card.getAttribute("data-card-id"))));
+      const fallbackCard = await page.$('button.combat-card[data-card-id="forge__ore_still__still_03"]');
+      if (fallbackCard) {
+        fallbackAssetUrl = await fallbackCard.$eval("img", (element) => element instanceof HTMLImageElement ? element.src : "");
+        const marker = await fallbackCard.$eval(".card-art-note", (element) => element.textContent?.trim());
+        if (marker !== "굳은 조각 재료 도판") throw new Error(`missing canonical fallback 표시가 없습니다: ${marker}`);
+        break;
+      }
+      const start = await page.$('button[data-action-kind="START_TURN"]:not([disabled])');
+      const end = await page.$('button[data-action-kind="END_TURN"]:not([disabled])');
+      if (start) await clickAndWait('button[data-action-kind="START_TURN"]');
+      else if (end) await clickAndWait('button[data-action-kind="END_TURN"]');
+      else break;
+    }
+    if (!fallbackAssetUrl || new URL(fallbackAssetUrl).pathname !== `${mountPath}assets/cards/ore_still.png`) {
+      throw new Error(`missing canonical fallback asset 경로가 올바르지 않습니다: ${fallbackAssetUrl}; hands=${JSON.stringify(observedEliteHands)}`);
+    }
+    const fallbackAssetResponse = await fetch(fallbackAssetUrl);
+    if (fallbackAssetResponse.status !== 200 || fallbackAssetResponse.headers.get("content-type")?.split(";", 1)[0] !== "image/png") {
+      throw new Error(`missing canonical fallback asset 응답 실패: ${fallbackAssetResponse.status}`);
+    }
     if (browserErrors.length > 0) {
       throw new Error(`브라우저 오류:\n${browserErrors.join("\n")}`);
     }
@@ -284,6 +307,7 @@ async function main() {
         webSocketRequests: 0,
         browserImageRequests: browserImageRequests.length,
         corePath: "first combat -> reward -> cache -> workshop -> elite",
+        missingCanonicalFallback: { cardId: "forge__ore_still__still_03", assetPath: new URL(fallbackAssetUrl).pathname, httpStatus: fallbackAssetResponse.status },
         staticAssets,
       }),
     );

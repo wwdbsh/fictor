@@ -4,7 +4,7 @@ import type { StorageLike } from "../../persistence";
 import { createStillkinTrack1Controller, STILLKIN_TRACK1_PROVISIONAL_CONFIG as CONFIG } from "../run";
 import type { StillkinTrack1Command, StillkinTrack1Snapshot } from "../run";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
-import type { BrowserMaterialDisplay } from "./runtime-packet";
+import { browserPacketHasCanonicalArt, type BrowserMaterialDisplay } from "./runtime-packet";
 import type {
   StillkinTrack1UiSession,
   Track1UiActionDescriptor,
@@ -102,14 +102,22 @@ function nodeLabel(node: (typeof CONFIG.route)[number]): string {
 }
 
 function journey(snapshot: StillkinTrack1Snapshot): Track1UiJourneyNode[] {
+  const isActiveNode = snapshot.flow.phase !== "BETWEEN_NODES";
+  const currentIndex = isActiveNode ? snapshot.flow.currentNodeIndex : snapshot.flow.phase === "BETWEEN_NODES" ? snapshot.flow.nextNodeIndex : null;
+  const completedBefore = currentIndex ?? snapshot.flow.nextNodeIndex;
   return CONFIG.route.map((node, index) => ({
     nodeId: node.nodeId,
     depth: node.depth,
     labelKo: nodeLabel(node),
-    status: index < snapshot.flow.nextNodeIndex
-      ? (index === snapshot.flow.currentNodeIndex && !["BETWEEN_NODES", "RUN_WON", "RUN_LOST"].includes(snapshot.flow.phase) ? "CURRENT" : "COMPLETED")
-      : index === snapshot.flow.nextNodeIndex ? "CURRENT" : "UPCOMING",
+    status: index === currentIndex ? "CURRENT" : index < completedBefore ? "COMPLETED" : "UPCOMING",
   }));
+}
+
+function focusKey(snapshot: StillkinTrack1Snapshot): string {
+  const node = snapshot.flow.phase === "BETWEEN_NODES"
+    ? CONFIG.route[snapshot.flow.nextNodeIndex]
+    : routeNode(snapshot);
+  return `${snapshot.flow.runId}:${snapshot.persistence.writeBlocked ? "BLOCKED" : snapshot.flow.phase}:${node?.nodeId ?? "none"}`;
 }
 
 function displayMap(items: readonly BrowserMaterialDisplay[]): Map<string, BrowserMaterialDisplay> {
@@ -175,6 +183,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   const commandByDescriptor = new WeakMap<Track1UiActionDescriptor, StillkinTrack1Command>();
   let acceptedSnapshot: StillkinTrack1Snapshot | null = null;
   let feedback: Feedback = null;
+  let latchedBlockingIssuesKo: readonly string[] | null = null;
 
   const bind = (actionId: string, kind: Track1UiActionKind, labelKo: string, command: StillkinTrack1Command, disabled = false): Track1UiActionDescriptor => {
     const descriptor = Object.freeze({ actionId, kind, labelKo, disabled });
@@ -204,7 +213,12 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     const material = materials.get(card.cardId);
     const resolved = resolveCanonical(card.cardId, context);
     const nameKo = material?.nameKo ?? resolved?.name_ko ?? card.cardId;
-    const art = material?.art ?? resolved?.art;
+    const fallbackMaterial = resolved?.material_ids
+      .map((id) => materials.get(id))
+      .filter((item): item is BrowserMaterialDisplay => item !== undefined)
+      .sort((left, right) => left.id < right.id ? -1 : left.id > right.id ? 1 : 0)[0];
+    const usesFallbackArt = resolved !== null && !browserPacketHasCanonicalArt(packet, resolved.material_ids);
+    const art = material?.art ?? (usesFallbackArt ? fallbackMaterial?.art : resolved?.art);
     const program = active.programs.find(({ effectId }) => effectId === card.effectId);
     const disabled = active.phase !== "PLAYER_ACTION" || card.cost === null || card.cost > active.player.energy;
     const action = bind(
@@ -228,6 +242,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       cardId: card.cardId,
       nameKo,
       artSrc: assetUrl(baseUrl, art ?? "cards/ore_still.png"),
+      artFallbackLabelKo: usesFallbackArt ? `${fallbackMaterial?.nameKo ?? "구성 재료"} 재료 도판` : null,
       cost: card.cost,
       power: card.power,
       effectLabelKo: card.power === null ? "수치 확정 전" : `효과 수치 ${card.power}`,
@@ -239,18 +254,22 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     const depth = currentDepth(snapshot);
     const shared = {
       screenKey: `${snapshot.flow.runId}:${snapshot.flow.revision}:${snapshot.flow.phase}`,
+      focusKey: focusKey(snapshot),
       headingKo: `어름의 터 · 깊이 ${depth} / 3`,
+      focusHeadingKo: `어름의 터 · 깊이 ${depth} / 3`,
       depth,
       stats: stats(snapshot),
       journey: journey(snapshot),
       feedback,
     } as const;
-    if (snapshot.persistence.writeBlocked) {
+    if (snapshot.persistence.writeBlocked || latchedBlockingIssuesKo) {
       return {
         ...shared,
+        focusKey: `${snapshot.flow.runId}:BLOCKED`,
         phase: "BLOCKED",
         headingKo: "저장 기록을 열 수 없습니다",
-        issuesKo: snapshot.persistence.issues.map((issue) => ISSUE_MESSAGES[issue] ?? `저장 기록 오류: ${issue}`),
+        focusHeadingKo: "저장 기록을 열 수 없습니다",
+        issuesKo: latchedBlockingIssuesKo ?? snapshot.persistence.issues.map((issue) => ISSUE_MESSAGES[issue] ?? `저장 기록 오류: ${issue}`),
       };
     }
     if (snapshot.flow.phase === "BETWEEN_NODES") {
@@ -314,7 +333,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         }
         return [];
       });
-      return { ...shared, phase: "AWAITING_REWARD", headingKo: "전투에서 살아남았습니다", choices };
+      return { ...shared, phase: "AWAITING_REWARD", focusHeadingKo: "전투에서 살아남았습니다", choices };
     }
     const node = routeNode(snapshot);
     if ((snapshot.flow.phase === "IN_EVENT" || snapshot.flow.phase === "EVENT_RESOLVED") && node?.kind === "EVENT") {
@@ -351,6 +370,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       ...shared,
       phase: won ? "RUN_WON" : "RUN_LOST",
       headingKo: won ? "어름의 잔영이 멈췄습니다" : "기록이 여기서 끊겼습니다",
+      focusHeadingKo: won ? "어름의 잔영이 멈췄습니다" : "기록이 여기서 끊겼습니다",
       messageKo: won ? "신의 심장이 도감에 남았습니다." : "영구 기록은 남아 있습니다. 새 런을 시작할 수 있습니다.",
       artSrc: assetUrl(baseUrl, won ? "cards/heart__still.png" : `backgrounds/background__still__depth_0${depth}.png`),
       action: bind(`restart:${snapshot.flow.revision}`, "RESTART", "새 런", { type: "RESTART", ...baseCommand(snapshot) }),
@@ -365,6 +385,9 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   const session: StillkinTrack1UiSession = {
     load() {
       acceptedSnapshot = controller.load().snapshot;
+      latchedBlockingIssuesKo = acceptedSnapshot.persistence.writeBlocked
+        ? acceptedSnapshot.persistence.issues.map((issue) => ISSUE_MESSAGES[issue] ?? `저장 기록 오류: ${issue}`)
+        : null;
       feedback = acceptedSnapshot.persistence.writeBlocked
         ? { tone: "ERROR", messageKo: "원본 저장 기록은 삭제하지 않았습니다." }
         : { tone: "STATUS", messageKo: "진행 기록을 불러왔습니다." };
@@ -373,6 +396,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     snapshot() { return project(ensureLoaded()); },
     dispatch(action): Track1UiDispatchResult {
       const snapshot = ensureLoaded();
+      if (latchedBlockingIssuesKo) return { applied: false, projection: project(snapshot) };
       const command = commandByDescriptor.get(action);
       if (!command || action.disabled) {
         feedback = failureFeedback("INVALID_ACTION");
@@ -380,7 +404,13 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       }
       const result = controller.dispatch(command);
       if (!result.applied) {
-        feedback = failureFeedback(result.reason, result.persistence && !result.persistence.ok ? result.persistence.reason : undefined);
+        const persistenceReason = result.persistence && !result.persistence.ok ? result.persistence.reason : undefined;
+        feedback = failureFeedback(result.reason, persistenceReason);
+        if (persistenceReason === "WRITE_BLOCKED" || persistenceReason === "READ_FAILED") {
+          latchedBlockingIssuesKo = [persistenceReason === "READ_FAILED"
+            ? ISSUE_MESSAGES.READ_FAILED
+            : "저장 기록이 외부에서 손상되었거나 지원하지 않는 형식으로 바뀌었습니다."];
+        }
         return { applied: false, projection: project(snapshot) };
       }
       acceptedSnapshot = result.snapshot;
@@ -389,6 +419,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     },
     describeWorkshopAction(materialInstanceIds) {
       const snapshot = ensureLoaded();
+      if (latchedBlockingIssuesKo) return null;
       if (snapshot.flow.phase !== "EVENT_RESOLVED" || materialInstanceIds.length !== 2) return null;
       const [leftId, rightId] = materialInstanceIds;
       const left = snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === leftId);

@@ -1,4 +1,5 @@
-import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,11 +9,56 @@ import type { Law, Material, ResultClass } from "../src/data/schema/contracts";
 
 export const BROWSER_RUNTIME_PACKET_GENERATOR_VERSION = "browser-runtime-packet-v1" as const;
 
+interface BrowserAssetAvailability {
+  readonly manifestSha256: string;
+  readonly canonicalCardIds: readonly string[];
+}
+
+function canonicalPairBitsetHex(materials: readonly Material[], canonicalCardIds: readonly string[]): string {
+  const pairByCardId = new Map<string, readonly [number, number]>();
+  for (let left = 0; left < materials.length; left += 1) {
+    for (let right = left; right < materials.length; right += 1) {
+      const ids = [materials[left].id, materials[right].id].sort();
+      pairByCardId.set(`forge__${ids[0]}__${ids[1]}`, [left, right]);
+    }
+  }
+  const bytes = new Uint8Array(Math.ceil((materials.length * materials.length) / 8));
+  for (const cardId of canonicalCardIds) {
+    const pair = pairByCardId.get(cardId);
+    if (!pair) throw new Error(`browser packet canonical asset has no material pair: ${cardId}`);
+    const index = pair[0] * materials.length + pair[1];
+    bytes[Math.floor(index / 8)] |= 1 << (index % 8);
+  }
+  return Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+interface T022AssetManifest {
+  readonly audit_version: string;
+  readonly status: string;
+  readonly scope: { readonly cards: { readonly canonical: number } };
+  readonly assets: { readonly records: readonly { readonly id: string; readonly category: string; readonly public_path: string }[] };
+}
+
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
 
-export function buildBrowserRuntimePacket(materials: readonly Material[], laws: readonly Law[], resultClasses: readonly ResultClass[]) {
+export function readBrowserAssetAvailability(repositoryRoot: string): BrowserAssetAvailability {
+  const manifestPath = resolve(repositoryRoot, "assets/manifests/t022-m2-assets-audit-v1.json");
+  const bytes = readFileSync(manifestPath);
+  const manifest = JSON.parse(bytes.toString("utf8")) as T022AssetManifest;
+  if (manifest.audit_version !== "t022-m2-assets-audit-v1" || manifest.status !== "VERIFIED") throw new Error("browser packet requires the verified T022 asset manifest");
+  const records = manifest.assets.records.filter(({ category }) => category === "CANONICAL");
+  if (records.length !== manifest.scope.cards.canonical || records.length !== 489) throw new Error("browser packet canonical asset count must be 489");
+  const canonicalCardIds = records.map(({ id, public_path }) => {
+    if (public_path !== `public/assets/cards/${id}.png` || !existsSync(resolve(repositoryRoot, public_path))) throw new Error(`browser packet canonical asset is unavailable: ${id}`);
+    return id;
+  }).sort();
+  if (new Set(canonicalCardIds).size !== canonicalCardIds.length) throw new Error("browser packet canonical asset ids must be unique");
+  return { manifestSha256: createHash("sha256").update(bytes).digest("hex"), canonicalCardIds };
+}
+
+export function buildBrowserRuntimePacket(materials: readonly Material[], laws: readonly Law[], resultClasses: readonly ResultClass[], assetAvailability: BrowserAssetAvailability) {
   const sourceHash = calculateSourceHash([materials, laws, resultClasses]);
   if (sourceHash !== FORGE_RUNTIME_SOURCE_HASH) {
     throw new Error(`browser packet source hash mismatch: ${sourceHash}`);
@@ -55,6 +101,11 @@ export function buildBrowserRuntimePacket(materials: readonly Material[], laws: 
     schemaVersion: "fictor-browser-runtime-packet-v1" as const,
     sourceHash,
     counts: { materials: 52 as const, laws: 21 as const, resultClasses: 34 as const },
+    assetAvailability: {
+      manifestSha256: assetAvailability.manifestSha256,
+      canonicalCardCount: 489 as const,
+      materialPairBitsetHex: canonicalPairBitsetHex(materials, assetAvailability.canonicalCardIds),
+    },
     resolverContext: {
       resolverVersion: FORGE_RUNTIME_RESOLVER_VERSION,
       sourceHash: FORGE_RUNTIME_SOURCE_HASH,
@@ -86,7 +137,8 @@ export function runBrowserRuntimePacketGeneration(repositoryRoot: string, checkO
   const materials = readJson<Material[]>(resolve(sourceRoot, "materials.json"));
   const laws = readJson<Law[]>(resolve(sourceRoot, "laws.json"));
   const resultClasses = readJson<ResultClass[]>(resolve(sourceRoot, "resultClasses.json"));
-  const contents = renderBrowserRuntimePacket(buildBrowserRuntimePacket(materials, laws, resultClasses));
+  const assetAvailability = readBrowserAssetAvailability(repositoryRoot);
+  const contents = renderBrowserRuntimePacket(buildBrowserRuntimePacket(materials, laws, resultClasses, assetAvailability));
 
   if (checkOnly) {
     let current: string;
