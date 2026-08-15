@@ -5,6 +5,7 @@ import { createStillkinTrack1Controller, STILLKIN_TRACK1_PROVISIONAL_CONFIG as C
 import type { StillkinTrack1Command, StillkinTrack1Snapshot } from "../run";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
 import { browserPacketHasCanonicalArt, type BrowserMaterialDisplay } from "./runtime-packet";
+import { buildCanonicalForgePreview, projectCanonicalCodex } from "./forge-codex-preview";
 import type {
   StillkinTrack1UiSession,
   Track1UiActionDescriptor,
@@ -12,10 +13,13 @@ import type {
   Track1UiCard,
   Track1UiDispatchResult,
   Track1UiEventChoice,
+  Track1UiForgeMaterial,
+  Track1UiForgeMode,
+  Track1UiForgePreview,
+  Track1UiForgeReview,
   Track1UiJourneyNode,
   Track1UiProjection,
   Track1UiRewardChoice,
-  Track1UiWorkshopMaterial,
 } from "./ui-types";
 
 export interface StillkinTrack1UiSessionOptions {
@@ -154,11 +158,14 @@ function recipeDisplay(recipeId: string, context: ForgeResolverContextV1): { nam
 
 function commandFeedback(events: readonly { type: string }[]): Feedback {
   const last = events.at(-1)?.type;
+  if (events.some(({ type }) => type === "INSTANT_FORGE_CLEANED")) return { tone: "STATUS", messageKo: "전투가 끝나 즉석 결과가 사라지고 사용한 재료가 덱으로 복구되었습니다." };
   if (last === "RUN_WON") return { tone: "STATUS", messageKo: "어름의 잔영이 멈췄습니다." };
   if (last === "RUN_LOST") return { tone: "STATUS", messageKo: "런이 끝났습니다." };
   if (events.some(({ type }) => type === "REWARD_AVAILABLE")) return { tone: "STATUS", messageKo: "전투 보상이 도착했습니다." };
   if (events.some(({ type }) => type === "WORKSHOP_ENTITLEMENT_GRANTED")) return { tone: "STATUS", messageKo: "연료 없이 한 번 빚을 수 있습니다." };
-  if (events.some(({ type }) => type === "FORGE_RESULT_CREATED")) return { tone: "STATUS", messageKo: "두 재료를 빚어 덱에 기록했습니다." };
+  const created = events.find((event): event is { type: "FORGE_RESULT_CREATED"; mode: "INSTANT" | "WORKSHOP" } => event.type === "FORGE_RESULT_CREATED" && "mode" in event);
+  if (created?.mode === "INSTANT") return { tone: "STATUS", messageKo: "즉석 결과가 손에 놓였습니다. 전투 종료 시 결과는 사라지고 재료는 복구됩니다." };
+  if (created?.mode === "WORKSHOP") return { tone: "STATUS", messageKo: "두 재료가 영구 소모되고 결과가 덱에 편입되었습니다." };
   if (events.some(({ type }) => type === "CARD_PLAYED")) return { tone: "STATUS", messageKo: "카드를 사용했습니다." };
   if (events.some(({ type }) => type === "TURN_STARTED")) return { tone: "STATUS", messageKo: "새 턴을 시작했습니다." };
   if (events.some(({ type }) => type === "EVENT_RESOLVED")) return { tone: "STATUS", messageKo: "사건을 기록했습니다." };
@@ -175,12 +182,15 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   const packet = BROWSER_RUNTIME_PACKET;
   const context = packet.resolverContext;
   const materials = displayMap(packet.materialDisplay);
+  const codexCanonical = projectCanonicalCodex(baseUrl);
   const controller = createStillkinTrack1Controller({
     storage: options.storage,
     resolverContext: context,
     ...(options.generationFactory ? { generationFactory: options.generationFactory } : {}),
   });
   const commandByDescriptor = new WeakMap<Track1UiActionDescriptor, StillkinTrack1Command>();
+  const previewAuthority = new WeakMap<Track1UiForgePreview, { revision: number; mode: Track1UiForgeMode; command: StillkinTrack1Command }>();
+  const reviewAuthority = new WeakMap<Track1UiForgeReview, { revision: number; mode: "WORKSHOP_PAID" | "WORKSHOP_FREE"; command: StillkinTrack1Command }>();
   let acceptedSnapshot: StillkinTrack1Snapshot | null = null;
   let feedback: Feedback = null;
   let latchedBlockingIssuesKo: readonly string[] | null = null;
@@ -202,6 +212,20 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       deckCount: snapshot.runtime.run.deck.length,
     };
   };
+  const activeForgeActions = (snapshot: StillkinTrack1Snapshot): 0 | 1 => snapshot.runtime.run.activeCombat?.forgeActionsRemaining ?? 0;
+
+  const workshopMaterials = (snapshot: StillkinTrack1Snapshot): Track1UiForgeMaterial[] => snapshot.runtime.run.ownedInstances.flatMap((instance) => {
+    const material = materials.get(instance.cardId);
+    return material ? [{
+      instanceId: instance.instanceId,
+      cardId: instance.cardId,
+      nameKo: material.nameKo,
+      artSrc: assetUrl(baseUrl, material.art),
+      category: material.category,
+    }] : [];
+  });
+
+  const hasDistinctPair = (items: readonly { cardId: string }[]) => new Set(items.map(({ cardId }) => cardId)).size >= 2;
 
   const cardProjection = (snapshot: StillkinTrack1Snapshot, instanceId: string): Track1UiCard | null => {
     const active = snapshot.runtime.run.activeCombat?.state;
@@ -221,6 +245,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     const art = material?.art ?? (usesFallbackArt ? fallbackMaterial?.art : resolved?.art);
     const program = active.programs.find(({ effectId }) => effectId === card.effectId);
     const disabled = active.phase !== "PLAYER_ACTION" || card.cost === null || card.cost > active.player.energy;
+    const forgeSelectable = material !== undefined && active.phase === "PLAYER_ACTION" && active.zones.hand.includes(instanceId) && activeForgeActions(snapshot) > 0;
     const action = bind(
       `play:${snapshot.flow.revision}:${instanceId}`,
       "PLAY_CARD",
@@ -246,6 +271,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       cost: card.cost,
       power: card.power,
       effectLabelKo: card.power === null ? "수치 확정 전" : `효과 수치 ${card.power}`,
+      forgeSelectable,
       action,
     };
   };
@@ -261,6 +287,8 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       stats: stats(snapshot),
       journey: journey(snapshot),
       feedback,
+      featureFlags: { heartForge: false },
+      codexDiscoveredCount: snapshot.profile.discoveredRecipeIds.length,
     } as const;
     if (snapshot.persistence.writeBlocked || latchedBlockingIssuesKo) {
       return {
@@ -274,12 +302,17 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     }
     if (snapshot.flow.phase === "BETWEEN_NODES") {
       const next = CONFIG.route[snapshot.flow.nextNodeIndex];
+      const forgeMaterials = workshopMaterials(snapshot);
+      const enoughMaterials = hasDistinctPair(forgeMaterials);
       return {
         ...shared,
         phase: "BETWEEN_NODES",
         backgroundSrc: assetUrl(baseUrl, `backgrounds/background__still__depth_0${depth}.png`),
         nextLabelKo: next ? nodeLabel(next) : "기록의 끝",
         action: bind(`enter:${snapshot.flow.revision}`, "ENTER_NEXT_NODE", "다음 기록으로", { type: "ENTER_NEXT_NODE", ...baseCommand(snapshot) }, !next),
+        workshopMaterials: forgeMaterials,
+        paidWorkshopEnabled: snapshot.runtime.run.fuel >= 1 && enoughMaterials,
+        paidWorkshopDisabledReasonKo: snapshot.runtime.run.fuel < 1 ? "연료가 부족합니다." : enoughMaterials ? null : "서로 다른 재료 두 장이 필요합니다.",
       };
     }
     if (snapshot.flow.phase === "IN_COMBAT") {
@@ -288,6 +321,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       if (!active || !binding) throw new Error("controller combat projection is unavailable");
       const intent = active.enemy.intents[active.enemy.currentIntentIndex];
       const hand = active.zones.hand.map((id) => cardProjection(snapshot, id)).filter((card): card is Track1UiCard => card !== null);
+      const instantForgeAvailable = active.phase === "PLAYER_ACTION" && activeForgeActions(snapshot) > 0 && hasDistinctPair(hand.filter(({ forgeSelectable }) => forgeSelectable));
       let primaryAction: Track1UiActionDescriptor | null = null;
       if (active.phase === "TURN_READY") {
         primaryAction = bind(`start:${snapshot.flow.revision}`, "START_TURN", "턴 시작", { type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: { type: "START_TURN" } });
@@ -315,6 +349,8 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         drawCount: active.zones.deck.length,
         discardCount: active.zones.discard.length,
         hand,
+        instantForgeAvailable,
+        instantForgeDisabledReasonKo: active.phase !== "PLAYER_ACTION" ? "플레이어 행동 단계에서 사용할 수 있습니다." : activeForgeActions(snapshot) === 0 ? "이번 턴의 빚기 행동을 이미 사용했습니다." : hasDistinctPair(hand.filter(({ forgeSelectable }) => forgeSelectable)) ? null : "손에 서로 다른 재료 두 장이 필요합니다.",
         primaryAction,
         instructionKo: active.phase === "TURN_READY" ? "턴을 시작해 손패를 펼치세요." : "카드를 선택하면 현재 적에게 적용됩니다.",
       };
@@ -354,16 +390,13 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         }));
         return { ...shared, phase: "IN_EVENT", eventType: node.eventType, titleKo: copy.title, descriptionKo: copy.description, artSrc: assetUrl(baseUrl, copy.art), choices };
       }
-      const workshopMaterials: Track1UiWorkshopMaterial[] = snapshot.flow.workshopEntitlementNodeId === node.nodeId
-        ? snapshot.runtime.run.ownedInstances.flatMap((instance) => {
-          const material = materials.get(instance.cardId);
-          return material ? [{ instanceId: instance.instanceId, cardId: instance.cardId, nameKo: material.nameKo, artSrc: assetUrl(baseUrl, material.art) }] : [];
-        })
+      const availableWorkshopMaterials: Track1UiForgeMaterial[] = snapshot.flow.workshopEntitlementNodeId === node.nodeId
+        ? workshopMaterials(snapshot)
         : [];
       const leaveAction = snapshot.flow.workshopEntitlementNodeId === null
         ? bind(`leave:${snapshot.flow.revision}`, "LEAVE_EVENT", "다음 길로", { type: "LEAVE_EVENT", ...baseCommand(snapshot) })
         : null;
-      return { ...shared, phase: "EVENT_RESOLVED", eventType: node.eventType, titleKo: copy.title, artSrc: assetUrl(baseUrl, copy.art), workshopMaterials, leaveAction };
+      return { ...shared, phase: "EVENT_RESOLVED", eventType: node.eventType, titleKo: copy.title, artSrc: assetUrl(baseUrl, copy.art), workshopMaterials: availableWorkshopMaterials, leaveAction };
     }
     const won = snapshot.flow.phase === "RUN_WON";
     return {
@@ -417,20 +450,112 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       feedback = commandFeedback(result.events);
       return { applied: true, projection: project(acceptedSnapshot) };
     },
-    describeWorkshopAction(materialInstanceIds) {
+    previewForge(mode, materialInstanceIds) {
       const snapshot = ensureLoaded();
-      if (latchedBlockingIssuesKo) return null;
-      if (snapshot.flow.phase !== "EVENT_RESOLVED" || materialInstanceIds.length !== 2) return null;
+      if (latchedBlockingIssuesKo || materialInstanceIds.length !== 2) return null;
       const [leftId, rightId] = materialInstanceIds;
-      const left = snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === leftId);
-      const right = snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === rightId);
-      if (!left || !right || left.instanceId === right.instanceId || left.cardId === right.cardId || !materials.has(left.cardId) || !materials.has(right.cardId)) return null;
+      if (!leftId || !rightId || leftId === rightId) return null;
+      let left: { instanceId: string; cardId: string } | undefined;
+      let right: { instanceId: string; cardId: string } | undefined;
+      let command: StillkinTrack1Command;
+      let executable = true;
+      let disabledReasonKo: string | null = null;
+      if (mode === "INSTANT") {
+        const active = snapshot.runtime.run.activeCombat;
+        const binding = snapshot.flow.combatBinding;
+        if (snapshot.flow.phase !== "IN_COMBAT" || !active || !binding) return null;
+        const inHand = (instanceId: string) => active.state.zones.hand.includes(instanceId)
+          ? active.state.instances.find((instance) => instance.instanceId === instanceId)
+          : undefined;
+        left = inHand(leftId);
+        right = inHand(rightId);
+        if (active.state.phase !== "PLAYER_ACTION") { executable = false; disabledReasonKo = "플레이어 행동 단계에서 사용할 수 있습니다."; }
+        else if (active.forgeActionsRemaining === 0) { executable = false; disabledReasonKo = "이번 턴의 빚기 행동을 이미 사용했습니다."; }
+        command = { type: "FORGE_INSTANT", expectedRevision: snapshot.flow.revision, ...binding, materialInstanceIds: [leftId, rightId] };
+      } else {
+        if (mode === "WORKSHOP_PAID" && snapshot.flow.phase !== "BETWEEN_NODES") return null;
+        const node = routeNode(snapshot);
+        if (mode === "WORKSHOP_FREE" && (snapshot.flow.phase !== "EVENT_RESOLVED" || node?.kind !== "EVENT" || node.eventType !== "WORKSHOP" || snapshot.flow.workshopEntitlementNodeId !== node.nodeId)) return null;
+        left = snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === leftId);
+        right = snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === rightId);
+        if (mode === "WORKSHOP_PAID" && snapshot.runtime.run.fuel < 1) { executable = false; disabledReasonKo = "연료가 부족합니다."; }
+        command = mode === "WORKSHOP_PAID"
+          ? { type: "FORGE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: [leftId, rightId] }
+          : { type: "USE_FREE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: [leftId, rightId] };
+      }
+      if (!left || !right || left.cardId === right.cardId || !materials.has(left.cardId) || !materials.has(right.cardId)) return null;
+      const selected = [left, right].sort((first, second) => first.cardId < second.cardId ? -1 : first.cardId > second.cardId ? 1 : first.instanceId < second.instanceId ? -1 : 1);
+      const canonical = buildCanonicalForgePreview([selected[0].cardId, selected[1].cardId], baseUrl);
+      if (!canonical) return null;
+      const fuelBefore = snapshot.runtime.run.fuel;
+      const preview: Track1UiForgePreview = Object.freeze({
+        previewId: `forge-preview:${snapshot.flow.revision}:${mode}:${selected[0].instanceId}:${selected[1].instanceId}`,
+        mode,
+        selectedInstanceIds: Object.freeze([selected[0].instanceId, selected[1].instanceId]) as unknown as readonly [string, string],
+        canonical,
+        cost: Object.freeze({
+          kind: mode === "INSTANT" ? "ACTION" : mode === "WORKSHOP_PAID" ? "FUEL" : "FREE_ENTITLEMENT",
+          labelKo: mode === "INSTANT" ? "행동 1회" : mode === "WORKSHOP_PAID" ? "연료 1" : "무료 공방 권리",
+          fuelBefore,
+          fuelAfter: mode === "WORKSHOP_PAID" && fuelBefore > 0 ? fuelBefore - 1 : fuelBefore,
+        }),
+        lifetime: mode === "INSTANT" ? "TEMPORARY" : "PERMANENT",
+        lifetimeLabelKo: mode === "INSTANT" ? "전투 종료 시 결과 소멸 · 재료 복구" : "재료 영구 소모 · 결과 덱 편입",
+        executable,
+        disabledReasonKo,
+      });
+      previewAuthority.set(preview, { revision: snapshot.flow.revision, mode, command });
+      return preview;
+    },
+    describeInstantForgeAction(preview) {
+      const snapshot = ensureLoaded();
+      const authority = previewAuthority.get(preview);
+      if (!authority || authority.mode !== "INSTANT" || authority.revision !== snapshot.flow.revision || !preview.executable) return null;
+      return bind(`instant-forge:${preview.previewId}`, "FORGE_INSTANT", "즉석 빚기", authority.command);
+    },
+    reviewWorkshopForge(preview) {
+      const snapshot = ensureLoaded();
+      const authority = previewAuthority.get(preview);
+      if (!authority || authority.mode === "INSTANT" || authority.revision !== snapshot.flow.revision || !preview.executable) return null;
+      const review: Track1UiForgeReview = Object.freeze({
+        reviewId: `forge-review:${preview.previewId}`,
+        preview,
+        headingKo: authority.mode === "WORKSHOP_PAID" ? "공방 빚기 최종 확인" : "무료 공방 빚기 최종 확인",
+        warningKo: "선택한 두 재료는 영구적으로 소모되며 되돌릴 수 없습니다.",
+      });
+      reviewAuthority.set(review, { revision: authority.revision, mode: authority.mode, command: authority.command });
+      return review;
+    },
+    confirmForgeReview(review) {
+      const snapshot = ensureLoaded();
+      const authority = reviewAuthority.get(review);
+      if (!authority || authority.revision !== snapshot.flow.revision) return null;
       return bind(
-        `free-workshop:${snapshot.flow.revision}:${leftId}:${rightId}`,
-        "USE_FREE_WORKSHOP",
-        "두 재료 빚기",
-        { type: "USE_FREE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: [leftId, rightId] },
+        `confirm:${review.reviewId}`,
+        authority.mode === "WORKSHOP_PAID" ? "FORGE_WORKSHOP" : "USE_FREE_WORKSHOP",
+        authority.mode === "WORKSHOP_PAID" ? "영구 소모하고 빚기" : "영구 소모하고 무료로 빚기",
+        authority.command,
       );
+    },
+    codexSnapshot() {
+      const snapshot = ensureLoaded();
+      const discovered = new Set(snapshot.profile.discoveredRecipeIds);
+      return Object.freeze({
+        total: 1326,
+        pageSize: 48,
+        discoveredCount: discovered.size,
+        entries: Object.freeze(codexCanonical.map((canonical, index) => {
+          const isDiscovered = discovered.has(canonical.recipeId);
+          return Object.freeze({
+            entryKey: `codex-entry-${String(index + 1).padStart(4, "0")}`,
+            ordinal: index + 1,
+            discovered: isDiscovered,
+            recipeId: isDiscovered ? canonical.recipeId : null,
+            preview: isDiscovered ? canonical : null,
+            discoverySources: isDiscovered ? Object.freeze(["INSTANT", "WORKSHOP"] as const) : null,
+          });
+        })),
+      });
     },
   };
   return Object.freeze(session);

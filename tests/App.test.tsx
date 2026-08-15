@@ -13,8 +13,9 @@ class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>();
   failSet = false;
   failGet = false;
+  setCalls = 0;
   getItem(key: string) { if (this.failGet) throw new Error("read"); return this.values.get(key) ?? null; }
-  setItem(key: string, value: string) { if (this.failSet) throw new Error("quota"); this.values.set(key, value); }
+  setItem(key: string, value: string) { if (this.failSet) throw new Error("quota"); this.setCalls += 1; this.values.set(key, value); }
   removeItem(key: string) { this.values.delete(key); }
 }
 
@@ -42,6 +43,26 @@ function firstRewardProjection() {
   return { session, projection };
 }
 
+function instantForgeProjection() {
+  const storage = new MemoryStorage();
+  const session = createStillkinTrack1UiSession({ storage, baseUrl: "/fictor-test/", generationFactory: () => "instant-ui-generation" });
+  let projection = session.load();
+  projection = session.dispatch(asBetween(projection).action).projection;
+  for (let turn = 0; turn < 8 && projection.phase === "IN_COMBAT"; turn += 1) {
+    if (projection.primaryAction?.kind === "START_TURN") projection = session.dispatch(projection.primaryAction).projection;
+    if (projection.phase !== "IN_COMBAT") break;
+    const selectable = projection.hand.filter(({ forgeSelectable }) => forgeSelectable);
+    if (new Set(selectable.map(({ cardId }) => cardId)).size >= 2) return { storage, session, projection };
+    projection = session.dispatch(projection.primaryAction!).projection;
+  }
+  throw new Error("instant forge pair unavailable");
+}
+
+function asBetween(projection: Track1UiProjection) {
+  if (projection.phase !== "BETWEEN_NODES") throw new Error("expected BETWEEN_NODES");
+  return projection;
+}
+
 afterEach(cleanup);
 
 describe("Track-1 App", () => {
@@ -53,8 +74,78 @@ describe("Track-1 App", () => {
     const heading = screen.getByRole("heading", { level: 1, name: "어름의 터 · 깊이 1 / 3" });
     await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.getByRole("list", { name: "고정된 런 여정" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(screen.getAllByRole("button")).toHaveLength(3);
     expect(screen.getByRole("button", { name: "다음 기록으로" }).tagName).toBe("BUTTON");
+  });
+
+  it("opens a paginated masked Codex and restores focus when closed", async () => {
+    mounted();
+    const open = screen.getByRole("button", { name: "도감 열기 · 발견 0 / 1326" });
+    fireEvent.click(open);
+    const dialog = screen.getByRole("dialog", { name: "도감" });
+    expect(dialog).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "도감" })).toHaveFocus());
+    expect(document.querySelectorAll(".codex-entry")).toHaveLength(48);
+    expect(document.querySelectorAll(".codex-entry.is-masked")).toHaveLength(48);
+    expect(screen.getByText("1 / 28")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "다음 도감 페이지" }));
+    expect(screen.getByText("2 / 28")).toBeVisible();
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await waitFor(() => expect(open).toHaveFocus());
+  });
+
+  it("requires review and confirmation for irreversible workshop forging, with cancel focus return", async () => {
+    const { storage } = mounted();
+    fireEvent.click(screen.getByRole("button", { name: "공방 열기" }));
+    const materialButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".workshop-materials button"));
+    const left = materialButtons[0];
+    const right = materialButtons.find((button) => button.dataset.materialCardId !== left.dataset.materialCardId)!;
+    fireEvent.click(left);
+    fireEvent.click(right);
+    expect(left).toHaveAttribute("aria-pressed", "true");
+    expect(right).toHaveAttribute("aria-pressed", "true");
+    const review = screen.getByRole("button", { name: "최종 확인으로" });
+    expect(storage.setCalls).toBe(0);
+    fireEvent.click(review);
+    const dialog = screen.getByRole("dialog", { name: "공방 빚기 최종 확인" });
+    await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "공방 빚기 최종 확인" })).toHaveFocus());
+    expect(dialog).toHaveTextContent("선택한 두 재료는 영구적으로 소모");
+    expect(dialog).toHaveTextContent("결과");
+    expect(dialog).toHaveTextContent("연료");
+    expect(storage.setCalls).toBe(0);
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await waitFor(() => expect(review).toHaveFocus());
+    expect(storage.setCalls).toBe(0);
+
+    fireEvent.click(review);
+    fireEvent.click(screen.getByRole("button", { name: "취소" }));
+    await waitFor(() => expect(review).toHaveFocus());
+    expect(storage.setCalls).toBe(0);
+    fireEvent.click(review);
+    fireEvent.click(screen.getByRole("button", { name: "영구 소모 확인" }));
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("영구 소모되고 결과가 덱에 편입"));
+    expect(storage.setCalls).toBe(1);
+  });
+
+  it("separates instant-forge selection from card play and puts the canonical result in hand", async () => {
+    const { session, projection } = instantForgeProjection();
+    render(<App session={session} initialProjection={projection} />);
+    const mode = screen.getByRole("button", { name: "즉석 빚기 선택 모드" });
+    fireEvent.click(mode);
+    expect(mode).toHaveAttribute("aria-pressed", "true");
+    const cards = Array.from(document.querySelectorAll<HTMLButtonElement>("button.combat-card:not(:disabled)"));
+    const left = cards[0];
+    const right = cards.find((card) => card.dataset.cardId !== left.dataset.cardId)!;
+    const screenKey = screen.getByRole("main").getAttribute("data-screen-key");
+    fireEvent.click(left);
+    fireEvent.click(right);
+    expect(left).toHaveAttribute("aria-pressed", "true");
+    expect(right).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("main")).toHaveAttribute("data-screen-key", screenKey);
+    expect(document.querySelector(".instant-preview > p")).toHaveTextContent("전투 종료 시 결과 소멸 · 재료 복구");
+    fireEvent.click(screen.getByRole("button", { name: /^즉석 빚기$/ }));
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("즉석 결과가 손에 놓였습니다"));
+    expect(document.querySelector('button.combat-card[data-card-id^="forge__"]')).toBeInTheDocument();
   });
 
   it("enters combat by keyboard-focusable button and moves focus to the new heading", async () => {

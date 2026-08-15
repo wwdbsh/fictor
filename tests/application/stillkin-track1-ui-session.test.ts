@@ -1,14 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { createStillkinTrack1UiSession, type StillkinTrack1UiSession, type Track1UiProjection } from "../../src/application";
+import { createStillkinTrack1UiSession, type StillkinTrack1UiSession, type Track1UiForgeReview, type Track1UiProjection } from "../../src/application";
+import { projectCanonicalCodex } from "../../src/application/browser/forge-codex-preview";
 import { FICTOR_SAVE_V2_KEY, type StorageLike } from "../../src/persistence";
 
 class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>();
   failSet = false;
   failGet = false;
+  setCalls = 0;
   getItem(key: string) { if (this.failGet) throw new Error("read"); return this.values.get(key) ?? null; }
-  setItem(key: string, value: string) { if (this.failSet) throw new Error("quota"); this.values.set(key, value); }
+  setItem(key: string, value: string) { if (this.failSet) throw new Error("quota"); this.setCalls += 1; this.values.set(key, value); }
   removeItem(key: string) { this.values.delete(key); }
 }
 
@@ -62,7 +64,159 @@ function currentJourneyNode(projection: Track1UiProjection) {
   return current[0];
 }
 
+function combatWithDistinctForgePair(session: StillkinTrack1UiSession, initial: Track1UiProjection) {
+  let projection = enter(session, initial);
+  for (let turn = 0; turn < 8 && projection.phase === "IN_COMBAT"; turn += 1) {
+    if (projection.primaryAction?.kind === "START_TURN") projection = apply(session, projection.primaryAction);
+    const combat = asPhase(projection, "IN_COMBAT");
+    const selectable = combat.hand.filter(({ forgeSelectable }) => forgeSelectable);
+    const left = selectable[0];
+    const right = selectable.find(({ cardId }) => cardId !== left?.cardId);
+    if (left && right) return { combat, pair: [left, right] as const };
+    projection = apply(session, combat.primaryAction!);
+  }
+  throw new Error("combat never produced a distinct forge pair");
+}
+
+function firstDistinct<T extends { cardId: string; instanceId: string }>(items: readonly T[]): [T, T] {
+  const left = items[0];
+  const right = items.find(({ cardId }) => cardId !== left?.cardId);
+  if (!left || !right) throw new Error("distinct material pair unavailable");
+  return [left, right];
+}
+
 describe("Stillkin Track-1 browser UI session", () => {
+  it("builds one canonical preview for instant, paid, free, and reversed pairs", () => {
+    const instantSession = create().session;
+    const { pair: [instantLeft, instantRight] } = combatWithDistinctForgePair(instantSession, instantSession.snapshot());
+    const instant = instantSession.previewForge("INSTANT", [instantLeft.instanceId, instantRight.instanceId])!;
+    const reversed = instantSession.previewForge("INSTANT", [instantRight.instanceId, instantLeft.instanceId])!;
+    expect(reversed.canonical).toEqual(instant.canonical);
+    expect(instant).toMatchObject({ cost: { kind: "ACTION", labelKo: "행동 1회" }, lifetime: "TEMPORARY" });
+
+    const paidSession = create().session;
+    const between = asPhase(paidSession.snapshot(), "BETWEEN_NODES");
+    const paidLeft = between.workshopMaterials.find(({ cardId }) => cardId === instantLeft.cardId)!;
+    const paidRight = between.workshopMaterials.find(({ cardId }) => cardId === instantRight.cardId)!;
+    const paid = paidSession.previewForge("WORKSHOP_PAID", [paidRight.instanceId, paidLeft.instanceId])!;
+    expect(paid.canonical).toEqual(instant.canonical);
+    expect(paid).toMatchObject({ cost: { kind: "FUEL", fuelBefore: 4, fuelAfter: 3 }, lifetime: "PERMANENT" });
+    expect(paidSession.previewForge("WORKSHOP_FREE", [paidLeft.instanceId, paidRight.instanceId])).toBeNull();
+  });
+
+  it("keeps previews current-instance-only and descriptors opaque, confirmation-only, and stale-safe", () => {
+    const { storage, session } = create();
+    const between = asPhase(session.snapshot(), "BETWEEN_NODES");
+    const [left, right] = firstDistinct(between.workshopMaterials);
+    expect(session.previewForge("INSTANT", [left.instanceId, right.instanceId])).toBeNull();
+    expect(session.previewForge("WORKSHOP_PAID", [left.instanceId, "missing-instance"])).toBeNull();
+    const duplicate = between.workshopMaterials.find(({ cardId, instanceId }) => cardId === left.cardId && instanceId !== left.instanceId)!;
+    expect(session.previewForge("WORKSHOP_PAID", [left.instanceId, duplicate.instanceId])).toBeNull();
+
+    const preview = session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+    const writesBefore = storage.setCalls;
+    expect(session.dispatch(preview as unknown as Parameters<StillkinTrack1UiSession["dispatch"]>[0]).applied).toBe(false);
+    expect(storage.setCalls).toBe(writesBefore);
+    expect(session.reviewWorkshopForge({} as typeof preview)).toBeNull();
+    const review = session.reviewWorkshopForge(preview)!;
+    expect(storage.setCalls).toBe(writesBefore);
+    expect(session.confirmForgeReview({} as Track1UiForgeReview)).toBeNull();
+    const action = session.confirmForgeReview(review)!;
+    expect(storage.setCalls).toBe(writesBefore);
+
+    const stalePreview = session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+    const staleReview = session.reviewWorkshopForge(stalePreview)!;
+    const applied = session.dispatch(action);
+    expect(applied.applied).toBe(true);
+    expect(storage.setCalls).toBe(writesBefore + 1);
+    expect(session.confirmForgeReview(staleReview)).toBeNull();
+    expect(session.dispatch(action).applied).toBe(false);
+    expect(storage.setCalls).toBe(writesBefore + 1);
+  });
+
+  it("forges instantly into the hand, records one discovery, then reports cleanup and restoration", () => {
+    const { storage, session } = create();
+    const available = combatWithDistinctForgePair(session, session.snapshot());
+    let projection: Track1UiProjection = available.combat;
+    const [left, right] = available.pair;
+    const preview = session.previewForge("INSTANT", [right.instanceId, left.instanceId])!;
+    const action = session.describeInstantForgeAction(preview)!;
+    projection = apply(session, action);
+    const forged = asPhase(projection, "IN_COMBAT");
+    expect(forged.hand.some(({ cardId }) => cardId === preview.canonical.cardId)).toBe(true);
+    expect(forged.hand.some(({ instanceId }) => instanceId === left.instanceId || instanceId === right.instanceId)).toBe(false);
+    expect(forged.feedback?.messageKo).toContain("전투 종료 시 결과는 사라지고 재료는 복구");
+    expect(session.codexSnapshot().entries.filter(({ discovered }) => discovered)).toHaveLength(1);
+
+    projection = winCombat(session, projection);
+    expect(projection.feedback?.messageKo).toContain("즉석 결과가 사라지고 사용한 재료가 덱으로 복구");
+    const envelope = JSON.parse(storage.values.get(FICTOR_SAVE_V2_KEY)!);
+    expect(envelope.runtime.run.activeCombat).toBeNull();
+    expect(envelope.runtime.run.deck).toEqual(expect.arrayContaining([left.instanceId, right.instanceId]));
+    expect(envelope.runtime.run.ownedInstances.some(({ cardId }: { cardId: string }) => cardId === preview.canonical.cardId)).toBe(false);
+  });
+
+  it("derives a lexical 1326-entry masked Codex without exposing heart forge", () => {
+    const all = projectCanonicalCodex("/preview/subpath/");
+    expect(all).toHaveLength(1326);
+    expect(new Set(all.map(({ recipeId }) => recipeId)).size).toBe(1326);
+    expect(all.map(({ recipeId }) => recipeId)).toEqual([...all.map(({ recipeId }) => recipeId)].sort());
+    const { storage, session } = create();
+    let codex = session.codexSnapshot();
+    expect(codex).toMatchObject({ total: 1326, pageSize: 48, discoveredCount: 0 });
+    expect(codex.entries).toHaveLength(1326);
+    expect(new Set(codex.entries.map(({ entryKey }) => entryKey)).size).toBe(1326);
+    expect(codex.entries.every(({ recipeId, preview, discovered }) => !discovered && recipeId === null && preview === null)).toBe(true);
+    expect(session.snapshot().featureFlags.heartForge).toBe(false);
+
+    const between = asPhase(session.snapshot(), "BETWEEN_NODES");
+    const [left, right] = firstDistinct(between.workshopMaterials);
+    const preview = session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+    const review = session.reviewWorkshopForge(preview)!;
+    apply(session, session.confirmForgeReview(review)!);
+    codex = session.codexSnapshot();
+    expect(codex.discoveredCount).toBe(1);
+    expect(codex.entries.filter(({ discovered }) => discovered)).toEqual([
+      expect.objectContaining({ recipeId: preview.canonical.recipeId, discoverySources: ["INSTANT", "WORKSHOP"] }),
+    ]);
+    const reloaded = createStillkinTrack1UiSession({ storage, baseUrl: "/preview/subpath/", generationFactory: () => "reloaded-generation" });
+    reloaded.load();
+    expect(reloaded.codexSnapshot().entries.filter(({ discovered }) => discovered)).toHaveLength(1);
+  });
+
+  it("disables paid forging at fuel zero while a real free entitlement remains executable", () => {
+    const { session } = create();
+    let projection: Track1UiProjection = session.snapshot();
+    for (let expectedFuel = 3; expectedFuel >= 0; expectedFuel -= 1) {
+      const between = asPhase(projection, "BETWEEN_NODES");
+      const [left, right] = firstDistinct(between.workshopMaterials);
+      const preview = session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+      const beforeDeck = between.stats.deckCount;
+      projection = apply(session, session.confirmForgeReview(session.reviewWorkshopForge(preview)!)!);
+      expect(projection.stats.fuel).toBe(expectedFuel);
+      expect(projection.stats.deckCount).toBe(beforeDeck - 1);
+    }
+    const exhausted = asPhase(projection, "BETWEEN_NODES");
+    expect(exhausted.paidWorkshopEnabled).toBe(false);
+    expect(exhausted.paidWorkshopDisabledReasonKo).toContain("연료");
+    const [left, right] = firstDistinct(exhausted.workshopMaterials);
+    const disabledPreview = session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+    expect(disabledPreview).toMatchObject({ executable: false, cost: { fuelBefore: 0, fuelAfter: 0 } });
+    expect(session.reviewWorkshopForge(disabledPreview)).toBeNull();
+
+    projection = winCombat(session, enter(session, projection));
+    projection = apply(session, asPhase(projection, "AWAITING_REWARD").choices[0].action);
+    projection = resolveAndLeave(session, enter(session, projection));
+    projection = enter(session, projection);
+    projection = apply(session, asPhase(projection, "IN_EVENT").choices[0].action);
+    const free = asPhase(projection, "EVENT_RESOLVED");
+    const [freeLeft, freeRight] = firstDistinct(free.workshopMaterials);
+    const freePreview = session.previewForge("WORKSHOP_FREE", [freeLeft.instanceId, freeRight.instanceId])!;
+    expect(freePreview).toMatchObject({ executable: true, cost: { kind: "FREE_ENTITLEMENT", fuelBefore: 0, fuelAfter: 0 } });
+    projection = apply(session, session.confirmForgeReview(session.reviewWorkshopForge(freePreview)!)!);
+    expect(projection.stats.fuel).toBe(0);
+    expect(asPhase(projection, "EVENT_RESOLVED").leaveAction).not.toBeNull();
+  });
   it("plays the real first combat through reward, cache, free workshop picker, and next encounter", () => {
     const { session } = create();
     const between = session.snapshot();
@@ -93,10 +247,14 @@ describe("Stillkin Track-1 browser UI session", () => {
     const other = workshop.workshopMaterials.find(({ cardId }) => cardId === "still_03");
     expect(pair).toBeDefined();
     expect(other).toBeDefined();
-    expect(session.describeWorkshopAction([pair!.instanceId])).toBeNull();
+    expect(session.previewForge("WORKSHOP_FREE", [pair!.instanceId])).toBeNull();
     const duplicate = workshop.workshopMaterials.find(({ cardId, instanceId }) => cardId === pair!.cardId && instanceId !== pair!.instanceId);
-    expect(session.describeWorkshopAction([pair!.instanceId, duplicate?.instanceId ?? pair!.instanceId])).toBeNull();
-    const freeForge = session.describeWorkshopAction([pair!.instanceId, other!.instanceId]);
+    expect(session.previewForge("WORKSHOP_FREE", [pair!.instanceId, duplicate?.instanceId ?? pair!.instanceId])).toBeNull();
+    const freePreview = session.previewForge("WORKSHOP_FREE", [pair!.instanceId, other!.instanceId]);
+    expect(freePreview).not.toBeNull();
+    const freeReview = session.reviewWorkshopForge(freePreview!);
+    expect(freeReview).not.toBeNull();
+    const freeForge = session.confirmForgeReview(freeReview!);
     expect(freeForge).not.toBeNull();
     projection = apply(session, freeForge!);
     workshop = asPhase(projection, "EVENT_RESOLVED");
@@ -209,7 +367,8 @@ describe("Stillkin Track-1 browser UI session", () => {
     const workshop = projection as Extract<Track1UiProjection, { phase: "EVENT_RESOLVED" }>;
     const left = workshop.workshopMaterials[0];
     const right = workshop.workshopMaterials.find(({ cardId }) => cardId !== left.cardId)!;
-    projection = apply(session, session.describeWorkshopAction([left.instanceId, right.instanceId])!);
+    const preview = session.previewForge("WORKSHOP_FREE", [left.instanceId, right.instanceId])!;
+    projection = apply(session, session.confirmForgeReview(session.reviewWorkshopForge(preview)!)!);
     projection = apply(session, (projection as Extract<Track1UiProjection, { phase: "EVENT_RESOLVED" }>).leaveAction!);
     projection = winCombat(session, enter(session, projection)); // elite
     projection = apply(session, (projection as Extract<Track1UiProjection, { phase: "AWAITING_REWARD" }>).choices[1].action);

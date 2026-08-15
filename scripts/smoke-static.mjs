@@ -212,6 +212,20 @@ async function main() {
       }, {}, before);
     }
 
+    async function winVisibleCombat() {
+      let steps = 0;
+      while (await page.$("main.phase-in_combat")) {
+        if (steps++ > 1_000) throw new Error("전투 smoke가 종료되지 않았습니다.");
+        const start = await page.$('button[data-action-kind="START_TURN"]:not([disabled])');
+        const card = await page.$("button.combat-card:not([disabled])");
+        const end = await page.$('button[data-action-kind="END_TURN"]:not([disabled])');
+        if (start) await clickAndWait('button[data-action-kind="START_TURN"]');
+        else if (card) await clickAndWait("button.combat-card:not([disabled])");
+        else if (end) await clickAndWait('button[data-action-kind="END_TURN"]');
+        else throw new Error("전투에서 조작 가능한 행동을 찾지 못했습니다.");
+      }
+    }
+
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
     await page.waitForSelector("main.phase-in_combat");
     const firstEnemySrc = await page.$eval(".enemy-record img", (element) => element instanceof HTMLImageElement ? element.src : "");
@@ -219,16 +233,64 @@ async function main() {
       throw new Error(`첫 적 asset 경로가 subpath-safe하지 않습니다: ${firstEnemySrc}`);
     }
     let combatSteps = 0;
+    let instantDiscovery = null;
+    let reloadedAfterInstant = false;
     while (await page.$("main.phase-in_combat")) {
       if (combatSteps++ > 1_000) throw new Error("첫 전투 smoke가 종료되지 않았습니다.");
       const start = await page.$('button[data-action-kind="START_TURN"]:not([disabled])');
       const card = await page.$("button.combat-card:not([disabled])");
       const end = await page.$('button[data-action-kind="END_TURN"]:not([disabled])');
       if (start) await clickAndWait('button[data-action-kind="START_TURN"]');
+      else if (!instantDiscovery) {
+        const pair = await page.$$eval("button.combat-card:not([disabled])", (cards) => {
+          const left = cards.find((candidate) => !candidate.getAttribute("data-card-id")?.startsWith("forge__"));
+          const right = cards.find((candidate) => !candidate.getAttribute("data-card-id")?.startsWith("forge__") && candidate.getAttribute("data-card-id") !== left?.getAttribute("data-card-id"));
+          return left && right ? [left.getAttribute("data-card-id"), right.getAttribute("data-card-id")] : null;
+        });
+        if (!pair) {
+          if (end) await clickAndWait('button[data-action-kind="END_TURN"]');
+          else if (card) await clickAndWait("button.combat-card:not([disabled])");
+          continue;
+        }
+        if (!(await page.$('.instant-mode-toggle:not([disabled])'))) throw new Error("서로 다른 현재 손 재료가 있는데 즉석 빚기 선택 모드가 비활성입니다.");
+        await page.click(".instant-mode-toggle");
+        const selected = await page.$$eval("button.combat-card:not([disabled])", (cards, materialIds) => {
+          const selectedButtons = materialIds.map((id) => cards.find((candidate) => candidate.getAttribute("data-card-id") === id));
+          if (!selectedButtons.every((candidate) => candidate instanceof HTMLButtonElement)) return false;
+          selectedButtons.forEach((candidate) => candidate.click());
+          return true;
+        }, pair);
+        if (!selected) throw new Error("즉석 빚기 재료 선택에 실패했습니다.");
+        await page.waitForSelector(".instant-preview .canonical-preview");
+        const resultName = await page.$eval(".instant-preview .preview-result strong", (element) => element.textContent?.trim());
+        await clickAndWait(".instant-preview .primary-cta");
+        const ephemeralCardId = await page.$eval('button.combat-card[data-card-id^="forge__"]', (element) => element.getAttribute("data-card-id"));
+        instantDiscovery = { materialIds: pair, resultName, ephemeralCardId };
+        await page.click(".codex-open");
+        await page.waitForSelector(".codex-surface");
+        const codexSummary = await page.$eval(".codex-heading p", (element) => element.textContent?.trim());
+        if (codexSummary !== "발견한 기록 1 / 1326") throw new Error(`즉석 발견 도감 요약이 다릅니다: ${codexSummary}`);
+        let foundDiscoveredEntry = false;
+        for (let codexPage = 0; codexPage < 28; codexPage += 1) {
+          if ((await page.$$(".codex-entry.is-discovered")).length === 1) { foundDiscoveredEntry = true; break; }
+          const nextCodex = await page.$('button[aria-label="다음 도감 페이지"]:not([disabled])');
+          if (!nextCodex) break;
+          await nextCodex.click();
+          await page.waitForFunction((previousPage) => document.querySelector(".codex-pagination span")?.textContent?.trim() !== previousPage, {}, `${codexPage + 1} / 28`);
+        }
+        if (!foundDiscoveredEntry) throw new Error("즉석 발견 도감 항목을 28개 page에서 찾지 못했습니다.");
+        await page.click(".codex-heading .surface-close");
+        await page.reload({ waitUntil: "networkidle0" });
+        await page.waitForSelector("main.phase-in_combat");
+        const codexLabel = await page.$eval(".codex-open", (element) => element.getAttribute("aria-label"));
+        if (!codexLabel?.includes("발견 1 / 1326")) throw new Error(`reload 뒤 즉석 발견이 유지되지 않았습니다: ${codexLabel}`);
+        reloadedAfterInstant = true;
+      }
       else if (card) await clickAndWait("button.combat-card:not([disabled])");
       else if (end) await clickAndWait('button[data-action-kind="END_TURN"]');
       else throw new Error("첫 전투에서 조작 가능한 행동을 찾지 못했습니다.");
     }
+    if (!instantDiscovery || !reloadedAfterInstant) throw new Error("즉석 발견 → 도감 → reload smoke가 실행되지 않았습니다.");
     await page.waitForSelector("main.phase-awaiting_reward");
     await clickAndWait(".reward-card button");
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
@@ -249,7 +311,9 @@ async function main() {
     });
     if (!selected) throw new Error("공방에서 ore_still + still_03 재료를 찾지 못했습니다.");
     await page.waitForSelector('.resolved-screen .primary-cta:not([disabled])');
-    await clickAndWait('.resolved-screen .primary-cta:not([disabled])');
+    await page.click('.resolved-screen .primary-cta:not([disabled])');
+    await page.waitForSelector('.forge-dialog[role="dialog"]');
+    await clickAndWait('.forge-dialog .primary-cta:not([disabled])');
     await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
     await page.waitForSelector('img[alt="눌린 불의 잔해"]');
@@ -277,6 +341,50 @@ async function main() {
     if (fallbackAssetResponse.status !== 200 || fallbackAssetResponse.headers.get("content-type")?.split(";", 1)[0] !== "image/png") {
       throw new Error(`missing canonical fallback asset 응답 실패: ${fallbackAssetResponse.status}`);
     }
+
+    await winVisibleCombat();
+    await page.waitForSelector("main.phase-awaiting_reward");
+    await clickAndWait(".reward-card:nth-child(2) button");
+    await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]'); // COLLAPSE
+    await clickAndWait(".event-choice");
+    if (await page.$('button[data-action-kind="LEAVE_EVENT"]')) await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+    if (!(await page.$("main.phase-between_nodes"))) throw new Error("COLLAPSE 이후 런이 계속되지 않았습니다.");
+    await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]'); // FICTOR
+    await clickAndWait(".event-choice:last-child");
+    await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+    await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]'); // RECORD
+    await clickAndWait(".event-choice");
+    await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+    await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]'); // ODDITY
+    await clickAndWait(".event-choice");
+    await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+    await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]'); // BOSS
+    await winVisibleCombat();
+    await page.waitForSelector("main.phase-run_won");
+    await clickAndWait('button[data-action-kind="RESTART"]');
+    await page.waitForSelector("main.phase-between_nodes");
+
+    const codexBeforePaid = await page.$eval(".codex-open", (element) => element.getAttribute("aria-label"));
+    await page.click('.journey-actions > button:not(.primary-cta)');
+    await page.waitForSelector('.forge-panel[aria-label="공방 빚기"]');
+    const paidSelected = await page.$$eval(".workshop-materials button", (buttons, materialIds) => {
+      const selectedButtons = materialIds.map((id) => buttons.find((button) => button.getAttribute("data-material-card-id") === id));
+      if (!selectedButtons.every((candidate) => candidate instanceof HTMLButtonElement)) return false;
+      selectedButtons.forEach((candidate) => candidate.click());
+      return true;
+    }, instantDiscovery.materialIds);
+    if (!paidSelected) throw new Error("새 런 공방에서 즉석 발견과 같은 재료를 찾지 못했습니다.");
+    await page.waitForSelector('.forge-panel .preview-result strong');
+    const paidResultName = await page.$eval('.forge-panel .preview-result strong', (element) => element.textContent?.trim());
+    if (paidResultName !== instantDiscovery.resultName) throw new Error(`즉석/공방 canonical 결과가 다릅니다: ${instantDiscovery.resultName} / ${paidResultName}`);
+    await page.click('.forge-panel .primary-cta:not([disabled])');
+    await page.waitForSelector('.forge-dialog[role="dialog"]');
+    await clickAndWait('.forge-dialog .primary-cta:not([disabled])');
+    const codexAfterPaid = await page.$eval(".codex-open", (element) => element.getAttribute("aria-label"));
+    if (codexAfterPaid !== codexBeforePaid) throw new Error(`같은 recipe의 공방 빚기가 도감 항목을 중복했습니다: ${codexBeforePaid} / ${codexAfterPaid}`);
+    const fuelAfterPaid = await page.$$eval(".stats-strip div", (items) => items.find((item) => item.querySelector("dt")?.textContent === "연료")?.querySelector("dd")?.textContent?.trim());
+    if (fuelAfterPaid !== "3") throw new Error(`새 런 유료 공방 연료 결과가 다릅니다: ${fuelAfterPaid}`);
+
     if (browserErrors.length > 0) {
       throw new Error(`브라우저 오류:\n${browserErrors.join("\n")}`);
     }
@@ -306,7 +414,8 @@ async function main() {
         apiRequests: 0,
         webSocketRequests: 0,
         browserImageRequests: browserImageRequests.length,
-        corePath: "first combat -> reward -> cache -> workshop -> elite",
+        corePath: "instant discovery -> Codex -> reload -> full run -> restart -> paid workshop same recipe",
+        instantDiscovery: { ...instantDiscovery, reloaded: reloadedAfterInstant, codexBeforePaid, codexAfterPaid, fuelAfterPaid },
         missingCanonicalFallback: { cardId: "forge__ore_still__still_03", assetPath: new URL(fallbackAssetUrl).pathname, httpStatus: fallbackAssetResponse.status },
         staticAssets,
       }),
@@ -325,6 +434,7 @@ async function main() {
     } finally {
       try {
         if (server.listening) {
+          server.closeAllConnections();
           await new Promise((resolveClose, rejectClose) => {
             server.close((error) => (error ? rejectClose(error) : resolveClose()));
           });
