@@ -187,6 +187,22 @@ describe("Stillkin literal Track-1 controller", () => {
       (envelope) => { envelope.runtime.run.activeCombat.state.instances.find((item: any) => item.instanceId === created.instanceId).cardId = "ore_still"; },
       (envelope) => { envelope.runtime.run.activeCombat.state.cards.find((item: any) => item.cardId === expected.card_id).effectId = "DELAYED_EXPLOSION"; },
       (envelope) => { envelope.runtime.run.activeCombat.state.zones.discard.push(created.instanceId); },
+      (envelope) => {
+        const active = envelope.runtime.run.activeCombat;
+        const ledger = active.ephemeralResults.find((item: any) => item.instanceId === created.instanceId);
+        if (!envelope.profile.discoveredRecipeIds.includes("ore_burn|ore_still")) {
+          envelope.profile.discoveredRecipeIds.push("ore_burn|ore_still");
+          envelope.profile.discoveredRecipeIds.sort();
+        }
+        ledger.recipeId = "ore_burn|ore_still";
+        ledger.cardId = "forge__ore_burn__ore_still";
+        active.state.instances.find((item: any) => item.instanceId === created.instanceId).cardId = "forge__ore_burn__ore_still";
+        const card = active.state.cards.find((item: any) => item.cardId === expected.card_id);
+        card.cardId = "forge__ore_burn__ore_still";
+        card.effectId = "DELAYED_EXPLOSION";
+        card.resonanceAttribute = "STILL";
+        active.state.programs = active.state.programs.filter((item: any) => item.effectId !== expected.combat_effect);
+      },
     ];
     for (const mutate of mutations) {
       const tamperedStorage = new MemoryStorage();

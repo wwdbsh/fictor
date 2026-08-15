@@ -251,6 +251,66 @@ describe("forge runtime", () => {
     expect(cleaned.state.zones.deck.filter((instanceId) => ["material-1", "material-2"].includes(instanceId))).toHaveLength(2);
   });
 
+  it("binds multiple instant results to chronological isolated material pairs", () => {
+    const resolver = context();
+    const four = runtime();
+    four.run.ownedInstances.push({ instanceId: "material-4", cardId: materialsSource[3].id });
+    four.run.deck.push("material-4");
+    const setup = fixtureSetup({
+      rules: { ...fixtureSetup().rules, drawCount: 4 },
+      cards: four.run.ownedInstances.map((item, index) => ({
+        cardId: item.cardId,
+        effectId: "DELAYED_EXPLOSION" as const,
+        cost: 0,
+        power: 1,
+        resonanceAttribute: (["STILL", "BURN", "SCATTER", "ROT"] as const)[index],
+      })),
+      instances: four.run.ownedInstances,
+      deck: four.run.deck,
+      programs: fixtureSetup().programs.slice(0, 1),
+    });
+    four.run.activeCombat = {
+      state: createCombatState(setup),
+      enrolledPersistentInstanceIds: [...four.run.deck],
+      forgeActionTurn: 0,
+      forgeActionsRemaining: 0,
+      isolatedMaterials: [],
+      ephemeralResults: [],
+    };
+
+    let result = reduceForgeRuntime(four, { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, resolver);
+    result = reduceForgeRuntime(result.state, { type: "FORGE_INSTANT", materialInstanceIds: ["material-1", "material-2"] }, resolver);
+    result = reduceForgeRuntime(result.state, { type: "APPLY_COMBAT", command: { type: "END_TURN" } }, resolver);
+    result = reduceForgeRuntime(result.state, { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, resolver);
+    result = reduceForgeRuntime(result.state, { type: "FORGE_INSTANT", materialInstanceIds: ["reserve", "material-4"] }, resolver);
+    expect(result.state?.run.activeCombat).toMatchObject({
+      isolatedMaterials: [
+        { instance: { instanceId: "material-1" } },
+        { instance: { instanceId: "material-2" } },
+        { instance: { instanceId: "reserve" } },
+        { instance: { instanceId: "material-4" } },
+      ],
+      ephemeralResults: [{}, {}],
+    });
+    expect(decodeForgeRuntimeState(result.state)).toMatchObject({ valid: true });
+
+    const swappedResults = structuredClone(result.state!);
+    swappedResults.run.activeCombat!.ephemeralResults.reverse();
+    expect(decodeForgeRuntimeState(swappedResults).valid).toBe(false);
+    const swappedPairs = structuredClone(result.state!);
+    swappedPairs.run.activeCombat!.isolatedMaterials = [
+      ...swappedPairs.run.activeCombat!.isolatedMaterials.slice(2),
+      ...swappedPairs.run.activeCombat!.isolatedMaterials.slice(0, 2),
+    ];
+    expect(decodeForgeRuntimeState(swappedPairs).valid).toBe(false);
+    const oddPairCount = structuredClone(result.state!);
+    oddPairCount.run.activeCombat!.isolatedMaterials.pop();
+    expect(decodeForgeRuntimeState(oddPairCount).valid).toBe(false);
+    const missingPair = structuredClone(result.state!);
+    missingPair.run.activeCombat!.isolatedMaterials.splice(2, 2);
+    expect(decodeForgeRuntimeState(missingPair).valid).toBe(false);
+  });
+
   it("preserves budget on nested rejection and resets it only on a successful next turn", () => {
     let result = reduceForgeRuntime(runtime(true), { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, context());
     result = reduceForgeRuntime(result.state, { type: "FORGE_INSTANT", materialInstanceIds: ["material-1", "material-2"] }, context());

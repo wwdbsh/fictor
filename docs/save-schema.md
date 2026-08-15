@@ -21,7 +21,11 @@ workshop entitlement, 다음 encounter nonce 및 현재 combat binding을 포함
 안전 초기화하되 write-block하며 원본을 덮어쓰지 않는다.
 represented instant result는 ephemeral ledger의 card/instance/location과 combat의 정확히 한 zone이
 일치해야 한다. legacy overlay-only result는 zone/instance 어디에도 나타나지 않아야 하며 EQUIPMENT는
-항상 overlay-only다.
+항상 overlay-only다. ledger `i`는 `isolatedMaterials[2i]`, `isolatedMaterials[2i + 1]`과 시간순 1:2
+provenance를 이룬다. 두 material의 서로 다른 card ID를 lexical sort한 `low|high`와
+`forge__${low}__${high}`가 ledger의 recipe/card와 정확히 일치해야 하며, 이 규칙은 represented와
+legacy overlay-only 결과에 똑같이 적용된다. canonical recipe 허용과 profile discovery 결속은 이 형식
+검증에 더해 persistence authority가 계속 검증한다.
 
 저장 직전에 v2를 다시 읽어 `(saveGeneration, saveRevision)`을 비교한다. 이는 같은 탭/프로세스에서의
 stale 보호이지 browser `localStorage`의 진정한 multi-tab CAS라고 주장하지 않는다. quota/read/stale/

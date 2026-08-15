@@ -223,6 +223,23 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
   if (active.forgeActionTurn !== active.state.turn) errors.push(`${location}.forgeActionTurn must equal combat turn`);
   const mayHaveAction = active.state.status === "ONGOING" && active.state.phase === "PLAYER_ACTION";
   if (!mayHaveAction && active.forgeActionsRemaining !== 0) errors.push(`${location}.forgeActionsRemaining must be zero outside an ongoing player action`);
+  if (active.isolatedMaterials.length !== active.ephemeralResults.length * 2) {
+    errors.push(`${location} must bind exactly two isolated materials to each ephemeral result`);
+  }
+  for (let index = 0; index < active.ephemeralResults.length; index += 1) {
+    const left = active.isolatedMaterials[index * 2]?.instance;
+    const right = active.isolatedMaterials[index * 2 + 1]?.instance;
+    if (!left || !right) continue;
+    if (left.cardId === right.cardId) {
+      errors.push(`${location}.ephemeralResults[${index}] provenance materials must have distinct card ids`);
+      continue;
+    }
+    const [low, high] = left.cardId < right.cardId ? [left.cardId, right.cardId] : [right.cardId, left.cardId];
+    const result = active.ephemeralResults[index];
+    if (result.recipeId !== `${low}|${high}` || result.cardId !== `forge__${low}__${high}`) {
+      errors.push(`${location}.ephemeralResults[${index}] does not match its chronological isolated material pair`);
+    }
+  }
   uniqueStrings(active.enrolledPersistentInstanceIds, `${location}.enrolledPersistentInstanceIds`, errors);
   const ownedById = new Map(owned.map((instance) => [instance.instanceId, instance]));
   const ephemeralById = new Map(active.ephemeralResults.map((item) => [item.instanceId, item]));
