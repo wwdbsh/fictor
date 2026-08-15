@@ -127,6 +127,15 @@ export interface Track1UiForgeReview {
   readonly warningKo: string;
 }
 
+export interface Track1UiForgePresentation {
+  /** Per-dispatch identity. It is presentation-only and is never persisted. */
+  readonly presentationId: string;
+  readonly discovery: "FIRST" | "REPEAT";
+  readonly mode: "INSTANT" | "WORKSHOP";
+  readonly location: "HAND" | "DECK" | "EQUIPMENT";
+  readonly canonical: Track1UiForgeCanonicalPreview;
+}
+
 export interface Track1UiCodexEntry {
   readonly entryKey: string;
   readonly ordinal: number;
@@ -244,6 +253,7 @@ export type Track1UiProjection =
 export interface Track1UiDispatchResult {
   readonly applied: boolean;
   readonly projection: Track1UiProjection;
+  readonly forgePresentation: Track1UiForgePresentation | null;
 }
 
 export interface StillkinTrack1UiSession {

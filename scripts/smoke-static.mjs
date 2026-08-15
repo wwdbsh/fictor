@@ -22,6 +22,22 @@ const contentTypes = new Map([
 
 const auditManifestPath = resolve(process.cwd(), "assets/manifests/t022-m2-assets-audit-v1.json");
 
+function currentIndexBundleFiles() {
+  const indexHtml = readFileSync(resolve(distDirectory, "index.html"), "utf8");
+  const references = [...indexHtml.matchAll(/\b(?:src|href)=["']([^"']+)["']/g)]
+    .map((match) => match[1])
+    .filter((reference) => /\.(?:js|css)(?:[?#]|$)/.test(reference));
+  if (references.length === 0) throw new Error("dist/index.html에 JS/CSS entrypoint 참조가 없습니다.");
+  const invalid = references.filter((reference) => !/^\.\/assets\/[^/?#]+\.(?:js|css)$/.test(reference));
+  if (invalid.length > 0) throw new Error(`dist/index.html bundle 참조 형식이 잘못되었습니다: ${invalid.join(", ")}`);
+  if (new Set(references).size !== references.length) throw new Error(`dist/index.html bundle 참조가 중복되었습니다: ${references.join(", ")}`);
+  return references.map((reference) => {
+    const filePath = resolve(distDirectory, reference);
+    if (!existsSync(filePath) || !statSync(filePath).isFile()) throw new Error(`dist/index.html 참조 파일이 없습니다: ${reference}`);
+    return filePath;
+  });
+}
+
 async function verifyMountedPngs(origin) {
   const manifest = JSON.parse(readFileSync(auditManifestPath, "utf8"));
   const records = manifest?.assets?.records;
@@ -144,6 +160,7 @@ async function main() {
     const apiRequests = [];
     const webSocketRequests = [];
     const browserImageRequests = [];
+    const discoveryCheckpoints = [];
 
     const disableSandbox = process.env.PUPPETEER_DISABLE_SANDBOX === "true";
     browser = await puppeteer.launch({
@@ -202,6 +219,48 @@ async function main() {
     if (initialImagePaths.length !== 1 || initialImagePaths[0] !== `${mountPath}assets/backgrounds/background__still__depth_01.png`) {
       throw new Error(`초기 화면 밖 asset이 요청되었습니다: ${initialImagePaths.join(", ")}`);
     }
+    const initialAssetBytes = statSync(resolve(distDirectory, "assets/backgrounds/background__still__depth_01.png")).size;
+    if (initialAssetBytes > 2_296_255) throw new Error(`초기 asset budget 초과: ${initialAssetBytes}`);
+
+    const bundleFiles = currentIndexBundleFiles();
+    const javascriptBytes = bundleFiles.filter((path) => extname(path) === ".js").reduce((sum, path) => sum + statSync(path).size, 0);
+    const cssBytes = bundleFiles.filter((path) => extname(path) === ".css").reduce((sum, path) => sum + statSync(path).size, 0);
+    if (javascriptBytes > 409_600 || cssBytes > 32_768) {
+      throw new Error(`bundle budget 초과: js=${javascriptBytes}, css=${cssBytes}`);
+    }
+
+    const verifyUnsafeAssetPolicy = async () => {
+      const probePage = await browser.newPage();
+      const imageRequests = [];
+      try {
+        await probePage.setRequestInterception(true);
+        probePage.on("request", (request) => {
+          if (request.resourceType() === "image") imageRequests.push(request.url());
+          const requestOrigin = new URL(request.url()).origin;
+          void (requestOrigin === origin ? request.continue() : request.abort());
+        });
+        const response = await probePage.goto(`${pageUrl}?t030-asset-policy-probe=1`, { waitUntil: "networkidle0" });
+        if (response === null || !response.ok()) throw new Error(`asset policy probe 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
+        await probePage.waitForSelector('[data-asset-policy-probe="ready"]');
+        const probeState = await probePage.$eval('[data-asset-policy-probe="ready"]', (element) => ({
+          placeholders: element.querySelectorAll("[data-asset-placeholder]").length,
+          images: element.querySelectorAll("img").length,
+          srcsetAttributes: Array.from(element.querySelectorAll("img")).filter((image) => image.hasAttribute("srcset") || image.hasAttribute("srcSet")).length,
+        }));
+        const allowedProbeImages = new Set([
+          `${mountPath}assets/backgrounds/background__still__depth_01.png`,
+          `${mountPath}assets/cards/ore_still.png`,
+        ]);
+        const unexpected = imageRequests.filter((requestUrl) => new URL(requestUrl).origin !== origin || !allowedProbeImages.has(new URL(requestUrl).pathname));
+        if (probeState.placeholders !== 3 || probeState.images !== 1 || probeState.srcsetAttributes !== 0 || unexpected.length > 0) {
+          throw new Error(`unsafe asset 요청 차단 실패: state=${JSON.stringify(probeState)}, requests=${imageRequests.join(", ")}`);
+        }
+        return { cases: ["NEWLINE_SCHEME", "PROTOCOL_RELATIVE", "FIVE_LEVEL_ENCODED_TRAVERSAL", "LOWERCASE_EXTERNAL_SRCSET"], unsafeImageRequests: 0, unsafeSrcsetAttributes: 0 };
+      } finally {
+        await probePage.close();
+      }
+    };
+    const unsafeAssetPolicy = await verifyUnsafeAssetPolicy();
 
     async function clickAndWait(selector) {
       const before = await page.$eval("main", (element) => element.getAttribute("data-screen-key"));
@@ -210,6 +269,24 @@ async function main() {
         const main = document.querySelector("main");
         return main?.getAttribute("aria-busy") === "false" && main.getAttribute("data-screen-key") !== screenKey;
       }, {}, before);
+    }
+
+    async function settleFirstDiscovery(label) {
+      const checkpoints = [];
+      for (const phase of ["BURNING", "REVEALING", "PRINTING", "FINAL"]) {
+        await page.waitForSelector(`.discovery-overlay[data-discovery-phase="${phase}"]`);
+        checkpoints.push(phase);
+      }
+      const locked = await page.$eval("main", (element) => element.hasAttribute("inert") && element.getAttribute("aria-hidden") === "true");
+      if (!locked) throw new Error(`${label} FIRST discovery 동안 underlay가 잠기지 않았습니다.`);
+      const continueLabel = await page.$eval(".discovery-overlay button.primary-cta", (element) => element.textContent?.trim());
+      const finalCopy = await page.$eval(".discovery-final-copy", (element) => element.textContent?.trim());
+      if (continueLabel !== "계속" || !finalCopy?.includes("도감에 남았습니다")) throw new Error(`${label} FINAL이 완전한 정적 결과가 아닙니다.`);
+      await page.click(".discovery-overlay button.primary-cta");
+      await page.waitForSelector(".discovery-overlay", { hidden: true });
+      const unlocked = await page.$eval("main", (element) => !element.hasAttribute("inert") && !element.hasAttribute("aria-hidden"));
+      if (!unlocked) throw new Error(`${label} FIRST discovery 종료 뒤 underlay가 복구되지 않았습니다.`);
+      discoveryCheckpoints.push({ label, phases: checkpoints, continued: true });
     }
 
     async function winVisibleCombat() {
@@ -266,6 +343,8 @@ async function main() {
         await clickAndWait(".instant-preview .primary-cta");
         const ephemeralCardId = await page.$eval('button.combat-card[data-card-id^="forge__"]', (element) => element.getAttribute("data-card-id"));
         instantDiscovery = { materialIds: pair, resultName, ephemeralCardId };
+        await settleFirstDiscovery("instant");
+        const imagesBeforeCodex = browserImageRequests.length;
         await page.click(".codex-open");
         await page.waitForSelector(".codex-surface");
         const codexSummary = await page.$eval(".codex-heading p", (element) => element.textContent?.trim());
@@ -279,6 +358,9 @@ async function main() {
           await page.waitForFunction((previousPage) => document.querySelector(".codex-pagination span")?.textContent?.trim() !== previousPage, {}, `${codexPage + 1} / 28`);
         }
         if (!foundDiscoveredEntry) throw new Error("즉석 발견 도감 항목을 28개 page에서 찾지 못했습니다.");
+        const codexImagePaths = browserImageRequests.slice(imagesBeforeCodex).map((value) => new URL(value).pathname);
+        const unexpectedCodexImages = codexImagePaths.filter((path) => !path.endsWith(`/assets/cards/${ephemeralCardId}.png`));
+        if (unexpectedCodexImages.length > 0 || codexImagePaths.length > 1) throw new Error(`도감이 현재 발견 외 asset을 요청했습니다: ${codexImagePaths.join(", ")}`);
         await page.click(".codex-heading .surface-close");
         await page.reload({ waitUntil: "networkidle0" });
         await page.waitForSelector("main.phase-in_combat");
@@ -314,6 +396,7 @@ async function main() {
     await page.click('.resolved-screen .primary-cta:not([disabled])');
     await page.waitForSelector('.forge-dialog[role="dialog"]');
     await clickAndWait('.forge-dialog .primary-cta:not([disabled])');
+    await settleFirstDiscovery("free-workshop");
     await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
     await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
     await page.waitForSelector('img[alt="눌린 불의 잔해"]');
@@ -380,6 +463,13 @@ async function main() {
     await page.click('.forge-panel .primary-cta:not([disabled])');
     await page.waitForSelector('.forge-dialog[role="dialog"]');
     await clickAndWait('.forge-dialog .primary-cta:not([disabled])');
+    await page.waitForSelector(".discovery-toast");
+    const repeatState = await page.$eval("main", (element) => ({ inert: element.hasAttribute("inert"), hidden: element.getAttribute("aria-hidden") }));
+    if (repeatState.inert || repeatState.hidden !== null) throw new Error(`REPEAT toast가 underlay를 잠갔습니다: ${JSON.stringify(repeatState)}`);
+    const repeatCopy = await page.$eval(".discovery-toast", (element) => element.textContent?.trim());
+    if (!repeatCopy?.includes("알고 있는 제법") || !repeatCopy.includes(instantDiscovery.resultName)) throw new Error(`REPEAT toast 결과가 다릅니다: ${repeatCopy}`);
+    await page.click(".discovery-toast button");
+    await page.waitForSelector(".discovery-toast", { hidden: true });
     const codexAfterPaid = await page.$eval(".codex-open", (element) => element.getAttribute("aria-label"));
     if (codexAfterPaid !== codexBeforePaid) throw new Error(`같은 recipe의 공방 빚기가 도감 항목을 중복했습니다: ${codexBeforePaid} / ${codexAfterPaid}`);
     const fuelAfterPaid = await page.$$eval(".stats-strip div", (items) => items.find((item) => item.querySelector("dt")?.textContent === "연료")?.querySelector("dd")?.textContent?.trim());
@@ -414,6 +504,9 @@ async function main() {
         apiRequests: 0,
         webSocketRequests: 0,
         browserImageRequests: browserImageRequests.length,
+        performanceBudgets: { initialRequests: 1, initialAssetBytes, javascriptBytes, cssBytes, noncurrentInitialAssets: 0 },
+        unsafeAssetPolicy,
+        discoveryCheckpoints,
         corePath: "instant discovery -> Codex -> reload -> full run -> restart -> paid workshop same recipe",
         instantDiscovery: { ...instantDiscovery, reloaded: reloadedAfterInstant, codexBeforePaid, codexAfterPaid, fuelAfterPaid },
         missingCanonicalFallback: { cardId: "forge__ore_still__still_03", assetPath: new URL(fallbackAssetUrl).pathname, httpStatus: fallbackAssetResponse.status },

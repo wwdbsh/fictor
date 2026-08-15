@@ -3,7 +3,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { createStillkinTrack1UiSession, type Track1UiActionDescriptor, type Track1UiProjection } from "../src/application";
 import { FICTOR_SAVE_V2_KEY, type StorageLike } from "../src/persistence";
@@ -63,6 +63,7 @@ function asBetween(projection: Track1UiProjection) {
   return projection;
 }
 
+beforeEach(() => window.history.replaceState({}, "", "/fictor-test/"));
 afterEach(cleanup);
 
 describe("Track-1 App", () => {
@@ -146,7 +147,15 @@ describe("Track-1 App", () => {
     expect(storage.setCalls).toBe(0);
     fireEvent.click(review);
     fireEvent.click(screen.getByRole("button", { name: "영구 소모 확인" }));
+    const discovery = await screen.findByRole("dialog", { name: "빚기 기록" });
+    expect(screen.getByRole("main", { hidden: true })).toHaveAttribute("inert");
+    fireEvent.click(screen.getByRole("button", { name: "연출 건너뛰기" }));
+    expect(discovery).toHaveAttribute("data-discovery-phase", "FINAL");
+    expect(screen.getByRole("button", { name: "계속" })).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "계속" }));
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("영구 소모되고 결과가 덱에 편입"));
+    expect(screen.getByRole("main")).not.toHaveAttribute("inert");
+    await waitFor(() => expect(screen.getByRole("heading", { level: 1 })).toHaveFocus());
     expect(storage.setCalls).toBe(1);
     const refreshedOpen = screen.getByRole("button", { name: "도감 열기 · 발견 1 / 1326" });
     fireEvent.click(refreshedOpen);
@@ -170,6 +179,10 @@ describe("Track-1 App", () => {
     expect(screen.getByRole("main")).toHaveAttribute("data-screen-key", screenKey);
     expect(document.querySelector(".instant-preview > p")).toHaveTextContent("전투 종료 시 결과 소멸 · 재료 복구");
     fireEvent.click(screen.getByRole("button", { name: /^즉석 빚기$/ }));
+    await screen.findByRole("dialog", { name: "빚기 기록" });
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+    expect(screen.getByRole("dialog", { name: "새 제법 발견" })).toHaveTextContent("굳은 조각과 서리꽃의 제법이 도감에 남았습니다");
+    fireEvent.click(screen.getByRole("button", { name: "계속" }));
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("즉석 결과가 손에 놓였습니다"));
     expect(document.querySelector('button.combat-card[data-card-id^="forge__"]')).toBeInTheDocument();
   });

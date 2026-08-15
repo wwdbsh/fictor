@@ -156,10 +156,32 @@ describe("Stillkin Track-1 browser UI session", () => {
     const staleReview = session.reviewWorkshopForge(stalePreview)!;
     const applied = session.dispatch(action);
     expect(applied.applied).toBe(true);
+    expect(applied.forgePresentation).toMatchObject({ discovery: "FIRST", canonical: preview.canonical });
     expect(storage.setCalls).toBe(writesBefore + 1);
     expect(session.confirmForgeReview(staleReview)).toBeNull();
     expect(session.dispatch(action).applied).toBe(false);
     expect(storage.setCalls).toBe(writesBefore + 1);
+  });
+
+  it("returns FIRST then non-persisted-animation REPEAT for the same canonical recipe", () => {
+    const { session } = create();
+    let between = asPhase(session.snapshot(), "BETWEEN_NODES");
+    const [left, right] = firstDistinct(between.workshopMaterials);
+    const cardIds = [left.cardId, right.cardId] as const;
+    const firstPreview = session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+    const first = session.dispatch(session.confirmForgeReview(session.reviewWorkshopForge(firstPreview)!)!);
+    expect(first.forgePresentation).toMatchObject({ discovery: "FIRST", mode: "WORKSHOP", canonical: firstPreview.canonical });
+
+    between = asPhase(first.projection, "BETWEEN_NODES");
+    const repeatLeft = between.workshopMaterials.find(({ cardId }) => cardId === cardIds[0]);
+    const repeatRight = between.workshopMaterials.find(({ cardId }) => cardId === cardIds[1]);
+    expect(repeatLeft).toBeDefined();
+    expect(repeatRight).toBeDefined();
+    const repeatPreview = session.previewForge("WORKSHOP_PAID", [repeatLeft!.instanceId, repeatRight!.instanceId])!;
+    const repeat = session.dispatch(session.confirmForgeReview(session.reviewWorkshopForge(repeatPreview)!)!);
+    expect(repeat.forgePresentation).toMatchObject({ discovery: "REPEAT", mode: "WORKSHOP", canonical: firstPreview.canonical });
+    expect(repeat.forgePresentation?.presentationId).not.toBe(first.forgePresentation?.presentationId);
+    expect(session.codexSnapshot().discoveredCount).toBe(1);
   });
 
   it("cannot mint a descriptor from an old run review after restart resets the revision", () => {
@@ -371,6 +393,7 @@ describe("Stillkin Track-1 browser UI session", () => {
     expect(accepted.applied).toBe(true);
     const rejected = stale.session.dispatch(staleAction);
     expect(rejected.applied).toBe(false);
+    expect(rejected.forgePresentation).toBeNull();
     expect(rejected.projection.phase).toBe("BETWEEN_NODES");
     expect(rejected.projection.feedback).toMatchObject({ tone: "ERROR" });
 
@@ -378,7 +401,18 @@ describe("Stillkin Track-1 browser UI session", () => {
     (failing.storage as MemoryStorage).failSet = true;
     const writeRejected = failing.session.dispatch((failing.projection as Extract<Track1UiProjection, { phase: "BETWEEN_NODES" }>).action);
     expect(writeRejected.applied).toBe(false);
+    expect(writeRejected.forgePresentation).toBeNull();
     expect(writeRejected.projection.phase).toBe("BETWEEN_NODES");
+
+    const forgeFailure = create(new MemoryStorage(), "forge-write-failure");
+    const forgeBetween = asPhase(forgeFailure.projection, "BETWEEN_NODES");
+    const [left, right] = firstDistinct(forgeBetween.workshopMaterials);
+    const preview = forgeFailure.session.previewForge("WORKSHOP_PAID", [left.instanceId, right.instanceId])!;
+    const forgeAction = forgeFailure.session.confirmForgeReview(forgeFailure.session.reviewWorkshopForge(preview)!)!;
+    (forgeFailure.storage as MemoryStorage).failSet = true;
+    const forgeRejected = forgeFailure.session.dispatch(forgeAction);
+    expect(forgeRejected).toMatchObject({ applied: false, forgePresentation: null });
+    expect(forgeRejected.projection.stats).toEqual(forgeBetween.stats);
   });
 
   it("blocks and preserves corrupt and unsupported saves", () => {

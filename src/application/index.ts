@@ -21,7 +21,7 @@ export type {
   Track1CombatBinding,
   Track1Phase,
 } from "./run";
-export { BROWSER_RUNTIME_PACKET, BROWSER_RUNTIME_PACKET_SCHEMA_VERSION, createStillkinTrack1UiSession } from "./browser";
+export { BROWSER_RUNTIME_PACKET, BROWSER_RUNTIME_PACKET_SCHEMA_VERSION, buildForgePresentation, createStillkinTrack1UiSession } from "./browser";
 export type {
   BrowserMaterialDisplay,
   BrowserRuntimePacketV1,
@@ -38,6 +38,7 @@ export type {
   Track1UiForgeMaterial,
   Track1UiForgeMode,
   Track1UiForgePreview,
+  Track1UiForgePresentation,
   Track1UiForgeReview,
   Track1UiCodexEntry,
   Track1UiCodexSnapshot,
