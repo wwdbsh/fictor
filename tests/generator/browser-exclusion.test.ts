@@ -15,7 +15,7 @@ function filesUnder(directory: string): string[] {
   });
 }
 
-describe("generated catalog browser exclusion", () => {
+describe("canonical catalog browser exclusion", () => {
   // 60s timeout: this test spawns a real `npm run build`, which loses to
   // vitest's default 5s budget under full-suite parallel load (the T015 v4
   // asset suites add ~60s of concurrent work). Standalone it runs in ~1-2s.
@@ -31,12 +31,14 @@ describe("generated catalog browser exclusion", () => {
       .join("\n");
     for (const forbidden of [
       "forge__burn_01__still_01",
-      "PENDING_2026_08_21",
-      "canonical-v1",
+      "cards.generated.json",
+      "equipment.generated.json",
+      "content_hash",
       "fictor.materials",
       "tsx scripts/gen-data",
     ]) {
       expect(bundle).not.toContain(forbidden);
     }
+    expect(bundle).toContain("fictor-browser-runtime-packet-v1");
   });
 });

@@ -47,11 +47,36 @@ describe("current source architecture", () => {
     expect(mainSource).toMatch(/from\s+["']react-dom\/client["']/);
     expect(mainSource).toMatch(/from\s+["']\.\/presentation\/App["']/);
     expect(mainSource).toContain("createRoot(rootElement).render");
+    expect(mainSource.match(/createStillkinTrack1UiSession\s*\(/g)).toHaveLength(1);
+    expect(mainSource.indexOf("createStillkinTrack1UiSession(")).toBeLessThan(mainSource.indexOf("createRoot(rootElement).render"));
 
     for (const file of sourceFiles(sourceRoot).filter((path) => path !== mainPath)) {
       const source = readFileSync(file, "utf8");
       expect(source, relative(repositoryRoot, file)).not.toMatch(/react-dom\/client|\bcreateRoot\s*\(/);
     }
+  });
+
+  it("keeps presentation on the application-owned UI contract", () => {
+    const presentationFiles = sourceFiles(join(sourceRoot, "presentation"));
+    const combined = presentationFiles.map((file) => readFileSync(file, "utf8")).join("\n");
+    expect(combined).toMatch(/from\s+["']\.\.\/application["']/);
+    expect(combined).not.toMatch(/from\s+["'][^"']*(?:domain|persistence|data|run\/track1-config)[^"']*["']/);
+    expect(combined).not.toMatch(/\b(?:localStorage|fetch|WebSocket)\b/);
+    expect(combined).not.toMatch(/\b(?:expectedRevision|runId|combatBinding|encounterNonce)\b/);
+  });
+
+  it("keeps browser storage access in main and commands inside the application facade", () => {
+    const browserFacing = [
+      join(sourceRoot, "main.tsx"),
+      ...sourceFiles(join(sourceRoot, "application", "browser")),
+      ...sourceFiles(join(sourceRoot, "presentation")),
+    ];
+    for (const file of browserFacing.filter((path) => path !== join(sourceRoot, "main.tsx"))) {
+      expect(readFileSync(file, "utf8"), relative(repositoryRoot, file)).not.toMatch(/\blocalStorage\b/);
+    }
+    const mainSource = readFileSync(join(sourceRoot, "main.tsx"), "utf8");
+    expect(mainSource).toContain("localStorageAdapter");
+    expect(mainSource).toContain("window.localStorage");
   });
 
   it("keeps source data, schemas, generators, and generated catalogs out of the browser graph", () => {
