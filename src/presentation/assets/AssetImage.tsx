@@ -1,4 +1,4 @@
-import { useEffect, useState, type ImgHTMLAttributes } from "react";
+import { useEffect, useState } from "react";
 
 import { currentAssetUrlContext, resolveSafeLocalAssetUrl } from "./asset-url";
 import { track1AssetRecordForUrl, track1DynamicAssetPolicy, type Track1DynamicAssetSlot } from "./track1-asset-manifest";
@@ -6,9 +6,17 @@ import { track1AssetRecordForUrl, track1DynamicAssetPolicy, type Track1DynamicAs
 type ImageAttempt = "PRIMARY" | "FALLBACK" | "PLACEHOLDER";
 export type AssetImageRole = "STATIC_MANIFEST" | Track1DynamicAssetSlot;
 
-type CommonAssetImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "srcSet" | "sizes" | "useMap" | "style" | "dangerouslySetInnerHTML" | "onError"> & {
+type CommonAssetImageProps = {
   readonly src: string;
   readonly placeholderLabel: string;
+  readonly alt?: string;
+  readonly className?: string;
+  readonly id?: string;
+  readonly title?: string;
+  readonly loading?: "eager" | "lazy";
+  readonly decoding?: "async" | "auto" | "sync";
+  readonly width?: number | string;
+  readonly height?: number | string;
 };
 
 type StaticAssetImageProps = CommonAssetImageProps & {
@@ -53,13 +61,13 @@ export function AssetImage(props: AssetImageProps) {
     className,
     assetRole,
     fallbackSrc = null,
-    srcSet: _srcSet,
-    sizes: _sizes,
-    useMap: _useMap,
-    style: _style,
-    dangerouslySetInnerHTML: _dangerouslySetInnerHTML,
-    ...imageProps
-  } = props as AssetImageProps & Pick<ImgHTMLAttributes<HTMLImageElement>, "srcSet" | "sizes" | "useMap" | "style" | "dangerouslySetInnerHTML">;
+    id,
+    title,
+    loading,
+    decoding,
+    width,
+    height,
+  } = props;
   const context = currentAssetUrlContext();
   const resolvedPrimary = resolveSafeLocalAssetUrl(src, context);
   const dynamicPolicy = track1DynamicAssetPolicy(assetRole);
@@ -87,7 +95,12 @@ export function AssetImage(props: AssetImageProps) {
   const record = track1AssetRecordForUrl(effectiveSrc, context);
   return (
     <img
-      {...imageProps}
+      id={id}
+      title={title}
+      loading={loading}
+      decoding={decoding}
+      width={width}
+      height={height}
       className={className}
       src={effectiveSrc}
       alt={alt}

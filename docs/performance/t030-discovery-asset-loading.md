@@ -14,8 +14,9 @@
 encoded·double-encoded 상위 경로 순회는 `img src`에 들어가기 전에 fail-closed로 차단한다. URL은 현재
 origin과 문서 base path를 기준으로 정규화하며, 동일 origin의 `${basePath}assets/` 아래 PNG만 허용한다.
 primary가 차단되어도 슬롯 정책이 허용하는 안전한 local fallback은 한 번만 사용한다.
-bounded decode 뒤 `%`가 남는 다중 encoding도 차단하며, native prop spread에서는 `srcSet`, `sizes`,
-`useMap`, inline style과 raw HTML을 제거해 우회 이미지 요청을 만들 수 없게 한다.
+bounded decode 뒤 `%`가 남는 다중 encoding도 차단한다. native image props는 broad spread 없이
+`id/className/alt/title/loading/decoding/width/height`만 명시적으로 전달하므로 camelCase 또는 lowercase
+`srcSet`, `sizes`, `useMap`, inline style과 raw HTML로 우회 이미지 요청을 만들 수 없다.
 
 브라우저에는 T022 audit JSON을 싣지 않는다. 대신
 `src/presentation/assets/track1-asset-manifest.ts`의 현재 Track 1 고정 surface 13개만
@@ -38,7 +39,7 @@ manifest의 authority, requested-PNG 규칙, 슬롯별 fallback 및 단일 recor
 | 초기 image request | 정확히 1 | 1 | PASS |
 | 초기 asset raw bytes | ≤ 2,296,255 | 2,296,255 | PASS |
 | 초기 non-current asset | 0 | 0 | PASS |
-| production JavaScript raw bytes | ≤ 409,600 | 378,744 | PASS |
+| production JavaScript raw bytes | ≤ 409,600 | 378,776 | PASS |
 | production CSS raw bytes | ≤ 32,768 | 28,028 | PASS |
 
 관찰 명령은 `npm run build` 뒤 `npm run smoke:static`이다. smoke는 외부/API/WebSocket 요청 0,
@@ -48,8 +49,8 @@ JS/CSS 예산 테스트는 `dist`의 모든 hashed 파일을 합산하지 않고
 `./assets/*.js`와 `./assets/*.css`만 존재 확인 후 합산한다. 따라서 stale 또는 동시 build 산출물은 예산에
 혼입되지 않으며, 중복·누락 참조는 실패한다.
 bundle exclusion test는 격리된 임시 outDir에서 빌드해 공유 `dist`와 경쟁하지 않는다. 별도 Chromium
-negative probe는 newline-scheme, protocol-relative, 5단계 encoded traversal 및 external `srcSet`을
-production `AssetImage`에 전달하고 unsafe image request가 0임을 확인한다.
+negative probe는 newline-scheme, protocol-relative, 5단계 encoded traversal 및 1x lowercase external
+`srcset`을 production `AssetImage`에 전달하고 DOM `srcset` 속성과 unsafe image request가 모두 0임을 확인한다.
 
 ## 발견 연출 수명
 

@@ -113,6 +113,7 @@ describe("AssetImage", () => {
         assetRole="HAND"
         src="/assets/cards/ore_still.png"
         srcSet="//example.invalid/external-srcset.png 2x"
+        srcset="//example.invalid/lowercase-srcset.png 1x"
         sizes="100vw"
         useMap="https://example.invalid/map"
         style={{ backgroundImage: "url(https://example.invalid/background.png)" }}
@@ -124,6 +125,7 @@ describe("AssetImage", () => {
     const image = screen.getByRole("img", { name: "굳은 광석" });
     expect(image).toHaveAttribute("src", "/assets/cards/ore_still.png");
     expect(image).not.toHaveAttribute("srcset");
+    expect(image.getAttributeNames().map((name) => name.toLowerCase())).not.toContain("srcset");
     expect(image).not.toHaveAttribute("sizes");
     expect(image).not.toHaveAttribute("usemap");
     expect(image).not.toHaveAttribute("style");
