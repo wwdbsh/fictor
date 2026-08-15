@@ -77,8 +77,18 @@ function isSafeResolvedCard(card: GeneratedCard): boolean {
 function cleanupActive(active: ActiveCombatForgeRuntime): ForgeRuntimeEvent {
   const restoredInstanceIds = active.isolatedMaterials.map((item) => item.instance.instanceId);
   const removedEphemeralInstanceIds = active.ephemeralResults.map((item) => item.instanceId);
+  const removedEphemeralIdSet = new Set(removedEphemeralInstanceIds);
+  active.state.instances = active.state.instances.filter(({ instanceId }) => !removedEphemeralIdSet.has(instanceId));
+  active.state.zones.deck = active.state.zones.deck.filter((instanceId) => !removedEphemeralIdSet.has(instanceId));
+  active.state.zones.hand = active.state.zones.hand.filter((instanceId) => !removedEphemeralIdSet.has(instanceId));
+  active.state.zones.discard = active.state.zones.discard.filter((instanceId) => !removedEphemeralIdSet.has(instanceId));
+  active.state.zones.exile = active.state.zones.exile.filter((instanceId) => !removedEphemeralIdSet.has(instanceId));
   active.state.instances.push(...active.isolatedMaterials.map((item) => item.instance));
   active.state.zones.deck.push(...restoredInstanceIds);
+  const referencedCardIds = new Set(active.state.instances.map(({ cardId }) => cardId));
+  active.state.cards = active.state.cards.filter(({ cardId }) => referencedCardIds.has(cardId));
+  const referencedEffectIds = new Set(active.state.cards.map(({ effectId }) => effectId));
+  active.state.programs = active.state.programs.filter(({ effectId }) => referencedEffectIds.has(effectId));
   active.isolatedMaterials = [];
   active.ephemeralResults = [];
   return {
@@ -86,6 +96,20 @@ function cleanupActive(active: ActiveCombatForgeRuntime): ForgeRuntimeEvent {
     restoredInstanceIds,
     removedEphemeralInstanceIds,
   };
+}
+
+function syncRepresentedEphemeralLocations(active: ActiveCombatForgeRuntime): void {
+  const zones = [
+    ["HAND", active.state.zones.hand],
+    ["DECK", active.state.zones.deck],
+    ["DISCARD", active.state.zones.discard],
+    ["EXILE", active.state.zones.exile],
+  ] as const;
+  for (const ephemeral of active.ephemeralResults) {
+    if (!active.state.instances.some(({ instanceId }) => instanceId === ephemeral.instanceId)) continue;
+    const location = zones.find(([, instanceIds]) => instanceIds.includes(ephemeral.instanceId))?.[0];
+    if (location) ephemeral.location = location;
+  }
 }
 
 function commit(
@@ -144,6 +168,7 @@ function applyCombat(
   if (state.revision === Number.MAX_SAFE_INTEGER) return reject(state, command.type, "POSTCONDITION_FAILED");
 
   active.state = combatResult.state;
+  syncRepresentedEphemeralLocations(active);
   if (command.command.type === "START_TURN") {
     active.forgeActionTurn = active.state.turn;
     active.forgeActionsRemaining = 1;

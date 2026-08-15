@@ -29,6 +29,7 @@ const MATERIAL_IDS = [
   ...Array.from({ length: 6 }, (_, index) => `odd_${String(index + 1).padStart(2, "0")}`),
 ].sort();
 const MATERIAL_ID_SET = new Set(MATERIAL_IDS);
+const TOOL_ID_SET = new Set(Array.from({ length: 10 }, (_, index) => `tool_${String(index + 1).padStart(2, "0")}`));
 const RECIPE_CARD_ENTRIES: Array<readonly [string, string]> = [];
 for (let left = 0; left < MATERIAL_IDS.length; left += 1) {
   for (let right = left + 1; right < MATERIAL_IDS.length; right += 1) {
@@ -280,6 +281,8 @@ export function runtimeReferencesAllowed(runtime: ForgeRuntimeStateV1, catalog: 
   const cardAllowed = (cardId: string): boolean => MATERIAL_ID_SET.has(cardId)
     || (FORGE_CARD_RECIPE_MAP.has(cardId) && discoveries.has(FORGE_CARD_RECIPE_MAP.get(cardId)!));
   if (runtime.run.ownedInstances.some((item) => !safeInstanceId(item.instanceId) || !cardAllowed(item.cardId))) return false;
+  const ownedToolIds = runtime.run.ownedInstances.map(({ cardId }) => cardId).filter((cardId) => TOOL_ID_SET.has(cardId));
+  if (new Set(ownedToolIds).size !== ownedToolIds.length) return false;
   if (runtime.run.deck.some((id) => !safeInstanceId(id))) return false;
   const active = runtime.run.activeCombat;
   if (!active) return true;

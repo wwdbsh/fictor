@@ -6,7 +6,7 @@ import {
   ownsHeart,
   recordOwnedHeart,
   startNewRun,
-} from "../../src/application";
+} from "../../src/application/game-session";
 import materialsSource from "../../src/data/source/materials.json";
 import lawsSource from "../../src/data/source/laws.json";
 import resultClassesSource from "../../src/data/source/resultClasses.json";

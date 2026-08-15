@@ -90,4 +90,26 @@ describe("current source architecture", () => {
     expect(runtimeIndex).toContain("FORGE_RUNTIME_SOURCE_HASH");
     expect(runtimeIndex).not.toMatch(/(?:sha256Hex|canonicalSerialize|projectionHash|PROJECTION_HASH)/);
   });
+
+  it("keeps run flow and reward authority browser-safe", () => {
+    const roots = [
+      join(sourceRoot, "application", "run"),
+      join(sourceRoot, "domain", "rewards"),
+      join(sourceRoot, "domain", "events"),
+    ];
+    const combined = roots.flatMap(sourceFiles).map((file) => readFileSync(file, "utf8")).join("\n");
+    expect(combined).not.toMatch(/data\/(?:source|generated)|\.generated\.json/i);
+    expect(combined).not.toMatch(/\b(?:Math\.random|Date|localStorage|fetch|WebSocket)\b/);
+  });
+
+  it("keeps legacy raw run authority out of the root application barrel", () => {
+    const rootBarrel = readFileSync(join(sourceRoot, "application", "index.ts"), "utf8");
+    const runBarrel = readFileSync(join(sourceRoot, "application", "run", "index.ts"), "utf8");
+    const forgeRuntimeReducer = readFileSync(join(sourceRoot, "domain", "forge-runtime", "reducer.ts"), "utf8");
+    expect(rootBarrel).toContain("createStillkinTrack1Controller");
+    expect(rootBarrel).not.toMatch(/\b(?:reduceRunFlow|createDormantRunFlowState|executeRunGameCommand|decodeRunFlowCommand|RunGameSessionV1|RunFlowStateV1|RunScenarioV1|executeForgeRuntimeCommand|loadGameSession|GameSession|SessionMutationResult)\b/);
+    expect(rootBarrel).not.toContain('export * from "./run"');
+    expect(runBarrel).not.toMatch(/\b(?:reduceRunFlow|createDormantRunFlowState|executeRunGameCommand|decodeRunFlowCommand|decodeRunScenario|adaptTerminalCombatToRunCommand|RunGameSessionV1|RunFlowStateV1|RunScenarioV1|STILLKIN_PRODUCTION_SCENARIO_V1)\b/);
+    expect(forgeRuntimeReducer).not.toContain("reduceEntitledWorkshopForgeInternal");
+  });
 });
