@@ -1,4 +1,13 @@
 export {
+  BURNKIN_TRACK1_CONFIG_HASH,
+  BURNKIN_TRACK1_PROVISIONAL_CONFIG,
+  BURNKIN_TRACK1_PROVISIONAL_STATUS,
+  BURNKIN_TRACK1_RULES,
+  BURNKIN_TRACK1_SAVE_KEY,
+  BURNKIN_TRACK1_SCENARIO_HASH,
+  BURNKIN_TRACK1_SCENARIO_ID,
+  createBurnkinTrack1Controller,
+  createTrack1Controller,
   createStillkinTrack1Controller,
   STILLKIN_TRACK1_CONFIG_HASH,
   STILLKIN_TRACK1_CONTROLLER_VERSION,
@@ -8,6 +17,7 @@ export {
   STILLKIN_TRACK1_SCENARIO_HASH,
   STILLKIN_TRACK1_SCENARIO_ID,
   T027_LITERAL_CONTRACT_HASH,
+  T033_CONTRACT_HASH,
 } from "./run";
 export type {
   StillkinTrack1Command,
@@ -21,12 +31,16 @@ export type {
   Track1CombatBinding,
   Track1Phase,
 } from "./run";
-export { BROWSER_RUNTIME_PACKET, BROWSER_RUNTIME_PACKET_SCHEMA_VERSION, buildForgePresentation, createStillkinTrack1UiSession } from "./browser";
+export { BROWSER_RUNTIME_PACKET, BROWSER_RUNTIME_PACKET_SCHEMA_VERSION, buildForgePresentation, createStillkinTrack1UiSession, createTrack1RaceSelection, FICTOR_RACE_SELECTION_KEY } from "./browser";
 export type {
   BrowserMaterialDisplay,
   BrowserRuntimePacketV1,
+  PlayableTrack1RaceId,
   StillkinTrack1UiSession,
   StillkinTrack1UiSessionOptions,
+  Track1RaceSelection,
+  Track1RaceSelectionChoice,
+  Track1RaceSelectionOptions,
   Track1UiActionDescriptor,
   Track1UiActionKind,
   Track1UiCard,

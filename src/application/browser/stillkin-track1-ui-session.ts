@@ -1,8 +1,8 @@
 import { resolveForgeCard, type GeneratedCard } from "../../domain/forge";
 import type { ForgeResolverContextV1 } from "../../domain/forge-runtime";
 import type { StorageLike } from "../../persistence";
-import { createStillkinTrack1Controller, STILLKIN_TRACK1_PROVISIONAL_CONFIG as CONFIG } from "../run";
-import type { StillkinTrack1Command, StillkinTrack1Snapshot } from "../run";
+import { BURNKIN_TRACK1_RULES, createTrack1Controller, STILLKIN_TRACK1_PROVISIONAL_CONFIG as CONFIG } from "../run";
+import type { StillkinTrack1Command, StillkinTrack1Snapshot, Track1RaceId } from "../run";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
 import { browserPacketHasCanonicalArt, type BrowserMaterialDisplay } from "./runtime-packet";
 import { buildCanonicalForgePreview, projectCanonicalCodex } from "./forge-codex-preview";
@@ -27,6 +27,7 @@ export interface StillkinTrack1UiSessionOptions {
   readonly storage: StorageLike;
   readonly baseUrl: string;
   readonly generationFactory?: () => string;
+  readonly raceId?: Track1RaceId;
 }
 
 type Feedback = null | { tone: "STATUS" | "ERROR"; messageKo: string };
@@ -73,6 +74,9 @@ const FAILURE_MESSAGES: Record<string, string> = {
   WRITE_BLOCKED: "손상되거나 지원하지 않는 기록을 보존하고 있어 저장이 차단되었습니다.",
   PERSISTENCE_FAILED: "진행 기록을 저장하지 못해 이 행동을 되돌렸습니다.",
   RUNTIME_REJECTED: "게임 규칙이 이 행동을 받아들이지 않았습니다.",
+  INSUFFICIENT_HP: "지불 뒤에도 체력이 남아 있어야 합니다.",
+  ENERGY_CAP_EXCEEDED: "에너지가 가득 차 있어 태울 수 없습니다.",
+  RACE_COMMAND_UNAVAILABLE: "선택한 붙이에게 없는 행동입니다.",
   INSUFFICIENT_FUEL: "연료가 부족합니다.",
   WORKSHOP_SELECTION_INVALID: "서로 다른 재료 두 장을 골라야 합니다.",
 };
@@ -196,7 +200,10 @@ function commandFeedback(events: readonly { type: string }[]): Feedback {
   if (created?.mode === "INSTANT" && created.location === "EQUIPMENT") return { tone: "STATUS", messageKo: "즉석 장비 결과는 전투 동안만 보유하며 손에 놓이지 않습니다. 전투 종료 시 장비 결과는 사라지고 재료는 복구됩니다." };
   if (created?.mode === "INSTANT") return { tone: "STATUS", messageKo: "즉석 결과가 손에 놓였습니다. 전투 종료 시 결과는 사라지고 재료는 복구됩니다." };
   if (created?.mode === "WORKSHOP") return { tone: "STATUS", messageKo: "두 재료가 영구 소모되고 결과가 덱에 편입되었습니다." };
+  if (events.some(({ type }) => type === "BURNKIN_RESONANCE_BROKEN")) return { tone: "STATUS", messageKo: "공명이 끊겨 자해 피해를 받았습니다." };
   if (events.some(({ type }) => type === "CARD_PLAYED")) return { tone: "STATUS", messageKo: "카드를 사용했습니다." };
+  if (events.some(({ type }) => type === "BURNKIN_CARD_KINDLED")) return { tone: "STATUS", messageKo: "카드 한 장을 지펴 에너지로 바꿨습니다." };
+  if (events.some(({ type }) => type === "BURNKIN_HP_PAID")) return { tone: "STATUS", messageKo: "체력을 태워 에너지를 얻었습니다." };
   if (events.some(({ type }) => type === "TURN_STARTED")) return { tone: "STATUS", messageKo: "새 턴을 시작했습니다." };
   if (events.some(({ type }) => type === "EVENT_RESOLVED")) return { tone: "STATUS", messageKo: "사건을 기록했습니다." };
   return last ? { tone: "STATUS", messageKo: "진행 기록을 저장했습니다." } : null;
@@ -213,11 +220,11 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   const context = packet.resolverContext;
   const materials = displayMap(packet.materialDisplay);
   const codexCanonical = projectCanonicalCodex(baseUrl);
-  const controller = createStillkinTrack1Controller({
+  const controller = createTrack1Controller({
     storage: options.storage,
     resolverContext: context,
     ...(options.generationFactory ? { generationFactory: options.generationFactory } : {}),
-  });
+  }, options.raceId ?? "Stillkin");
   const commandByDescriptor = new WeakMap<Track1UiActionDescriptor, StillkinTrack1Command>();
   const previewAuthority = new WeakMap<Track1UiForgePreview, ForgeAuthorityIdentity & { mode: Track1UiForgeMode; command: StillkinTrack1Command }>();
   const reviewAuthority = new WeakMap<Track1UiForgeReview, ForgeAuthorityIdentity & { mode: "WORKSHOP_PAID" | "WORKSHOP_FREE"; command: StillkinTrack1Command }>();
@@ -292,6 +299,22 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       },
       disabled,
     );
+    const kindleDisabled = snapshot.raceId !== "Burnkin"
+      || active.phase !== "PLAYER_ACTION"
+      || card.cost === null
+      || active.player.energy + card.cost > active.rules.maxEnergy;
+    const kindleAction = snapshot.raceId === "Burnkin" ? bind(
+      `kindle:${snapshot.flow.revision}:${instanceId}`,
+      "BURNKIN_KINDLE",
+      `${nameKo} 지피기`,
+      {
+        type: "BURNKIN_KINDLE",
+        expectedRevision: snapshot.flow.revision,
+        ...binding,
+        instanceId,
+      },
+      kindleDisabled,
+    ) : null;
     return {
       instanceId,
       cardId: card.cardId,
@@ -303,6 +326,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       effectLabelKo: card.power === null ? "수치 확정 전" : `효과 수치 ${card.power}`,
       forgeSelectable,
       action,
+      kindleAction,
     };
   };
 
@@ -319,6 +343,8 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       feedback,
       featureFlags: { heartForge: false },
       codexDiscoveredCount: snapshot.profile.discoveredRecipeIds.length,
+      raceId: snapshot.raceId,
+      raceLabelKo: snapshot.raceLabelKo,
     } as const;
     if (snapshot.persistence.writeBlocked || latchedBlockingIssuesKo) {
       return {
@@ -358,6 +384,17 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       } else if (active.phase === "PLAYER_ACTION") {
         primaryAction = bind(`end:${snapshot.flow.revision}`, "END_TURN", "턴 종료", { type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: { type: "END_TURN" } });
       }
+      const burnkinPassiveDisabled = snapshot.raceId !== "Burnkin"
+        || active.phase !== "PLAYER_ACTION"
+        || active.player.hp <= BURNKIN_TRACK1_RULES.hpToEnergy.hpCost
+        || active.player.energy + BURNKIN_TRACK1_RULES.hpToEnergy.energyGain > active.rules.maxEnergy;
+      const burnkinPassiveAction = snapshot.raceId === "Burnkin" ? bind(
+        `burnkin-passive:${snapshot.flow.revision}`,
+        "BURNKIN_PAY_HP",
+        "피 태우기",
+        { type: "BURNKIN_PAY_HP", expectedRevision: snapshot.flow.revision, ...binding },
+        burnkinPassiveDisabled,
+      ) : null;
       const enemyArt = binding.encounterId === "the_stilling" ? "cards/heart__still.png" : `enemies/${binding.encounterId}.png`;
       return {
         ...shared,
@@ -383,6 +420,10 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         instantForgeDisabledReasonKo: active.phase !== "PLAYER_ACTION" ? "플레이어 행동 단계에서 사용할 수 있습니다." : activeForgeActions(snapshot) === 0 ? "이번 턴의 빚기 행동을 이미 사용했습니다." : hasDistinctPair(hand.filter(({ forgeSelectable }) => forgeSelectable)) ? null : "손에 서로 다른 재료 두 장이 필요합니다.",
         primaryAction,
         instructionKo: active.phase === "TURN_READY" ? "턴을 시작해 손패를 펼치세요." : "카드를 선택하면 현재 적에게 적용됩니다.",
+        burnkinPassiveAction,
+        burnkinRulesKo: snapshot.raceId === "Burnkin"
+          ? `체력 ${BURNKIN_TRACK1_RULES.hpToEnergy.hpCost} → 에너지 ${BURNKIN_TRACK1_RULES.hpToEnergy.energyGain} · 공명 2배 · 단절 시 체력 ${BURNKIN_TRACK1_RULES.resonanceBreakSelfDamage} 피해`
+          : null,
       };
     }
     if (snapshot.flow.phase === "AWAITING_REWARD") {

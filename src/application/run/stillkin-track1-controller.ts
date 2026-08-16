@@ -23,7 +23,13 @@ import {
   type ForgeResolverContextV1,
   type ForgeRuntimeStateV1,
 } from "../../domain/forge-runtime";
-import { STILLKIN_BLOCK_RETENTION } from "../../domain/races";
+import {
+  applyBurnkinResonanceBreak,
+  kindleBurnkinCard,
+  payBurnkinHpForEnergy,
+  STILLKIN_BLOCK_RETENTION,
+  type BurnkinProvisionalRules,
+} from "../../domain/races";
 import { canonicalSerialize, sha256Hex } from "../../domain/forge-runtime/source-binding";
 import {
   classifyPersistentProfile,
@@ -45,6 +51,11 @@ import {
 } from "../../persistence";
 import { assertStillkinTrack1GroundAuthority } from "./track1-ground-authority";
 import {
+  BURNKIN_TRACK1_CONFIG_HASH,
+  BURNKIN_TRACK1_PROVISIONAL_CONFIG,
+  BURNKIN_TRACK1_RULES,
+  BURNKIN_TRACK1_SCENARIO_HASH,
+  BURNKIN_TRACK1_SCENARIO_ID,
   STILLKIN_TRACK1_CONFIG_HASH,
   STILLKIN_TRACK1_PROVISIONAL_CONFIG as CONFIG,
   STILLKIN_TRACK1_SCENARIO_HASH,
@@ -60,6 +71,7 @@ import {
   type StillkinTrack1LoadResult,
   type StillkinTrack1Snapshot,
   type Track1CombatBinding,
+  type Track1RaceId,
 } from "./track1-types";
 
 type JsonRecord = Record<string, unknown>;
@@ -73,6 +85,59 @@ type ControllerState = {
   writeBlocked: boolean;
   issues: SaveLoadIssue[];
 };
+
+type Track1RaceExecution = {
+  raceId: Track1RaceId;
+  raceLabelKo: "어름붙이" | "사름붙이";
+  runPrefix: "stillkin-track1-run" | "burnkin-track1-run";
+  scenarioId: StillkinTrack1FlowState["scenarioId"];
+  scenarioHash: string;
+  configId: StillkinTrack1FlowState["configId"];
+  configHash: string;
+  starterDeck: readonly string[];
+  baselineAttribute: "STILL" | "BURN";
+  resonanceRate: number;
+  blockRetention: { numerator: number; denominator: number; rounding: "FLOOR" };
+  saveV2Key: string;
+  migrateV1: boolean;
+  burnkinRules: BurnkinProvisionalRules | null;
+};
+
+const STILLKIN_EXECUTION: Track1RaceExecution = Object.freeze({
+  raceId: "Stillkin",
+  raceLabelKo: "어름붙이",
+  runPrefix: "stillkin-track1-run",
+  scenarioId: STILLKIN_TRACK1_SCENARIO_ID,
+  scenarioHash: STILLKIN_TRACK1_SCENARIO_HASH,
+  configId: CONFIG.configId,
+  configHash: STILLKIN_TRACK1_CONFIG_HASH,
+  starterDeck: CONFIG.starterDeck,
+  baselineAttribute: "STILL",
+  resonanceRate: CONFIG.combat.resonanceRate,
+  blockRetention: STILLKIN_BLOCK_RETENTION,
+  saveV2Key: FICTOR_SAVE_V2_KEY,
+  migrateV1: true,
+  burnkinRules: null,
+});
+
+export const BURNKIN_TRACK1_SAVE_KEY = "fictor.burnkin.save.v2" as const;
+
+const BURNKIN_EXECUTION: Track1RaceExecution = Object.freeze({
+  raceId: "Burnkin",
+  raceLabelKo: "사름붙이",
+  runPrefix: "burnkin-track1-run",
+  scenarioId: BURNKIN_TRACK1_SCENARIO_ID,
+  scenarioHash: BURNKIN_TRACK1_SCENARIO_HASH,
+  configId: BURNKIN_TRACK1_PROVISIONAL_CONFIG.configId,
+  configHash: BURNKIN_TRACK1_CONFIG_HASH,
+  starterDeck: BURNKIN_TRACK1_PROVISIONAL_CONFIG.starterDeck,
+  baselineAttribute: "BURN",
+  resonanceRate: CONFIG.combat.resonanceRate * BURNKIN_TRACK1_RULES.resonanceRateMultiplier,
+  blockRetention: Object.freeze({ numerator: 0, denominator: 1, rounding: "FLOOR" }),
+  saveV2Key: BURNKIN_TRACK1_SAVE_KEY,
+  migrateV1: false,
+  burnkinRules: BURNKIN_TRACK1_RULES,
+});
 
 const TRACK1_PERSISTENCE_CATALOG = snapshotPersistenceCatalog({
   sourceHash: FORGE_RUNTIME_SOURCE_HASH,
@@ -208,8 +273,8 @@ function xorshift32(value: number): number {
   return next >>> 0;
 }
 
-function createStarterRuntime(profile: PersistentProfileV1): ForgeRuntimeStateV1 {
-  const ownedInstances = CONFIG.starterDeck.map((cardId, index) => ({ instanceId: `track1-instance-${index}`, cardId }));
+function createStarterRuntime(profile: PersistentProfileV1, execution: Track1RaceExecution): ForgeRuntimeStateV1 {
+  const ownedInstances = execution.starterDeck.map((cardId, index) => ({ instanceId: `track1-instance-${index}`, cardId }));
   return {
     schemaVersion: FORGE_RUNTIME_SCHEMA_VERSION,
     engineVersion: FORGE_RUNTIME_ENGINE_VERSION,
@@ -227,18 +292,18 @@ function createStarterRuntime(profile: PersistentProfileV1): ForgeRuntimeStateV1
   };
 }
 
-function createFlow(runSequence: number): StillkinTrack1FlowState {
-  const runId = `stillkin-track1-run-${runSequence}`;
+function createFlow(runSequence: number, execution: Track1RaceExecution): StillkinTrack1FlowState {
+  const runId = `${execution.runPrefix}-${runSequence}`;
   return {
     schemaVersion: STILLKIN_TRACK1_FLOW_SCHEMA_VERSION,
     controllerVersion: STILLKIN_TRACK1_CONTROLLER_VERSION,
     revision: 0,
     runSequence,
     runId,
-    scenarioId: STILLKIN_TRACK1_SCENARIO_ID,
-    scenarioHash: STILLKIN_TRACK1_SCENARIO_HASH,
-    configId: CONFIG.configId,
-    configHash: STILLKIN_TRACK1_CONFIG_HASH,
+    scenarioId: execution.scenarioId,
+    scenarioHash: execution.scenarioHash,
+    configId: execution.configId,
+    configHash: execution.configHash,
     phase: "BETWEEN_NODES",
     nextNodeIndex: 0,
     currentNodeIndex: null,
@@ -255,16 +320,16 @@ function safeCount(value: unknown): value is number {
   return Number.isSafeInteger(value) && (value as number) >= 0;
 }
 
-function decodeFlow(value: unknown): StillkinTrack1FlowState | null {
+function decodeFlow(value: unknown, execution: Track1RaceExecution): StillkinTrack1FlowState | null {
   let flow: StillkinTrack1FlowState;
   try { flow = snapshotJson(value) as StillkinTrack1FlowState; } catch { return null; }
   if (!flow || typeof flow !== "object") return null;
   const expected = ["schemaVersion", "controllerVersion", "revision", "runSequence", "runId", "scenarioId", "scenarioHash", "configId", "configHash", "phase", "nextNodeIndex", "currentNodeIndex", "pendingOfferId", "workshopEntitlementNodeId", "nextEncounterNonce", "combatBinding", "playerHp", "randomState"];
   if (Object.keys(flow).length !== expected.length || expected.some((key) => !Object.hasOwn(flow, key))) return null;
   if (flow.schemaVersion !== STILLKIN_TRACK1_FLOW_SCHEMA_VERSION || flow.controllerVersion !== STILLKIN_TRACK1_CONTROLLER_VERSION
-    || flow.scenarioId !== STILLKIN_TRACK1_SCENARIO_ID || flow.scenarioHash !== STILLKIN_TRACK1_SCENARIO_HASH
-    || flow.configId !== CONFIG.configId || flow.configHash !== STILLKIN_TRACK1_CONFIG_HASH) return null;
-  if (!safeCount(flow.revision) || !safeCount(flow.runSequence) || flow.runSequence < 1 || flow.runId !== `stillkin-track1-run-${flow.runSequence}`
+    || flow.scenarioId !== execution.scenarioId || flow.scenarioHash !== execution.scenarioHash
+    || flow.configId !== execution.configId || flow.configHash !== execution.configHash) return null;
+  if (!safeCount(flow.revision) || !safeCount(flow.runSequence) || flow.runSequence < 1 || flow.runId !== `${execution.runPrefix}-${flow.runSequence}`
     || !safeCount(flow.nextNodeIndex) || flow.nextNodeIndex > CONFIG.route.length || !(flow.currentNodeIndex === null || safeCount(flow.currentNodeIndex))
     || !safeCount(flow.nextEncounterNonce) || flow.nextEncounterNonce < 1 || !safeCount(flow.playerHp) || flow.playerHp > CONFIG.maxPlayerHp
     || !safeCount(flow.randomState) || flow.randomState > 0xffffffff) return null;
@@ -406,7 +471,7 @@ function representInstantForge(
   return decoded.valid ? { state: decoded.value, events } : null;
 }
 
-function combatProjection(runtime: ForgeRuntimeStateV1, context: ForgeResolverContextV1): Pick<CombatSetup, "cards" | "instances" | "deck" | "programs"> {
+function combatProjection(runtime: ForgeRuntimeStateV1, context: ForgeResolverContextV1, execution: Track1RaceExecution): Pick<CombatSetup, "cards" | "instances" | "deck" | "programs"> {
   const cards: CardDefinition[] = [];
   const playableCardIds = new Set<string>();
   const equipmentCardIds = new Set<string>();
@@ -428,8 +493,13 @@ function combatProjection(runtime: ForgeRuntimeStateV1, context: ForgeResolverCo
     if (playableCardIds.has(cardId) || equipmentCardIds.has(cardId)) continue;
     const recipeId = canonicalRecipeIdForCard(cardId);
     if (recipeId === null) {
-      if (!context.materials.some(({ id }) => id === cardId)) throw new Error(`unknown Track-1 material projection: ${cardId}`);
-      const card = { cardId, ...CONFIG.combat.baselineMaterial } as CardDefinition;
+      const material = context.materials.find(({ id }) => id === cardId);
+      if (!material) throw new Error(`unknown Track-1 material projection: ${cardId}`);
+      const projected = Array.isArray(material.attribute) ? material.attribute[0] : material.attribute;
+      const resonanceAttribute = execution.raceId === "Stillkin"
+        ? "STILL"
+        : projected && projected !== "NONE" ? projected : execution.baselineAttribute;
+      const card = { cardId, ...CONFIG.combat.baselineMaterial, resonanceAttribute } as CardDefinition;
       addPlayable(card, programForEffect(card.effectId));
       continue;
     }
@@ -461,24 +531,24 @@ function combatProjection(runtime: ForgeRuntimeStateV1, context: ForgeResolverCo
   return { cards, instances, deck, programs };
 }
 
-function combatSetup(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState, node: (typeof CONFIG.route)[number] & { kind: "ENCOUNTER" }, context: ForgeResolverContextV1): CombatSetup {
+function combatSetup(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState, node: (typeof CONFIG.route)[number] & { kind: "ENCOUNTER" }, context: ForgeResolverContextV1, execution: Track1RaceExecution): CombatSetup {
   const kind = node.encounterKind;
   const hp = kind === "NORMAL" ? CONFIG.combat.normal.hp : kind === "ELITE" ? CONFIG.combat.elite.hp : CONFIG.combat.boss.hp;
-  const projection = combatProjection(runtime, context);
+  const projection = combatProjection(runtime, context, execution);
   return {
     seed: fnv1a(`${flow.runId}|${node.nodeId}|${flow.nextEncounterNonce}`),
-    rules: { maxEnergy: CONFIG.combat.maxEnergy, drawCount: CONFIG.combat.drawCount, resonanceRate: CONFIG.combat.resonanceRate, blockRetention: STILLKIN_BLOCK_RETENTION, terminalPolicy: "DEFEAT_FIRST" },
+    rules: { maxEnergy: CONFIG.combat.maxEnergy, drawCount: CONFIG.combat.drawCount, resonanceRate: execution.resonanceRate, blockRetention: execution.blockRetention, terminalPolicy: "DEFEAT_FIRST" },
     player: { hp: flow.playerHp, maxHp: CONFIG.maxPlayerHp, block: 0 },
     enemy: { enemyId: node.encounterId, hp, maxHp: hp, block: 0, intents: enemyIntents(kind), initialIntentIndex: 0 },
     ...projection,
   };
 }
 
-function loadedCombatMatchesAuthority(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState, context: ForgeResolverContextV1): boolean {
+function loadedCombatMatchesAuthority(runtime: ForgeRuntimeStateV1, flow: StillkinTrack1FlowState, context: ForgeResolverContextV1, execution: Track1RaceExecution): boolean {
   const active = runtime.run.activeCombat;
   const node = currentNode(flow);
   if (!active || !flow.combatBinding || node?.kind !== "ENCOUNTER" || active.state.status !== "ONGOING") return false;
-  const expected = combatSetup(runtime, { ...flow, nextEncounterNonce: flow.combatBinding.encounterNonce }, node, context);
+  const expected = combatSetup(runtime, { ...flow, nextEncounterNonce: flow.combatBinding.encounterNonce }, node, context, execution);
   const expectedCards = expected.cards;
   return active.state.enemy.enemyId === node.encounterId
     && active.state.enemy.maxHp === expected.enemy.maxHp
@@ -518,14 +588,16 @@ function currentNode(flow: StillkinTrack1FlowState) {
   return flow.currentNodeIndex === null ? null : CONFIG.route[flow.currentNodeIndex] ?? null;
 }
 
-function makeSnapshot(state: ControllerState): StillkinTrack1Snapshot {
+function makeSnapshot(state: ControllerState, execution: Track1RaceExecution): StillkinTrack1Snapshot {
   const node = currentNode(state.flow);
   return clone({
+    raceId: execution.raceId,
+    raceLabelKo: execution.raceLabelKo,
     profile: state.profile,
     runtime: state.runtime,
     flow: state.flow,
     persistence: { generation: state.generation, revision: state.saveRevision, writeBlocked: state.writeBlocked, issues: state.issues },
-    scenario: { scenarioId: STILLKIN_TRACK1_SCENARIO_ID, scenarioHash: STILLKIN_TRACK1_SCENARIO_HASH, configId: CONFIG.configId, configHash: STILLKIN_TRACK1_CONFIG_HASH },
+    scenario: { scenarioId: execution.scenarioId, scenarioHash: execution.scenarioHash, configId: execution.configId, configHash: execution.configHash },
     currentNode: node,
     rewardChoices: state.flow.pendingOfferId ? choicesForOffer(state.flow.pendingOfferId) : [],
     eventChoices: eventChoices(node ?? undefined),
@@ -570,14 +642,18 @@ function commandSnapshot(raw: unknown): StillkinTrack1Command | null {
   if (["ENTER_NEXT_NODE", "LEAVE_EVENT", "RESTART"].includes(value.type)) return common(["type", "expectedRevision", "runId"]) && token() ? value as unknown as StillkinTrack1Command : null;
   if (["CHOOSE_REWARD", "RESOLVE_EVENT"].includes(value.type)) return common(["type", "expectedRevision", "runId", "choiceId"]) && token() && typeof value.choiceId === "string" && value.choiceId.length > 0 ? value as unknown as StillkinTrack1Command : null;
   if (["FORGE_WORKSHOP", "USE_FREE_WORKSHOP"].includes(value.type)) return common(["type", "expectedRevision", "runId", "materialInstanceIds"]) && token() && Array.isArray(value.materialInstanceIds) && value.materialInstanceIds.length === 2 && value.materialInstanceIds.every((id) => typeof id === "string" && id.length > 0) ? value as unknown as StillkinTrack1Command : null;
-  if (["APPLY_COMBAT", "FORGE_INSTANT"].includes(value.type)) {
-    const tail = value.type === "APPLY_COMBAT" ? "command" : "materialInstanceIds";
-    if (!common(["type", "expectedRevision", "runId", "nodeId", "encounterId", "encounterNonce", tail]) || !token() || typeof value.nodeId !== "string" || typeof value.encounterId !== "string" || !safeCount(value.encounterNonce)) return null;
+  if (["APPLY_COMBAT", "FORGE_INSTANT", "BURNKIN_PAY_HP", "BURNKIN_KINDLE"].includes(value.type)) {
+    const tail = value.type === "APPLY_COMBAT" ? "command"
+      : value.type === "FORGE_INSTANT" ? "materialInstanceIds"
+        : value.type === "BURNKIN_KINDLE" ? "instanceId" : null;
+    const keys = ["type", "expectedRevision", "runId", "nodeId", "encounterId", "encounterNonce", ...(tail ? [tail] : [])];
+    if (!common(keys) || !token() || typeof value.nodeId !== "string" || typeof value.encounterId !== "string" || !safeCount(value.encounterNonce)) return null;
     if (value.type === "APPLY_COMBAT") {
       const decoded = decodeCombatCommand(value.command);
       if (!decoded.valid) return null;
       value.command = decoded.value;
-    } else if (!Array.isArray(value.materialInstanceIds) || value.materialInstanceIds.length !== 2 || !value.materialInstanceIds.every((id) => typeof id === "string" && id.length > 0)) return null;
+    } else if (value.type === "FORGE_INSTANT" && (!Array.isArray(value.materialInstanceIds) || value.materialInstanceIds.length !== 2 || !value.materialInstanceIds.every((id) => typeof id === "string" && id.length > 0))) return null;
+    else if (value.type === "BURNKIN_KINDLE" && (typeof value.instanceId !== "string" || value.instanceId.length === 0)) return null;
     return value as unknown as StillkinTrack1Command;
   }
   return null;
@@ -608,13 +684,13 @@ function forgeEntitledWorkshop(
   };
 }
 
-export function createStillkinTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown): StillkinTrack1Controller {
+function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOptions | unknown, execution: Track1RaceExecution): StillkinTrack1Controller {
   const options = captureOptions(rawOptions);
   assertStillkinTrack1GroundAuthority();
   let state: ControllerState | null = null;
 
   const fresh = (profile = createDefaultProfile(), runSequence = 1): ControllerState => ({
-    profile: clone(profile), runtime: createStarterRuntime(profile), flow: createFlow(runSequence), generation: null, saveRevision: 0, writeBlocked: false, issues: [],
+    profile: clone(profile), runtime: createStarterRuntime(profile, execution), flow: createFlow(runSequence, execution), generation: null, saveRevision: 0, writeBlocked: false, issues: [],
   });
 
   const stateAuthorityValid = (candidate: ControllerState): boolean => {
@@ -623,7 +699,7 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
     if (!runtimeReferencesAllowed(candidate.runtime, TRACK1_PERSISTENCE_CATALOG)) return false;
     if ((candidate.flow.phase === "IN_COMBAT") !== (candidate.runtime.run.activeCombat !== null)) return false;
     try {
-      return candidate.flow.phase !== "IN_COMBAT" || loadedCombatMatchesAuthority(candidate.runtime, candidate.flow, options.context);
+      return candidate.flow.phase !== "IN_COMBAT" || loadedCombatMatchesAuthority(candidate.runtime, candidate.flow, options.context, execution);
     } catch { return false; }
   };
 
@@ -644,7 +720,7 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
     if (profile.kind !== "VALID") return { ok: false, issue: profile.kind === "UNSUPPORTED" ? "UNSUPPORTED_VERSION" : "INVALID_PROFILE" };
     const runtimeProjection = parsed.runtime as JsonRecord;
     const runtime = decodeForgeRuntimeState({ ...runtimeProjection, profile: { discoveredRecipeIds: [...profile.value.discoveredRecipeIds] } });
-    const flow = decodeFlow(parsed.flow);
+    const flow = decodeFlow(parsed.flow, execution);
     if (!runtime.valid || !flow) return { ok: false, issue: "INVALID_RUN" };
     const value: ControllerState = {
       profile: profile.value,
@@ -660,38 +736,40 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
 
   const load = (): StillkinTrack1LoadResult => {
     let v2: string | null;
-    try { v2 = options.getItem(FICTOR_SAVE_V2_KEY); } catch {
+    try { v2 = options.getItem(execution.saveV2Key); } catch {
       state = { ...fresh(), writeBlocked: true, issues: ["READ_FAILED"] };
-      return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
+      return { snapshot: makeSnapshot(state, execution), source: "SAFE_INITIALIZED" };
     }
     if (v2 !== null) {
       const decoded = decodeV2Bytes(v2);
       if (decoded.ok) {
         state = decoded.value;
-        return { snapshot: makeSnapshot(state), source: "SAVED" };
+        return { snapshot: makeSnapshot(state, execution), source: "SAVED" };
       }
       state = { ...fresh(), writeBlocked: true, issues: [decoded.issue] };
-      return { snapshot: makeSnapshot(state), source: "SAFE_INITIALIZED" };
+      return { snapshot: makeSnapshot(state, execution), source: "SAFE_INITIALIZED" };
     }
     let profile = createDefaultProfile();
     let source: StillkinTrack1LoadResult["source"] = "EMPTY";
-    try {
-      const v1 = options.getItem(FICTOR_SAVE_KEY);
-      if (v1 !== null) {
-        const parsed = parseKnownEnvelope(JSON.parse(v1) as unknown);
-        if (parsed.kind === "KNOWN") {
-          const migrated = classifyPersistentProfile(parsed.profile);
-          if (migrated.kind === "VALID") { profile = migrated.value; source = "MIGRATED_V1"; }
+    if (execution.migrateV1) {
+      try {
+        const v1 = options.getItem(FICTOR_SAVE_KEY);
+        if (v1 !== null) {
+          const parsed = parseKnownEnvelope(JSON.parse(v1) as unknown);
+          if (parsed.kind === "KNOWN") {
+            const migrated = classifyPersistentProfile(parsed.profile);
+            if (migrated.kind === "VALID") { profile = migrated.value; source = "MIGRATED_V1"; }
+          }
         }
-      }
-    } catch { /* v1 is never modified and invalid v1 does not poison a new v2 run. */ }
+      } catch { /* v1 is never modified and invalid v1 does not poison a new v2 run. */ }
+    }
     state = fresh(profile);
-    return { snapshot: makeSnapshot(state), source };
+    return { snapshot: makeSnapshot(state, execution), source };
   };
 
   const snapshot = (): StillkinTrack1Snapshot => {
     if (!state) load();
-    return makeSnapshot(state!);
+    return makeSnapshot(state!, execution);
   };
 
   const reject = (command: StillkinTrack1Command["type"] | "UNKNOWN", reason: string, persistence: StillkinTrack1DispatchResult["persistence"] = null): StillkinTrack1DispatchResult => ({
@@ -703,7 +781,7 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
     if (!stateAuthorityValid(candidate)) return { ok: false, reason: "INVALID_RUNTIME" };
     if (candidate.saveRevision === Number.MAX_SAFE_INTEGER) return { ok: false, reason: "REVISION_EXHAUSTED" };
     let bytes: string | null;
-    try { bytes = options.getItem(FICTOR_SAVE_V2_KEY); } catch { return { ok: false, reason: "READ_FAILED" }; }
+    try { bytes = options.getItem(execution.saveV2Key); } catch { return { ok: false, reason: "READ_FAILED" }; }
     if (candidate.generation === null) {
       if (bytes !== null) return decodeV2Bytes(bytes).ok ? { ok: false, reason: "STALE_WRITE" } : { ok: false, reason: "WRITE_BLOCKED" };
     } else {
@@ -721,7 +799,7 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
       revision = 0;
     }
     const envelope: SaveEnvelopeV2<StillkinTrack1FlowState> = { schemaVersion: SAVE_SCHEMA_VERSION_V2, saveGeneration: generation, saveRevision: revision, profile: candidate.profile, runtime: projectRuntimeState(candidate.runtime), flow: candidate.flow };
-    try { options.setItem(FICTOR_SAVE_V2_KEY, JSON.stringify(envelope)); } catch { return { ok: false, reason: "WRITE_FAILED" }; }
+    try { options.setItem(execution.saveV2Key, JSON.stringify(envelope)); } catch { return { ok: false, reason: "WRITE_FAILED" }; }
     candidate.generation = generation;
     candidate.saveRevision = revision;
     return { ok: true, generation, revision };
@@ -751,7 +829,7 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
           if (next.kind === "EVENT") candidate.flow.phase = "IN_EVENT";
           else {
             try {
-              const setup = combatSetup(candidate.runtime, candidate.flow, next, options.context);
+              const setup = combatSetup(candidate.runtime, candidate.flow, next, options.context, execution);
               const combat = createCombatState(setup);
               const binding = { runId: candidate.flow.runId, nodeId: next.nodeId, encounterId: next.encounterId, encounterNonce: candidate.flow.nextEncounterNonce };
               const runtime = decodeForgeRuntimeState({ ...candidate.runtime, run: { ...candidate.runtime.run, activeCombat: { state: combat, enrolledPersistentInstanceIds: [...setup.deck], forgeActionTurn: 0, forgeActionsRemaining: 0, isolatedMaterials: [], ephemeralResults: [] } } });
@@ -766,15 +844,89 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
           }
         }
       }
-    } else if (command.type === "APPLY_COMBAT" || command.type === "FORGE_INSTANT") {
+    } else if (command.type === "APPLY_COMBAT" || command.type === "FORGE_INSTANT" || command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") {
       if (candidate.flow.phase !== "IN_COMBAT" || !bindingMatches(candidate.flow.combatBinding, command)) failure = "STALE_ENCOUNTER_BINDING";
       else if (!candidate.runtime.run.activeCombat || candidate.runtime.run.activeCombat.state.enemy.enemyId !== command.encounterId) failure = "COMBAT_AUTHORITY_MISMATCH";
+      else if ((command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") && execution.raceId !== "Burnkin") failure = "RACE_COMMAND_UNAVAILABLE";
       else {
-        const runtimeCommand = command.type === "APPLY_COMBAT" ? { type: "APPLY_COMBAT" as const, command: command.command } : { type: "FORGE_INSTANT" as const, materialInstanceIds: command.materialInstanceIds };
-        const result = reduceForgeRuntime(candidate.runtime, runtimeCommand, options.context);
-        if (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED")) failure = "RUNTIME_REJECTED";
-        else {
-          const represented = command.type === "FORGE_INSTANT" ? representInstantForge(result, options.context) : { state: result.state, events: result.events };
+        const beforeResonance = candidate.runtime.run.activeCombat.state.resonance.activeAttribute;
+        let result: { state: ForgeRuntimeStateV1 | null; events: StillkinTrack1Event[]; resolvedCard?: GeneratedCard };
+        if (command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") {
+          const rules = execution.burnkinRules!;
+          const transition = command.type === "BURNKIN_PAY_HP"
+            ? payBurnkinHpForEnergy(candidate.runtime.run.activeCombat.state, rules)
+            : kindleBurnkinCard(candidate.runtime.run.activeCombat.state, command.instanceId);
+          if (!transition.ok || !transition.state || candidate.runtime.revision === Number.MAX_SAFE_INTEGER) {
+            failure = transition.ok ? "RUNTIME_REJECTED" : transition.reason;
+            result = { state: candidate.runtime, events: [] };
+          } else {
+            const activeCombat = clone(candidate.runtime.run.activeCombat);
+            activeCombat.state = transition.state;
+            if (command.type === "BURNKIN_KINDLE") {
+              const ephemeral = activeCombat.ephemeralResults.find(({ instanceId }) => instanceId === command.instanceId);
+              if (ephemeral) ephemeral.location = "EXILE";
+            }
+            const decoded = decodeForgeRuntimeState({
+              ...candidate.runtime,
+              revision: candidate.runtime.revision + 1,
+              run: { ...candidate.runtime.run, activeCombat },
+            });
+            if (!decoded.valid) {
+              failure = "POSTCONDITION_FAILED";
+              result = { state: candidate.runtime, events: [] };
+            } else result = { state: decoded.value, events: [...transition.events] };
+          }
+        } else {
+          const runtimeCommand = command.type === "APPLY_COMBAT"
+            ? { type: "APPLY_COMBAT" as const, command: command.command }
+            : { type: "FORGE_INSTANT" as const, materialInstanceIds: command.materialInstanceIds };
+          result = reduceForgeRuntime(candidate.runtime, runtimeCommand, options.context) as typeof result;
+        }
+        if (!failure && (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED"))) failure = "RUNTIME_REJECTED";
+        else if (!failure && result.state) {
+          let represented: { state: ForgeRuntimeStateV1; events: StillkinTrack1Event[] } | null = command.type === "FORGE_INSTANT"
+            ? representInstantForge(result as ForgeRuntimeReducerResult, options.context)
+            : { state: result.state, events: [...result.events] };
+          if (represented && execution.raceId === "Burnkin" && command.type === "APPLY_COMBAT" && command.command.type === "PLAY_CARD") {
+            const activeAfter = represented.state.run.activeCombat;
+            const afterResonance = activeAfter?.state.resonance.activeAttribute ?? null;
+            const breakResult = activeAfter
+              ? applyBurnkinResonanceBreak(activeAfter.state, beforeResonance, afterResonance, execution.burnkinRules!)
+              : null;
+            if (!breakResult?.ok || !breakResult.state) represented = null;
+            else if (breakResult.events.length > 0) {
+              const updated = decodeForgeRuntimeState({
+                ...represented.state,
+                run: { ...represented.state.run, activeCombat: { ...activeAfter!, state: breakResult.state } },
+              });
+              if (!updated.valid) represented = null;
+              else {
+                const cleanupEvents = represented.events.filter((event) => event.type === "INSTANT_FORGE_CLEANED");
+                const nonterminalEvents = represented.events.filter((event) => event.type !== "COMBAT_ENDED" && !(event.type === "PHASE_CHANGED" && event.phase === "TERMINAL") && event.type !== "INSTANT_FORGE_CLEANED");
+                let updatedState = updated.value;
+                let terminalCleanupEvents: StillkinTrack1Event[] = cleanupEvents;
+                if (breakResult.state.status !== "ONGOING" && cleanupEvents.length === 0) {
+                  const cleanup = reduceForgeRuntime(updatedState, { type: "CLEANUP_COMBAT" }, options.context);
+                  if (!cleanup.state || cleanup.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED")) represented = null;
+                  else { updatedState = cleanup.state; terminalCleanupEvents = cleanup.events; }
+                }
+                if (represented) {
+                  represented = {
+                    state: updatedState,
+                    events: [
+                      ...nonterminalEvents,
+                      ...breakResult.events,
+                      ...(breakResult.state.status === "ONGOING" ? [] : [
+                        { type: "COMBAT_ENDED" as const, status: breakResult.state.status },
+                        { type: "PHASE_CHANGED" as const, phase: "TERMINAL" as const },
+                      ]),
+                      ...terminalCleanupEvents,
+                    ],
+                  };
+                }
+              }
+            }
+          }
           if (!represented) failure = "RUNTIME_REJECTED";
           else {
             candidate.runtime = represented.state;
@@ -899,8 +1051,8 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
       if (candidate.flow.phase !== "RUN_WON" && candidate.flow.phase !== "RUN_LOST") failure = "INVALID_PHASE";
       else if (candidate.flow.runSequence === Number.MAX_SAFE_INTEGER) failure = "RUN_SEQUENCE_EXHAUSTED";
       else {
-        candidate.runtime = createStarterRuntime(candidate.profile);
-        candidate.flow = createFlow(candidate.flow.runSequence + 1);
+        candidate.runtime = createStarterRuntime(candidate.profile, execution);
+        candidate.flow = createFlow(candidate.flow.runSequence + 1, execution);
         events.push({ type: "RUN_RESTARTED", runId: candidate.flow.runId });
       }
     }
@@ -910,14 +1062,28 @@ export function createStillkinTrack1Controller(rawOptions: StillkinTrack1Control
     const synchronized = syncProfile(candidate.runtime, candidate.profile);
     if (!synchronized) return reject(command.type, "POSTCONDITION_FAILED");
     candidate.runtime = synchronized;
-    const validatedFlow = decodeFlow(candidate.flow);
+    const validatedFlow = decodeFlow(candidate.flow, execution);
     if (!validatedFlow) return reject(command.type, "POSTCONDITION_FAILED");
     candidate.flow = validatedFlow;
     const persistence = persist(candidate);
     if (!persistence?.ok) return reject(command.type, "PERSISTENCE_FAILED", persistence);
     state = candidate;
-    return { applied: true, snapshot: makeSnapshot(state), events: clone(events), persistence };
+    return { applied: true, snapshot: makeSnapshot(state, execution), events: clone(events), persistence };
   };
 
   return Object.freeze({ load, snapshot, dispatch });
+}
+
+export function createStillkinTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown): StillkinTrack1Controller {
+  return createTrack1ControllerInternal(rawOptions, STILLKIN_EXECUTION);
+}
+
+export function createBurnkinTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown): StillkinTrack1Controller {
+  return createTrack1ControllerInternal(rawOptions, BURNKIN_EXECUTION);
+}
+
+export function createTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown, raceId: Track1RaceId): StillkinTrack1Controller {
+  if (raceId === "Stillkin") return createTrack1ControllerInternal(rawOptions, STILLKIN_EXECUTION);
+  if (raceId === "Burnkin") return createTrack1ControllerInternal(rawOptions, BURNKIN_EXECUTION);
+  throw new TypeError("race is not enabled for Track 1");
 }

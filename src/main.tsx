@@ -1,8 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { createStillkinTrack1UiSession } from "./application";
-import { App } from "./presentation/App";
+import { createTrack1RaceSelection } from "./application";
+import { RaceSelectApp } from "./presentation/race-select";
 import "./presentation/styles.css";
 
 const rootElement = document.getElementById("root");
@@ -16,11 +16,9 @@ const localStorageAdapter = {
   setItem(key: string, value: string) { window.localStorage.setItem(key, value); },
   removeItem(key: string) { window.localStorage.removeItem(key); },
 };
-const session = createStillkinTrack1UiSession({ storage: localStorageAdapter, baseUrl: import.meta.env.BASE_URL });
-const initialProjection = session.load();
-
+const raceSelection = createTrack1RaceSelection({ storage: localStorageAdapter, baseUrl: import.meta.env.BASE_URL });
 createRoot(rootElement).render(
   <StrictMode>
-    <App session={session} initialProjection={initialProjection} />
+    <RaceSelectApp selection={raceSelection} />
   </StrictMode>,
 );

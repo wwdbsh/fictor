@@ -17,6 +17,7 @@ import { FirstDiscoveryOverlay, RepeatDiscoveryToast } from "./discovery";
 export interface AppProps {
   readonly session: StillkinTrack1UiSession;
   readonly initialProjection: Track1UiProjection;
+  readonly onChangeRace?: () => void;
 }
 
 function Brand() {
@@ -33,13 +34,14 @@ function ChevronIcon({ direction }: { direction: "left" | "right" }) {
 
 const CODEX_MODE_LABELS = { INSTANT: "즉석 빚기", WORKSHOP: "공방 빚기" } as const;
 
-function ScreenHeader({ projection, onOpenCodex, codexButtonRef }: { projection: Track1UiProjection; onOpenCodex: () => void; codexButtonRef: RefObject<HTMLButtonElement | null> }) {
+function ScreenHeader({ projection, onOpenCodex, onChangeRace, codexButtonRef }: { projection: Track1UiProjection; onOpenCodex: () => void; onChangeRace?: () => void; codexButtonRef: RefObject<HTMLButtonElement | null> }) {
   const saveLabel = projection.phase === "BLOCKED" ? "저장 차단" : projection.feedback?.tone === "ERROR" ? "변경 안 됨" : "저장됨";
   return (
     <header className="screen-header">
       <Brand />
       <p className="depth-label">{projection.headingKo}</p>
       <div className="header-actions">
+        {onChangeRace ? <button type="button" className="race-change" onClick={onChangeRace} aria-label={`붙이 바꾸기 · 현재 ${projection.raceLabelKo}`}>{projection.raceLabelKo}</button> : null}
         {projection.phase !== "BLOCKED" ? (
           <button ref={codexButtonRef} type="button" className="codex-open" onClick={onOpenCodex} aria-label={`도감 열기 · 발견 ${projection.codexDiscoveredCount} / 1326`}>
             <BookIcon /><span>도감 {projection.codexDiscoveredCount}</span>
@@ -166,28 +168,31 @@ function JourneyScreen({ projection, session, busy, onAction }: { projection: Ex
   );
 }
 
-function CombatCard({ card, handIndex, busy, forgeSelectionMode, selected, onAction, onToggleForge }: { card: Track1UiCard; handIndex: number; busy: boolean; forgeSelectionMode: boolean; selected: boolean; onAction: (action: Track1UiActionDescriptor, handIndex: number) => void; onToggleForge: (instanceId: string) => void }) {
+function CombatCard({ card, handIndex, busy, selectionMode, selected, onAction, onToggleForge }: { card: Track1UiCard; handIndex: number; busy: boolean; selectionMode: "FORGE" | "KINDLE" | null; selected: boolean; onAction: (action: Track1UiActionDescriptor, handIndex: number) => void; onToggleForge: (instanceId: string) => void }) {
   const content: ReactNode = <><span className="card-cost">{card.cost ?? "—"}</span><strong>{card.nameKo}</strong><AssetImage assetRole="HAND" src={card.artSrc} placeholderLabel={card.nameKo} alt="" />{card.artFallbackLabelKo ? <span className="card-art-note">{card.artFallbackLabelKo}</span> : null}<span className="card-rule">{card.effectLabelKo}</span><span className="card-power">{card.power ?? "—"}</span></>;
-  if (forgeSelectionMode) return <button type="button" className="combat-card" disabled={busy || !card.forgeSelectable} onClick={() => onToggleForge(card.instanceId)} aria-pressed={selected} aria-label={`${card.nameKo} 즉석 빚기 재료 ${selected ? "선택 해제" : "선택"}`} data-card-instance-id={card.instanceId} data-card-id={card.cardId} data-hand-index={handIndex}>{content}</button>;
+  if (selectionMode === "FORGE") return <button type="button" className="combat-card" disabled={busy || !card.forgeSelectable} onClick={() => onToggleForge(card.instanceId)} aria-pressed={selected} aria-label={`${card.nameKo} 즉석 빚기 재료 ${selected ? "선택 해제" : "선택"}`} data-card-instance-id={card.instanceId} data-card-id={card.cardId} data-hand-index={handIndex}>{content}</button>;
+  if (selectionMode === "KINDLE") return <button type="button" className="combat-card" disabled={busy || !card.kindleAction || card.kindleAction.disabled} onClick={() => card.kindleAction && onAction(card.kindleAction, handIndex)} aria-label={`${card.nameKo} 지피기`} data-card-instance-id={card.instanceId} data-card-id={card.cardId} data-hand-index={handIndex}>{content}</button>;
   return card.action ? <button type="button" className="combat-card" disabled={busy || card.action.disabled} onClick={() => onAction(card.action!, handIndex)} aria-label={card.action.labelKo} data-card-instance-id={card.instanceId} data-card-id={card.cardId} data-hand-index={handIndex}>{content}</button> : <article className="combat-card">{content}</article>;
 }
 
 function CombatScreen({ projection, session, busy, onAction, onCardAction }: { projection: Extract<Track1UiProjection, { phase: "IN_COMBAT" }>; session: StillkinTrack1UiSession; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void; onCardAction: (action: Track1UiActionDescriptor, handIndex: number) => void }) {
-  const [forgeMode, setForgeMode] = useState(false);
+  const [selectionMode, setSelectionMode] = useState<"FORGE" | "KINDLE" | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   useEffect(() => { setSelected((current) => current.filter((id) => projection.hand.some((card) => card.instanceId === id && card.forgeSelectable))); }, [projection.screenKey, projection.hand]);
-  const toggleMode = () => { setForgeMode((current) => !current); setSelected([]); };
+  const toggleForgeMode = () => { setSelectionMode((current) => current === "FORGE" ? null : "FORGE"); setSelected([]); };
+  const toggleKindleMode = () => { setSelectionMode((current) => current === "KINDLE" ? null : "KINDLE"); setSelected([]); };
   const toggleCard = (instanceId: string) => setSelected((current) => current.includes(instanceId) ? current.filter((id) => id !== instanceId) : current.length < 2 ? [...current, instanceId] : [current[1], instanceId]);
   const preview = selected.length === 2 ? session.previewForge("INSTANT", selected) : null;
   const instantAction = preview ? session.describeInstantForgeAction(preview) : null;
-  const executeInstant = () => { if (instantAction) { setForgeMode(false); setSelected([]); onAction(instantAction); } };
+  const executeInstant = () => { if (instantAction) { setSelectionMode(null); setSelected([]); onAction(instantAction); } };
   return (
     <section className="combat-screen page-screen art-screen">
       <AssetImage assetRole="STATIC_MANIFEST" className="screen-background" src={projection.backgroundSrc} placeholderLabel="어름의 터" alt="" />
       <div className="enemy-stage"><p className="intent-banner">다음 의도 · <strong>{projection.enemy.intentKo}{projection.enemy.intentAmount === null ? "" : ` ${projection.enemy.intentAmount}`}</strong></p><figure className="enemy-record"><AssetImage assetRole="STATIC_MANIFEST" src={projection.enemy.artSrc} placeholderLabel={projection.enemy.nameKo} alt={projection.enemy.nameKo} /><figcaption><strong>{projection.enemy.nameKo}</strong><span>체력 {projection.enemy.hp} / {projection.enemy.maxHp}</span><span>방어 {projection.enemy.block}</span></figcaption></figure></div>
-      <div className="combat-instruction"><p>{forgeMode ? "즉석 빚기 재료 두 장을 고르세요. 카드 사용과 선택은 분리됩니다." : projection.instructionKo}</p><button type="button" className="instant-mode-toggle" aria-pressed={forgeMode} onClick={toggleMode} disabled={busy || (!forgeMode && !projection.instantForgeAvailable)} aria-label={`즉석 빚기 선택 모드${projection.instantForgeDisabledReasonKo && !forgeMode ? ` · ${projection.instantForgeDisabledReasonKo}` : ""}`}>{forgeMode ? "즉석 빚기 취소" : "즉석 빚기"}<small>행동 1회 · 전투 한정</small></button></div>
-      <div className="hand" aria-label="손패">{projection.hand.length > 0 ? projection.hand.map((card, index) => <CombatCard key={card.instanceId} card={card} handIndex={index} busy={busy} forgeSelectionMode={forgeMode} selected={selected.includes(card.instanceId)} onAction={onCardAction} onToggleForge={toggleCard} />) : <p className="empty-hand">손에 든 카드가 없습니다.</p>}</div>
-      {forgeMode ? <aside className="instant-preview">{preview ? <><CanonicalPreview canonical={preview.canonical} compact /><p>{preview.cost.labelKo} · {preview.lifetimeLabelKo}</p><button type="button" className="action-button primary-cta" onClick={executeInstant} disabled={busy || !instantAction}>즉석 빚기</button></> : <p role="status">{selected.length} / 2장 선택</p>}</aside> : null}
+      <div className="combat-instruction"><p>{selectionMode === "FORGE" ? "즉석 빚기 재료 두 장을 고르세요. 카드 사용과 선택은 분리됩니다." : selectionMode === "KINDLE" ? "소멸시켜 코스트만큼 에너지로 바꿀 카드 한 장을 고르세요." : projection.instructionKo}</p><div className="race-combat-actions"><button type="button" className="instant-mode-toggle" aria-pressed={selectionMode === "FORGE"} onClick={toggleForgeMode} disabled={busy || (selectionMode !== "FORGE" && !projection.instantForgeAvailable)} aria-label={`즉석 빚기 선택 모드${projection.instantForgeDisabledReasonKo && selectionMode !== "FORGE" ? ` · ${projection.instantForgeDisabledReasonKo}` : ""}`}>{selectionMode === "FORGE" ? "즉석 빚기 취소" : "즉석 빚기"}<small>행동 1회 · 전투 한정</small></button>{projection.raceId === "Burnkin" ? <>{projection.burnkinPassiveAction ? <ActionButton action={projection.burnkinPassiveAction} busy={busy} onAction={onAction} detailKo="체력 1 → 에너지 1" /> : null}<button type="button" className="instant-mode-toggle" aria-pressed={selectionMode === "KINDLE"} onClick={toggleKindleMode} disabled={busy || projection.hand.every((card) => !card.kindleAction || card.kindleAction.disabled)}>{selectionMode === "KINDLE" ? "지피기 취소" : "지피기"}<small>카드 소멸 · 코스트만큼 에너지</small></button></> : null}</div></div>
+      <div className="hand" aria-label="손패">{projection.hand.length > 0 ? projection.hand.map((card, index) => <CombatCard key={card.instanceId} card={card} handIndex={index} busy={busy} selectionMode={selectionMode} selected={selected.includes(card.instanceId)} onAction={onCardAction} onToggleForge={toggleCard} />) : <p className="empty-hand">손에 든 카드가 없습니다.</p>}</div>
+      {selectionMode === "FORGE" ? <aside className="instant-preview">{preview ? <><CanonicalPreview canonical={preview.canonical} compact /><p>{preview.cost.labelKo} · {preview.lifetimeLabelKo}</p><button type="button" className="action-button primary-cta" onClick={executeInstant} disabled={busy || !instantAction}>즉석 빚기</button></> : <p role="status">{selected.length} / 2장 선택</p>}</aside> : null}
+      {projection.burnkinRulesKo ? <p className="burnkin-rules-note">{projection.burnkinRulesKo}</p> : null}
       <aside className="combat-left-stats"><span>체력 {projection.stats.hp} / {projection.stats.maxHp}</span><span>방어 {projection.stats.block}</span><span>덱 {projection.drawCount}</span><span>버린 카드 {projection.discardCount}</span></aside>
       <aside className="combat-controls"><p>에너지 {projection.energy} / {projection.maxEnergy}</p>{projection.primaryAction ? <ActionButton action={projection.primaryAction} busy={busy} onAction={onAction} className="turn-action" /> : null}</aside>
     </section>
@@ -245,7 +250,7 @@ function CodexSurface({ session, onClose }: { session: StillkinTrack1UiSession; 
   );
 }
 
-export function App({ session, initialProjection }: AppProps) {
+export function App({ session, initialProjection, onChangeRace }: AppProps) {
   const [projection, setProjection] = useState(initialProjection);
   const [pendingAction, setPendingAction] = useState<Track1UiActionDescriptor | null>(null);
   const [codexOpen, setCodexOpen] = useState(false);
@@ -295,7 +300,7 @@ export function App({ session, initialProjection }: AppProps) {
   return (
     <>
       <main ref={shell} className={`game-shell phase-${projection.phase.toLowerCase()}`} aria-busy={busy} aria-hidden={underlayLocked ? true : undefined} inert={underlayLocked ? true : undefined} data-screen-key={projection.screenKey}>
-        <ScreenHeader projection={projection} onOpenCodex={() => { if (!busy) { codexButton.current?.blur(); setCodexOpen(true); } }} codexButtonRef={codexButton} />
+        <ScreenHeader projection={projection} onOpenCodex={() => { if (!busy) { codexButton.current?.blur(); setCodexOpen(true); } }} onChangeRace={busy || underlayLocked ? undefined : onChangeRace} codexButtonRef={codexButton} />
         <h1 className="sr-only focus-heading" ref={heading} tabIndex={-1}>{projection.focusHeadingKo}</h1>
         {projection.phase === "BLOCKED" ? <BlockedScreen projection={projection} /> : null}
         {projection.phase === "BETWEEN_NODES" ? <JourneyScreen key={projection.screenKey} projection={projection} session={session} busy={busy} onAction={onAction} /> : null}
