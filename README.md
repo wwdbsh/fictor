@@ -100,6 +100,18 @@ T031 M3 후보는 [마일스톤 문서](docs/milestones/README.md)의 candidate 
 
 ### macOS 테스트 임시 디렉터리 복구
 
+테스트 임시 root의 소유권은 [`tests/helpers/owned-temp.ts`](tests/helpers/owned-temp.ts)가 관리합니다.
+대상 테스트는 `fictor-...-` prefix를 가진 root만 현재 OS 임시 디렉터리 아래에서 만들고, test-owned root는
+`onTestFinished`, suite-owned root는 `afterAll`에서 정리합니다. 정리 전에는 생성 시점의 directory/device/inode
+identity를 다시 확인하며, symlink·타입 변경·identity 불일치가 있으면 해당 root를 삭제하지 않고 전체 실패로
+집계합니다. 테스트 출력에는 절대경로 없는 `FICTOR_TEMP_AUDIT` JSON이 남고, 정상 불변식은
+테스트 PASS, `created_roots === cleaned_roots`, `remaining_roots: 0`, `remaining_bytes: 0`,
+`cleanup_failures: 0`, `diagnostic_failures: 0`입니다.
+
+임시 root 회귀 검증은 항상 새로 만든 격리 `TMPDIR`에서 실행하십시오. 기존 macOS `$TMPDIR`에서 전체 suite를
+실행하거나 광역 `fictor-*` glob으로 삭제하지 마십시오. 현재 `$TMPDIR`의 baseline을 조사·삭제하는 절차는 코드
+수정 및 실제 임시 디렉터리 검증이 끝난 뒤 별도 승인된 작업으로만 수행합니다.
+
 T015 v4 회귀 테스트는 macOS 사용자 임시 디렉터리에 테스트 전용 fixture를 만들고 테스트 종료 시
 자동 삭제합니다. 강제 종료 뒤 잔여물을 확인할 때는 먼저 모든 Vitest 프로세스가 끝났는지 확인한 다음,
 정확한 T015 접두사만 미리 출력합니다.
@@ -115,20 +127,11 @@ find "$fictor_tmp_root" -maxdepth 1 -type d \( \
 \) -print
 ```
 
-출력 대상이 모두 종료된 T015 테스트 fixture임을 확인한 뒤에만 사용자가 다음 정리 명령을 실행합니다.
-
-```bash
-find "$fictor_tmp_root" -maxdepth 1 -type d \( \
-  -name 'fictor-t015-v4-*' -o \
-  -name 'fictor-t015-v4-anchor-*' -o \
-  -name 'fictor-t015-v4-lock-*' -o \
-  -name 'fictor-t015-v43-*' \
-\) -exec rm -rf -- {} +
-```
-
-이 절차는 `/private/tmp`, `fictor-t028-*`, `showcase-capture`, 저장소의 `assets/runs` 또는
-`assets/backups`를 정리하지 않습니다. 이 경로들은 별도 실행·증거 경계이므로 광역 `fictor-*` 패턴으로
-삭제하지 않습니다.
+출력은 조사 전용이며 삭제를 수행하지 않습니다. 실제 정리는 별도로 검토된 도구에서만 수행해야 하며,
+고정된 exact manifest의 path/device/inode/mtime 재확인, symlink·일반 디렉터리 확인, `lsof` 성공 및
+열린 handle 0 확인을 모두 통과해야 합니다. 하나라도 불일치하면 전체 abort하며, 실시간 광역 glob 삭제는
+금지합니다. 이 절차는 `/private/tmp`, `fictor-t028-*`, `showcase-capture`, 저장소의 `assets/runs` 또는
+`assets/backups`를 정리하지 않습니다.
 
 ## 구현 문서
 

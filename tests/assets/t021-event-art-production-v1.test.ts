@@ -1,9 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { beforeAll, describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { t020GetCostRequest } from "../../scripts/assets/t020-world-art-production-v1-ops";
 import {
@@ -23,6 +24,7 @@ import {
 import { dryRunT021, runT021Preparation } from "../../scripts/assets/t021-event-art-production-v1-cli";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("t021-event-art-production-v1");
 const EPOCH = Date.parse("2026-08-16T00:00:00.000Z");
 const presentation = { evidence_version: "t021-test-presentation" } as unknown as T021Presentation;
 const approval = { evidence_version: "t021-test-approval" } as unknown as T021Approval;
@@ -47,7 +49,7 @@ beforeAll(() => { cachedPlan = buildT021Plan(repositoryRoot); });
 
 interface Prepared { root: string; plan: T021Plan }
 function fixture(startUnits = START_UNITS): Prepared {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-"));
+  const root = tempManager.create("fictor-t021-");
   mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
   copyFileSync(resolve(repositoryRoot, T021_CORE_PLAN_PATH), resolve(root, T021_CORE_PLAN_PATH));
   const anchor = json(root, "initial-balance.json", { credits: startUnits / 100, provider_observed_at: at(-120) });
@@ -119,7 +121,7 @@ describe("T021 manifest discovery", () => {
   });
 
   test("a manifest whose EVENT aspect changed is refused rather than assumed", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-aspect-"));
+    const root = tempManager.create("fictor-t021-aspect-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     const core = JSON.parse(readFileSync(resolve(repositoryRoot, T021_CORE_PLAN_PATH), "utf8")) as { assets: Array<Record<string, unknown>> };
     for (const a of core.assets) if (a.category === "EVENT") a.aspect_ratio = "16:9";
@@ -268,7 +270,7 @@ describe("T021 paid discipline", () => {
   }, 120_000);
 
   test("init requires a balance covering the 30.00 cap", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-poor-"));
+    const root = tempManager.create("fictor-t021-poor-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     expect(() => runT021OpsInternal(["init", "--observed-at", at(-60), "--balance-file", json(root, "b.json", { credits: 29.99, provider_observed_at: at(-120) })], root, cachedPlan, presentation, approval)).toThrow(/does not cover the 30.00 cap/);
   });
@@ -378,14 +380,14 @@ describe("T021 contact sheet links — the T020 v2 carry-over", () => {
 
 describe("T021 entry gates and preparation", () => {
   test("an unapproved root is refused before any production command runs", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-unapproved-"));
+    const root = tempManager.create("fictor-t021-unapproved-");
     mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
     expect(() => productionContextT021("status", () => new Date(), root)).toThrow();
     expect(isT021Authorized(root, cachedPlan)).toBe(false);
   });
 
   test("the committed-clean gate passes on a committed scope and fails once it is dirtied", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-git-"));
+    const root = tempManager.create("fictor-t021-git-");
     const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t021-event-art-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
     const tracked = [...Object.values(binding.files).map(({ path }) => path), "assets/evidence/t021-event-art-implementation-binding-v1.json", "assets/manifests/t021-event-art-v1.plan.json"];
     for (const path of tracked) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
@@ -400,7 +402,7 @@ describe("T021 entry gates and preparation", () => {
   });
 
   test("gen and binding-gen refuse once a run journal exists", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-journal-"));
+    const root = tempManager.create("fictor-t021-journal-");
     mkdirSync(resolve(root, "assets/runs/t021-event-art"), { recursive: true });
     writeFileSync(resolve(root, T021_V1_JOURNAL_PATH), "{}\n");
     expect(() => runT021Preparation(["gen"], root)).toThrow(/refused while a run journal exists/);
@@ -453,7 +455,7 @@ describe("T021 budget arithmetic and the observed-balance path", () => {
    * answer. What must never happen is the artifact hiding it, which is what this pins.
    */
   function disclosureRoot(): string {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t021-disclosure-"));
+    const root = tempManager.create("fictor-t021-disclosure-");
     const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t021-event-art-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
     const needed = [
       ...Object.values(binding.files).map(({ path }) => path),

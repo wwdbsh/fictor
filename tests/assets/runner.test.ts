@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
-import { mkdtempSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { FakeAssetProvider } from "../../scripts/assets/fake-provider";
 import { buildPlanManifest } from "../../scripts/assets/manifest";
@@ -18,6 +19,7 @@ import {
 import type { AssetPlanManifest, AssetProvider, PlannedAsset, ProviderBatchRequest, ProviderJobQuery, ProviderSubmission, RunLedger } from "../../scripts/assets/types";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("runner");
 const approvalMetadata = {
   approved_by: "human-reviewer",
   approved_at: "2026-08-11T13:30:00+09:00",
@@ -29,7 +31,7 @@ function plan(): AssetPlanManifest {
 }
 
 function runPaths(label: string) {
-  const root = mkdtempSync(resolve(tmpdir(), `fictor-run-${label}-`));
+  const root = tempManager.create(`fictor-run-${label}-`);
   return {
     root,
     controlRoot: resolve(root, "control"),

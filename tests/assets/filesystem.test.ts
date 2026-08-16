@@ -1,8 +1,9 @@
-import { existsSync, mkdirSync, mkdtempSync, symlinkSync, unlinkSync, utimesSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, symlinkSync, unlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import {
   DEFAULT_MAX_PNG_BYTES,
@@ -14,6 +15,8 @@ import {
   safeResolve,
 } from "../../scripts/assets/filesystem";
 import { redactError } from "../../scripts/assets/redaction";
+
+const tempManager = createOwnedTempManager("filesystem");
 
 function crc32(bytes: Uint8Array): number {
   let crc = 0xffffffff;
@@ -52,8 +55,8 @@ function png(width = 3, height = 4, fill = 0): Buffer {
 
 describe("safe asset file recovery", () => {
   test("writes atomically, accepts the same hash, refuses a different hash, and verifies backup", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-local-"));
-    const backup = mkdtempSync(resolve(tmpdir(), "fictor-backup-"));
+    const root = tempManager.create("fictor-local-");
+    const backup = tempManager.create("fictor-backup-");
     const first = atomicWriteVerifiedPng(root, "cards/a.png", png(), "3:4");
     expect(first.already_existed).toBe(false);
     expect(atomicWriteVerifiedPng(root, "cards/a.png", png(), "3:4").already_existed).toBe(true);
@@ -67,15 +70,15 @@ describe("safe asset file recovery", () => {
       .toThrow("BACKUP_ROOT_NOT_DISTINCT");
     expect(() => backupVerifiedFile(resolve(backup, "nested"), backup, "cards/a.png", first.sha256, "3:4"))
       .toThrow("BACKUP_ROOT_NOT_DISTINCT");
-    const alias = resolve(mkdtempSync(resolve(tmpdir(), "fictor-alias-parent-")), "local-alias");
+    const alias = resolve(tempManager.create("fictor-alias-parent-"), "local-alias");
     symlinkSync(root, alias);
     expect(() => backupVerifiedFile(root, alias, "cards/a.png", first.sha256, "3:4"))
       .toThrow("BACKUP_ROOT_NOT_DISTINCT");
   });
 
   test("rejects traversal, absolute paths, NUL, symlinks, malformed PNG, wrong aspect, and oversized data", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-safe-"));
-    const outside = mkdtempSync(resolve(tmpdir(), "fictor-outside-"));
+    const root = tempManager.create("fictor-safe-");
+    const outside = tempManager.create("fictor-outside-");
     mkdirSync(resolve(root, "cards"));
     symlinkSync(outside, resolve(root, "cards/link"));
     for (const unsafe of ["../a.png", "/tmp/a.png", "cards\\a.png", "cards/\0a.png"]) {
@@ -127,7 +130,7 @@ describe("safe asset file recovery", () => {
   });
 
   test("enforces a single runner and only recovers a stale dead lock", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-lock-"));
+    const root = tempManager.create("fictor-lock-");
     const path = resolve(root, "runner.lock");
     const first = acquireRunnerLock(root, "runner.lock", 100);
     expect(() => acquireRunnerLock(root, "runner.lock", 100)).toThrow("RUNNER_LOCKED");
@@ -143,8 +146,8 @@ describe("safe asset file recovery", () => {
   });
 
   test("control JSON and lock reject nested symlink ancestors without mutating outside", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-control-"));
-    const outside = mkdtempSync(resolve(tmpdir(), "fictor-control-outside-"));
+    const root = tempManager.create("fictor-control-");
+    const outside = tempManager.create("fictor-control-outside-");
     mkdirSync(resolve(root, "nested"));
     symlinkSync(outside, resolve(root, "nested", "escape"));
     expect(() => atomicWriteJson(root, "nested/escape/ledger.json", { secret: false }))

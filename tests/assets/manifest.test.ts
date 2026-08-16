@@ -1,12 +1,14 @@
-import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { buildPlanManifest, renderPlanManifest, validatePlanManifest } from "../../scripts/assets/manifest";
 import { paperToneForId } from "../../scripts/assets/prompt";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("manifest");
 
 describe("core asset plan", () => {
   test("is byte deterministic and preserves approved totals, paths, aspects, and gate packing", () => {
@@ -68,7 +70,7 @@ describe("core asset plan", () => {
   });
 
   test("changes its recorded source hash when source bytes change", () => {
-    const temporaryRoot = mkdtempSync(resolve(tmpdir(), "fictor-plan-"));
+    const temporaryRoot = tempManager.create("fictor-plan-");
     cpSync(resolve(repositoryRoot, "src/data/source"), resolve(temporaryRoot, "src/data/source"), { recursive: true });
     cpSync(resolve(repositoryRoot, "src/data/generated"), resolve(temporaryRoot, "src/data/generated"), { recursive: true });
     const before = buildPlanManifest(temporaryRoot);

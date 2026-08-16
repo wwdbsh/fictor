@@ -1,14 +1,16 @@
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
-import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { T015_V2_JOURNAL_PATH, T015_V2_JOURNAL_SHA256, T015_V3_EXACT_APPROVAL_PHRASE, T015_V3_PENDING_PATH, T015_V3_PLAN_PATH, buildT015V3Forensics, buildT015V3Plan, isT015V3Authorized, sha256T015V3 } from "../../scripts/assets/canonical-shard-1-recovery-v3";
 import { T015_V3_JOURNAL_PATH, assertT015V3CommittedClean, isPublicT015V3ResolvedAddress, runT015V3JobsHandoffInternal, runT015V3OpsInternal, transportPeerMatchesT015V3Pin, type T015V3Dependencies, type T015V3Journal } from "../../scripts/assets/canonical-shard-1-recovery-v3-ops";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("canonical-shard-1-recovery-v3");
 const ownerJournalPaths = ["assets/runs/t015-canonical-shard-1/operations-v1.json", T015_V2_JOURNAL_PATH, T015_V3_JOURNAL_PATH] as const;
 const ownerJournalsPresent = ownerJournalPaths.every((path) => existsSync(resolve(repositoryRoot, path)));
 const ownerDescribe = describe.skipIf(!ownerJournalsPresent);
@@ -22,7 +24,7 @@ function crc32(bytes: Uint8Array): number { let crc = 0xffffffff; for (const byt
 function chunk(type: string, data: Buffer): Buffer { const name = Buffer.from(type); const result = Buffer.alloc(12 + data.length); result.writeUInt32BE(data.length, 0); name.copy(result, 4); data.copy(result, 8); result.writeUInt32BE(crc32(Buffer.concat([name, data])), 8 + data.length); return result; }
 function png(fill = 0): Buffer { const header = Buffer.alloc(13); header.writeUInt32BE(3, 0); header.writeUInt32BE(4, 4); header[8] = 8; header[9] = 2; const pixels = Buffer.alloc(40, fill); for (let row = 0; row < 4; row += 1) pixels[row * 10] = 0; return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", header), chunk("IDAT", deflateSync(pixels)), chunk("IEND", Buffer.alloc(0))]); }
 function summary(statuses: readonly string[]) { const active = ["pending", "waiting", "queued", "in_progress", "ip_detect"]; const failed = ["failed", "canceled", "nsfw", "ip_detected"]; return { active: statuses.filter((status) => active.includes(status)).length, completed: statuses.filter((status) => status === "completed").length, errors: statuses.filter((status) => status === "lookup_failed").length, failed: statuses.filter((status) => failed.includes(status)).length, total: statuses.length }; }
-function fixture() { const root = mkdtempSync(resolve(tmpdir(), "fictor-t015-v3-")); mkdirSync(resolve(root, T015_V2_JOURNAL_PATH, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, T015_V2_JOURNAL_PATH), resolve(root, T015_V2_JOURNAL_PATH)); const plan = buildT015V3Plan(repositoryRoot); runT015V3OpsInternal(["migrate", "--observed-at", "2026-08-12T09:00:00.000Z"], root, plan); const v2 = JSON.parse(readFileSync(resolve(root, T015_V2_JOURNAL_PATH), "utf8")); const jobs = v2.legacy_recovery.jobs as Array<{ index: number; job_id: string }>; const response = { all_terminal: true, jobs: jobs.map(({ index, job_id }) => ({ index, job_id, status: "completed", type: "image", model: "nano_banana_flash", result_url: `https://d111111abcdef8.cloudfront.net/${index}.png` })), summary: summary(Array(12).fill("completed")) }; return { root, plan, jobs, response }; }
+function fixture() { const root = tempManager.create("fictor-t015-v3-"); mkdirSync(resolve(root, T015_V2_JOURNAL_PATH, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, T015_V2_JOURNAL_PATH), resolve(root, T015_V2_JOURNAL_PATH)); const plan = buildT015V3Plan(repositoryRoot); runT015V3OpsInternal(["migrate", "--observed-at", "2026-08-12T09:00:00.000Z"], root, plan); const v2 = JSON.parse(readFileSync(resolve(root, T015_V2_JOURNAL_PATH), "utf8")); const jobs = v2.legacy_recovery.jobs as Array<{ index: number; job_id: string }>; const response = { all_terminal: true, jobs: jobs.map(({ index, job_id }) => ({ index, job_id, status: "completed", type: "image", model: "nano_banana_flash", result_url: `https://d111111abcdef8.cloudfront.net/${index}.png` })), summary: summary(Array(12).fill("completed")) }; return { root, plan, jobs, response }; }
 
 ownerDescribe("[OWNER_ONLY:T015_V3_JOURNALS] T015 bounded recovery v3", () => {
   // The fresh v3 approval was controller-attested and committed on 2026-08-13

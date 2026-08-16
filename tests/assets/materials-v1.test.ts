@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, readFileSync, readdirSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { describe, expect, test, vi } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { acquireRunnerLock } from "../../scripts/assets/filesystem";
 import {
@@ -47,6 +48,7 @@ import {
 import { canonicalJson } from "../../scripts/assets/style-candidates";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("materials-v1");
 const TEST_PUBLIC_ADDRESS = "93.184.216.34";
 
 interface TestPinnedRequest {
@@ -162,7 +164,7 @@ function fixture() {
   const now = new Date("2026-08-11T13:10:00.000Z");
   const presentation = buildT013DisclosurePresentationEvidence(plan, risk, "2026-08-11T13:00:00.000Z", now);
   const approval = buildT013ApprovalEvidence(plan, risk, presentation, T013_EXACT_APPROVAL_PHRASE, "2026-08-11T13:01:00.000Z", now);
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t013-"));
+  const root = tempManager.create("fictor-t013-");
   return { plan, risk, presentation, approval, root };
 }
 

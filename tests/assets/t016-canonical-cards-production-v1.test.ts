@@ -1,9 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { beforeAll, describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { t020GetCostRequest } from "../../scripts/assets/t020-world-art-production-v1-ops";
 import {
@@ -27,6 +28,7 @@ import {
 } from "../../scripts/assets/t016-canonical-selection-v1";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("t016-canonical-cards-production-v1");
 const EPOCH = Date.parse("2026-08-14T12:00:00.000Z");
 const presentation = { evidence_version: "t016-test-presentation" } as unknown as T016Presentation;
 const approval = { evidence_version: "t016-test-approval" } as unknown as T016Approval;
@@ -51,7 +53,7 @@ beforeAll(() => { cachedPlan = buildT016Plan(repositoryRoot); });
 
 interface Prepared { root: string; plan: T016Plan }
 function fixture(startUnits = START_UNITS): Prepared {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-"));
+  const root = tempManager.create("fictor-t016-");
   mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
   copyFileSync(resolve(repositoryRoot, T016_CORE_PLAN_PATH), resolve(root, T016_CORE_PLAN_PATH));
   const anchor = json(root, "initial-balance.json", { credits: startUnits / 100, provider_observed_at: at(-120) });
@@ -125,7 +127,7 @@ describe("T016 selection — which 160 of the 994", () => {
   });
 
   test("a tampered selection artifact is refused rather than obeyed", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-sel-"));
+    const root = tempManager.create("fictor-t016-sel-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     mkdirSync(resolve(root, "src/data/source"), { recursive: true });
     copyFileSync(resolve(repositoryRoot, T016_CORE_PLAN_PATH), resolve(root, T016_CORE_PLAN_PATH));
@@ -391,7 +393,7 @@ describe("T016 paid discipline", () => {
   }, 120_000);
 
   test("init requires a balance covering the 240.00 cap", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-poor-"));
+    const root = tempManager.create("fictor-t016-poor-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     expect(() => runT016OpsInternal(["init", "--observed-at", at(-60), "--balance-file", json(root, "b.json", { credits: 239.99, provider_observed_at: at(-120) })], root, cachedPlan, presentation, approval)).toThrow(/does not cover the 240.00 cap/);
   });
@@ -501,14 +503,14 @@ describe("T016 contact sheet links — the T020 v2 carry-over", () => {
 
 describe("T016 entry gates and preparation", () => {
   test("an unapproved root is refused before any production command runs", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-unapproved-"));
+    const root = tempManager.create("fictor-t016-unapproved-");
     mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
     expect(() => productionContextT016("status", () => new Date(), root)).toThrow();
     expect(isT016Authorized(root, cachedPlan)).toBe(false);
   });
 
   test("the committed-clean gate passes on a committed scope and fails once it is dirtied", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-git-"));
+    const root = tempManager.create("fictor-t016-git-");
     const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t016-canonical-cards-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
     const tracked = [...Object.values(binding.files).map(({ path }) => path), "assets/evidence/t016-canonical-cards-implementation-binding-v1.json", "assets/manifests/t016-canonical-cards-v1.plan.json"];
     for (const path of tracked) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
@@ -523,7 +525,7 @@ describe("T016 entry gates and preparation", () => {
   });
 
   test("gen and binding-gen refuse once a run journal exists", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-journal-"));
+    const root = tempManager.create("fictor-t016-journal-");
     mkdirSync(resolve(root, "assets/runs/t016-canonical-cards"), { recursive: true });
     writeFileSync(resolve(root, T016_V1_JOURNAL_PATH), "{}\n");
     expect(() => runT016Preparation(["gen"], root)).toThrow(/refused while a run journal exists/);
@@ -571,7 +573,7 @@ describe("T016 entry gates and preparation", () => {
   test("selection-gen reproduces the committed artifact byte for byte", () => {
     // The artifact was hand-made once during design; without a committed generator, nobody
     // could rebuild it. Regenerating into a scratch root must land on the same bytes.
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-selgen-"));
+    const root = tempManager.create("fictor-t016-selgen-");
     for (const path of [T016_CORE_PLAN_PATH, T016_MATERIALS_PATH]) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
     const result = runT016Preparation(["selection-gen"], root);
     expect(result.selected).toBe(T016_SELECTION_COUNT);
@@ -619,7 +621,7 @@ describe("T016 budget arithmetic and the observed-balance path", () => {
    * answer. What must never happen is the artifact hiding it, which is what this pins.
    */
   function disclosureRoot(): string {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t016-disclosure-"));
+    const root = tempManager.create("fictor-t016-disclosure-");
     const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t016-canonical-cards-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
     const needed = [
       ...Object.values(binding.files).map(({ path }) => path),

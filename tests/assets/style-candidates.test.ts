@@ -1,8 +1,10 @@
-import { existsSync, mkdtempSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { assertContactSheetOutputPath, runStyleCandidatesCli } from "../../scripts/assets/style-candidates-cli";
 import { atomicWriteVerifiedPng } from "../../scripts/assets/filesystem";
@@ -27,6 +29,7 @@ import {
 } from "../../scripts/assets/style-candidates";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("style-candidates");
 
 function crc32(bytes: Uint8Array): number {
   let crc = 0xffffffff;
@@ -130,9 +133,9 @@ function validEvidence(manifest: StyleCandidatesManifest, ledger: StyleProviderL
 }
 
 function recoveredFixture(manifest: StyleCandidatesManifest) {
-  const fixtureRepositoryRoot = mkdtempSync(resolve(tmpdir(), "fictor-style-repo-"));
+  const fixtureRepositoryRoot = tempManager.create("fictor-style-repo-");
   const localRoot = resolve(fixtureRepositoryRoot, "public/assets");
-  const backupRoot = mkdtempSync(resolve(tmpdir(), "fictor-style-backup-"));
+  const backupRoot = tempManager.create("fictor-style-backup-");
   const ledger = validProviderLedger(manifest);
   const evidence = validEvidence(manifest, ledger);
   const bytes = manifest.candidates.map((_, index) => png(index));
