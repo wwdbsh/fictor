@@ -169,6 +169,7 @@ async function main() {
       args: disableSandbox ? ["--no-sandbox", "--disable-setuid-sandbox"] : [],
     });
     const page = await browser.newPage();
+    await page.evaluateOnNewDocument(() => window.localStorage.setItem("fictor.race.v1", "Stillkin"));
     const devtools = await page.createCDPSession();
     await devtools.send("Network.enable");
 
@@ -263,6 +264,7 @@ async function main() {
     const verifyFreshLossAndRestart = async () => {
       const context = await browser.createBrowserContext();
       const lossPage = await context.newPage();
+      await lossPage.evaluateOnNewDocument(() => window.localStorage.setItem("fictor.race.v1", "Stillkin"));
       const lossWebSockets = [];
       const lossDevtools = await lossPage.createCDPSession();
       await lossDevtools.send("Network.enable");
@@ -321,8 +323,50 @@ async function main() {
     };
     const lossRestart = await verifyFreshLossAndRestart();
 
+    const verifyBurnkinSelection = async () => {
+      const context = await browser.createBrowserContext();
+      const burnkinPage = await context.newPage();
+      try {
+        const response = await burnkinPage.goto(pageUrl, { waitUntil: "networkidle0" });
+        if (response === null || !response.ok()) throw new Error(`Burnkin 선택 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
+        await burnkinPage.waitForSelector(".race-select-screen");
+        const selected = await burnkinPage.$$eval(".race-choice button", (buttons) => {
+          const button = buttons.find((candidate) => candidate.textContent?.includes("사름붙이로 시작"));
+          if (!(button instanceof HTMLButtonElement)) return false;
+          button.click();
+          return true;
+        });
+        if (!selected) throw new Error("Burnkin 선택 버튼을 찾지 못했습니다.");
+        await burnkinPage.waitForSelector("main.phase-between_nodes");
+        await burnkinPage.click('button[data-action-kind="ENTER_NEXT_NODE"]');
+        await burnkinPage.waitForSelector("main.phase-in_combat");
+        await burnkinPage.click('button[data-action-kind="START_TURN"]');
+        await burnkinPage.waitForSelector('button[data-action-kind="BURNKIN_PAY_HP"]');
+        const state = await burnkinPage.evaluate(() => {
+          const bytes = window.localStorage.getItem("fictor.burnkin.save.v2");
+          const envelope = bytes ? JSON.parse(bytes) : null;
+          return {
+            selectedRace: window.localStorage.getItem("fictor.race.v1"),
+            stillkinSavePresent: window.localStorage.getItem("fictor.save.v2") !== null,
+            configId: envelope?.flow?.configId,
+            resonanceRate: envelope?.runtime?.run?.activeCombat?.state?.rules?.resonanceRate,
+            starterIds: [...new Set((envelope?.runtime?.run?.ownedInstances ?? []).map((instance) => instance.cardId))].sort(),
+          };
+        });
+        if (state.selectedRace !== "Burnkin" || state.stillkinSavePresent || state.configId !== "burnkin-track1-provisional-v1"
+          || state.resonanceRate !== 0.2 || JSON.stringify(state.starterIds) !== JSON.stringify(["burn_01", "burn_02", "burn_03", "burn_04", "burn_05", "ore_burn"])) {
+          throw new Error(`Burnkin browser authority가 일치하지 않습니다: ${JSON.stringify(state)}`);
+        }
+        return { race: "Burnkin", phase: "IN_COMBAT", resonanceRate: 0.2, starterCards: 30 };
+      } finally {
+        await context.close();
+      }
+    };
+    const burnkinSelection = await verifyBurnkinSelection();
+
     const verifyUnsafeAssetPolicy = async () => {
       const probePage = await browser.newPage();
+      await probePage.evaluateOnNewDocument(() => window.localStorage.setItem("fictor.race.v1", "Stillkin"));
       const imageRequests = [];
       try {
         await probePage.setRequestInterception(true);
@@ -687,7 +731,8 @@ async function main() {
           paid: { fuelBefore: paidBefore.runtime.run.fuel, fuelAfter: paidAfter.runtime.run.fuel, permanentMaterialsConsumed: 2, permanentResultsAdded: 1, canonicalCardId: instantDiscovery.ephemeralCardId, duplicateDiscoveries: 0 },
         },
         boss: { heartId: "heart__still", phase: wonSave.flow.phase, restartPhase: wonRestartSave.flow.phase },
-        corePath: "isolated fresh loss -> RUN_LOST -> restart; instant discovery -> Codex -> reload -> full run -> boss victory -> restart -> paid workshop same recipe",
+        burnkinSelection,
+        corePath: "race selection -> Burnkin ice combat; isolated fresh loss -> RUN_LOST -> restart; instant discovery -> Codex -> reload -> full run -> boss victory -> restart -> paid workshop same recipe",
         instantDiscovery: { ...instantDiscovery, reloaded: reloadedAfterInstant, codexBeforePaid, codexAfterPaid, fuelAfterPaid },
         missingCanonicalFallback: { cardId: "forge__ore_still__still_03", assetPath: new URL(fallbackAssetUrl).pathname, httpStatus: fallbackAssetResponse.status },
         staticAssets,

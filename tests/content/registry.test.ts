@@ -17,11 +17,11 @@ import {
 
 const assetsRoot = resolve(import.meta.dirname, "../../public/assets");
 
-describe("Stillkin and ice content registry", () => {
-  it("enables only Stillkin and GROUND_STILL while distinguishing disabled and missing", () => {
-    expect(listEnabledRaces().map((race) => race.id)).toEqual(["Stillkin"]);
+describe("playable races and ice content registry", () => {
+  it("enables Stillkin and Burnkin against the existing ice ground while distinguishing disabled and missing", () => {
+    expect(listEnabledRaces().map((race) => race.id)).toEqual(["Stillkin", "Burnkin"]);
     expect(listEnabledGrounds().map((ground) => ground.id)).toEqual(["GROUND_STILL"]);
-    expect(lookupRace("Burnkin").status).toBe("DISABLED");
+    expect(lookupRace("Burnkin")).toMatchObject({ status: "ENABLED", value: { groundIds: ["GROUND_STILL"], policyId: "Burnkin" } });
     expect(lookupGround("GROUND_BURN").status).toBe("DISABLED");
     expect(lookupRace("Unknown").status).toBe("MISSING");
     expect(lookupGround("UNKNOWN").status).toBe("MISSING");
@@ -84,7 +84,7 @@ describe("Stillkin and ice content registry", () => {
   });
 
   it("does not expose inactive content and protects nested registry data from mutation aliases", () => {
-    expect(getRaceDescriptor("Burnkin")?.enabled).toBe(false);
+    expect(getRaceDescriptor("Burnkin")?.enabled).toBe(true);
     expect(getGroundDescriptor("GROUND_BURN")?.depths).toEqual([]);
     expect(Object.isFrozen(CONTENT_REGISTRY)).toBe(true);
     expect(Object.isFrozen(CONTENT_REGISTRY.grounds[0])).toBe(true);

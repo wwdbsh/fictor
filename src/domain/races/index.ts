@@ -18,6 +18,13 @@ export {
   stillkinPolicy,
 } from "./stillkin";
 export {
+  applyBurnkinResonanceBreak,
+  BURNKIN_POLICY,
+  burnkinPolicy,
+  kindleBurnkinCard,
+  payBurnkinHpForEnergy,
+} from "./burnkin";
+export {
   MechanicConfigError,
   resolvePressedFire,
   resolveTotalStop,

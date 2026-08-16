@@ -1,4 +1,5 @@
 import { STILLKIN_DESCRIPTOR } from "./races/stillkin";
+import { BURNKIN_DESCRIPTOR } from "./races/burnkin";
 import { ICE_GROUND_DESCRIPTOR } from "./grounds/ice";
 import type {
   AssetLookup,
@@ -12,7 +13,7 @@ import type {
 } from "./types";
 
 const disabledRace = (
-  id: Exclude<RaceId, "Stillkin">,
+  id: Exclude<RaceId, "Stillkin" | "Burnkin">,
   nameKo: string,
   attribute: RaceDescriptor["attribute"],
 ): RaceDescriptor =>
@@ -46,7 +47,7 @@ const disabledGround = (
 
 const KNOWN_RACES: readonly RaceDescriptor[] = Object.freeze([
   STILLKIN_DESCRIPTOR,
-  disabledRace("Burnkin", "사름붙이", "BURN"),
+  BURNKIN_DESCRIPTOR,
   disabledRace("Joinkin", "이음붙이", "JOIN"),
   disabledRace("Scatterkin", "흩음붙이", "SCATTER"),
   disabledRace("Rotkin", "삭음붙이", "ROT"),
@@ -99,7 +100,7 @@ export const CONTENT_REGISTRY = cloneAndFreeze(REGISTRY);
 export const contentRegistry = CONTENT_REGISTRY;
 export const ASSET_PATH_ALLOWLIST = cloneAndFreeze(ASSET_ALLOWLIST);
 export const CONTENT_CARDINALITIES = Object.freeze({
-  enabledRaces: 1,
+  enabledRaces: 2,
   enabledGrounds: 1,
   stillDepths: 3,
   stillNormalEnemies: 5,
@@ -107,7 +108,7 @@ export const CONTENT_CARDINALITIES = Object.freeze({
   stillBosses: 1,
   stillEvents: 6,
 });
-export const ENABLED_RACE_IDS = Object.freeze(["Stillkin"] as const);
+export const ENABLED_RACE_IDS = Object.freeze(["Stillkin", "Burnkin"] as const);
 export const ENABLED_GROUND_IDS = Object.freeze(["GROUND_STILL"] as const);
 
 function lookup<T extends { id: string; enabled: boolean }>(

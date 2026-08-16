@@ -45,9 +45,9 @@ describe("current source architecture", () => {
     const mainSource = readFileSync(mainPath, "utf8");
 
     expect(mainSource).toMatch(/from\s+["']react-dom\/client["']/);
-    expect(mainSource).toMatch(/from\s+["']\.\/presentation\/App["']/);
+    expect(mainSource).toMatch(/from\s+["']\.\/presentation\/race-select["']/);
     expect(mainSource).toContain("createRoot(rootElement).render");
-    expect(mainSource.match(/createStillkinTrack1UiSession\s*\(/g)).toHaveLength(1);
+    expect(mainSource.match(/createTrack1RaceSelection\s*\(/g)).toHaveLength(1);
     expect(mainSource.indexOf("createStillkinTrack1UiSession(")).toBeLessThan(mainSource.indexOf("createRoot(rootElement).render"));
 
     for (const file of sourceFiles(sourceRoot).filter((path) => path !== mainPath)) {

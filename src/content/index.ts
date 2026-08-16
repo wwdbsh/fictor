@@ -25,5 +25,5 @@ export {
   KNOWN_RACES,
 } from "./registry";
 export { GROUND_STILL_DESCRIPTOR, ICE_GROUND_DESCRIPTOR, STILL_GROUND_ENCOUNTERS, STILL_GROUND_EVENTS } from "./grounds";
-export { STILLKIN_DESCRIPTOR } from "./races";
+export { BURNKIN_DESCRIPTOR, STILLKIN_DESCRIPTOR } from "./races";
 export type * from "./types";

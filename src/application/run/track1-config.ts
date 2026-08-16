@@ -1,5 +1,6 @@
 import { canonicalSerialize, sha256Hex } from "../../domain/forge-runtime/source-binding";
 import { FORGE_RUNTIME_FUEL_COST } from "../../domain/forge-runtime";
+import type { BurnkinProvisionalRules } from "../../domain/races";
 
 export const STILLKIN_TRACK1_PROVISIONAL_STATUS = "PROVISIONAL_USER_DIRECTION_2026_08_15" as const;
 export const T027_LITERAL_CONTRACT_HASH = "dcbd69c50f569efe75e5a0c72550dc4aa6ef76e1f9964199f010b9078792ed99" as const;
@@ -66,6 +67,37 @@ export const STILLKIN_TRACK1_SCENARIO_ID = "stillkin-track1-literal-v1" as const
 export const STILLKIN_TRACK1_SCENARIO_HASH = sha256Hex(canonicalSerialize({
   scenarioId: STILLKIN_TRACK1_SCENARIO_ID,
   configHash: STILLKIN_TRACK1_CONFIG_HASH,
+  route: STILLKIN_TRACK1_PROVISIONAL_CONFIG.route,
+  offers: STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers,
+}));
+
+export const T033_CONTRACT_HASH = "840ed0dcd20f76647f28e0bfc1f9fbf0ceae55f9f9fac5adb8744dea9c5dfae5" as const;
+export const BURNKIN_TRACK1_PROVISIONAL_STATUS = "PROVISIONAL_T033_NOT_FINAL_BALANCE" as const;
+export const BURNKIN_TRACK1_RULES: BurnkinProvisionalRules = Object.freeze({
+  hpToEnergy: Object.freeze({ hpCost: 1, energyGain: 1, mustRemainAlive: true }),
+  resonanceRateMultiplier: 2,
+  resonanceBreakSelfDamage: 1,
+});
+
+export const BURNKIN_TRACK1_PROVISIONAL_CONFIG = Object.freeze({
+  configId: "burnkin-track1-provisional-v1",
+  contractHash: T033_CONTRACT_HASH,
+  status: BURNKIN_TRACK1_PROVISIONAL_STATUS,
+  authority: "T033_CONTROLLER_SELECTED_PROVISIONAL_EXECUTION_PACKET",
+  balanceFinal: false,
+  rules: BURNKIN_TRACK1_RULES,
+  starterDeck: Object.freeze(["ore_burn", "burn_01", "burn_02", "burn_03", "burn_04", "burn_05"]
+    .flatMap((cardId) => Array.from({ length: 5 }, () => cardId))),
+} as const);
+
+export const BURNKIN_TRACK1_CONFIG_HASH = sha256Hex(canonicalSerialize({
+  sharedTrack1ConfigHash: STILLKIN_TRACK1_CONFIG_HASH,
+  burnkin: BURNKIN_TRACK1_PROVISIONAL_CONFIG,
+}));
+export const BURNKIN_TRACK1_SCENARIO_ID = "burnkin-track1-ice-v1" as const;
+export const BURNKIN_TRACK1_SCENARIO_HASH = sha256Hex(canonicalSerialize({
+  scenarioId: BURNKIN_TRACK1_SCENARIO_ID,
+  configHash: BURNKIN_TRACK1_CONFIG_HASH,
   route: STILLKIN_TRACK1_PROVISIONAL_CONFIG.route,
   offers: STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers,
 }));

@@ -13,6 +13,8 @@ export type Track1UiActionKind =
   | "START_TURN"
   | "PLAY_CARD"
   | "END_TURN"
+  | "BURNKIN_PAY_HP"
+  | "BURNKIN_KINDLE"
   | "CHOOSE_REWARD"
   | "RESOLVE_EVENT"
   | "FORGE_INSTANT"
@@ -55,6 +57,7 @@ export interface Track1UiCard {
   readonly effectLabelKo: string;
   readonly forgeSelectable: boolean;
   readonly action: Track1UiActionDescriptor | null;
+  readonly kindleAction: Track1UiActionDescriptor | null;
 }
 
 export interface Track1UiRewardChoice {
@@ -165,6 +168,8 @@ interface Track1UiBaseProjection {
   readonly feedback: null | { readonly tone: "STATUS" | "ERROR"; readonly messageKo: string };
   readonly featureFlags: { readonly heartForge: false };
   readonly codexDiscoveredCount: number;
+  readonly raceId: "Stillkin" | "Burnkin";
+  readonly raceLabelKo: "어름붙이" | "사름붙이";
 }
 
 export interface Track1UiBlockedProjection extends Track1UiBaseProjection {
@@ -205,6 +210,8 @@ export interface Track1UiCombatProjection extends Track1UiBaseProjection {
   readonly instantForgeDisabledReasonKo: string | null;
   readonly primaryAction: Track1UiActionDescriptor | null;
   readonly instructionKo: string;
+  readonly burnkinPassiveAction: Track1UiActionDescriptor | null;
+  readonly burnkinRulesKo: string | null;
 }
 
 export interface Track1UiRewardProjection extends Track1UiBaseProjection {

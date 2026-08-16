@@ -1,6 +1,19 @@
 # Track 1 literal run flow
 
-T027의 공개 경계는 `createStillkinTrack1Controller({ storage, resolverContext })`다. 호출자는
+## T033 종족 선택과 Burnkin
+
+새 브라우저 프로필은 enabled content registry의 `Stillkin`과 `Burnkin` 중 하나를 먼저 고른다. 기존
+`fictor.save.v2`가 있고 선택 기록이 없는 사용자는 Stillkin 런을 그대로 열어 저장 호환을 유지한다.
+Burnkin도 새 터를 만들지 않고 동일한 어름의 터 9-node route를 완주한다.
+
+Burnkin 시작 덱은 BURN 재료 6종을 5장씩 넣은 30장이다. 전투 중 `피 태우기`는 체력 지불과 에너지
+증가를 원자적으로 적용하고, `지피기`는 손패 한 장을 exile로 옮긴 뒤 그 카드 코스트만큼 에너지를
+얻는다. 공명률은 같은 provisional base의 정확한 2배이며 active attribute가 바뀌면 direct self-damage를
+받는다. 단절 피해가 lethal이면 같은 controller dispatch에서 terminal 판정과 즉석 결과 cleanup까지
+끝낸다. exact provisional 값과 비승인 범위는
+[T033 결정 기록](decisions/t033-burnkin-provisional-rules-2026-08-16.md)에 둔다.
+
+Track 1 공개 경계는 종족별 factory 또는 `createTrack1Controller({ storage, resolverContext }, raceId)`다. 호출자는
 `load`, `snapshot`, `dispatch`만 사용하며, 시나리오 본문·런/ForgeRuntime 상태·소유 도구 목록·전투
 결과·공방 성공 여부를 제출할 수 없다. 과거 `run-flow-state-v1` reducer와 game-session 조합기는
 rollback을 위한 deep module에 남지만 application root에서는 노출하지 않는다.

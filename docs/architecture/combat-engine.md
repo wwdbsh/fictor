@@ -47,6 +47,13 @@ block 잔존은 `{ numerator, denominator, rounding: "FLOOR" }`로 직렬화한�
 `floor(block * numerator / denominator)`만 허용한다. T023의 완전 만료는 `0/1`, T026의 절반 잔존은
 `1/2`로 표현할 수 있다. 부동소수 반올림 규칙이나 종족별 상수는 엔진에 숨겨 두지 않는다.
 
+T033 Burnkin은 combat-state/replay v2 command union을 바꾸지 않는다. race policy가 controller 경계에서
+기존 `APPLY_COMBAT`의 canonical 결과를 받아 단절 전후 속성을 비교하고, 필요한 direct self-damage와
+terminal 판정을 같은 ForgeRuntime transaction에 합성한다. `피 태우기`와 `지피기`도 strict Track 1
+command boundary를 통과한 뒤 canonical CombatState clone에만 적용한다. 따라서 base combat replay는
+종족 외부 행동을 기록했다고 주장하지 않으며, Burnkin의 authoritative replay는 Track 1 저장/event
+ledger다.
+
 count, 확정 cost, energy, seed와 index는 안전한 정수여야 한다. HP, block, 확정 power, rate와 operation amount는
 유한·비음수이고 안전 범위를 벗어나지 않아야 한다. 공명률이 `null`이거나 계산이 overflow이면 수치
 효과의 카드 플레이 전체를 거부한다. 계산 결과를 반올림하지 않는다. 아직 밸런스가 승인되지 않은

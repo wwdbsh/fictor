@@ -4,6 +4,13 @@
 
 literal T027 진행은 새 키 `fictor.save.v2`에 한 번의 `setItem`으로 저장한다.
 
+T033 Burnkin은 같은 envelope v2 구조를 별도 키 `fictor.burnkin.save.v2`에 저장한다. Burnkin
+config/scenario hash와 `burnkin-track1-run-*` ID가 Stillkin bytes의 교차 로드를 막는다. 종족 선택 키
+`fictor.race.v1`은 `Stillkin | Burnkin`만 담고 profile/runtime/flow 권한을 갖지 않는다. 기존 Stillkin
+v2가 있으면서 선택 키가 없는 경우에만 UI가 Stillkin을 자동 선택한다.
+두 종족 envelope는 현재 각자의 profile을 포함한다. 종족 변경은 두 저장을 모두 보존하지만 발견 레시피와
+심장을 자동 병합하지 않으며, 전역 profile 통합에는 명시적인 후속 schema/migration 결정이 필요하다.
+
 ```ts
 interface SaveEnvelopeV2 {
   schemaVersion: 2;
