@@ -1,8 +1,9 @@
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import {
   T031_MANIFEST_PATH,
@@ -14,6 +15,7 @@ import {
 } from "../../scripts/t031-m3-candidate-audit";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("t031-m3-candidate-audit");
 
 function write(root: string, path: string, bytes: string | Buffer): void {
   mkdirSync(dirname(resolve(root, path)), { recursive: true });
@@ -44,7 +46,7 @@ function smokeSummary() {
 }
 
 function fixture(source = "export const safe = true;\n") {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t031-"));
+  const root = tempManager.create("fictor-t031-");
   git(root, ["init", "-q"]);
   copyFileSync(resolve(repositoryRoot, "package.json"), resolve(root, "package.json"));
   write(root, ".gitignore", "dist/\n");

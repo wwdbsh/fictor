@@ -1,9 +1,11 @@
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { hostname, tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { deflateSync } from "node:zlib";
 import { beforeAll, describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import {
   T020_CORE_PLAN_PATH, T020_CORE_PLAN_SHA256, T020_MASTER_STYLE_SHA256, T020_NO_COPY_BOUNDARY, T020_REFERENCE_INSTRUCTION,
@@ -23,6 +25,7 @@ import {
 import { dryRunT020 } from "../../scripts/assets/t020-world-art-production-v1-cli";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("t020-world-art-production-v1");
 const EPOCH = Date.parse("2026-08-14T00:00:00.000Z");
 const presentation = { evidence_version: "t020-test-presentation" } as unknown as T020Presentation;
 const approval = { evidence_version: "t020-test-approval" } as unknown as T020Approval;
@@ -47,7 +50,7 @@ beforeAll(() => { cachedPlan = buildT020Plan(repositoryRoot); });
 
 interface Prepared { root: string; plan: T020Plan }
 function fixture(startUnits = START_UNITS): Prepared {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-"));
+  const root = tempManager.create("fictor-t020-");
   mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
   copyFileSync(resolve(repositoryRoot, T020_CORE_PLAN_PATH), resolve(root, T020_CORE_PLAN_PATH));
   const anchor = json(root, "initial-balance.json", { credits: startUnits / 100, provider_observed_at: at(-120) });
@@ -188,7 +191,7 @@ describe("T020 plan determinism", () => {
   });
 
   test("a plan built against a mutated core manifest is refused", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-tamper-"));
+    const root = tempManager.create("fictor-t020-tamper-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     const core = JSON.parse(readFileSync(resolve(repositoryRoot, T020_CORE_PLAN_PATH), "utf8")) as { assets: unknown[] };
     core.assets = core.assets.slice(0, -1);
@@ -259,7 +262,7 @@ describe("T020 cap math", () => {
   });
 
   test("init refuses a balance that does not cover the whole cap", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-poor-"));
+    const root = tempManager.create("fictor-t020-poor-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     const anchor = json(root, "initial-balance.json", { credits: 80.99, provider_observed_at: at(-120) });
     expect(() => runT020OpsInternal(["init", "--observed-at", at(-60), "--balance-file", anchor], root, cachedPlan, presentation, approval)).toThrow(/does not cover the 81.00 cap/);
@@ -928,7 +931,7 @@ describe("T020 production entry gates", () => {
   test("the authorization gate refuses a root with no approval evidence", () => {
     // `productionContext` admits a command only when `isT020Authorized` holds, so that is the
     // gate under test. A root without the evidence chain must never satisfy it.
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-unapproved-"));
+    const root = tempManager.create("fictor-t020-unapproved-");
     mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
     expect(isT020Authorized(root, cachedPlan)).toBe(false);
     // The real repository has since received the v1 approval, and the gate reports that
@@ -939,7 +942,7 @@ describe("T020 production entry gates", () => {
 
   test("gen and binding-gen refuse to re-derive once a run journal exists", async () => {
     const { runT020Preparation } = await import("../../scripts/assets/t020-world-art-production-v1-cli");
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-journal-"));
+    const root = tempManager.create("fictor-t020-journal-");
     mkdirSync(resolve(root, "assets/runs/t020-world-art"), { recursive: true });
     writeFileSync(resolve(root, T020_V1_JOURNAL_PATH), "{}\n");
     // The guard must fire before either writer touches the plan or the binding, since
@@ -951,13 +954,13 @@ describe("T020 production entry gates", () => {
 
   test("the committed-clean gate rejects a root whose binding scope is not tracked", async () => {
     const { assertT020CommittedClean } = await import("../../scripts/assets/t020-world-art-production-v1-ops");
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-dirty-"));
+    const root = tempManager.create("fictor-t020-dirty-");
     expect(() => assertT020CommittedClean(root)).toThrow(/committed-clean|binding changed|not a regular file/);
   });
 
   test("the committed-clean gate passes on a committed binding scope and fails once it is dirtied", async () => {
     const { assertT020CommittedClean } = await import("../../scripts/assets/t020-world-art-production-v1-ops");
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020-git-"));
+    const root = tempManager.create("fictor-t020-git-");
     const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t020-world-art-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
     const tracked = [...Object.values(binding.files).map(({ path }) => path), "assets/evidence/t020-world-art-implementation-binding-v1.json", "assets/manifests/t020-world-art-v1.plan.json"];
     for (const path of tracked) {

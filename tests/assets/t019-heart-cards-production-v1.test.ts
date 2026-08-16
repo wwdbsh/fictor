@@ -1,9 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { beforeAll, describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { t020GetCostRequest } from "../../scripts/assets/t020-world-art-production-v1-ops";
 import {
@@ -23,6 +24,7 @@ import {
 import { dryRunT019, runT019Preparation } from "../../scripts/assets/t019-heart-cards-production-v1-cli";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("t019-heart-cards-production-v1");
 const EPOCH = Date.parse("2026-08-14T12:00:00.000Z");
 const presentation = { evidence_version: "t019-test-presentation" } as unknown as T019Presentation;
 const approval = { evidence_version: "t019-test-approval" } as unknown as T019Approval;
@@ -47,7 +49,7 @@ beforeAll(() => { cachedPlan = buildT019Plan(repositoryRoot); });
 
 interface Prepared { root: string; plan: T019Plan }
 function fixture(startUnits = START_UNITS): Prepared {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t019-"));
+  const root = tempManager.create("fictor-t019-");
   mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
   copyFileSync(resolve(repositoryRoot, T019_CORE_PLAN_PATH), resolve(root, T019_CORE_PLAN_PATH));
   const anchor = json(root, "initial-balance.json", { credits: startUnits / 100, provider_observed_at: at(-120) });
@@ -125,7 +127,7 @@ describe("T019 manifest discovery", () => {
     const mutate = (fn: (a: Record<string, unknown>) => void, expected: RegExp) => {
       const copy = JSON.parse(JSON.stringify(core)) as { assets: Array<Record<string, unknown>> };
       for (const a of copy.assets) if (a.category === "HEART") { fn(a); break; }
-      const root = mkdtempSync(resolve(tmpdir(), "fictor-t019-mutate-"));
+      const root = tempManager.create("fictor-t019-mutate-");
       mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
       writeFileSync(resolve(root, T019_CORE_PLAN_PATH), `${JSON.stringify(copy, null, 2)}\n`);
       // The sha pin fires first — which is the point: none of these can arrive unnoticed.
@@ -304,7 +306,7 @@ describe("T019 paid discipline", () => {
   }, 120_000);
 
   test("init requires a balance covering the 9.00 cap", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t019-poor-"));
+    const root = tempManager.create("fictor-t019-poor-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     expect(() => runT019OpsInternal(["init", "--observed-at", at(-60), "--balance-file", json(root, "b.json", { credits: 8.99, provider_observed_at: at(-120) })], root, cachedPlan, presentation, approval)).toThrow(/does not cover the 9.00 cap/);
   });
@@ -414,14 +416,14 @@ describe("T019 contact sheet links — the T020 v2 carry-over", () => {
 
 describe("T019 entry gates and preparation", () => {
   test("an unapproved root is refused before any production command runs", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t019-unapproved-"));
+    const root = tempManager.create("fictor-t019-unapproved-");
     mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
     expect(() => productionContextT019("status", () => new Date(), root)).toThrow();
     expect(isT019Authorized(root, cachedPlan)).toBe(false);
   });
 
   test("the committed-clean gate passes on a committed scope and fails once it is dirtied", async () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t019-git-"));
+    const root = tempManager.create("fictor-t019-git-");
     const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t019-heart-cards-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
     const tracked = [...Object.values(binding.files).map(({ path }) => path), "assets/evidence/t019-heart-cards-implementation-binding-v1.json", "assets/manifests/t019-heart-cards-v1.plan.json"];
     for (const path of tracked) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
@@ -436,7 +438,7 @@ describe("T019 entry gates and preparation", () => {
   });
 
   test("gen and binding-gen refuse once a run journal exists", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t019-journal-"));
+    const root = tempManager.create("fictor-t019-journal-");
     mkdirSync(resolve(root, "assets/runs/t019-heart-cards"), { recursive: true });
     writeFileSync(resolve(root, T019_V1_JOURNAL_PATH), "{}\n");
     expect(() => runT019Preparation(["gen"], root)).toThrow(/refused while a run journal exists/);
@@ -490,7 +492,7 @@ describe("T019 budget arithmetic and the observed-balance path", () => {
    * answer. What must never happen is the artifact hiding it, which is what this pins.
    */
   function disclosureRoot(): string {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t019-disclosure-"));
+    const root = tempManager.create("fictor-t019-disclosure-");
     const binding = JSON.parse(readFileSync(resolve(repositoryRoot, "assets/evidence/t019-heart-cards-implementation-binding-v1.json"), "utf8")) as { files: Record<string, { path: string }> };
     const needed = [
       ...Object.values(binding.files).map(({ path }) => path),

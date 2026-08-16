@@ -1,8 +1,9 @@
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { beforeAll, describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { T020_CORE_PLAN_PATH } from "../../scripts/assets/t020-world-art-production-v1";
 import { t020GetCostRequest } from "../../scripts/assets/t020-world-art-production-v1-ops";
@@ -21,6 +22,7 @@ import {
 import { dryRunT020V2 } from "../../scripts/assets/t020-world-art-production-v2-cli";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("t020-world-art-production-v2");
 const EPOCH = Date.parse("2026-08-15T00:00:00.000Z");
 const presentation = { evidence_version: "t020-v2-test-presentation" } as unknown as T020V2Presentation;
 const approval = { evidence_version: "t020-v2-test-approval" } as unknown as T020V2Approval;
@@ -46,7 +48,7 @@ beforeAll(() => { cachedPlan = buildT020V2Plan(repositoryRoot); });
 
 interface Prepared { root: string; plan: T020V2Plan }
 function fixture(startUnits = START_UNITS): Prepared {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-"));
+  const root = tempManager.create("fictor-t020v2-");
   mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
   copyFileSync(resolve(repositoryRoot, T020_CORE_PLAN_PATH), resolve(root, T020_CORE_PLAN_PATH));
   const anchor = json(root, "initial-balance.json", { credits: startUnits / 100, provider_observed_at: at(-120) });
@@ -166,7 +168,7 @@ describe("T020 v2 pinned v1 journal", () => {
   });
 
   test("a tampered forensic copy is refused", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-tamper-"));
+    const root = tempManager.create("fictor-t020v2-tamper-");
     mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     copyFileSync(resolve(repositoryRoot, T020_CORE_PLAN_PATH), resolve(root, T020_CORE_PLAN_PATH));
@@ -317,7 +319,7 @@ describe("T020 v2 paid run", () => {
   }, 120_000);
 
   test("init requires a balance covering the new 72.00 cap, not the old 81.00", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-poor-"));
+    const root = tempManager.create("fictor-t020v2-poor-");
     mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
     const anchor = json(root, "b.json", { credits: 71.99, provider_observed_at: at(-120) });
     expect(() => runT020V2OpsInternal(["init", "--observed-at", at(-60), "--balance-file", anchor], root, cachedPlan, presentation, approval)).toThrow(/does not cover the 72.00 cap/);
@@ -387,7 +389,7 @@ describe("T020 v2 preparation CLI", () => {
 describe("T020 v2 production entry gates", () => {
   test("an unapproved root is refused before any command runs", async () => {
     const { productionContextT020V2 } = await import("../../scripts/assets/t020-world-art-production-v2-ops");
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-unapproved-"));
+    const root = tempManager.create("fictor-t020v2-unapproved-");
     mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
     // No plan, no evidence chain: the gate must refuse rather than fall through to the command.
     expect(() => productionContextT020V2("status", () => new Date(), root)).toThrow();
@@ -398,7 +400,7 @@ describe("T020 v2 production entry gates", () => {
     // The gate's job is to distinguish "approved" from "not approved" — not to encode which of
     // those the repository happens to be in today. v2 has since been approved and run, so the
     // discriminating test is a root that carries no approval at all.
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-noapproval-"));
+    const root = tempManager.create("fictor-t020v2-noapproval-");
     mkdirSync(resolve(root, "assets/evidence"), { recursive: true });
     copyFileSync(resolve(repositoryRoot, "assets/evidence/t020-world-art-disclosure-presentation-v2.json"), resolve(root, "assets/evidence/t020-world-art-disclosure-presentation-v2.json"));
     expect(isT020V2Authorized(root, cachedPlan)).toBe(false);
@@ -408,7 +410,7 @@ describe("T020 v2 production entry gates", () => {
 
   test("the committed-clean gate is reached once an approval exists", async () => {
     const { assertT020V2CommittedClean } = await import("../../scripts/assets/t020-world-art-production-v2-ops");
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t020v2-dirty-"));
+    const root = tempManager.create("fictor-t020v2-dirty-");
     // Nothing tracked here at all, so the binding load fails before git is consulted; the
     // assertion is that the gate refuses, which is what productionContext relies on.
     expect(() => assertT020V2CommittedClean(root)).toThrow();

@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import {
   buildInitialStyleV2OperationsJournal,
@@ -31,6 +32,7 @@ import { buildStyleCandidatesManifest, canGenerateRemotely } from "../../scripts
 import { DEFAULT_MAX_PNG_BYTES, atomicWriteJson, atomicWriteVerifiedPng } from "../../scripts/assets/filesystem";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("style-candidates-v2");
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -270,7 +272,7 @@ describe("T011 limited READY style-candidates-v2", () => {
 
   test("renders only complete real PNG evidence and enforces CLI output allowlist, symlink, no-clobber, and idempotence", () => {
     const manifest = buildStyleCandidatesV2Manifest(repositoryRoot);
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-style-v2-contact-"));
+    const root = tempManager.create("fictor-style-v2-contact-");
     const journal = completedJournal(manifest);
     manifest.candidates.forEach((candidate, index) => {
       const bytes = png(index, 299, 400);
@@ -332,7 +334,7 @@ describe("T011 limited READY style-candidates-v2", () => {
     unsafeAssetPath.candidates[0].path = "../outside.png";
     expect(() => runStyleV2ContactSheetAfterReadyGate(args, unsafeAssetPath, journal, completion, root)).toThrow("READY");
 
-    const symlinkRoot = mkdtempSync(resolve(tmpdir(), "fictor-style-v2-symlink-"));
+    const symlinkRoot = tempManager.create("fictor-style-v2-symlink-");
     manifest.candidates.forEach((candidate, index) => {
       const bytes = png(index, 299, 400);
       atomicWriteVerifiedPng(resolve(symlinkRoot, "public/assets"), candidate.path, bytes, "3:4", DEFAULT_MAX_PNG_BYTES, 5_000);
@@ -365,7 +367,7 @@ describe("T011 limited READY style-candidates-v2", () => {
       ];
     };
 
-    const jobRoot = mkdtempSync(resolve(tmpdir(), "fictor-style-v2-job-anomaly-"));
+    const jobRoot = tempManager.create("fictor-style-v2-job-anomaly-");
     runStyleV2CliForTest(["init"], jobRoot);
     expect(() => runStyleV2CliForTest(prepareArgs("1.50", "true"), jobRoot)).toThrow("created a job");
     const jobJournal = journalAt(jobRoot);
@@ -377,7 +379,7 @@ describe("T011 limited READY style-candidates-v2", () => {
     });
     expect(() => runStyleV2CliForTest(prepareArgs("1.50", "false"), jobRoot)).toThrow("fail-stopped");
 
-    const priceRoot = mkdtempSync(resolve(tmpdir(), "fictor-style-v2-price-anomaly-"));
+    const priceRoot = tempManager.create("fictor-style-v2-price-anomaly-");
     runStyleV2CliForTest(["init"], priceRoot);
     expect(() => runStyleV2CliForTest(prepareArgs("1.75", "false"), priceRoot)).toThrow("unit price changed");
     const priceJournal = journalAt(priceRoot);
@@ -388,7 +390,7 @@ describe("T011 limited READY style-candidates-v2", () => {
     });
     expect(() => runStyleV2CliForTest(prepareArgs("1.50", "false"), priceRoot)).toThrow("fail-stopped");
 
-    const driftRoot = mkdtempSync(resolve(tmpdir(), "fictor-style-v2-model-drift-"));
+    const driftRoot = tempManager.create("fictor-style-v2-model-drift-");
     runStyleV2CliForTest(["init"], driftRoot);
     runStyleV2CliForTest(prepareArgs("1.50", "false"), driftRoot);
     const driftAt = now();
@@ -414,7 +416,7 @@ describe("T011 limited READY style-candidates-v2", () => {
       "--submitted-at", driftAt, "--completed-at", driftAt,
     ], driftRoot)).toThrow("fail-stopped");
 
-    const balanceRoot = mkdtempSync(resolve(tmpdir(), "fictor-style-v2-balance-anomaly-"));
+    const balanceRoot = tempManager.create("fictor-style-v2-balance-anomaly-");
     runStyleV2CliForTest(["init"], balanceRoot);
     const preparedAt = now();
     runStyleV2CliForTest([

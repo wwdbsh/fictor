@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { deflateSync } from "node:zlib";
 import { beforeAll, describe, expect, test } from "vitest";
+
+import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import {
   T022_FAILED_IDS,
@@ -30,6 +31,7 @@ import {
 } from "../../scripts/assets/t022-m2-assets-audit-v1";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const tempManager = createOwnedTempManager("t022-m2-assets-audit-v1");
 
 function crc32(bytes: Uint8Array): number { let crc = 0xffffffff; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ 0xffffffff) >>> 0; }
 function chunk(type: string, data: Buffer): Buffer { const name = Buffer.from(type); const result = Buffer.alloc(12 + data.length); result.writeUInt32BE(data.length, 0); name.copy(result, 4); data.copy(result, 8); result.writeUInt32BE(crc32(Buffer.concat([name, data])), 8 + data.length); return result; }
@@ -40,7 +42,7 @@ function png(width = 3, height = 4, fill = 0): Buffer {
 }
 
 function fixture(two = false): { root: string; assets: T022ExpectedAsset[] } {
-  const root = mkdtempSync(resolve(tmpdir(), "fictor-t022-test-"));
+  const root = tempManager.create("fictor-t022-test-");
   const backup = "assets/backups/owner";
   const assets: T022ExpectedAsset[] = [{ id: "one", category: "MATERIAL", source_task: "T013", path: "cards/one.png", aspect_ratio: "3:4", backup_root: backup }];
   if (two) assets.push({ id: "two", category: "CANONICAL", source_task: "T015", path: "cards/two.png", aspect_ratio: "3:4", backup_root: backup });
@@ -147,7 +149,7 @@ describe("T022 targeted PNG and owner-root audit", () => {
 
 describe("T022 immutable record and check", () => {
   test("no-clobber creates missing bytes, accepts identical bytes, and refuses a different rebaseline", () => {
-    const root = mkdtempSync(resolve(tmpdir(), "fictor-t022-record-"));
+    const root = tempManager.create("fictor-t022-record-");
     expect(writeT022NoClobber(root, "out.json", "one\n")).toBe("CREATED");
     expect(writeT022NoClobber(root, "out.json", "one\n")).toBe("IDENTICAL");
     expect(() => writeT022NoClobber(root, "out.json", "two\n")).toThrow(/REBASELINE_REQUIRED/);
