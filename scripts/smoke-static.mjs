@@ -326,6 +326,7 @@ async function main() {
     const verifyBurnkinCompletion = async () => {
       const context = await browser.createBrowserContext();
       const burnkinPage = await context.newPage();
+      await burnkinPage.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
       const errors = [];
       burnkinPage.on("console", (message) => {
         if (message.type() === "error") errors.push(`console: ${message.text()}`);
@@ -391,7 +392,41 @@ async function main() {
           } else if (await burnkinPage.$("main.phase-in_event")) {
             await clickAndWait(".event-choice:not([disabled])");
           } else if (await burnkinPage.$("main.phase-event_resolved")) {
-            await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+            const leave = await burnkinPage.$('button[data-action-kind="LEAVE_EVENT"]');
+            if (leave) {
+              await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+            } else {
+              const selected = await burnkinPage.$$eval(".workshop-materials button", (buttons) => {
+                for (let left = 0; left < buttons.length; left += 1) {
+                  const leftId = buttons[left].getAttribute("data-material-card-id");
+                  if (!leftId || leftId.startsWith("forge__")) continue;
+                  const right = buttons.slice(left + 1).find((button) => {
+                    const rightId = button.getAttribute("data-material-card-id");
+                    return rightId && rightId !== leftId && !rightId.startsWith("forge__");
+                  });
+                  if (!(buttons[left] instanceof HTMLButtonElement) || !(right instanceof HTMLButtonElement)) continue;
+                  buttons[left].click();
+                  right.click();
+                  return true;
+                }
+                return false;
+              });
+              if (!selected) throw new Error("Burnkin 무료 공방에서 서로 다른 두 재료를 찾지 못했습니다.");
+              await burnkinPage.waitForSelector(".forge-panel .canonical-preview");
+              await burnkinPage.click(".resolved-screen .primary-cta:not([disabled])");
+              await burnkinPage.waitForSelector('.forge-dialog[role="dialog"]');
+              await clickAndWait('.forge-dialog .primary-cta:not([disabled])');
+              await burnkinPage.waitForSelector(".discovery-overlay, .discovery-toast");
+              if (await burnkinPage.$(".discovery-overlay")) {
+                await burnkinPage.waitForSelector('.discovery-overlay[data-discovery-phase="FINAL"]');
+                await burnkinPage.click(".discovery-overlay button.primary-cta");
+                await burnkinPage.waitForSelector(".discovery-overlay", { hidden: true });
+              } else {
+                await burnkinPage.click(".discovery-toast button");
+                await burnkinPage.waitForSelector(".discovery-toast", { hidden: true });
+              }
+              await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+            }
           } else {
             const phase = await burnkinPage.$eval("main", (element) => element.className);
             throw new Error(`Burnkin 브라우저 완주가 알 수 없는 화면에 멈췄습니다: ${phase}`);
