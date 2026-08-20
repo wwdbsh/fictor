@@ -3,6 +3,7 @@ import {
   createCombatState,
   decodeCombatCommand,
   type CardDefinition,
+  type CombatCommand,
   type CombatEffectId,
   type CombatSetup,
   type EffectProgram,
@@ -56,6 +57,10 @@ import {
   BURNKIN_TRACK1_RULES,
   BURNKIN_TRACK1_SCENARIO_HASH,
   BURNKIN_TRACK1_SCENARIO_ID,
+  JOINKIN_TRACK1_CONFIG_HASH,
+  JOINKIN_TRACK1_PROVISIONAL_CONFIG,
+  JOINKIN_TRACK1_SCENARIO_HASH,
+  JOINKIN_TRACK1_SCENARIO_ID,
   STILLKIN_TRACK1_CONFIG_HASH,
   STILLKIN_TRACK1_PROVISIONAL_CONFIG as CONFIG,
   STILLKIN_TRACK1_SCENARIO_HASH,
@@ -88,14 +93,14 @@ type ControllerState = {
 
 type Track1RaceExecution = {
   raceId: Track1RaceId;
-  raceLabelKo: "어름붙이" | "사름붙이";
-  runPrefix: "stillkin-track1-run" | "burnkin-track1-run";
+  raceLabelKo: "어름붙이" | "사름붙이" | "이음붙이";
+  runPrefix: "stillkin-track1-run" | "burnkin-track1-run" | "joinkin-track1-run";
   scenarioId: StillkinTrack1FlowState["scenarioId"];
   scenarioHash: string;
   configId: StillkinTrack1FlowState["configId"];
   configHash: string;
   starterDeck: readonly string[];
-  baselineAttribute: "STILL" | "BURN";
+  baselineAttribute: "STILL" | "BURN" | "JOIN";
   resonanceRate: number;
   blockRetention: { numerator: number; denominator: number; rounding: "FLOOR" };
   saveV2Key: string;
@@ -137,6 +142,25 @@ const BURNKIN_EXECUTION: Track1RaceExecution = Object.freeze({
   saveV2Key: BURNKIN_TRACK1_SAVE_KEY,
   migrateV1: false,
   burnkinRules: BURNKIN_TRACK1_RULES,
+});
+
+export const JOINKIN_TRACK1_SAVE_KEY = "fictor.joinkin.save.v2" as const;
+
+const JOINKIN_EXECUTION: Track1RaceExecution = Object.freeze({
+  raceId: "Joinkin",
+  raceLabelKo: "이음붙이",
+  runPrefix: "joinkin-track1-run",
+  scenarioId: JOINKIN_TRACK1_SCENARIO_ID,
+  scenarioHash: JOINKIN_TRACK1_SCENARIO_HASH,
+  configId: JOINKIN_TRACK1_PROVISIONAL_CONFIG.configId,
+  configHash: JOINKIN_TRACK1_CONFIG_HASH,
+  starterDeck: JOINKIN_TRACK1_PROVISIONAL_CONFIG.starterDeck,
+  baselineAttribute: "JOIN",
+  resonanceRate: CONFIG.combat.resonanceRate,
+  blockRetention: Object.freeze({ numerator: 0, denominator: 1, rounding: "FLOOR" }),
+  saveV2Key: JOINKIN_TRACK1_SAVE_KEY,
+  migrateV1: false,
+  burnkinRules: null,
 });
 
 const TRACK1_PERSISTENCE_CATALOG = snapshotPersistenceCatalog({
@@ -288,6 +312,7 @@ function createStarterRuntime(profile: PersistentProfileV1, execution: Track1Rac
       ownedInstances,
       deck: ownedInstances.map(({ instanceId }) => instanceId),
       activeCombat: null,
+      ...(execution.raceId === "Joinkin" ? { joinkinThirdOverlays: [] } : {}),
     },
   };
 }
@@ -375,6 +400,26 @@ function syncProfile(runtime: ForgeRuntimeStateV1, profile: PersistentProfileV1)
   return decoded.valid ? decoded.value : null;
 }
 
+function joinkinOverlayAuthorityValid(runtime: ForgeRuntimeStateV1, context: ForgeResolverContextV1): boolean {
+  const expectedAttribute = (materialId: string) => {
+    const material = context.materials.find(({ id }) => id === materialId);
+    if (!material) return undefined;
+    const attribute = Array.isArray(material.attribute) ? material.attribute[0] : material.attribute;
+    return attribute === "NONE" ? null : attribute;
+  };
+  for (const overlay of runtime.run.joinkinThirdOverlays ?? []) {
+    if (expectedAttribute(overlay.thirdMaterialId) !== overlay.resonanceAttribute) return false;
+    const owned = runtime.run.ownedInstances.find(({ instanceId }) => instanceId === overlay.instanceId);
+    const recipeId = owned ? canonicalRecipeIdForCard(owned.cardId) : null;
+    if (!owned || recipeId === null || recipeId.split("|").includes(overlay.thirdMaterialId)) return false;
+  }
+  for (const result of runtime.run.activeCombat?.ephemeralResults ?? []) {
+    if (result.provenance?.kind !== "JOINKIN_THREE") continue;
+    if (expectedAttribute(result.provenance.thirdMaterialId) !== result.provenance.resonanceAttribute) return false;
+  }
+  return true;
+}
+
 function enemyIntents(kind: "NORMAL" | "ELITE" | "BOSS"): EnemyIntent[] {
   const damage = (intentId: string, amount: number, labelKo: string): EnemyIntent => ({
     intentId, labelKo, telegraph: "ATTACK", displayAmount: amount,
@@ -428,6 +473,62 @@ function playableResolvedCard(resolved: GeneratedCard): { card: CardDefinition; 
     },
     program: programForEffect(effectId),
   };
+}
+
+function baseResonanceAttribute(cardId: string, context: ForgeResolverContextV1, fallback: "JOIN"): import("../../domain/resonance").ResonanceAttribute {
+  const material = context.materials.find(({ id }) => id === cardId);
+  if (material) {
+    const attribute = Array.isArray(material.attribute) ? material.attribute[0] : material.attribute;
+    return attribute && attribute !== "NONE" ? attribute : fallback;
+  }
+  const playable = playableResolvedCard(canonicalResolvedCard(cardId, context));
+  if (!playable?.card.resonanceAttribute) throw new Error("Joinkin card has no resonance attribute");
+  return playable.card.resonanceAttribute;
+}
+
+function prepareJoinkinCardPlay(
+  runtime: ForgeRuntimeStateV1,
+  command: Extract<CombatCommand, { type: "PLAY_CARD" }>,
+  context: ForgeResolverContextV1,
+): { runtime: ForgeRuntimeStateV1; cardId: string; rawAttribute: import("../../domain/resonance").ResonanceAttribute; bridgeOpenAfter: boolean } | null {
+  const candidate = clone(runtime);
+  const active = candidate.run.activeCombat;
+  if (!active) return null;
+  const instance = active.state.instances.find(({ instanceId }) => instanceId === command.instanceId);
+  if (!instance) return null;
+  const card = active.state.cards.find(({ cardId }) => cardId === instance.cardId);
+  if (!card) return null;
+  const persistentOverlay = candidate.run.joinkinThirdOverlays?.find(({ instanceId }) => instanceId === command.instanceId);
+  const ephemeralOverlay = active.ephemeralResults.find(({ instanceId }) => instanceId === command.instanceId)?.provenance;
+  const overlayAttribute = persistentOverlay?.resonanceAttribute
+    ?? (ephemeralOverlay?.kind === "JOINKIN_THREE" ? ephemeralOverlay.resonanceAttribute : null);
+  const rawAttribute = overlayAttribute ?? baseResonanceAttribute(instance.cardId, context, "JOIN");
+  const bridgeOpen = active.joinkinBridgeOpen === true;
+  const current = active.state.resonance.activeAttribute;
+  const effectiveAttribute = rawAttribute === "JOIN" ? current ?? "JOIN" : rawAttribute;
+  if (rawAttribute !== "JOIN" && bridgeOpen && current !== null) {
+    const streak = active.state.resonance.streakByAttribute[current];
+    active.state.resonance = {
+      activeAttribute: rawAttribute,
+      streakByAttribute: { STILL: 0, BURN: 0, SCATTER: 0, ROT: 0, WASH: 0, JOIN: 0, [rawAttribute]: streak },
+    };
+  }
+  card.resonanceAttribute = effectiveAttribute;
+  return { runtime: candidate, cardId: instance.cardId, rawAttribute, bridgeOpenAfter: rawAttribute === "JOIN" };
+}
+
+function restoreJoinkinCardDefinition(
+  runtime: ForgeRuntimeStateV1,
+  cardId: string,
+  context: ForgeResolverContextV1,
+): ForgeRuntimeStateV1 | null {
+  const candidate = clone(runtime);
+  const active = candidate.run.activeCombat;
+  if (!active) return candidate;
+  const card = active.state.cards.find((item) => item.cardId === cardId);
+  if (card) card.resonanceAttribute = baseResonanceAttribute(cardId, context, "JOIN");
+  const decoded = decodeForgeRuntimeState(candidate);
+  return decoded.valid ? decoded.value : null;
 }
 
 function representInstantForge(
@@ -641,10 +742,13 @@ function commandSnapshot(raw: unknown): StillkinTrack1Command | null {
   const token = () => safeCount(value.expectedRevision) && typeof value.runId === "string";
   if (["ENTER_NEXT_NODE", "LEAVE_EVENT", "RESTART"].includes(value.type)) return common(["type", "expectedRevision", "runId"]) && token() ? value as unknown as StillkinTrack1Command : null;
   if (["CHOOSE_REWARD", "RESOLVE_EVENT"].includes(value.type)) return common(["type", "expectedRevision", "runId", "choiceId"]) && token() && typeof value.choiceId === "string" && value.choiceId.length > 0 ? value as unknown as StillkinTrack1Command : null;
-  if (["FORGE_WORKSHOP", "USE_FREE_WORKSHOP"].includes(value.type)) return common(["type", "expectedRevision", "runId", "materialInstanceIds"]) && token() && Array.isArray(value.materialInstanceIds) && value.materialInstanceIds.length === 2 && value.materialInstanceIds.every((id) => typeof id === "string" && id.length > 0) ? value as unknown as StillkinTrack1Command : null;
-  if (["APPLY_COMBAT", "FORGE_INSTANT", "BURNKIN_PAY_HP", "BURNKIN_KINDLE"].includes(value.type)) {
+  if (["FORGE_WORKSHOP", "USE_FREE_WORKSHOP", "JOINKIN_FORGE_WORKSHOP", "JOINKIN_USE_FREE_WORKSHOP"].includes(value.type)) {
+    const length = value.type.startsWith("JOINKIN_") ? 3 : 2;
+    return common(["type", "expectedRevision", "runId", "materialInstanceIds"]) && token() && Array.isArray(value.materialInstanceIds) && value.materialInstanceIds.length === length && value.materialInstanceIds.every((id) => typeof id === "string" && id.length > 0) ? value as unknown as StillkinTrack1Command : null;
+  }
+  if (["APPLY_COMBAT", "FORGE_INSTANT", "JOINKIN_FORGE_INSTANT", "JOINKIN_EXTEND", "BURNKIN_PAY_HP", "BURNKIN_KINDLE"].includes(value.type)) {
     const tail = value.type === "APPLY_COMBAT" ? "command"
-      : value.type === "FORGE_INSTANT" ? "materialInstanceIds"
+      : value.type === "FORGE_INSTANT" || value.type === "JOINKIN_FORGE_INSTANT" ? "materialInstanceIds"
         : value.type === "BURNKIN_KINDLE" ? "instanceId" : null;
     const keys = ["type", "expectedRevision", "runId", "nodeId", "encounterId", "encounterNonce", ...(tail ? [tail] : [])];
     if (!common(keys) || !token() || typeof value.nodeId !== "string" || typeof value.encounterId !== "string" || !safeCount(value.encounterNonce)) return null;
@@ -652,7 +756,7 @@ function commandSnapshot(raw: unknown): StillkinTrack1Command | null {
       const decoded = decodeCombatCommand(value.command);
       if (!decoded.valid) return null;
       value.command = decoded.value;
-    } else if (value.type === "FORGE_INSTANT" && (!Array.isArray(value.materialInstanceIds) || value.materialInstanceIds.length !== 2 || !value.materialInstanceIds.every((id) => typeof id === "string" && id.length > 0))) return null;
+    } else if ((value.type === "FORGE_INSTANT" || value.type === "JOINKIN_FORGE_INSTANT") && (!Array.isArray(value.materialInstanceIds) || value.materialInstanceIds.length !== (value.type === "JOINKIN_FORGE_INSTANT" ? 3 : 2) || !value.materialInstanceIds.every((id) => typeof id === "string" && id.length > 0))) return null;
     else if (value.type === "BURNKIN_KINDLE" && (typeof value.instanceId !== "string" || value.instanceId.length === 0)) return null;
     return value as unknown as StillkinTrack1Command;
   }
@@ -665,14 +769,16 @@ function bindingMatches(binding: Track1CombatBinding | null, command: Track1Comb
 
 function forgeEntitledWorkshop(
   runtime: ForgeRuntimeStateV1,
-  materialInstanceIds: [string, string],
+  materialInstanceIds: [string, string] | [string, string, string],
   context: ForgeResolverContextV1,
 ) {
   const originalFuel = runtime.run.fuel;
   const paymentFuel = Math.max(originalFuel, FORGE_RUNTIME_FUEL_COST);
   const paymentState = decodeForgeRuntimeState({ ...runtime, run: { ...runtime.run, fuel: paymentFuel } });
   if (!paymentState.valid) return null;
-  const result = reduceForgeRuntime(paymentState.value, { type: "FORGE_WORKSHOP", materialInstanceIds }, context);
+  const result = materialInstanceIds.length === 3
+    ? reduceForgeRuntime(paymentState.value, { type: "FORGE_WORKSHOP_THREE", materialInstanceIds }, context)
+    : reduceForgeRuntime(paymentState.value, { type: "FORGE_WORKSHOP", materialInstanceIds }, context);
   if (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED")) return null;
   const restored = decodeForgeRuntimeState({ ...result.state, run: { ...result.state.run, fuel: originalFuel } });
   if (!restored.valid) return null;
@@ -696,7 +802,8 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
   const stateAuthorityValid = (candidate: ControllerState): boolean => {
     if (candidate.profile.discoveredRecipeIds.length !== candidate.runtime.profile.discoveredRecipeIds.length
       || candidate.profile.discoveredRecipeIds.some((id, index) => id !== candidate.runtime.profile.discoveredRecipeIds[index])) return false;
-    if (!runtimeReferencesAllowed(candidate.runtime, TRACK1_PERSISTENCE_CATALOG)) return false;
+    if (!runtimeReferencesAllowed(candidate.runtime, TRACK1_PERSISTENCE_CATALOG)
+      || !joinkinOverlayAuthorityValid(candidate.runtime, options.context)) return false;
     if ((candidate.flow.phase === "IN_COMBAT") !== (candidate.runtime.run.activeCombat !== null)) return false;
     try {
       return candidate.flow.phase !== "IN_COMBAT" || loadedCombatMatchesAuthority(candidate.runtime, candidate.flow, options.context, execution);
@@ -832,7 +939,21 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
               const setup = combatSetup(candidate.runtime, candidate.flow, next, options.context, execution);
               const combat = createCombatState(setup);
               const binding = { runId: candidate.flow.runId, nodeId: next.nodeId, encounterId: next.encounterId, encounterNonce: candidate.flow.nextEncounterNonce };
-              const runtime = decodeForgeRuntimeState({ ...candidate.runtime, run: { ...candidate.runtime.run, activeCombat: { state: combat, enrolledPersistentInstanceIds: [...setup.deck], forgeActionTurn: 0, forgeActionsRemaining: 0, isolatedMaterials: [], ephemeralResults: [] } } });
+              const runtime = decodeForgeRuntimeState({
+                ...candidate.runtime,
+                run: {
+                  ...candidate.runtime.run,
+                  activeCombat: {
+                    state: combat,
+                    enrolledPersistentInstanceIds: [...setup.deck],
+                    forgeActionTurn: 0,
+                    forgeActionsRemaining: 0,
+                    isolatedMaterials: [],
+                    ephemeralResults: [],
+                    ...(execution.raceId === "Joinkin" ? { joinkinSkillUsedTurn: null, joinkinBridgeOpen: false } : {}),
+                  },
+                },
+              });
               if (!runtime.valid) failure = "COMBAT_SETUP_FAILED";
               else {
                 candidate.runtime = runtime.value;
@@ -844,14 +965,35 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
           }
         }
       }
-    } else if (command.type === "APPLY_COMBAT" || command.type === "FORGE_INSTANT" || command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") {
+    } else if (command.type === "APPLY_COMBAT" || command.type === "FORGE_INSTANT" || command.type === "JOINKIN_FORGE_INSTANT" || command.type === "JOINKIN_EXTEND" || command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") {
       if (candidate.flow.phase !== "IN_COMBAT" || !bindingMatches(candidate.flow.combatBinding, command)) failure = "STALE_ENCOUNTER_BINDING";
       else if (!candidate.runtime.run.activeCombat || candidate.runtime.run.activeCombat.state.enemy.enemyId !== command.encounterId) failure = "COMBAT_AUTHORITY_MISMATCH";
       else if ((command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") && execution.raceId !== "Burnkin") failure = "RACE_COMMAND_UNAVAILABLE";
+      else if ((command.type === "JOINKIN_FORGE_INSTANT" || command.type === "JOINKIN_EXTEND") && execution.raceId !== "Joinkin") failure = "RACE_COMMAND_UNAVAILABLE";
       else {
         const beforeResonance = candidate.runtime.run.activeCombat.state.resonance.activeAttribute;
         let result: { state: ForgeRuntimeStateV1 | null; events: StillkinTrack1Event[]; resolvedCard?: GeneratedCard };
-        if (command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") {
+        let joinkinPlay: ReturnType<typeof prepareJoinkinCardPlay> = null;
+        if (command.type === "JOINKIN_EXTEND") {
+          const active = candidate.runtime.run.activeCombat;
+          if (active.state.status !== "ONGOING" || active.state.phase !== "PLAYER_ACTION"
+            || active.forgeActionTurn !== active.state.turn || active.forgeActionsRemaining !== 1
+            || active.joinkinSkillUsedTurn === active.state.turn || candidate.runtime.revision === Number.MAX_SAFE_INTEGER) {
+            failure = "JOINKIN_EXTEND_UNAVAILABLE";
+            result = { state: candidate.runtime, events: [] };
+          } else {
+            const decoded = decodeForgeRuntimeState({
+              ...candidate.runtime,
+              revision: candidate.runtime.revision + 1,
+              run: {
+                ...candidate.runtime.run,
+                activeCombat: { ...active, forgeActionsRemaining: 2, joinkinSkillUsedTurn: active.state.turn },
+              },
+            });
+            if (!decoded.valid) { failure = "POSTCONDITION_FAILED"; result = { state: candidate.runtime, events: [] }; }
+            else result = { state: decoded.value, events: [{ type: "JOINKIN_FORGE_ACTION_GRANTED", remaining: 2, turn: active.state.turn }] };
+          }
+        } else if (command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") {
           const rules = execution.burnkinRules!;
           const transition = command.type === "BURNKIN_PAY_HP"
             ? payBurnkinHpForEnergy(candidate.runtime.run.activeCombat.state, rules)
@@ -877,14 +1019,33 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
             } else result = { state: decoded.value, events: [...transition.events] };
           }
         } else {
+          let runtimeInput = candidate.runtime;
+          if (execution.raceId === "Joinkin" && command.type === "APPLY_COMBAT" && command.command.type === "PLAY_CARD") {
+            joinkinPlay = prepareJoinkinCardPlay(candidate.runtime, command.command, options.context);
+            if (!joinkinPlay) failure = "RUNTIME_REJECTED";
+            else runtimeInput = joinkinPlay.runtime;
+          }
           const runtimeCommand = command.type === "APPLY_COMBAT"
             ? { type: "APPLY_COMBAT" as const, command: command.command }
-            : { type: "FORGE_INSTANT" as const, materialInstanceIds: command.materialInstanceIds };
-          result = reduceForgeRuntime(candidate.runtime, runtimeCommand, options.context) as typeof result;
+            : command.type === "JOINKIN_FORGE_INSTANT"
+              ? { type: "FORGE_INSTANT_THREE" as const, materialInstanceIds: command.materialInstanceIds }
+              : { type: "FORGE_INSTANT" as const, materialInstanceIds: command.materialInstanceIds };
+          result = failure ? { state: candidate.runtime, events: [] } : reduceForgeRuntime(runtimeInput, runtimeCommand, options.context) as typeof result;
+          if (!failure && joinkinPlay && result.state) {
+            const restored = restoreJoinkinCardDefinition(result.state, joinkinPlay.cardId, options.context);
+            const active = restored?.run.activeCombat;
+            if (!restored || !active) failure = "POSTCONDITION_FAILED";
+            else {
+              active.joinkinBridgeOpen = active.state.status === "ONGOING" ? joinkinPlay.bridgeOpenAfter : false;
+              const decoded = decodeForgeRuntimeState(restored);
+              if (!decoded.valid) failure = "POSTCONDITION_FAILED";
+              else result.state = decoded.value;
+            }
+          }
         }
         if (!failure && (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED"))) failure = "RUNTIME_REJECTED";
         else if (!failure && result.state) {
-          let represented: { state: ForgeRuntimeStateV1; events: StillkinTrack1Event[] } | null = command.type === "FORGE_INSTANT"
+          let represented: { state: ForgeRuntimeStateV1; events: StillkinTrack1Event[] } | null = command.type === "FORGE_INSTANT" || command.type === "JOINKIN_FORGE_INSTANT"
             ? representInstantForge(result as ForgeRuntimeReducerResult, options.context)
             : { state: result.state, events: [...result.events] };
           if (represented && execution.raceId === "Burnkin" && command.type === "APPLY_COMBAT" && command.command.type === "PLAY_CARD") {
@@ -1019,8 +1180,10 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
         if (!failure && candidate.flow.phase !== "RUN_LOST") candidate.flow.phase = "EVENT_RESOLVED";
         if (!failure) events.push({ type: "EVENT_RESOLVED", eventType, choiceId: command.choiceId });
       }
-    } else if (command.type === "USE_FREE_WORKSHOP") {
-      if (candidate.flow.phase !== "EVENT_RESOLVED" || node?.kind !== "EVENT" || node.eventType !== "WORKSHOP" || candidate.flow.workshopEntitlementNodeId !== node.nodeId) failure = "NO_WORKSHOP_ENTITLEMENT";
+    } else if (command.type === "USE_FREE_WORKSHOP" || command.type === "JOINKIN_USE_FREE_WORKSHOP") {
+      if (command.type === "JOINKIN_USE_FREE_WORKSHOP" && execution.raceId !== "Joinkin") failure = "RACE_COMMAND_UNAVAILABLE";
+      else if (command.type === "USE_FREE_WORKSHOP" && execution.raceId === "Joinkin") failure = "RACE_COMMAND_UNAVAILABLE";
+      else if (candidate.flow.phase !== "EVENT_RESOLVED" || node?.kind !== "EVENT" || node.eventType !== "WORKSHOP" || candidate.flow.workshopEntitlementNodeId !== node.nodeId) failure = "NO_WORKSHOP_ENTITLEMENT";
       else {
         const result = forgeEntitledWorkshop(candidate.runtime, command.materialInstanceIds, options.context);
         if (!result) failure = "RUNTIME_REJECTED";
@@ -1032,10 +1195,14 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
           if (profile.kind !== "VALID") failure = "PROFILE_SYNC_FAILED"; else candidate.profile = profile.value;
         }
       }
-    } else if (command.type === "FORGE_WORKSHOP") {
-      if (candidate.flow.phase !== "BETWEEN_NODES" && candidate.flow.phase !== "EVENT_RESOLVED") failure = "INVALID_PHASE";
+    } else if (command.type === "FORGE_WORKSHOP" || command.type === "JOINKIN_FORGE_WORKSHOP") {
+      if (command.type === "JOINKIN_FORGE_WORKSHOP" && execution.raceId !== "Joinkin") failure = "RACE_COMMAND_UNAVAILABLE";
+      else if (command.type === "FORGE_WORKSHOP" && execution.raceId === "Joinkin") failure = "RACE_COMMAND_UNAVAILABLE";
+      else if (candidate.flow.phase !== "BETWEEN_NODES" && candidate.flow.phase !== "EVENT_RESOLVED") failure = "INVALID_PHASE";
       else {
-        const result = reduceForgeRuntime(candidate.runtime, { type: "FORGE_WORKSHOP", materialInstanceIds: command.materialInstanceIds }, options.context);
+        const result = command.type === "JOINKIN_FORGE_WORKSHOP"
+          ? reduceForgeRuntime(candidate.runtime, { type: "FORGE_WORKSHOP_THREE", materialInstanceIds: command.materialInstanceIds }, options.context)
+          : reduceForgeRuntime(candidate.runtime, { type: "FORGE_WORKSHOP", materialInstanceIds: command.materialInstanceIds }, options.context);
         if (!result.state || result.events.some((event) => event.type === "FORGE_REJECTED" || event.type === "COMMAND_REJECTED")) failure = "RUNTIME_REJECTED";
         else {
           candidate.runtime = result.state; events.push(...result.events);
@@ -1082,8 +1249,13 @@ export function createBurnkinTrack1Controller(rawOptions: StillkinTrack1Controll
   return createTrack1ControllerInternal(rawOptions, BURNKIN_EXECUTION);
 }
 
+export function createJoinkinTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown): StillkinTrack1Controller {
+  return createTrack1ControllerInternal(rawOptions, JOINKIN_EXECUTION);
+}
+
 export function createTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown, raceId: Track1RaceId): StillkinTrack1Controller {
   if (raceId === "Stillkin") return createTrack1ControllerInternal(rawOptions, STILLKIN_EXECUTION);
   if (raceId === "Burnkin") return createTrack1ControllerInternal(rawOptions, BURNKIN_EXECUTION);
+  if (raceId === "Joinkin") return createTrack1ControllerInternal(rawOptions, JOINKIN_EXECUTION);
   throw new TypeError("race is not enabled for Track 1");
 }

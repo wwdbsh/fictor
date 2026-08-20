@@ -18,6 +18,27 @@ Track 1 공개 경계는 종족별 factory 또는 `createTrack1Controller({ stor
 결과·공방 성공 여부를 제출할 수 없다. 과거 `run-flow-state-v1` reducer와 game-session 조합기는
 rollback을 위한 deep module에 남지만 application root에서는 노출하지 않는다.
 
+## T034 Joinkin
+
+종족 선택에 `Joinkin / 이음붙이`가 추가된다. 어름의 터 고정 route와 T027 provisional 전투 숫자를
+재사용하지만 save/config/scenario/run id는 별도다. 시작 덱은 결속 재료 20장과 unique tool 10장이다.
+Stillkin/Burnkin 진행 bytes는 선택을 바꿔도 삭제하거나 다시 쓰지 않는다.
+
+Joinkin 빚기 화면은 선택 순서를 `기본 재료 A`, `기본 재료 B`, `세 번째 공명 재료`로 표시한다. A/B만
+canonical preview, recipe, art와 도감 1,326개 항목을 결정한다. C는 해당 결과 instance에 적용할 공명
+속성 overlay로 따로 표시하며 도구 C는 `기본 결과 공명 유지`라고 표시한다. 즉석은 손에서 세 장을 골라
+action 1을 쓰고, 유료/무료 공방은 영구 소모 dialog에서 세 재료·결과·연료 전후를 확인해야 실행 descriptor가
+생긴다. preview/review는 run/revision/focus/screen capability에 묶여 stale 상태에서 명령을 만들 수 없다.
+
+전투에서 `이어붙이기`는 남은 빚기 행동 1을 2로 늘리며 턴당 한 번이다. END/terminal 뒤 추가 행동은
+남지 않는다. JOIN 카드는 현재 공명을 이어 bridge를 열고, 다음 non-JOIN 카드가 그 streak를 이어받아 새
+active 속성이 되며 bridge를 닫는다. 이 effective 전이는 power와 event에 먼저 반영된다.
+
+즉석 세 장은 전투 종료 때 정확히 복구되고 결과는 제거된다. 공방 세 장은 영구 소모되고 결과와 C overlay가
+저장된다. 무료 공방은 entitlement만 소비하고 fuel은 그대로다. 어느 모드든 discovery는 base pair recipe
+하나뿐이며 Codex card 수, recipe와 art는 변하지 않는다. 현재 어름 엘리트의 도구 보상은 Joinkin이 이미
+모든 도구를 소유하므로 함께 제시되는 비도구 보상을 선택해야 한다.
+
 모든 공개 command는 own data property만 허용하는 descriptor snapshot을 한 번 만든 뒤 처리한다.
 접근자, Proxy 반사 실패, symbol key, sparse 배열, 순환 참조와 추가 키는 거부한다. command 결과와
 `snapshot()`은 깊은 복사본이므로 controller 권한 객체와 별칭을 만들지 않는다. run command에는

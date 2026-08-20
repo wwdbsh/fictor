@@ -1,6 +1,6 @@
 import { reduceCombat } from "../combat";
 import type { CardInstance, CombatEvent } from "../combat";
-import { resolveForgeCard } from "../forge";
+import { resolveForgeCard, resolveJoinkinForgeCard } from "../forge";
 import type { GeneratedCard } from "../forge";
 import {
   decodeForgeResolverContext,
@@ -140,6 +140,18 @@ function selectInstances(
   return { ok: true, instances: [first, second] };
 }
 
+function selectThreeInstances(
+  state: ForgeRuntimeStateV1,
+  command: Extract<ForgeRuntimeCommand, { type: "FORGE_INSTANT_THREE" | "FORGE_WORKSHOP_THREE" }>,
+):
+  | { ok: true; instances: [CardInstance, CardInstance, CardInstance] }
+  | { ok: false; reason: ForgeRuntimeFailureCode } {
+  if (new Set(command.materialInstanceIds).size !== 3) return { ok: false, reason: "DUPLICATE_INSTANCE_SELECTION" };
+  const instances = command.materialInstanceIds.map((id) => state.run.ownedInstances.find((item) => item.instanceId === id));
+  if (instances.some((item) => !item)) return { ok: false, reason: "INSTANCE_NOT_FOUND" };
+  return { ok: true, instances: instances as [CardInstance, CardInstance, CardInstance] };
+}
+
 function materialDefinitions(
   context: ForgeResolverContextV1,
   instances: [CardInstance, CardInstance],
@@ -151,6 +163,18 @@ function materialDefinitions(
   if (!firstMaterial || !secondMaterial) return { ok: false, reason: "NOT_A_MATERIAL" };
   if (instances[0].cardId === instances[1].cardId) return { ok: false, reason: "SAME_MATERIAL_DEFINITION" };
   return { ok: true, materials: [firstMaterial, secondMaterial] };
+}
+
+function threeMaterialDefinitions(
+  context: ForgeResolverContextV1,
+  instances: [CardInstance, CardInstance, CardInstance],
+):
+  | { ok: true; materials: [ForgeResolverContextV1["materials"][number], ForgeResolverContextV1["materials"][number], ForgeResolverContextV1["materials"][number]] }
+  | { ok: false; reason: ForgeRuntimeFailureCode } {
+  const materials = instances.map((instance) => context.materials.find((item) => item.id === instance.cardId));
+  if (materials.some((item) => !item)) return { ok: false, reason: "NOT_A_MATERIAL" };
+  if (new Set(instances.map(({ cardId }) => cardId)).size !== 3) return { ok: false, reason: "SAME_MATERIAL_DEFINITION" };
+  return { ok: true, materials: materials as [ForgeResolverContextV1["materials"][number], ForgeResolverContextV1["materials"][number], ForgeResolverContextV1["materials"][number]] };
 }
 
 function applyCombat(
@@ -172,8 +196,11 @@ function applyCombat(
   if (command.command.type === "START_TURN") {
     active.forgeActionTurn = active.state.turn;
     active.forgeActionsRemaining = 1;
+    if ("joinkinSkillUsedTurn" in active) active.joinkinSkillUsedTurn = null;
   } else if (command.command.type === "END_TURN" || active.state.status !== "ONGOING") {
     active.forgeActionsRemaining = 0;
+    if ("joinkinSkillUsedTurn" in active) active.joinkinSkillUsedTurn = null;
+    if ("joinkinBridgeOpen" in active && active.state.status !== "ONGOING") active.joinkinBridgeOpen = false;
   }
   const events: ForgeRuntimeEvent[] = [...combatResult.events];
   if (active.state.status !== "ONGOING") events.push(cleanupActive(active));
@@ -191,7 +218,7 @@ function forgeInstant(
   if (!active) return reject(state, command.type, "COMBAT_NOT_ACTIVE");
   if (active.state.status !== "ONGOING") return reject(state, command.type, "TERMINAL_COMBAT");
   if (active.state.phase !== "PLAYER_ACTION") return reject(state, command.type, "INVALID_COMBAT_PHASE");
-  if (active.forgeActionTurn !== active.state.turn || active.forgeActionsRemaining !== 1) return reject(state, command.type, "NO_FORGE_ACTION");
+  if (active.forgeActionTurn !== active.state.turn || active.forgeActionsRemaining < 1) return reject(state, command.type, "NO_FORGE_ACTION");
 
   const selected = selectInstances(state, command);
   if (!selected.ok) return reject(state, command.type, selected.reason);
@@ -229,8 +256,9 @@ function forgeInstant(
     cardId: resolvedCard.card_id,
     recipeId: resolvedCard.recipe_id,
     location: "HAND",
+    provenance: { kind: "PAIR", materialInstanceIds: isolatedIds },
   });
-  active.forgeActionsRemaining -= 1;
+  active.forgeActionsRemaining = (active.forgeActionsRemaining - 1) as 0 | 1;
   state.run.nextInstanceSequence += 1;
   state.revision += 1;
   const discovered = insertDiscovery(state, resolvedCard.recipe_id);
@@ -241,6 +269,64 @@ function forgeInstant(
   ];
   if (discovered) events.push({ type: "RECIPE_DISCOVERED", recipeId: resolvedCard.recipe_id });
   return commit(state, rollbackState, events, command.type, resolvedCard);
+}
+
+function forgeInstantThree(
+  state: ForgeRuntimeStateV1,
+  rollbackState: ForgeRuntimeStateV1,
+  command: Extract<ForgeRuntimeCommand, { type: "FORGE_INSTANT_THREE" }>,
+  context: ForgeResolverContextV1,
+): ForgeRuntimeSuccessResult {
+  const active = state.run.activeCombat;
+  if (!active) return reject(state, command.type, "COMBAT_NOT_ACTIVE");
+  if (active.state.status !== "ONGOING") return reject(state, command.type, "TERMINAL_COMBAT");
+  if (active.state.phase !== "PLAYER_ACTION") return reject(state, command.type, "INVALID_COMBAT_PHASE");
+  if (active.forgeActionTurn !== active.state.turn || active.forgeActionsRemaining < 1) return reject(state, command.type, "NO_FORGE_ACTION");
+  const selected = selectThreeInstances(state, command);
+  if (!selected.ok) return reject(state, command.type, selected.reason);
+  for (const instance of selected.instances) {
+    if (!active.enrolledPersistentInstanceIds.includes(instance.instanceId)) return reject(state, command.type, "INSTANCE_NOT_FOUND");
+    const projected = active.state.instances.find((item) => item.instanceId === instance.instanceId);
+    if (!projected || projected.cardId !== instance.cardId) return reject(state, command.type, "INSTANCE_NOT_FOUND");
+    if (!active.state.zones.hand.includes(instance.instanceId)) return reject(state, command.type, "NOT_IN_HAND");
+  }
+  const definitions = threeMaterialDefinitions(context, selected.instances);
+  if (!definitions.ok) return reject(state, command.type, definitions.reason);
+  const generatedId = nextInstanceId(state);
+  if (!generatedId.ok) return reject(state, command.type, generatedId.reason);
+  if (state.revision === Number.MAX_SAFE_INTEGER) return reject(state, command.type, "POSTCONDITION_FAILED");
+  let resolution: ReturnType<typeof resolveJoinkinForgeCard>;
+  try { resolution = resolveJoinkinForgeCard(...definitions.materials, context.inputs); }
+  catch { return reject(state, command.type, definitions.materials[0].category === "TOOL" && definitions.materials[1].category === "TOOL" ? "EQUIPMENT_BASE_NOT_ALLOWED" : "RESOLUTION_FAILED"); }
+  if (!isSafeResolvedCard(resolution.card)) return reject(state, command.type, "RESOLUTION_FAILED");
+  const selectedIds = new Set(command.materialInstanceIds);
+  active.state.zones.hand = active.state.zones.hand.filter((id) => !selectedIds.has(id));
+  active.state.instances = active.state.instances.filter((item) => !selectedIds.has(item.instanceId));
+  active.isolatedMaterials.push(...selected.instances.map((instance) => ({ instance })));
+  active.ephemeralResults.push({
+    instanceId: generatedId.instanceId,
+    cardId: resolution.card.card_id,
+    recipeId: resolution.card.recipe_id,
+    location: "HAND",
+    provenance: {
+      kind: "JOINKIN_THREE",
+      baseMaterialInstanceIds: [selected.instances[0].instanceId, selected.instances[1].instanceId],
+      thirdMaterialInstanceId: selected.instances[2].instanceId,
+      thirdMaterialId: resolution.overlay.third_material_id,
+      resonanceAttribute: resolution.overlay.resonance_attribute,
+    },
+  });
+  active.forgeActionsRemaining = (active.forgeActionsRemaining - 1) as 0 | 1;
+  state.run.nextInstanceSequence += 1;
+  state.revision += 1;
+  const discovered = insertDiscovery(state, resolution.card.recipe_id);
+  const events: ForgeRuntimeEvent[] = [
+    { type: "MATERIALS_ISOLATED", instanceIds: [...command.materialInstanceIds] },
+    { type: "FORGE_ACTION_SPENT", remaining: active.forgeActionsRemaining, turn: active.state.turn },
+    { type: "FORGE_RESULT_CREATED", mode: "INSTANT", instanceId: generatedId.instanceId, cardId: resolution.card.card_id, recipeId: resolution.card.recipe_id, location: "HAND" },
+  ];
+  if (discovered) events.push({ type: "RECIPE_DISCOVERED", recipeId: resolution.card.recipe_id });
+  return commit(state, rollbackState, events, command.type, resolution.card);
 }
 
 function forgeWorkshop(
@@ -285,6 +371,48 @@ function forgeWorkshop(
   return commit(state, rollbackState, events, command.type, resolvedCard);
 }
 
+function forgeWorkshopThree(
+  state: ForgeRuntimeStateV1,
+  rollbackState: ForgeRuntimeStateV1,
+  command: Extract<ForgeRuntimeCommand, { type: "FORGE_WORKSHOP_THREE" }>,
+  context: ForgeResolverContextV1,
+): ForgeRuntimeSuccessResult {
+  if (state.run.activeCombat !== null) return reject(state, command.type, "COMBAT_ACTIVE");
+  const selected = selectThreeInstances(state, command);
+  if (!selected.ok) return reject(state, command.type, selected.reason);
+  for (const instance of selected.instances) if (!state.run.deck.includes(instance.instanceId)) return reject(state, command.type, "NOT_IN_DECK");
+  const definitions = threeMaterialDefinitions(context, selected.instances);
+  if (!definitions.ok) return reject(state, command.type, definitions.reason);
+  if (state.run.fuel < FORGE_RUNTIME_FUEL_COST) return reject(state, command.type, "INSUFFICIENT_FUEL");
+  const generatedId = nextInstanceId(state);
+  if (!generatedId.ok) return reject(state, command.type, generatedId.reason);
+  if (state.revision === Number.MAX_SAFE_INTEGER) return reject(state, command.type, "POSTCONDITION_FAILED");
+  let resolution: ReturnType<typeof resolveJoinkinForgeCard>;
+  try { resolution = resolveJoinkinForgeCard(...definitions.materials, context.inputs); }
+  catch { return reject(state, command.type, definitions.materials[0].category === "TOOL" && definitions.materials[1].category === "TOOL" ? "EQUIPMENT_BASE_NOT_ALLOWED" : "RESOLUTION_FAILED"); }
+  if (!isSafeResolvedCard(resolution.card)) return reject(state, command.type, "RESOLUTION_FAILED");
+  const selectedIds = new Set(command.materialInstanceIds);
+  state.run.ownedInstances = state.run.ownedInstances.filter((item) => !selectedIds.has(item.instanceId));
+  state.run.deck = state.run.deck.filter((id) => !selectedIds.has(id));
+  state.run.ownedInstances.push({ instanceId: generatedId.instanceId, cardId: resolution.card.card_id });
+  state.run.deck.push(generatedId.instanceId);
+  state.run.joinkinThirdOverlays = [
+    ...(state.run.joinkinThirdOverlays ?? []).filter(({ instanceId }) => !selectedIds.has(instanceId)),
+    { instanceId: generatedId.instanceId, thirdMaterialId: resolution.overlay.third_material_id, resonanceAttribute: resolution.overlay.resonance_attribute },
+  ];
+  state.run.fuel -= FORGE_RUNTIME_FUEL_COST;
+  state.run.nextInstanceSequence += 1;
+  state.revision += 1;
+  const discovered = insertDiscovery(state, resolution.card.recipe_id);
+  const events: ForgeRuntimeEvent[] = [
+    { type: "MATERIALS_CONSUMED", instanceIds: [...command.materialInstanceIds] },
+    { type: "FUEL_SPENT", amount: FORGE_RUNTIME_FUEL_COST, remaining: state.run.fuel },
+    { type: "FORGE_RESULT_CREATED", mode: "WORKSHOP", instanceId: generatedId.instanceId, cardId: resolution.card.card_id, recipeId: resolution.card.recipe_id, location: "DECK" },
+  ];
+  if (discovered) events.push({ type: "RECIPE_DISCOVERED", recipeId: resolution.card.recipe_id });
+  return commit(state, rollbackState, events, command.type, resolution.card);
+}
+
 function cleanupCombat(
   state: ForgeRuntimeStateV1,
   rollbackState: ForgeRuntimeStateV1,
@@ -321,7 +449,9 @@ export function reduceForgeRuntime(
   switch (command.type) {
     case "APPLY_COMBAT": return applyCombat(working, state, command);
     case "FORGE_INSTANT": return forgeInstant(working, state, command, context);
+    case "FORGE_INSTANT_THREE": return forgeInstantThree(working, state, command, context);
     case "FORGE_WORKSHOP": return forgeWorkshop(working, state, command, context);
+    case "FORGE_WORKSHOP_THREE": return forgeWorkshopThree(working, state, command, context);
     case "CLEANUP_COMBAT": return cleanupCombat(working, state, command);
   }
 }

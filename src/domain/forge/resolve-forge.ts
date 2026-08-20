@@ -7,6 +7,7 @@ import type {
   ForgeMaterial,
   ForgeResultClass,
   GeneratedCard,
+  JoinkinForgeResult,
   ToolDomain,
 } from "./types";
 
@@ -14,6 +15,38 @@ const MATERIAL_ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 function compareIds(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
+}
+
+/**
+ * Applies Joinkin's explicit third material without producing a new canonical
+ * card identity. The returned card is the exact A/B makeTier2 result.
+ */
+export function applyThird(
+  base: GeneratedCard,
+  third: ForgeMaterial,
+): JoinkinForgeResult {
+  if (!MATERIAL_ID_PATTERN.test(third.id)) throw new Error(`unsafe material id: ${third.id}`);
+  const attribute = Array.isArray(third.attribute) ? third.attribute[0] : third.attribute;
+  return {
+    card: base,
+    overlay: {
+      third_material_id: third.id,
+      resonance_attribute: attribute === "NONE" ? null : attribute,
+    },
+  };
+}
+
+export function resolveJoinkinForgeCard(
+  first: ForgeMaterial,
+  second: ForgeMaterial,
+  third: ForgeMaterial,
+  inputs: ForgeInputs,
+): JoinkinForgeResult {
+  const ids = [first.id, second.id, third.id];
+  if (new Set(ids).size !== ids.length) throw new Error("Joinkin materials must have distinct definitions");
+  const base = resolveForgeCard(first, second, inputs);
+  if (base.branch === "EQUIPMENT") throw new Error("Joinkin base pair cannot be equipment");
+  return applyThird(base, third);
 }
 
 function effectiveAttribute(material: ForgeMaterial): ForgeAttribute {

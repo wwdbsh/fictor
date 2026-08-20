@@ -15,6 +15,7 @@ export type Track1UiActionKind =
   | "END_TURN"
   | "BURNKIN_PAY_HP"
   | "BURNKIN_KINDLE"
+  | "JOINKIN_EXTEND"
   | "CHOOSE_REWARD"
   | "RESOLVE_EVENT"
   | "FORGE_INSTANT"
@@ -108,8 +109,16 @@ export interface Track1UiForgeCanonicalPreview {
 export interface Track1UiForgePreview {
   readonly previewId: string;
   readonly mode: Track1UiForgeMode;
-  readonly selectedInstanceIds: readonly [string, string];
+  readonly selectedInstanceIds: readonly [string, string] | readonly [string, string, string];
+  readonly requiredMaterialCount: 2 | 3;
   readonly canonical: Track1UiForgeCanonicalPreview;
+  readonly thirdOverlay: null | {
+    readonly materialId: string;
+    readonly nameKo: string;
+    readonly artSrc: string;
+    readonly resonanceAttribute: "STILL" | "BURN" | "SCATTER" | "ROT" | "WASH" | "JOIN" | null;
+    readonly labelKo: string;
+  };
   readonly cost: {
     readonly kind: "ACTION" | "FUEL" | "FREE_ENTITLEMENT";
     readonly labelKo: string;
@@ -168,8 +177,8 @@ interface Track1UiBaseProjection {
   readonly feedback: null | { readonly tone: "STATUS" | "ERROR"; readonly messageKo: string };
   readonly featureFlags: { readonly heartForge: false };
   readonly codexDiscoveredCount: number;
-  readonly raceId: "Stillkin" | "Burnkin";
-  readonly raceLabelKo: "어름붙이" | "사름붙이";
+  readonly raceId: "Stillkin" | "Burnkin" | "Joinkin";
+  readonly raceLabelKo: "어름붙이" | "사름붙이" | "이음붙이";
 }
 
 export interface Track1UiBlockedProjection extends Track1UiBaseProjection {
@@ -212,6 +221,8 @@ export interface Track1UiCombatProjection extends Track1UiBaseProjection {
   readonly instructionKo: string;
   readonly burnkinPassiveAction: Track1UiActionDescriptor | null;
   readonly burnkinRulesKo: string | null;
+  readonly joinkinExtendAction: Track1UiActionDescriptor | null;
+  readonly joinkinRulesKo: string | null;
 }
 
 export interface Track1UiRewardProjection extends Track1UiBaseProjection {

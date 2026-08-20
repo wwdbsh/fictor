@@ -284,6 +284,13 @@ export function runtimeReferencesAllowed(runtime: ForgeRuntimeStateV1, catalog: 
   const ownedToolIds = runtime.run.ownedInstances.map(({ cardId }) => cardId).filter((cardId) => TOOL_ID_SET.has(cardId));
   if (new Set(ownedToolIds).size !== ownedToolIds.length) return false;
   if (runtime.run.deck.some((id) => !safeInstanceId(id))) return false;
+  if ((runtime.run.joinkinThirdOverlays ?? []).some((item) =>
+    !safeInstanceId(item.instanceId) || !MATERIAL_ID_SET.has(item.thirdMaterialId)
+    || (() => {
+      const owned = runtime.run.ownedInstances.find(({ instanceId }) => instanceId === item.instanceId);
+      const recipeId = owned ? FORGE_CARD_RECIPE_MAP.get(owned.cardId) : undefined;
+      return !recipeId || recipeId.split("|").includes(item.thirdMaterialId);
+    })())) return false;
   const active = runtime.run.activeCombat;
   if (!active) return true;
   if (!catalog.allowedEnemyIds.has(active.state.enemy.enemyId)) return false;
@@ -298,7 +305,13 @@ export function runtimeReferencesAllowed(runtime: ForgeRuntimeStateV1, catalog: 
   if (active.isolatedMaterials.some((item) => !safeInstanceId(item.instance.instanceId) || !cardAllowed(item.instance.cardId))) return false;
   return active.ephemeralResults.every((item) => {
     const recipeId = FORGE_CARD_RECIPE_MAP.get(item.cardId);
-    return safeInstanceId(item.instanceId) && recipeId === item.recipeId && discoveries.has(item.recipeId);
+    if (!(safeInstanceId(item.instanceId) && recipeId === item.recipeId && discoveries.has(item.recipeId))) return false;
+    if (item.provenance?.kind === "JOINKIN_THREE") {
+      return MATERIAL_ID_SET.has(item.provenance.thirdMaterialId)
+        && safeInstanceId(item.provenance.thirdMaterialInstanceId)
+        && item.provenance.baseMaterialInstanceIds.every(safeInstanceId);
+    }
+    return item.provenance?.kind !== "PAIR" || item.provenance.materialInstanceIds.every(safeInstanceId);
   });
 }
 

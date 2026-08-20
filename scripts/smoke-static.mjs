@@ -364,6 +364,111 @@ async function main() {
     };
     const burnkinSelection = await verifyBurnkinSelection();
 
+    const verifyJoinkinSelection = async () => {
+      const context = await browser.createBrowserContext();
+      const joinkinPage = await context.newPage();
+      const clickAndWait = async (selector) => {
+        const before = await joinkinPage.$eval("main", (element) => element.getAttribute("data-screen-key"));
+        await joinkinPage.click(selector);
+        await joinkinPage.waitForFunction((screenKey) => {
+          const main = document.querySelector("main");
+          return main?.getAttribute("aria-busy") === "false" && main.getAttribute("data-screen-key") !== screenKey;
+        }, {}, before);
+      };
+      try {
+        const response = await joinkinPage.goto(pageUrl, { waitUntil: "networkidle0" });
+        if (response === null || !response.ok()) throw new Error(`Joinkin 선택 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
+        await joinkinPage.waitForSelector(".race-select-screen");
+        const selected = await joinkinPage.$$eval(".race-choice button", (buttons) => {
+          const button = buttons.find((candidate) => candidate.textContent?.includes("이음붙이로 시작"));
+          if (!(button instanceof HTMLButtonElement)) return false;
+          button.click();
+          return true;
+        });
+        if (!selected) throw new Error("Joinkin 선택 버튼을 찾지 못했습니다.");
+        await joinkinPage.waitForSelector("main.phase-between_nodes");
+        await joinkinPage.click('.journey-actions > button:not(.primary-cta)');
+        await joinkinPage.waitForSelector('.forge-panel[aria-label="공방 빚기"]');
+        const selectedSlots = await joinkinPage.$$eval(".workshop-materials button", (buttons) => {
+          const seen = new Set();
+          const selectedButtons = [];
+          for (const button of buttons) {
+            const cardId = button.getAttribute("data-material-card-id");
+            if (!cardId || seen.has(cardId)) continue;
+            seen.add(cardId);
+            selectedButtons.push(button);
+            if (selectedButtons.length === 3) break;
+          }
+          if (selectedButtons.length !== 3 || !selectedButtons.every((button) => button instanceof HTMLButtonElement)) return false;
+          selectedButtons.forEach((button) => button.click());
+          return true;
+        });
+        if (!selectedSlots) throw new Error("Joinkin 공방 3-slot 선택에 실패했습니다.");
+        await joinkinPage.waitForSelector(".forge-panel .canonical-preview");
+        const workshopText = await joinkinPage.$eval(".forge-panel", (element) => element.textContent ?? "");
+        if (!workshopText.includes("기본 재료 A") || !workshopText.includes("기본 재료 B") || !workshopText.includes("세 번째 공명 재료")
+          || !workshopText.includes("세 번째 재료") || !workshopText.includes("공명 오버레이")) {
+          throw new Error(`Joinkin 공방 slot/overlay 표시가 없습니다: ${workshopText}`);
+        }
+        await joinkinPage.click(".forge-panel .primary-cta:not([disabled])");
+        await joinkinPage.waitForSelector('.forge-dialog[role="dialog"]');
+        const dialogText = await joinkinPage.$eval('.forge-dialog[role="dialog"]', (element) => element.textContent ?? "");
+        if (!dialogText.includes("선택한 세 재료는 영구적으로 소모") || !dialogText.includes("영구 소모 세 번째 재료")) {
+          throw new Error(`Joinkin 영구 소모 확인 문구가 없습니다: ${dialogText}`);
+        }
+        await joinkinPage.keyboard.press("Escape");
+        await joinkinPage.waitForSelector('.forge-dialog[role="dialog"]', { hidden: true });
+        await joinkinPage.click(".forge-panel-heading .surface-close");
+
+        await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
+        await clickAndWait('button[data-action-kind="START_TURN"]');
+        await joinkinPage.waitForSelector('button[data-action-kind="JOINKIN_EXTEND"]');
+        await clickAndWait('button[data-action-kind="JOINKIN_EXTEND"]');
+        await joinkinPage.click(".instant-mode-toggle");
+        const handSelected = await joinkinPage.$$eval("button.combat-card:not([disabled])", (cards) => {
+          const seen = new Set();
+          const selectedButtons = [];
+          for (const card of cards) {
+            const cardId = card.getAttribute("data-card-id");
+            if (!cardId || seen.has(cardId)) continue;
+            seen.add(cardId);
+            selectedButtons.push(card);
+            if (selectedButtons.length === 3) break;
+          }
+          if (selectedButtons.length !== 3 || !selectedButtons.every((button) => button instanceof HTMLButtonElement)) return false;
+          selectedButtons.forEach((button) => button.click());
+          return true;
+        });
+        if (!handSelected) throw new Error("Joinkin 즉석 3-slot 선택에 실패했습니다.");
+        await joinkinPage.waitForSelector(".instant-preview .canonical-preview");
+        const instantText = await joinkinPage.$eval(".instant-preview", (element) => element.textContent ?? "");
+        const state = await joinkinPage.evaluate(() => {
+          const bytes = window.localStorage.getItem("fictor.joinkin.save.v2");
+          const envelope = bytes ? JSON.parse(bytes) : null;
+          const cards = (envelope?.runtime?.run?.ownedInstances ?? []).map((instance) => instance.cardId);
+          return {
+            selectedRace: window.localStorage.getItem("fictor.race.v1"),
+            stillkinSavePresent: window.localStorage.getItem("fictor.save.v2") !== null,
+            burnkinSavePresent: window.localStorage.getItem("fictor.burnkin.save.v2") !== null,
+            configId: envelope?.flow?.configId,
+            forgeActionsRemaining: envelope?.runtime?.run?.activeCombat?.forgeActionsRemaining,
+            joinMaterials: cards.filter((cardId) => cardId === "ore_join" || cardId.startsWith("join_")).length,
+            tools: cards.filter((cardId) => cardId.startsWith("tool_")),
+          };
+        });
+        if (!instantText.includes("세 번째 재료") || !instantText.includes("공명 오버레이")
+          || state.selectedRace !== "Joinkin" || state.stillkinSavePresent || state.burnkinSavePresent
+          || state.configId !== "joinkin-track1-provisional-v1" || state.forgeActionsRemaining !== 2
+          || state.joinMaterials !== 20 || state.tools.length !== 10 || new Set(state.tools).size !== 10) {
+          throw new Error(`Joinkin browser authority가 일치하지 않습니다: ${JSON.stringify({ instantText, state })}`);
+        }
+        return { race: "Joinkin", phase: "IN_COMBAT", starterCards: 30, joinMaterials: 20, uniqueTools: 10, forgeActionsRemaining: 2, workshopSlots: 3, instantSlots: 3 };
+      } finally {
+        await context.close();
+      }
+    };
+    const joinkinSelection = await verifyJoinkinSelection();
+
     const verifyUnsafeAssetPolicy = async () => {
       const probePage = await browser.newPage();
       await probePage.evaluateOnNewDocument(() => window.localStorage.setItem("fictor.race.v1", "Stillkin"));
@@ -732,7 +837,8 @@ async function main() {
         },
         boss: { heartId: "heart__still", phase: wonSave.flow.phase, restartPhase: wonRestartSave.flow.phase },
         burnkinSelection,
-        corePath: "race selection -> Burnkin ice combat; isolated fresh loss -> RUN_LOST -> restart; instant discovery -> Codex -> reload -> full run -> boss victory -> restart -> paid workshop same recipe",
+        joinkinSelection,
+        corePath: "race selection -> Burnkin/Joinkin ice combat; Joinkin 3-slot paid review + instant preview; isolated fresh loss -> RUN_LOST -> restart; instant discovery -> Codex -> reload -> full run -> boss victory -> restart -> paid workshop same recipe",
         instantDiscovery: { ...instantDiscovery, reloaded: reloadedAfterInstant, codexBeforePaid, codexAfterPaid, fuelAfterPaid },
         missingCanonicalFallback: { cardId: "forge__ore_still__still_03", assetPath: new URL(fallbackAssetUrl).pathname, httpStatus: fallbackAssetResponse.status },
         staticAssets,

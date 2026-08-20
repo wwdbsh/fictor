@@ -20,9 +20,9 @@ export interface StillkinTrack1FlowState {
   revision: number;
   runSequence: number;
   runId: string;
-  scenarioId: "stillkin-track1-literal-v1" | "burnkin-track1-ice-v1";
+  scenarioId: "stillkin-track1-literal-v1" | "burnkin-track1-ice-v1" | "joinkin-track1-ice-v1";
   scenarioHash: string;
-  configId: "stillkin-track1-provisional-v1" | "burnkin-track1-provisional-v1";
+  configId: "stillkin-track1-provisional-v1" | "burnkin-track1-provisional-v1" | "joinkin-track1-provisional-v1";
   configHash: string;
   phase: Track1Phase;
   nextNodeIndex: number;
@@ -36,8 +36,8 @@ export interface StillkinTrack1FlowState {
 }
 
 export interface StillkinTrack1Snapshot {
-  raceId: "Stillkin" | "Burnkin";
-  raceLabelKo: "어름붙이" | "사름붙이";
+  raceId: "Stillkin" | "Burnkin" | "Joinkin";
+  raceLabelKo: "어름붙이" | "사름붙이" | "이음붙이";
   profile: PersistentProfileV1;
   runtime: ForgeRuntimeStateV1;
   flow: StillkinTrack1FlowState;
@@ -56,13 +56,17 @@ export type StillkinTrack1Command =
   | { type: "ENTER_NEXT_NODE"; expectedRevision: number; runId: string }
   | ({ type: "APPLY_COMBAT"; expectedRevision: number; command: CombatCommand } & Track1CombatBinding)
   | ({ type: "FORGE_INSTANT"; expectedRevision: number; materialInstanceIds: [string, string] } & Track1CombatBinding)
+  | ({ type: "JOINKIN_FORGE_INSTANT"; expectedRevision: number; materialInstanceIds: [string, string, string] } & Track1CombatBinding)
+  | ({ type: "JOINKIN_EXTEND"; expectedRevision: number } & Track1CombatBinding)
   | ({ type: "BURNKIN_PAY_HP"; expectedRevision: number } & Track1CombatBinding)
   | ({ type: "BURNKIN_KINDLE"; expectedRevision: number; instanceId: string } & Track1CombatBinding)
   | { type: "CHOOSE_REWARD"; expectedRevision: number; runId: string; choiceId: string }
   | { type: "RESOLVE_EVENT"; expectedRevision: number; runId: string; choiceId: string }
   | { type: "USE_FREE_WORKSHOP"; expectedRevision: number; runId: string; materialInstanceIds: [string, string] }
+  | { type: "JOINKIN_USE_FREE_WORKSHOP"; expectedRevision: number; runId: string; materialInstanceIds: [string, string, string] }
   | { type: "LEAVE_EVENT"; expectedRevision: number; runId: string }
   | { type: "FORGE_WORKSHOP"; expectedRevision: number; runId: string; materialInstanceIds: [string, string] }
+  | { type: "JOINKIN_FORGE_WORKSHOP"; expectedRevision: number; runId: string; materialInstanceIds: [string, string, string] }
   | { type: "RESTART"; expectedRevision: number; runId: string };
 
 export type StillkinTrack1Event =
@@ -82,6 +86,7 @@ export type StillkinTrack1Event =
   | { type: "BURNKIN_ENERGY_GAINED"; source: "PASSIVE" | "KINDLE"; amount: number; remaining: number }
   | { type: "BURNKIN_CARD_KINDLED"; instanceId: string; cardId: string; energyGained: number }
   | { type: "BURNKIN_RESONANCE_BROKEN"; from: import("../../domain/resonance").ResonanceAttribute; to: import("../../domain/resonance").ResonanceAttribute; selfDamage: number; remainingHp: number }
+  | { type: "JOINKIN_FORGE_ACTION_GRANTED"; remaining: 2; turn: number }
   | { type: "FUEL_SPENT"; amount: 1; remaining: number }
   | { type: "HEART_OWNED"; heartId: "heart__still" }
   | { type: "RUN_WON" | "RUN_LOST" };

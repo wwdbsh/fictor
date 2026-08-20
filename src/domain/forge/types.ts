@@ -87,6 +87,18 @@ export interface GeneratedCard {
   art: string;
 }
 
+export interface JoinkinThirdOverlay {
+  /** The canonical third material definition. It never participates in the recipe id. */
+  third_material_id: string;
+  /** NONE tools preserve the base card's resonance attribute. */
+  resonance_attribute: ForgeAttribute | null;
+}
+
+export interface JoinkinForgeResult {
+  card: GeneratedCard;
+  overlay: JoinkinThirdOverlay;
+}
+
 export interface ForgeInputs {
   laws: readonly ForgeLaw[];
   resultClasses: readonly ForgeResultClass[];

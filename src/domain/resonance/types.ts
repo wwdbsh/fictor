@@ -16,6 +16,11 @@ export interface ResonanceState {
   streakByAttribute: StreakByAttribute;
 }
 
+export interface JoinkinResonanceState {
+  resonance: ResonanceState;
+  bridgeOpen: boolean;
+}
+
 export type ResonanceCalculationFailure =
   | "INVALID_POWER"
   | "INVALID_STREAK"

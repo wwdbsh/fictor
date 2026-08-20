@@ -192,13 +192,21 @@ function validateStringList(value: unknown, location: string, errors: string[]):
 }
 
 function validateActive(value: unknown, owned: readonly CardInstance[], location: string, errors: string[]): value is ActiveCombatForgeRuntime {
-  if (!record(value, ["state", "enrolledPersistentInstanceIds", "forgeActionTurn", "forgeActionsRemaining", "isolatedMaterials", "ephemeralResults"], location, errors)) return false;
+  if (!optionalRecord(
+    value,
+    ["state", "enrolledPersistentInstanceIds", "forgeActionTurn", "forgeActionsRemaining", "isolatedMaterials", "ephemeralResults"],
+    ["joinkinSkillUsedTurn", "joinkinBridgeOpen"],
+    location,
+    errors,
+  )) return false;
   const decodedCombat = decodeCombatState(value.state);
   if (!decodedCombat.valid) errors.push(...decodedCombat.errors.map((error) => `${location}.state: ${error}`));
   else value.state = decodedCombat.value;
   validateStringList(value.enrolledPersistentInstanceIds, `${location}.enrolledPersistentInstanceIds`, errors);
   if (!count(value.forgeActionTurn)) errors.push(`${location}.forgeActionTurn must be a safe unsigned integer`);
-  if (value.forgeActionsRemaining !== 0 && value.forgeActionsRemaining !== 1) errors.push(`${location}.forgeActionsRemaining must be zero or one`);
+  if (value.forgeActionsRemaining !== 0 && value.forgeActionsRemaining !== 1 && value.forgeActionsRemaining !== 2) errors.push(`${location}.forgeActionsRemaining must be zero, one, or two`);
+  if ("joinkinSkillUsedTurn" in value && value.joinkinSkillUsedTurn !== null && !count(value.joinkinSkillUsedTurn)) errors.push(`${location}.joinkinSkillUsedTurn must be null or a safe unsigned integer`);
+  if ("joinkinBridgeOpen" in value && typeof value.joinkinBridgeOpen !== "boolean") errors.push(`${location}.joinkinBridgeOpen must be boolean`);
   if (array(value.isolatedMaterials, `${location}.isolatedMaterials`, errors)) {
     for (let index = 0; index < value.isolatedMaterials.length; index += 1) {
       const isolated = value.isolatedMaterials[index];
@@ -211,9 +219,26 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
     for (let index = 0; index < value.ephemeralResults.length; index += 1) {
       const item = value.ephemeralResults[index];
       const itemLocation = `${location}.ephemeralResults[${index}]`;
-      if (record(item, ["instanceId", "cardId", "recipeId", "location"], itemLocation, errors)) {
+      if (optionalRecord(item, ["instanceId", "cardId", "recipeId", "location"], ["provenance"], itemLocation, errors)) {
         if (!nonempty(item.instanceId) || !nonempty(item.cardId) || !nonempty(item.recipeId)) errors.push(`${itemLocation} ids must be nonempty`);
         if (!oneOf(item.location, LOCATIONS)) errors.push(`${itemLocation}.location is invalid`);
+        if ("provenance" in item) {
+          const provenance = item.provenance;
+          if (provenance === null || typeof provenance !== "object" || Array.isArray(provenance)) errors.push(`${itemLocation}.provenance must be an object`);
+          else if ((provenance as UnknownRecord).kind === "PAIR") {
+            if (record(provenance, ["kind", "materialInstanceIds"], `${itemLocation}.provenance`, errors)) {
+              if (!array(provenance.materialInstanceIds, `${itemLocation}.provenance.materialInstanceIds`, errors)
+                || provenance.materialInstanceIds.length !== 2 || !provenance.materialInstanceIds.every(nonempty)) errors.push(`${itemLocation}.provenance pair ids are invalid`);
+            }
+          } else if ((provenance as UnknownRecord).kind === "JOINKIN_THREE") {
+            if (record(provenance, ["kind", "baseMaterialInstanceIds", "thirdMaterialInstanceId", "thirdMaterialId", "resonanceAttribute"], `${itemLocation}.provenance`, errors)) {
+              if (!array(provenance.baseMaterialInstanceIds, `${itemLocation}.provenance.baseMaterialInstanceIds`, errors)
+                || provenance.baseMaterialInstanceIds.length !== 2 || !provenance.baseMaterialInstanceIds.every(nonempty)
+                || !nonempty(provenance.thirdMaterialInstanceId) || !nonempty(provenance.thirdMaterialId)
+                || !(provenance.resonanceAttribute === null || oneOf(provenance.resonanceAttribute, ATTRIBUTES))) errors.push(`${itemLocation}.provenance Joinkin fields are invalid`);
+            }
+          } else errors.push(`${itemLocation}.provenance kind is invalid`);
+        }
       }
     }
   }
@@ -221,25 +246,45 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
 
   const active = value as unknown as ActiveCombatForgeRuntime;
   if (active.forgeActionTurn !== active.state.turn) errors.push(`${location}.forgeActionTurn must equal combat turn`);
+  if (active.forgeActionsRemaining === 2 && (active.joinkinSkillUsedTurn !== active.state.turn || typeof active.joinkinBridgeOpen !== "boolean")) {
+    errors.push(`${location}.forgeActionsRemaining two requires current-turn Joinkin skill authority`);
+  }
   const mayHaveAction = active.state.status === "ONGOING" && active.state.phase === "PLAYER_ACTION";
   if (!mayHaveAction && active.forgeActionsRemaining !== 0) errors.push(`${location}.forgeActionsRemaining must be zero outside an ongoing player action`);
-  if (active.isolatedMaterials.length !== active.ephemeralResults.length * 2) {
-    errors.push(`${location} must bind exactly two isolated materials to each ephemeral result`);
-  }
+  let isolatedCursor = 0;
   for (let index = 0; index < active.ephemeralResults.length; index += 1) {
-    const left = active.isolatedMaterials[index * 2]?.instance;
-    const right = active.isolatedMaterials[index * 2 + 1]?.instance;
+    const result = active.ephemeralResults[index];
+    const countForResult = result.provenance?.kind === "JOINKIN_THREE" ? 3 : 2;
+    const left = active.isolatedMaterials[isolatedCursor]?.instance;
+    const right = active.isolatedMaterials[isolatedCursor + 1]?.instance;
     if (!left || !right) continue;
     if (left.cardId === right.cardId) {
       errors.push(`${location}.ephemeralResults[${index}] provenance materials must have distinct card ids`);
       continue;
     }
     const [low, high] = left.cardId < right.cardId ? [left.cardId, right.cardId] : [right.cardId, left.cardId];
-    const result = active.ephemeralResults[index];
     if (result.recipeId !== `${low}|${high}` || result.cardId !== `forge__${low}__${high}`) {
       errors.push(`${location}.ephemeralResults[${index}] does not match its chronological isolated material pair`);
     }
+    if (result.provenance?.kind === "PAIR") {
+      if (result.provenance.materialInstanceIds[0] !== left.instanceId || result.provenance.materialInstanceIds[1] !== right.instanceId) {
+        errors.push(`${location}.ephemeralResults[${index}] pair provenance does not match isolated materials`);
+      }
+    } else if (result.provenance?.kind === "JOINKIN_THREE") {
+      const third = active.isolatedMaterials[isolatedCursor + 2]?.instance;
+      const ids = [left.instanceId, right.instanceId, third?.instanceId];
+      const cardIds = [left.cardId, right.cardId, third?.cardId];
+      if (!third || new Set(ids).size !== 3 || new Set(cardIds).size !== 3
+        || result.provenance.baseMaterialInstanceIds[0] !== left.instanceId
+        || result.provenance.baseMaterialInstanceIds[1] !== right.instanceId
+        || result.provenance.thirdMaterialInstanceId !== third.instanceId
+        || result.provenance.thirdMaterialId !== third.cardId) {
+        errors.push(`${location}.ephemeralResults[${index}] Joinkin provenance does not match isolated materials`);
+      }
+    }
+    isolatedCursor += countForResult;
   }
+  if (isolatedCursor !== active.isolatedMaterials.length) errors.push(`${location} isolated material count does not match result provenance`);
   uniqueStrings(active.enrolledPersistentInstanceIds, `${location}.enrolledPersistentInstanceIds`, errors);
   const ownedById = new Map(owned.map((instance) => [instance.instanceId, instance]));
   const ephemeralById = new Map(active.ephemeralResults.map((item) => [item.instanceId, item]));
@@ -304,13 +349,25 @@ function validateStateSnapshot(value: unknown): ForgeRuntimeValidationResult {
       if (!sortedUnique(value.profile.discoveredRecipeIds)) errors.push("state.profile.discoveredRecipeIds must be sorted");
     }
   }
-  if (!record(value.run, ["fuel", "nextInstanceSequence", "ownedInstances", "deck", "activeCombat"], "state.run", errors)) return { valid: false, errors };
+  if (!optionalRecord(value.run, ["fuel", "nextInstanceSequence", "ownedInstances", "deck", "activeCombat"], ["joinkinThirdOverlays"], "state.run", errors)) return { valid: false, errors };
   if (!count(value.run.fuel)) errors.push("state.run.fuel must be a safe unsigned integer");
   if (!count(value.run.nextInstanceSequence)) errors.push("state.run.nextInstanceSequence must be a safe unsigned integer");
   if (array(value.run.ownedInstances, "state.run.ownedInstances", errors)) {
     for (let index = 0; index < value.run.ownedInstances.length; index += 1) validateInstance(value.run.ownedInstances[index], `state.run.ownedInstances[${index}]`, errors);
   }
   validateStringList(value.run.deck, "state.run.deck", errors);
+  if ("joinkinThirdOverlays" in value.run) {
+    if (array(value.run.joinkinThirdOverlays, "state.run.joinkinThirdOverlays", errors)) {
+      for (let index = 0; index < value.run.joinkinThirdOverlays.length; index += 1) {
+        const item = value.run.joinkinThirdOverlays[index];
+        const itemLocation = `state.run.joinkinThirdOverlays[${index}]`;
+        if (record(item, ["instanceId", "thirdMaterialId", "resonanceAttribute"], itemLocation, errors)) {
+          if (!nonempty(item.instanceId) || !nonempty(item.thirdMaterialId)
+            || !(item.resonanceAttribute === null || oneOf(item.resonanceAttribute, ATTRIBUTES))) errors.push(`${itemLocation} is invalid`);
+        }
+      }
+    }
+  }
   if (errors.length === 0) {
     const owned = value.run.ownedInstances as CardInstance[];
     const ids = owned.map((instance) => instance.instanceId);
@@ -318,6 +375,11 @@ function validateStateSnapshot(value: unknown): ForgeRuntimeValidationResult {
     uniqueStrings(value.run.deck as string[], "state.run.deck", errors);
     const deck = value.run.deck as string[];
     if (deck.length !== ids.length || deck.some((id) => !ids.includes(id))) errors.push("state.run.deck must contain every owned instance exactly once");
+    if (Array.isArray(value.run.joinkinThirdOverlays)) {
+      const overlayIds = value.run.joinkinThirdOverlays.map((item) => item.instanceId);
+      uniqueStrings(overlayIds, "state.run.joinkinThirdOverlays instance ids", errors);
+      for (const id of overlayIds) if (!ids.includes(id)) errors.push(`state.run.joinkinThirdOverlays references an unowned instance: ${id}`);
+    }
   }
   if (value.run.activeCombat !== null && Array.isArray(value.run.ownedInstances)) {
     validateActive(value.run.activeCombat, value.run.ownedInstances as CardInstance[], "state.run.activeCombat", errors);
@@ -428,9 +490,10 @@ function validateCommandSnapshot(value: unknown): ForgeRuntimeValidationResult {
     const decoded = decodeCombatCommand(command.command);
     if (!decoded.valid) errors.push(...decoded.errors.map((error) => `command.command: ${error}`));
     else command.command = decoded.value;
-  } else if (command.type === "FORGE_INSTANT" || command.type === "FORGE_WORKSHOP") {
+  } else if (command.type === "FORGE_INSTANT" || command.type === "FORGE_WORKSHOP" || command.type === "FORGE_INSTANT_THREE" || command.type === "FORGE_WORKSHOP_THREE") {
     if (!record(command, ["type", "materialInstanceIds"], "command", errors)) return { valid: false, errors };
-    if (!array(command.materialInstanceIds, "command.materialInstanceIds", errors) || command.materialInstanceIds.length !== 2 || !command.materialInstanceIds.every(nonempty)) errors.push("command.materialInstanceIds must contain exactly two nonempty ids");
+    const expectedLength = command.type.endsWith("_THREE") ? 3 : 2;
+    if (!array(command.materialInstanceIds, "command.materialInstanceIds", errors) || command.materialInstanceIds.length !== expectedLength || !command.materialInstanceIds.every(nonempty)) errors.push(`command.materialInstanceIds must contain exactly ${expectedLength} nonempty ids`);
   } else if (command.type === "CLEANUP_COMBAT") {
     record(command, ["type"], "command", errors);
   } else {

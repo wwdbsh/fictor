@@ -166,7 +166,13 @@ describe("Stillkin literal Track-1 controller", () => {
     const created = forged.events.find((event) => event.type === "FORGE_RESULT_CREATED") as Extract<(typeof forged.events)[number], { type: "FORGE_RESULT_CREATED" }>;
     expect(created).toMatchObject({ mode: "INSTANT", cardId: expected.card_id, recipeId: expected.recipe_id, location: "HAND" });
     const forgedActive = forged.snapshot.runtime.run.activeCombat!;
-    expect(forgedActive.ephemeralResults).toContainEqual({ instanceId: created.instanceId, cardId: expected.card_id, recipeId: expected.recipe_id, location: "HAND" });
+    expect(forgedActive.ephemeralResults).toContainEqual({
+      instanceId: created.instanceId,
+      cardId: expected.card_id,
+      recipeId: expected.recipe_id,
+      location: "HAND",
+      provenance: { kind: "PAIR", materialInstanceIds: [first.instanceId, second.instanceId] },
+    });
     expect(forgedActive.state.instances).toContainEqual({ instanceId: created.instanceId, cardId: expected.card_id });
     expect(forgedActive.state.zones.hand).toContain(created.instanceId);
     expect(forgedActive.state.cards.find(({ cardId }) => cardId === expected.card_id)).toMatchObject({

@@ -79,6 +79,7 @@ const FAILURE_MESSAGES: Record<string, string> = {
   RACE_COMMAND_UNAVAILABLE: "선택한 붙이에게 없는 행동입니다.",
   INSUFFICIENT_FUEL: "연료가 부족합니다.",
   WORKSHOP_SELECTION_INVALID: "서로 다른 재료 두 장을 골라야 합니다.",
+  JOINKIN_EXTEND_UNAVAILABLE: "이어붙이기는 턴마다 빚기 행동이 남아 있을 때 한 번만 쓸 수 있습니다.",
 };
 
 function normalizedBaseUrl(value: string): string {
@@ -249,7 +250,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       deckCount: snapshot.runtime.run.deck.length,
     };
   };
-  const activeForgeActions = (snapshot: StillkinTrack1Snapshot): 0 | 1 => snapshot.runtime.run.activeCombat?.forgeActionsRemaining ?? 0;
+  const activeForgeActions = (snapshot: StillkinTrack1Snapshot): 0 | 1 | 2 => snapshot.runtime.run.activeCombat?.forgeActionsRemaining ?? 0;
 
   const workshopMaterials = (snapshot: StillkinTrack1Snapshot): Track1UiForgeMaterial[] => snapshot.runtime.run.ownedInstances.flatMap((instance) => {
     const material = materials.get(instance.cardId);
@@ -263,6 +264,13 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   });
 
   const hasDistinctPair = (items: readonly { cardId: string }[]) => new Set(items.map(({ cardId }) => cardId)).size >= 2;
+  const hasJoinkinTriple = (items: readonly { cardId: string; category?: string }[]) => {
+    for (let first = 0; first < items.length; first += 1) for (let second = first + 1; second < items.length; second += 1) {
+      if (items[first].cardId === items[second].cardId || (items[first].category === "TOOL" && items[second].category === "TOOL")) continue;
+      if (items.some((item, index) => index !== first && index !== second && item.cardId !== items[first].cardId && item.cardId !== items[second].cardId)) return true;
+    }
+    return false;
+  };
 
   const cardProjection = (snapshot: StillkinTrack1Snapshot, instanceId: string): Track1UiCard | null => {
     const active = snapshot.runtime.run.activeCombat?.state;
@@ -359,7 +367,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     if (snapshot.flow.phase === "BETWEEN_NODES") {
       const next = CONFIG.route[snapshot.flow.nextNodeIndex];
       const forgeMaterials = workshopMaterials(snapshot);
-      const enoughMaterials = hasDistinctPair(forgeMaterials);
+      const enoughMaterials = snapshot.raceId === "Joinkin" ? hasJoinkinTriple(forgeMaterials) : hasDistinctPair(forgeMaterials);
       return {
         ...shared,
         phase: "BETWEEN_NODES",
@@ -368,7 +376,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         action: bind(`enter:${snapshot.flow.revision}`, "ENTER_NEXT_NODE", "다음 기록으로", { type: "ENTER_NEXT_NODE", ...baseCommand(snapshot) }, !next),
         workshopMaterials: forgeMaterials,
         paidWorkshopEnabled: snapshot.runtime.run.fuel >= 1 && enoughMaterials,
-        paidWorkshopDisabledReasonKo: snapshot.runtime.run.fuel < 1 ? "연료가 부족합니다." : enoughMaterials ? null : "서로 다른 재료 두 장이 필요합니다.",
+        paidWorkshopDisabledReasonKo: snapshot.runtime.run.fuel < 1 ? "연료가 부족합니다." : enoughMaterials ? null : snapshot.raceId === "Joinkin" ? "서로 다른 재료 세 장이 필요합니다. 첫 두 칸에는 도구 둘을 함께 놓을 수 없습니다." : "서로 다른 재료 두 장이 필요합니다.",
       };
     }
     if (snapshot.flow.phase === "IN_COMBAT") {
@@ -377,7 +385,9 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       if (!active || !binding) throw new Error("controller combat projection is unavailable");
       const intent = active.enemy.intents[active.enemy.currentIntentIndex];
       const hand = active.zones.hand.map((id) => cardProjection(snapshot, id)).filter((card): card is Track1UiCard => card !== null);
-      const instantForgeAvailable = active.phase === "PLAYER_ACTION" && activeForgeActions(snapshot) > 0 && hasDistinctPair(hand.filter(({ forgeSelectable }) => forgeSelectable));
+      const selectable = hand.filter(({ forgeSelectable }) => forgeSelectable).map((card) => ({ ...card, category: materials.get(card.cardId)?.category }));
+      const instantForgeAvailable = active.phase === "PLAYER_ACTION" && activeForgeActions(snapshot) > 0
+        && (snapshot.raceId === "Joinkin" ? hasJoinkinTriple(selectable) : hasDistinctPair(selectable));
       let primaryAction: Track1UiActionDescriptor | null = null;
       if (active.phase === "TURN_READY") {
         primaryAction = bind(`start:${snapshot.flow.revision}`, "START_TURN", "턴 시작", { type: "APPLY_COMBAT", expectedRevision: snapshot.flow.revision, ...binding, command: { type: "START_TURN" } });
@@ -394,6 +404,13 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         "피 태우기",
         { type: "BURNKIN_PAY_HP", expectedRevision: snapshot.flow.revision, ...binding },
         burnkinPassiveDisabled,
+      ) : null;
+      const joinkinExtendAction = snapshot.raceId === "Joinkin" ? bind(
+        `joinkin-extend:${snapshot.flow.revision}`,
+        "JOINKIN_EXTEND",
+        "이어붙이기",
+        { type: "JOINKIN_EXTEND", expectedRevision: snapshot.flow.revision, ...binding },
+        active.phase !== "PLAYER_ACTION" || activeForgeActions(snapshot) !== 1 || snapshot.runtime.run.activeCombat?.joinkinSkillUsedTurn === active.turn,
       ) : null;
       const enemyArt = binding.encounterId === "the_stilling" ? "cards/heart__still.png" : `enemies/${binding.encounterId}.png`;
       return {
@@ -417,13 +434,15 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         discardCount: active.zones.discard.length,
         hand,
         instantForgeAvailable,
-        instantForgeDisabledReasonKo: active.phase !== "PLAYER_ACTION" ? "플레이어 행동 단계에서 사용할 수 있습니다." : activeForgeActions(snapshot) === 0 ? "이번 턴의 빚기 행동을 이미 사용했습니다." : hasDistinctPair(hand.filter(({ forgeSelectable }) => forgeSelectable)) ? null : "손에 서로 다른 재료 두 장이 필요합니다.",
+        instantForgeDisabledReasonKo: active.phase !== "PLAYER_ACTION" ? "플레이어 행동 단계에서 사용할 수 있습니다." : activeForgeActions(snapshot) === 0 ? "이번 턴의 빚기 행동을 이미 사용했습니다." : instantForgeAvailable ? null : snapshot.raceId === "Joinkin" ? "손에 서로 다른 재료 세 장이 필요합니다." : "손에 서로 다른 재료 두 장이 필요합니다.",
         primaryAction,
         instructionKo: active.phase === "TURN_READY" ? "턴을 시작해 손패를 펼치세요." : "카드를 선택하면 현재 적에게 적용됩니다.",
         burnkinPassiveAction,
         burnkinRulesKo: snapshot.raceId === "Burnkin"
           ? `체력 ${BURNKIN_TRACK1_RULES.hpToEnergy.hpCost} → 에너지 ${BURNKIN_TRACK1_RULES.hpToEnergy.energyGain} · 공명 2배 · 단절 시 체력 ${BURNKIN_TRACK1_RULES.resonanceBreakSelfDamage} 피해`
           : null,
+        joinkinExtendAction,
+        joinkinRulesKo: snapshot.raceId === "Joinkin" ? "기본 두 재료의 결과는 그대로 유지되고, 세 번째 재료의 주 속성만 이 결과 인스턴스의 공명을 덮습니다." : null,
       };
     }
     if (snapshot.flow.phase === "AWAITING_REWARD") {
@@ -526,11 +545,11 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     },
     previewForge(mode, materialInstanceIds) {
       const snapshot = ensureLoaded();
-      if (latchedBlockingIssuesKo || materialInstanceIds.length !== 2) return null;
-      const [leftId, rightId] = materialInstanceIds;
-      if (!leftId || !rightId || leftId === rightId) return null;
-      let left: { instanceId: string; cardId: string } | undefined;
-      let right: { instanceId: string; cardId: string } | undefined;
+      const requiredMaterialCount = snapshot.raceId === "Joinkin" ? 3 : 2;
+      if (latchedBlockingIssuesKo || materialInstanceIds.length !== requiredMaterialCount
+        || new Set(materialInstanceIds).size !== requiredMaterialCount) return null;
+      const selectedIds = [...materialInstanceIds] as [string, string] | [string, string, string];
+      let selected: Array<{ instanceId: string; cardId: string }>;
       let command: StillkinTrack1Command;
       let executable = true;
       let disabledReasonKo: string | null = null;
@@ -541,32 +560,52 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         const inHand = (instanceId: string) => active.state.zones.hand.includes(instanceId)
           ? active.state.instances.find((instance) => instance.instanceId === instanceId)
           : undefined;
-        left = inHand(leftId);
-        right = inHand(rightId);
+        selected = selectedIds.map(inHand).filter((item): item is { instanceId: string; cardId: string } => item !== undefined);
         if (active.state.phase !== "PLAYER_ACTION") { executable = false; disabledReasonKo = "플레이어 행동 단계에서 사용할 수 있습니다."; }
         else if (active.forgeActionsRemaining === 0) { executable = false; disabledReasonKo = "이번 턴의 빚기 행동을 이미 사용했습니다."; }
-        command = { type: "FORGE_INSTANT", expectedRevision: snapshot.flow.revision, ...binding, materialInstanceIds: [leftId, rightId] };
+        command = snapshot.raceId === "Joinkin"
+          ? { type: "JOINKIN_FORGE_INSTANT", expectedRevision: snapshot.flow.revision, ...binding, materialInstanceIds: selectedIds as [string, string, string] }
+          : { type: "FORGE_INSTANT", expectedRevision: snapshot.flow.revision, ...binding, materialInstanceIds: selectedIds as [string, string] };
       } else {
         if (mode === "WORKSHOP_PAID" && snapshot.flow.phase !== "BETWEEN_NODES") return null;
         const node = routeNode(snapshot);
         if (mode === "WORKSHOP_FREE" && (snapshot.flow.phase !== "EVENT_RESOLVED" || node?.kind !== "EVENT" || node.eventType !== "WORKSHOP" || snapshot.flow.workshopEntitlementNodeId !== node.nodeId)) return null;
-        left = snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === leftId);
-        right = snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === rightId);
+        selected = selectedIds.map((id) => snapshot.runtime.run.ownedInstances.find(({ instanceId }) => instanceId === id)).filter((item): item is { instanceId: string; cardId: string } => item !== undefined);
         if (mode === "WORKSHOP_PAID" && snapshot.runtime.run.fuel < 1) { executable = false; disabledReasonKo = "연료가 부족합니다."; }
-        command = mode === "WORKSHOP_PAID"
-          ? { type: "FORGE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: [leftId, rightId] }
-          : { type: "USE_FREE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: [leftId, rightId] };
+        command = snapshot.raceId === "Joinkin"
+          ? mode === "WORKSHOP_PAID"
+            ? { type: "JOINKIN_FORGE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: selectedIds as [string, string, string] }
+            : { type: "JOINKIN_USE_FREE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: selectedIds as [string, string, string] }
+          : mode === "WORKSHOP_PAID"
+            ? { type: "FORGE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: selectedIds as [string, string] }
+            : { type: "USE_FREE_WORKSHOP", ...baseCommand(snapshot), materialInstanceIds: selectedIds as [string, string] };
       }
-      if (!left || !right || left.cardId === right.cardId || !materials.has(left.cardId) || !materials.has(right.cardId)) return null;
-      const selected = [left, right].sort((first, second) => first.cardId < second.cardId ? -1 : first.cardId > second.cardId ? 1 : first.instanceId < second.instanceId ? -1 : 1);
+      if (selected.length !== requiredMaterialCount || new Set(selected.map(({ cardId }) => cardId)).size !== requiredMaterialCount
+        || selected.some(({ cardId }) => !materials.has(cardId))) return null;
+      const leftDisplay = materials.get(selected[0].cardId)!;
+      const rightDisplay = materials.get(selected[1].cardId)!;
+      if (snapshot.raceId === "Joinkin" && leftDisplay.category === "TOOL" && rightDisplay.category === "TOOL") return null;
       const canonical = buildCanonicalForgePreview([selected[0].cardId, selected[1].cardId], baseUrl);
       if (!canonical) return null;
+      const thirdDisplay = requiredMaterialCount === 3 ? materials.get(selected[2].cardId)! : null;
+      const thirdRawAttribute = thirdDisplay
+        ? (Array.isArray(thirdDisplay.attribute) ? thirdDisplay.attribute[0] : thirdDisplay.attribute)
+        : null;
+      const thirdOverlay = thirdDisplay ? Object.freeze({
+        materialId: thirdDisplay.id,
+        nameKo: thirdDisplay.nameKo,
+        artSrc: assetUrl(baseUrl, thirdDisplay.art),
+        resonanceAttribute: thirdRawAttribute === "NONE" ? null : thirdRawAttribute as Exclude<typeof thirdRawAttribute, "NONE">,
+        labelKo: thirdRawAttribute === "NONE" ? "기본 결과 공명 유지" : `${thirdRawAttribute} 공명 오버레이`,
+      }) : null;
       const fuelBefore = snapshot.runtime.run.fuel;
       const preview: Track1UiForgePreview = Object.freeze({
-        previewId: `forge-preview:${snapshot.flow.revision}:${mode}:${selected[0].instanceId}:${selected[1].instanceId}`,
+        previewId: `forge-preview:${snapshot.flow.revision}:${mode}:${selected.map(({ instanceId }) => instanceId).join(":")}`,
         mode,
-        selectedInstanceIds: Object.freeze([selected[0].instanceId, selected[1].instanceId]) as unknown as readonly [string, string],
+        selectedInstanceIds: Object.freeze(selected.map(({ instanceId }) => instanceId)) as unknown as readonly [string, string] | readonly [string, string, string],
+        requiredMaterialCount,
         canonical,
+        thirdOverlay,
         cost: Object.freeze({
           kind: mode === "INSTANT" ? "ACTION" : mode === "WORKSHOP_PAID" ? "FUEL" : "FREE_ENTITLEMENT",
           labelKo: mode === "INSTANT" ? "행동 1회" : mode === "WORKSHOP_PAID" ? "연료 1" : "무료 공방 권리",
@@ -595,7 +634,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
         reviewId: `forge-review:${preview.previewId}`,
         preview,
         headingKo: authority.mode === "WORKSHOP_PAID" ? "공방 빚기 최종 확인" : "무료 공방 빚기 최종 확인",
-        warningKo: "선택한 두 재료는 영구적으로 소모되며 되돌릴 수 없습니다.",
+        warningKo: `선택한 ${preview.requiredMaterialCount === 3 ? "세" : "두"} 재료는 영구적으로 소모되며 되돌릴 수 없습니다.`,
       });
       reviewAuthority.set(review, { ...authority, mode: authority.mode, command: authority.command });
       return review;
