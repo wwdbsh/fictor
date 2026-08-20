@@ -6,6 +6,7 @@ import type {
   GroundDepthDescriptor,
   GroundDescriptor,
   GroundEncounters,
+  GroundRewardMapping,
   NormalEnemyDescriptor,
 } from "../types";
 
@@ -158,6 +159,19 @@ export const STILL_GROUND_ENCOUNTERS: GroundEncounters = Object.freeze({
 
 export const STILL_GROUND_EVENTS = EVENTS;
 
+export const STILL_GROUND_REWARDS: GroundRewardMapping = Object.freeze({
+  normal: Object.freeze({
+    source: "NORMAL",
+    allowedMaterialCategories: Object.freeze(["ORE", "GROUND_PRODUCT"] as const),
+    origin: "GROUND_STILL",
+  }),
+  elite: Object.freeze({
+    source: "ELITE",
+    allowedMaterialCategories: Object.freeze(["TOOL", "ODDITY"] as const),
+  }),
+  boss: Object.freeze({ source: "BOSS", heartId: "heart__still" }),
+});
+
 export const ICE_GROUND_DESCRIPTOR: GroundDescriptor = Object.freeze({
   id: "GROUND_STILL",
   nameKo: "어름의 터",
@@ -167,6 +181,7 @@ export const ICE_GROUND_DESCRIPTOR: GroundDescriptor = Object.freeze({
   enabled: true,
   depths: DEPTHS,
   encounters: STILL_GROUND_ENCOUNTERS,
+  rewards: STILL_GROUND_REWARDS,
   events: EVENTS,
 });
 

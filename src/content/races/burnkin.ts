@@ -7,7 +7,7 @@ export const BURNKIN_DESCRIPTOR: RaceDescriptor = Object.freeze({
   attribute: "BURN",
   status: "ENABLED",
   enabled: true,
-  groundIds: Object.freeze(["GROUND_STILL"] as const),
+  groundIds: Object.freeze(["GROUND_STILL", "GROUND_BURN"] as const),
   policyId: "Burnkin",
 });
 

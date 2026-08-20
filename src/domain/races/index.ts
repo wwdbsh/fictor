@@ -26,8 +26,12 @@ export {
 } from "./burnkin";
 export {
   MechanicConfigError,
+  resolveBlast,
+  resolveBurnout,
   resolvePressedFire,
   resolveTotalStop,
+  tryResolveBlast,
+  tryResolveBurnout,
   tryResolvePressedFire,
   tryResolveTotalStop,
 } from "./mechanics";
