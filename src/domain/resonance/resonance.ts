@@ -3,6 +3,7 @@ import {
   type ResonanceAttribute,
   type ResonanceCalculationResult,
   type ResonanceState,
+  type JoinkinResonanceState,
   type StreakByAttribute,
 } from "./types";
 
@@ -16,6 +17,42 @@ function emptyStreaks(): StreakByAttribute {
     ROT: 0,
     WASH: 0,
     JOIN: 0,
+  };
+}
+
+/**
+ * Joinkin JOIN cards are a bridge. The returned effective attribute is the
+ * attribute that must be used for both power calculation and emitted events.
+ */
+export function advanceJoinkinResonance(
+  state: JoinkinResonanceState,
+  rawAttribute: ResonanceAttribute,
+): { state: JoinkinResonanceState; effectiveAttribute: ResonanceAttribute } {
+  if (!isResonanceAttribute(rawAttribute)) throw new Error("Invalid resonance attribute");
+  if (rawAttribute === "JOIN") {
+    const effectiveAttribute = state.resonance.activeAttribute ?? "JOIN";
+    return {
+      state: {
+        resonance: advanceResonance(state.resonance, effectiveAttribute),
+        bridgeOpen: true,
+      },
+      effectiveAttribute,
+    };
+  }
+  if (state.bridgeOpen && state.resonance.activeAttribute !== null) {
+    const continued = currentResonanceStreak(state.resonance);
+    const seeded: ResonanceState = {
+      activeAttribute: rawAttribute,
+      streakByAttribute: { ...emptyStreaks(), [rawAttribute]: continued },
+    };
+    return {
+      state: { resonance: advanceResonance(seeded, rawAttribute), bridgeOpen: false },
+      effectiveAttribute: rawAttribute,
+    };
+  }
+  return {
+    state: { resonance: advanceResonance(state.resonance, rawAttribute), bridgeOpen: false },
+    effectiveAttribute: rawAttribute,
   };
 }
 

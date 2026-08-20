@@ -1,7 +1,7 @@
 import { resolveForgeCard } from "../../domain/forge";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
 import { browserPacketHasCanonicalArt, type BrowserMaterialDisplay } from "./runtime-packet";
-import type { Track1UiForgeCanonicalPreview } from "./ui-types";
+import type { Track1UiForgeCanonicalPreview, Track1UiForgeThirdOverlay } from "./ui-types";
 
 interface CanonicalPreviewRecord {
   readonly recipeId: string;
@@ -96,6 +96,25 @@ export function buildCanonicalForgePreview(
   const recipeId = [...materialIds].sort(compareIds).join("|");
   const record = canonicalByRecipeId.get(recipeId);
   return record ? projectRecord(record, baseUrl) : null;
+}
+
+export function buildThirdOverlayPreview(
+  materialId: string,
+  baseUrl: string,
+  expectedAttribute?: string | null,
+): Track1UiForgeThirdOverlay | null {
+  const display = materialDisplayById.get(materialId);
+  const material = materialById.get(materialId);
+  if (!display || !material) return null;
+  const rawAttribute = Array.isArray(material.attribute) ? material.attribute[0] : material.attribute;
+  const resonanceAttribute = rawAttribute === "NONE" ? null : rawAttribute;
+  if (expectedAttribute !== undefined && resonanceAttribute !== expectedAttribute) return null;
+  return Object.freeze({
+    materialId,
+    nameKo: display.nameKo,
+    artSrc: assetUrl(baseUrl, display.art),
+    labelKo: resonanceAttribute === null ? "기본 결과 공명 유지" : `${resonanceAttribute} 공명 오버레이`,
+  });
 }
 
 export function projectCanonicalCodex(baseUrl: string): readonly Track1UiForgeCanonicalPreview[] {

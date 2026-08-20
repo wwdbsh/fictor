@@ -153,7 +153,7 @@ describe("Track-1 App", () => {
     expect(discovery).toHaveAttribute("data-discovery-phase", "FINAL");
     expect(screen.getByRole("button", { name: "계속" })).toHaveFocus();
     fireEvent.click(screen.getByRole("button", { name: "계속" }));
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("영구 소모되고 결과가 덱에 편입"));
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("두 재료 소모 · 결과 덱 편입"));
     expect(screen.getByRole("main")).not.toHaveAttribute("inert");
     await waitFor(() => expect(screen.getByRole("heading", { level: 1 })).toHaveFocus());
     expect(storage.setCalls).toBe(1);

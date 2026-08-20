@@ -6,7 +6,7 @@ T026은 콘텐츠 정의와 Stillkin의 순수 정책만 고정한다. registry�
 
 ## 활성 범위
 
-- 활성 종족: `Stillkin` 하나
+- 활성 종족: `Stillkin`, `Burnkin`, `Joinkin` 세 종
 - 활성 터: `GROUND_STILL`(어름의 터) 하나
 - 어름의 터 깊이: 1~3, 각각 `서리 낀 들판`, `얼어붙은 폭포와 계단`, `완전히 정지한 거대 구조`
 - 일반 적: `SWARM`, `BULK`, `SHELL`, `REACH`, `MIMIC` 다섯 형태
@@ -54,3 +54,7 @@ overlay에 기록한다. 선택 단계는 zone을 바꾸지 않으며, enforceme
 
 최종 공명률, 적 HP·damage, 보상, 연료, 깊이별 확률은 이 문서와 registry에 넣지 않는다.
 2026-08-21 밸런스 승인 전에는 pending 상태를 유지한다.
+
+T033/T034는 Burnkin과 Joinkin을 같은 `GROUND_STILL` route에서 활성화했다. 이는 사름/이음 터 콘텐츠를
+활성화한 것이 아니다. 두 종족의 execution packet, starter, save authority는 application layer에 있고
+registry는 종족 선택과 어름의 터 허용 관계만 노출한다.

@@ -18,10 +18,11 @@ import {
 const assetsRoot = resolve(import.meta.dirname, "../../public/assets");
 
 describe("playable races and ice content registry", () => {
-  it("enables Stillkin and Burnkin against the existing ice ground while distinguishing disabled and missing", () => {
-    expect(listEnabledRaces().map((race) => race.id)).toEqual(["Stillkin", "Burnkin"]);
+  it("enables Stillkin, Burnkin, and Joinkin against the existing ice ground while distinguishing disabled and missing", () => {
+    expect(listEnabledRaces().map((race) => race.id)).toEqual(["Stillkin", "Burnkin", "Joinkin"]);
     expect(listEnabledGrounds().map((ground) => ground.id)).toEqual(["GROUND_STILL"]);
     expect(lookupRace("Burnkin")).toMatchObject({ status: "ENABLED", value: { groundIds: ["GROUND_STILL"], policyId: "Burnkin" } });
+    expect(lookupRace("Joinkin")).toMatchObject({ status: "ENABLED", value: { groundIds: ["GROUND_STILL"], policyId: "Joinkin" } });
     expect(lookupGround("GROUND_BURN").status).toBe("DISABLED");
     expect(lookupRace("Unknown").status).toBe("MISSING");
     expect(lookupGround("UNKNOWN").status).toBe("MISSING");

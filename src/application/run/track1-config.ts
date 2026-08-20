@@ -101,3 +101,30 @@ export const BURNKIN_TRACK1_SCENARIO_HASH = sha256Hex(canonicalSerialize({
   route: STILLKIN_TRACK1_PROVISIONAL_CONFIG.route,
   offers: STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers,
 }));
+
+export const T034_CONTRACT_HASH = "41895166ffdda0f6129a2806dee4b36b1e0eba5233a28f654affe2e76642e52e" as const;
+export const JOINKIN_TRACK1_PROVISIONAL_STATUS = "PROVISIONAL_T034_NOT_FINAL_BALANCE" as const;
+const JOINKIN_MATERIAL_IDS = ["ore_join", "join_01", "join_02", "join_03", "join_04", "join_05"] as const;
+const JOINKIN_MATERIAL_STARTER = Array.from({ length: 20 }, (_, index) => JOINKIN_MATERIAL_IDS[index % JOINKIN_MATERIAL_IDS.length]);
+export const JOINKIN_TRACK1_PROVISIONAL_CONFIG = Object.freeze({
+  configId: "joinkin-track1-provisional-v1",
+  contractHash: T034_CONTRACT_HASH,
+  status: JOINKIN_TRACK1_PROVISIONAL_STATUS,
+  authority: "T034_CONTROLLER_SELECTED_PROVISIONAL_EXECUTION_PACKET",
+  balanceFinal: false,
+  starterDeck: Object.freeze([
+    ...JOINKIN_MATERIAL_STARTER,
+    ...Array.from({ length: 10 }, (_, index) => `tool_${String(index + 1).padStart(2, "0")}`),
+  ]),
+} as const);
+export const JOINKIN_TRACK1_CONFIG_HASH = sha256Hex(canonicalSerialize({
+  sharedTrack1ConfigHash: STILLKIN_TRACK1_CONFIG_HASH,
+  joinkin: JOINKIN_TRACK1_PROVISIONAL_CONFIG,
+}));
+export const JOINKIN_TRACK1_SCENARIO_ID = "joinkin-track1-ice-v1" as const;
+export const JOINKIN_TRACK1_SCENARIO_HASH = sha256Hex(canonicalSerialize({
+  scenarioId: JOINKIN_TRACK1_SCENARIO_ID,
+  configHash: JOINKIN_TRACK1_CONFIG_HASH,
+  route: STILLKIN_TRACK1_PROVISIONAL_CONFIG.route,
+  offers: STILLKIN_TRACK1_PROVISIONAL_CONFIG.offers,
+}));

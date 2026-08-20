@@ -6,10 +6,15 @@ literal T027 진행은 새 키 `fictor.save.v2`에 한 번의 `setItem`으로 �
 
 T033 Burnkin은 같은 envelope v2 구조를 별도 키 `fictor.burnkin.save.v2`에 저장한다. Burnkin
 config/scenario hash와 `burnkin-track1-run-*` ID가 Stillkin bytes의 교차 로드를 막는다. 종족 선택 키
-`fictor.race.v1`은 `Stillkin | Burnkin`만 담고 profile/runtime/flow 권한을 갖지 않는다. 기존 Stillkin
+`fictor.race.v1`은 `Stillkin | Burnkin | Joinkin`만 담고 profile/runtime/flow 권한을 갖지 않는다. 기존 Stillkin
 v2가 있으면서 선택 키가 없는 경우에만 UI가 Stillkin을 자동 선택한다.
-두 종족 envelope는 현재 각자의 profile을 포함한다. 종족 변경은 두 저장을 모두 보존하지만 발견 레시피와
+세 종족 envelope는 현재 각자의 profile을 포함한다. 종족 변경은 모든 저장을 보존하지만 발견 레시피와
 심장을 자동 병합하지 않으며, 전역 profile 통합에는 명시적인 후속 schema/migration 결정이 필요하다.
+
+T034 Joinkin은 같은 outer envelope v2를 `fictor.joinkin.save.v2`에 저장한다. 별도
+`joinkin-track1-provisional-v1` config hash, `joinkin-track1-ice-v1` scenario hash와
+`joinkin-track1-run-*` ID가 다른 종족 bytes의 교차 로드를 막는다. 기존 두 종족의 키와 hash는 변경하지
+않는다.
 
 ```ts
 interface SaveEnvelopeV2 {
@@ -33,6 +38,17 @@ provenance를 이룬다. 두 material의 서로 다른 card ID를 lexical sort�
 `forge__${low}__${high}`가 ledger의 recipe/card와 정확히 일치해야 하며, 이 규칙은 represented와
 legacy overlay-only 결과에 똑같이 적용된다. canonical recipe 허용과 profile discovery 결속은 이 형식
 검증에 더해 persistence authority가 계속 검증한다.
+
+Joinkin 결과부터 `ephemeralResults[i].provenance`는 `PAIR | JOINKIN_THREE` grouped record를 선택적으로 갖는다.
+`PAIR`는 두 instance id를, `JOINKIN_THREE`는 base instance 둘, C instance/id와 nullable resonance overlay를
+갖는다. provenance가 없는 기존 result는 위 legacy 1:2 규칙으로 계속 읽는다. 새 group은 isolation cursor와
+정확히 1:2 또는 1:3으로 대응해야 하고, recipe/card는 언제나 base 둘에서만 파생한다. 영구 Joinkin 결과는
+`run.joinkinThirdOverlays[]`에 `{instanceId, thirdMaterialId, resonanceAttribute}`를 저장한다. overlay instance는
+owned/deck에 있어야 하며 application loader가 pinned resolver context에서 C의 주 속성(`NONE`이면 null)을
+재계산해 exact 일치를 요구한다. active bridge와 skill turn 필드도 Joinkin combat에만 존재한다. 이 optional
+additive 필드가 없는 Stillkin/Burnkin v2는 migration 없이 계속 유효하다. 실행 종족 권한은 더 엄격하다.
+Joinkin save는 영구 forge instance와 overlay가 1:1이고 active combat의 bridge/skill 필드가 모두 있어야 하며,
+Stillkin/Burnkin save는 Joinkin overlay·triple provenance·action 2를 포함하면 fail-closed된다.
 
 저장 직전에 v2를 다시 읽어 `(saveGeneration, saveRevision)`을 비교한다. 이는 같은 탭/프로세스에서의
 stale 보호이지 browser `localStorage`의 진정한 multi-tab CAS라고 주장하지 않는다. quota/read/stale/

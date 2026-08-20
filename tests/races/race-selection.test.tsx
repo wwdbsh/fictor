@@ -43,4 +43,52 @@ describe("race selection", () => {
     expect(screen.queryByRole("heading", { name: "붙이를 고르세요" })).toBeNull();
     expect(screen.getByRole("heading", { name: "저장 기록을 열 수 없습니다" })).toBeTruthy();
   });
+
+  it("renders Joinkin's ordered A/B/third slots and traps keyboard focus in irreversible confirmation", async () => {
+    const storage = new MemoryStorage();
+    const { container } = render(<RaceSelectApp selection={createTrack1RaceSelection({ storage, baseUrl: "/fictor-test/" })} />);
+    fireEvent.click(screen.getByRole("button", { name: "이음붙이로 시작" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /공방 열기/ })).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: /공방 열기/ }));
+
+    const slotList = screen.getByRole("list", { name: "빚기 재료 슬롯" });
+    expect(slotList.textContent).toContain("기본 재료 A");
+    expect(slotList.textContent).toContain("기본 재료 B");
+    expect(slotList.textContent).toContain("세 번째 공명 재료");
+    const buttons = Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-material-card-id]"));
+    const chosen: HTMLButtonElement[] = [];
+    const seen = new Set<string>();
+    for (const button of buttons) {
+      const cardId = button.dataset.materialCardId!;
+      if (seen.has(cardId)) continue;
+      seen.add(cardId);
+      chosen.push(button);
+      if (chosen.length === 3) break;
+    }
+    expect(chosen).toHaveLength(3);
+    chosen.forEach((button) => fireEvent.click(button));
+    expect(slotList.textContent).not.toContain("비어 있음");
+    expect(screen.getByText(/세 번째 재료 · .* · JOIN 공명 오버레이/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "최종 확인으로" }));
+
+    const dialog = screen.getByRole("dialog", { name: "공방 빚기 최종 확인" });
+    expect(dialog.textContent).toContain("선택한 세 재료는 영구적으로 소모");
+    expect(dialog.textContent).toContain("영구 소모 세 번째 재료");
+    const cancel = screen.getByRole("button", { name: "취소" });
+    const confirm = screen.getByRole("button", { name: "영구 소모 확인" });
+    const heading = screen.getByRole("heading", { name: "공방 빚기 최종 확인" });
+    await waitFor(() => expect(document.activeElement).toBe(heading));
+    fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(confirm);
+    fireEvent.keyDown(dialog, { key: "Tab" });
+    expect(document.activeElement).toBe(cancel);
+    fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(confirm);
+    confirm.focus();
+    fireEvent.keyDown(dialog, { key: "Tab" });
+    expect(document.activeElement).toBe(cancel);
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "공방 빚기 최종 확인" })).toBeNull());
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "최종 확인으로" }));
+  });
 });

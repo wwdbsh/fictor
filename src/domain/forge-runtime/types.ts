@@ -4,7 +4,7 @@ import type {
   CombatEvent,
   CombatState,
 } from "../combat";
-import type { ForgeInputs, ForgeMaterial, GeneratedCard } from "../forge";
+import type { ForgeAttribute, ForgeInputs, ForgeMaterial, GeneratedCard } from "../forge";
 
 export const FORGE_RUNTIME_SCHEMA_VERSION = "forge-runtime-state-v1" as const;
 export const FORGE_RUNTIME_ENGINE_VERSION = "forge-runtime-engine-v1" as const;
@@ -23,13 +23,34 @@ export interface EphemeralForgeResult {
   cardId: string;
   recipeId: string;
   location: EphemeralLocation;
+  provenance?: ForgeResultProvenance;
+}
+
+export type ForgeResultProvenance =
+  | { kind: "PAIR"; materialInstanceIds: [string, string] }
+  | {
+      kind: "JOINKIN_THREE";
+      baseMaterialInstanceIds: [string, string];
+      thirdMaterialInstanceId: string;
+      thirdMaterialId: string;
+      resonanceAttribute: ForgeAttribute | null;
+    };
+
+export interface JoinkinPersistentOverlay {
+  instanceId: string;
+  thirdMaterialId: string;
+  resonanceAttribute: ForgeAttribute | null;
 }
 
 export interface ActiveCombatForgeRuntime {
   state: CombatState;
   enrolledPersistentInstanceIds: string[];
   forgeActionTurn: number;
-  forgeActionsRemaining: 0 | 1;
+  forgeActionsRemaining: 0 | 1 | 2;
+  /** Absent on legacy pair-only saves. */
+  joinkinSkillUsedTurn?: number | null;
+  /** Absent on legacy pair-only saves. */
+  joinkinBridgeOpen?: boolean;
   isolatedMaterials: IsolatedMaterial[];
   ephemeralResults: EphemeralForgeResult[];
 }
@@ -49,6 +70,8 @@ export interface ForgeRuntimeStateV1 {
     ownedInstances: CardInstance[];
     deck: string[];
     activeCombat: ActiveCombatForgeRuntime | null;
+    /** Absent on legacy Stillkin/Burnkin saves. */
+    joinkinThirdOverlays?: JoinkinPersistentOverlay[];
   };
 }
 
@@ -62,7 +85,9 @@ export interface ForgeResolverContextV1 {
 export type ForgeRuntimeCommand =
   | { type: "APPLY_COMBAT"; command: CombatCommand }
   | { type: "FORGE_INSTANT"; materialInstanceIds: [string, string] }
+  | { type: "FORGE_INSTANT_THREE"; materialInstanceIds: [string, string, string] }
   | { type: "FORGE_WORKSHOP"; materialInstanceIds: [string, string] }
+  | { type: "FORGE_WORKSHOP_THREE"; materialInstanceIds: [string, string, string] }
   | { type: "CLEANUP_COMBAT" };
 
 export type ForgeRuntimeFailureCode =
@@ -79,6 +104,7 @@ export type ForgeRuntimeFailureCode =
   | "DUPLICATE_INSTANCE_SELECTION"
   | "NOT_A_MATERIAL"
   | "SAME_MATERIAL_DEFINITION"
+  | "EQUIPMENT_BASE_NOT_ALLOWED"
   | "NO_FORGE_ACTION"
   | "INSUFFICIENT_FUEL"
   | "INSTANCE_ID_COLLISION"
@@ -93,8 +119,8 @@ export type ForgeRuntimeEvent =
       command: ForgeRuntimeCommand["type"] | "UNKNOWN";
       reason: ForgeRuntimeFailureCode;
     }
-  | { type: "MATERIALS_ISOLATED"; instanceIds: [string, string] }
-  | { type: "MATERIALS_CONSUMED"; instanceIds: [string, string] }
+  | { type: "MATERIALS_ISOLATED"; instanceIds: [string, string] | [string, string, string] }
+  | { type: "MATERIALS_CONSUMED"; instanceIds: [string, string] | [string, string, string] }
   | { type: "FORGE_ACTION_SPENT"; remaining: number; turn: number }
   | { type: "FUEL_SPENT"; amount: 1; remaining: number }
   | { type: "FREE_WORKSHOP_USED"; amount: 0; remainingFuel: number }
@@ -105,6 +131,10 @@ export type ForgeRuntimeEvent =
       cardId: string;
       recipeId: string;
       location: "HAND" | "DECK" | "EQUIPMENT";
+      thirdOverlay?: {
+        thirdMaterialId: string;
+        resonanceAttribute: ForgeAttribute | null;
+      };
     }
   | { type: "RECIPE_DISCOVERED"; recipeId: string }
   | {

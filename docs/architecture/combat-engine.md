@@ -54,6 +54,14 @@ command boundary를 통과한 뒤 canonical CombatState clone에만 적용한다
 종족 외부 행동을 기록했다고 주장하지 않으며, Burnkin의 authoritative replay는 Track 1 저장/event
 ledger다.
 
+T034 Joinkin도 combat-state/replay v2와 기본 reducer를 바꾸지 않는다. controller가 `PLAY_CARD` 직전에
+instance별 세 번째 overlay를 포함한 raw resonance attribute와 bridge 상태를 읽는다. JOIN이면 현재 active
+attribute(없으면 JOIN)를 effective attribute로 사용하고, 열린 bridge 뒤 non-JOIN이면 기존 streak를 새
+attribute에 seed한 다음 canonical reducer가 1을 증가시키게 한다. 따라서 power 계산과
+`RESONANCE_ADVANCED` event가 같은 effective attribute/streak를 사용한다. 성공 뒤 card definition은 canonical
+base projection으로 복구하며 bridge boolean만 ForgeRuntime overlay에 남긴다. Stillkin/Burnkin은 이 adapter를
+통과하지 않아 기존 전이를 유지한다.
+
 count, 확정 cost, energy, seed와 index는 안전한 정수여야 한다. HP, block, 확정 power, rate와 operation amount는
 유한·비음수이고 안전 범위를 벗어나지 않아야 한다. 공명률이 `null`이거나 계산이 overflow이면 수치
 효과의 카드 플레이 전체를 거부한다. 계산 결과를 반올림하지 않는다. 아직 밸런스가 승인되지 않은

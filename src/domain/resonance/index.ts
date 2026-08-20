@@ -1,5 +1,6 @@
 export {
   advanceResonance,
+  advanceJoinkinResonance,
   calculateResonantPower,
   createResonanceState,
   currentResonanceStreak,

@@ -27,9 +27,10 @@ terminal 전환과 명시적 cleanup은 ephemeral location이 HAND/DECK/DISCARD/
 combat은 증거와 replay 대조를 위해 남기며 close-combat 명령은 두지 않는다. 이미 ledger가 빈 cleanup은
 revision이나 event를 만들지 않는 멱등 성공이다.
 
-즉석 action budget은 `0 | 1`뿐이고 항상 nested combat turn과 같은 `forgeActionTurn`에 묶인다. ongoing
-`PLAYER_ACTION`에서만 1일 수 있으며 `END_TURN`과 모든 terminal 전환에서 0으로 만료된다. 성공한 다음
-`START_TURN`만 새 turn의 1회를 부여하므로 persisted 값 조작으로 한 턴에 두 번 빚을 수 없다.
+기본 즉석 action budget은 `0 | 1`이고 항상 nested combat turn과 같은 `forgeActionTurn`에 묶인다. ongoing
+`PLAYER_ACTION`에서만 양수일 수 있으며 `END_TURN`과 모든 terminal 전환에서 0으로 만료된다. 성공한 다음
+`START_TURN`만 새 turn의 기본 1회를 부여한다. Joinkin의 검증된 2 예외는 아래 T034 절의 현재-turn skill
+authority가 있을 때만 유효하므로 persisted 값 조작으로 횟수를 늘릴 수 없다.
 
 ## 원자성, 저장, 확장 seam
 
@@ -49,5 +50,25 @@ rollback은 이전 snapshot 전체 교체로 한다.
 공식 canonical source 또는 최소 projection이 바뀌면 version/source hash/projection digest를 함께 명시적으로
 재검수해 rebind해야 한다. caller가 새 hash를 임의로 제시하는 방식의 자동 승격은 허용하지 않는다.
 
-Joinkin의 추가 단계와 터별 무료 빚기는 이후 trusted additive command/effect seam이다. 현재 API에는 caller가
-fuelCost, instanceId, 무료 여부를 주입할 수 없고, 공방 비용 1과 즉석 턴당 1회만 고정한다.
+## T034 Joinkin grouped provenance
+
+T034는 기존 pair 명령을 바꾸지 않고 `FORGE_INSTANT_THREE`와 `FORGE_WORKSHOP_THREE`를 additive하게 연결한다.
+첫 두 instance가 canonical pair이고 세 번째 instance는 명시적 C다. resolver는
+`resolveForgeCard(A,B)` 뒤 `applyThird(base,C)`만 수행한다. 결과 card/recipe/art/effect는 base와 exact
+동일하며 중간 결과 instance, catalog 밖 id 또는 새 discovery key는 없다. A/B tool+tool과 세 instance 또는
+definition 중복은 mutation 전에 거부한다.
+
+즉석 ledger는 legacy pair의 암묵적 1:2 순서를 계속 읽으면서, 새 결과에는 `PAIR | JOINKIN_THREE` grouped
+provenance를 선택적으로 기록한다. Joinkin group은 base instance 둘, C instance/id와 C 주 속성 overlay를
+함께 묶는다. cleanup은 group 크기에 따라 정확히 2장 또는 3장을 복구한다. 영구 결과의 C overlay는
+`run.joinkinThirdOverlays`에 instance별로 저장한다. strict boundary는 group/격리 순서/card id/recipe를
+대조하고 application load authority가 canonical material definition에서 C 속성을 다시 파생해 tamper를
+거부한다. 필드가 없는 기존 Stillkin/Burnkin pair save는 legacy 형식으로 계속 유효하다.
+
+무료 공방은 application이 동일 workshop reducer의 고정 비용을 내부 payment snapshot에서 처리하고 원래
+연료를 복구한 뒤 `FREE_WORKSHOP_USED`로 투영한다. caller가 fuel/free boolean을 전달하는 seam은 없고,
+entitlement 소비와 단일 flow/runtime revision 및 localStorage CAS가 같은 controller transaction에 있다.
+
+Joinkin의 `이어붙이기`는 active combat의 action budget을 검증된 1에서 2로 한 번만 올린다. 2는 현재 turn과
+`joinkinSkillUsedTurn` authority가 일치할 때만 decode되며 END/terminal에서 0으로 만료한다. 다른 종족은
+controller 명령을 받지 않는다. 터별 다른 무료 빚기 정책은 여전히 후속 seam이다.
