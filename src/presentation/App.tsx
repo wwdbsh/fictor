@@ -112,8 +112,11 @@ function ForgeReviewDialog({ review, session, busy, returnFocusRef, onCancel, on
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape") { event.preventDefault(); close(); return; }
     if (event.key !== "Tab") return;
-    if (event.shiftKey && document.activeElement === cancelRef.current) { event.preventDefault(); confirmRef.current?.focus(); }
-    else if (!event.shiftKey && document.activeElement === confirmRef.current) { event.preventDefault(); cancelRef.current?.focus(); }
+    const active = document.activeElement;
+    if (event.shiftKey ? active === headingRef.current || active === cancelRef.current : active === headingRef.current || active === confirmRef.current) {
+      event.preventDefault();
+      (event.shiftKey ? confirmRef.current : cancelRef.current)?.focus();
+    }
   };
   const confirm = () => {
     const action = session.confirmForgeReview(review);

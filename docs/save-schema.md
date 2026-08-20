@@ -46,7 +46,9 @@ Joinkin 결과부터 `ephemeralResults[i].provenance`는 `PAIR | JOINKIN_THREE` 
 `run.joinkinThirdOverlays[]`에 `{instanceId, thirdMaterialId, resonanceAttribute}`를 저장한다. overlay instance는
 owned/deck에 있어야 하며 application loader가 pinned resolver context에서 C의 주 속성(`NONE`이면 null)을
 재계산해 exact 일치를 요구한다. active bridge와 skill turn 필드도 Joinkin combat에만 존재한다. 이 optional
-additive 필드가 없는 Stillkin/Burnkin v2는 migration 없이 계속 유효하다.
+additive 필드가 없는 Stillkin/Burnkin v2는 migration 없이 계속 유효하다. 실행 종족 권한은 더 엄격하다.
+Joinkin save는 영구 forge instance와 overlay가 1:1이고 active combat의 bridge/skill 필드가 모두 있어야 하며,
+Stillkin/Burnkin save는 Joinkin overlay·triple provenance·action 2를 포함하면 fail-closed된다.
 
 저장 직전에 v2를 다시 읽어 `(saveGeneration, saveRevision)`을 비교한다. 이는 같은 탭/프로세스에서의
 stale 보호이지 browser `localStorage`의 진정한 multi-tab CAS라고 주장하지 않는다. quota/read/stale/

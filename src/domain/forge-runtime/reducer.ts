@@ -323,7 +323,11 @@ function forgeInstantThree(
   const events: ForgeRuntimeEvent[] = [
     { type: "MATERIALS_ISOLATED", instanceIds: [...command.materialInstanceIds] },
     { type: "FORGE_ACTION_SPENT", remaining: active.forgeActionsRemaining, turn: active.state.turn },
-    { type: "FORGE_RESULT_CREATED", mode: "INSTANT", instanceId: generatedId.instanceId, cardId: resolution.card.card_id, recipeId: resolution.card.recipe_id, location: "HAND" },
+    {
+      type: "FORGE_RESULT_CREATED", mode: "INSTANT", instanceId: generatedId.instanceId,
+      cardId: resolution.card.card_id, recipeId: resolution.card.recipe_id, location: "HAND",
+      thirdOverlay: { thirdMaterialId: resolution.overlay.third_material_id, resonanceAttribute: resolution.overlay.resonance_attribute },
+    },
   ];
   if (discovered) events.push({ type: "RECIPE_DISCOVERED", recipeId: resolution.card.recipe_id });
   return commit(state, rollbackState, events, command.type, resolution.card);
@@ -407,7 +411,11 @@ function forgeWorkshopThree(
   const events: ForgeRuntimeEvent[] = [
     { type: "MATERIALS_CONSUMED", instanceIds: [...command.materialInstanceIds] },
     { type: "FUEL_SPENT", amount: FORGE_RUNTIME_FUEL_COST, remaining: state.run.fuel },
-    { type: "FORGE_RESULT_CREATED", mode: "WORKSHOP", instanceId: generatedId.instanceId, cardId: resolution.card.card_id, recipeId: resolution.card.recipe_id, location: "DECK" },
+    {
+      type: "FORGE_RESULT_CREATED", mode: "WORKSHOP", instanceId: generatedId.instanceId,
+      cardId: resolution.card.card_id, recipeId: resolution.card.recipe_id, location: "DECK",
+      thirdOverlay: { thirdMaterialId: resolution.overlay.third_material_id, resonanceAttribute: resolution.overlay.resonance_attribute },
+    },
   ];
   if (discovered) events.push({ type: "RECIPE_DISCOVERED", recipeId: resolution.card.recipe_id });
   return commit(state, rollbackState, events, command.type, resolution.card);

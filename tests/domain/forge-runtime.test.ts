@@ -311,6 +311,43 @@ describe("forge runtime", () => {
     expect(decodeForgeRuntimeState(missingPair).valid).toBe(false);
   });
 
+  it("fails closed when legacy pair, explicit pair, or Joinkin triple isolation is zero or partial", () => {
+    let result = reduceForgeRuntime(runtime(true), { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, context());
+    result = reduceForgeRuntime(result.state, { type: "FORGE_INSTANT", materialInstanceIds: ["material-1", "material-2"] }, context());
+    const explicitPair = result.state!;
+    expect(decodeForgeRuntimeState(explicitPair)).toMatchObject({ valid: true });
+
+    const legacyPair = structuredClone(explicitPair);
+    delete legacyPair.run.activeCombat!.ephemeralResults[0].provenance;
+    expect(decodeForgeRuntimeState(legacyPair)).toMatchObject({ valid: true });
+
+    const triple = structuredClone(explicitPair);
+    const active = triple.run.activeCombat!;
+    const third = triple.run.ownedInstances.find(({ instanceId }) => instanceId === "reserve")!;
+    active.enrolledPersistentInstanceIds.push(third.instanceId);
+    active.isolatedMaterials.push({ instance: third });
+    active.ephemeralResults[0].provenance = {
+      kind: "JOINKIN_THREE",
+      baseMaterialInstanceIds: ["material-1", "material-2"],
+      thirdMaterialInstanceId: third.instanceId,
+      thirdMaterialId: third.cardId,
+      resonanceAttribute: null,
+    };
+    expect(decodeForgeRuntimeState(triple)).toMatchObject({ valid: true });
+
+    for (const [label, source, partialCounts] of [
+      ["legacy pair", legacyPair, [0, 1]],
+      ["explicit pair", explicitPair, [0, 1]],
+      ["Joinkin triple", triple, [0, 1, 2]],
+    ] as const) {
+      for (const partialCount of partialCounts) {
+        const tampered = structuredClone(source);
+        tampered.run.activeCombat!.isolatedMaterials = tampered.run.activeCombat!.isolatedMaterials.slice(0, partialCount);
+        expect(decodeForgeRuntimeState(tampered).valid, `${label} with ${partialCount} isolated materials`).toBe(false);
+      }
+    }
+  });
+
   it("preserves budget on nested rejection and resets it only on a successful next turn", () => {
     let result = reduceForgeRuntime(runtime(true), { type: "APPLY_COMBAT", command: { type: "START_TURN" } }, context());
     result = reduceForgeRuntime(result.state, { type: "FORGE_INSTANT", materialInstanceIds: ["material-1", "material-2"] }, context());

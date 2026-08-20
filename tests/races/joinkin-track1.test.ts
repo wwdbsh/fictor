@@ -2,14 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   BROWSER_RUNTIME_PACKET,
+  BURNKIN_TRACK1_SAVE_KEY,
+  createBurnkinTrack1Controller,
   createJoinkinTrack1Controller,
   createStillkinTrack1Controller,
   JOINKIN_TRACK1_SAVE_KEY,
   type StillkinTrack1Controller,
   type StillkinTrack1Snapshot,
 } from "../../src/application";
-import type { StorageLike } from "../../src/persistence";
-import { reduceForgeRuntime } from "../../src/domain";
+import { FICTOR_SAVE_V2_KEY, type StorageLike } from "../../src/persistence";
+import { decodeForgeRuntimeState, reduceForgeRuntime } from "../../src/domain";
 
 class MemoryStorage implements StorageLike {
   readonly values = new Map<string, string>();
@@ -89,6 +91,18 @@ describe("Joinkin Track 1 integration", () => {
     expect(cleaned.events).toContainEqual({ type: "INSTANT_FORGE_CLEANED", restoredInstanceIds: ids, removedEphemeralInstanceIds: [expect.any(String)] });
   });
 
+  it("atomically rejects the public pair instant command for Joinkin", () => {
+    const { controller, storage, snapshot } = create();
+    let current = dispatch(controller, { type: "ENTER_NEXT_NODE", expectedRevision: 0, runId: snapshot.flow.runId }).snapshot;
+    current = dispatch(controller, { type: "APPLY_COMBAT", ...binding(current), command: { type: "START_TURN" } }).snapshot;
+    const ids = current.runtime.run.activeCombat!.state.zones.hand.slice(0, 2) as [string, string];
+    const beforeBytes = storage.values.get(JOINKIN_TRACK1_SAVE_KEY);
+    const rejected = controller.dispatch({ type: "FORGE_INSTANT", ...binding(current), materialInstanceIds: ids });
+    expect(rejected).toMatchObject({ applied: false, reason: "RACE_COMMAND_UNAVAILABLE" });
+    expect(rejected.snapshot).toEqual(current);
+    expect(storage.values.get(JOINKIN_TRACK1_SAVE_KEY)).toBe(beforeBytes);
+  });
+
   it("rejects duplicate triples and equipment base pairs without any state or persistence mutation", () => {
     const duplicateRun = create(new MemoryStorage());
     const duplicateBefore = duplicateRun.snapshot;
@@ -151,12 +165,131 @@ describe("Joinkin Track 1 integration", () => {
     const stillIds = stillSnapshot.runtime.run.ownedInstances.slice(0, 3).map(({ instanceId }) => instanceId) as [string, string, string];
     expect(still.dispatch({ type: "JOINKIN_FORGE_WORKSHOP", expectedRevision: 0, runId: stillSnapshot.flow.runId, materialInstanceIds: stillIds }).applied).toBe(false);
 
-    const envelope = JSON.parse(storage.values.get(JOINKIN_TRACK1_SAVE_KEY)!);
+    const canonicalBytes = storage.values.get(JOINKIN_TRACK1_SAVE_KEY)!;
+    const missingOverlay = JSON.parse(canonicalBytes);
+    missingOverlay.runtime.run.joinkinThirdOverlays = [];
+    storage.values.set(JOINKIN_TRACK1_SAVE_KEY, JSON.stringify(missingOverlay));
+    const incomplete = createJoinkinTrack1Controller({ storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext }).load();
+    expect(incomplete.source).toBe("SAFE_INITIALIZED");
+    expect(incomplete.snapshot.persistence.writeBlocked).toBe(true);
+
+    storage.values.set(JOINKIN_TRACK1_SAVE_KEY, canonicalBytes);
+    const envelope = JSON.parse(canonicalBytes);
     envelope.runtime.run.joinkinThirdOverlays[0].resonanceAttribute = "BURN";
     storage.values.set(JOINKIN_TRACK1_SAVE_KEY, JSON.stringify(envelope));
     const tampered = createJoinkinTrack1Controller({ storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext }).load();
     expect(tampered.source).toBe("SAFE_INITIALIZED");
     expect(tampered.snapshot.persistence.writeBlocked).toBe(true);
+  });
+
+  it("requires Joinkin skill authority fields after use and forbids injected Joinkin authority on other races", () => {
+    const used = create();
+    let current = dispatch(used.controller, { type: "ENTER_NEXT_NODE", expectedRevision: 0, runId: used.snapshot.flow.runId }).snapshot;
+    current = dispatch(used.controller, { type: "APPLY_COMBAT", ...binding(current), command: { type: "START_TURN" } }).snapshot;
+    current = dispatch(used.controller, { type: "JOINKIN_EXTEND", ...binding(current) }).snapshot;
+    const ids = current.runtime.run.activeCombat!.state.zones.hand.slice(0, 3) as [string, string, string];
+    current = dispatch(used.controller, { type: "JOINKIN_FORGE_INSTANT", ...binding(current), materialInstanceIds: ids }).snapshot;
+    expect(current.runtime.run.activeCombat).toMatchObject({ forgeActionsRemaining: 1, joinkinSkillUsedTurn: 1 });
+    const omitted = JSON.parse(used.storage.values.get(JOINKIN_TRACK1_SAVE_KEY)!);
+    delete omitted.runtime.run.activeCombat.joinkinSkillUsedTurn;
+    expect(decodeForgeRuntimeState({ ...omitted.runtime, profile: { discoveredRecipeIds: omitted.profile.discoveredRecipeIds } }).valid).toBe(true);
+    used.storage.values.set(JOINKIN_TRACK1_SAVE_KEY, JSON.stringify(omitted));
+    expect(createJoinkinTrack1Controller({ storage: used.storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext }).load()).toMatchObject({
+      source: "SAFE_INITIALIZED",
+      snapshot: { persistence: { writeBlocked: true, issues: ["INVALID_RUN"] } },
+    });
+
+    for (const [race, key, factory] of [
+      ["Stillkin", FICTOR_SAVE_V2_KEY, createStillkinTrack1Controller],
+      ["Burnkin", BURNKIN_TRACK1_SAVE_KEY, createBurnkinTrack1Controller],
+    ] as const) {
+      const storage = new MemoryStorage();
+      const controller = factory({ storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext, generationFactory: () => `${race}-generation` });
+      let snapshot = controller.load().snapshot;
+      snapshot = dispatch(controller, { type: "ENTER_NEXT_NODE", expectedRevision: 0, runId: snapshot.flow.runId }).snapshot;
+      snapshot = dispatch(controller, { type: "APPLY_COMBAT", ...binding(snapshot), command: { type: "START_TURN" } }).snapshot;
+      const envelope = JSON.parse(storage.values.get(key)!);
+      const active = envelope.runtime.run.activeCombat;
+      active.forgeActionsRemaining = 2;
+      active.joinkinSkillUsedTurn = active.state.turn;
+      active.joinkinBridgeOpen = false;
+      expect(decodeForgeRuntimeState({ ...envelope.runtime, profile: { discoveredRecipeIds: envelope.profile.discoveredRecipeIds } }).valid).toBe(true);
+      storage.values.set(key, JSON.stringify(envelope));
+      expect(factory({ storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext }).load()).toMatchObject({
+        source: "SAFE_INITIALIZED",
+        snapshot: { persistence: { writeBlocked: true, issues: ["INVALID_RUN"] } },
+      });
+    }
+  });
+
+  it("rejects a self-consistent triple provenance ledger injected into pair-only races", () => {
+    for (const [race, expectedAttribute, key, factory] of [
+      ["Stillkin", "STILL", FICTOR_SAVE_V2_KEY, createStillkinTrack1Controller],
+      ["Burnkin", "BURN", BURNKIN_TRACK1_SAVE_KEY, createBurnkinTrack1Controller],
+    ] as const) {
+      const storage = new MemoryStorage();
+      const controller = factory({ storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext, generationFactory: () => `${race}-triple` });
+      let snapshot = controller.load().snapshot;
+      snapshot = dispatch(controller, { type: "ENTER_NEXT_NODE", expectedRevision: 0, runId: snapshot.flow.runId }).snapshot;
+
+      let pair: [string, string] | null = null;
+      let pairCardIds: [string, string] | null = null;
+      // Grouped five-copy starters make turn 1 mono-definition; turn 2 crosses the first group boundary.
+      for (let turn = 1; turn <= 2 && pair === null; turn += 1) {
+        snapshot = dispatch(controller, { type: "APPLY_COMBAT", ...binding(snapshot), command: { type: "START_TURN" } }).snapshot;
+        const active = snapshot.runtime.run.activeCombat!;
+        const hand = active.state.zones.hand.map((instanceId) => active.state.instances.find((instance) => instance.instanceId === instanceId)!);
+        const left = hand[0];
+        const right = hand.find(({ cardId }) => cardId !== left.cardId);
+        if (right) {
+          pair = [left.instanceId, right.instanceId];
+          pairCardIds = [left.cardId, right.cardId];
+        } else if (turn < 2) {
+          snapshot = dispatch(controller, { type: "APPLY_COMBAT", ...binding(snapshot), command: { type: "END_TURN" } }).snapshot;
+        }
+      }
+      expect(pair, `${race} should expose a distinct public forge pair by turn 2`).not.toBeNull();
+      expect(pairCardIds).not.toBeNull();
+      if (!pair || !pairCardIds) throw new Error(`${race} distinct forge pair unavailable within deterministic bound`);
+      snapshot = dispatch(controller, { type: "FORGE_INSTANT", ...binding(snapshot), materialInstanceIds: pair }).snapshot;
+
+      // The pair and envelope came through public controller authority before the single provenance injection.
+      expect(factory({ storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext }).load().source).toBe("SAVED");
+      const envelope = JSON.parse(storage.values.get(key)!);
+      const forgedActive = envelope.runtime.run.activeCombat;
+      const provenance = forgedActive.ephemeralResults[0].provenance;
+      expect(provenance).toMatchObject({ kind: "PAIR", materialInstanceIds: pair });
+      const third = forgedActive.state.instances.find((instance: { instanceId: string; cardId: string }) =>
+        !pair.includes(instance.instanceId) && !pairCardIds.includes(instance.cardId) && !instance.cardId.startsWith("forge__"));
+      expect(third, `${race} should retain a third distinct enrolled material`).toBeTruthy();
+      if (!third) throw new Error(`${race} third material unavailable`);
+      const thirdDefinition = BROWSER_RUNTIME_PACKET.resolverContext.materials.find(({ id }) => id === third.cardId);
+      expect(thirdDefinition).toBeTruthy();
+      if (!thirdDefinition) throw new Error(`${race} third material definition unavailable`);
+      const thirdAttribute = Array.isArray(thirdDefinition.attribute) ? thirdDefinition.attribute[0] : thirdDefinition.attribute;
+      expect(thirdAttribute).toBe(expectedAttribute);
+
+      forgedActive.state.instances = forgedActive.state.instances.filter((instance: { instanceId: string }) => instance.instanceId !== third.instanceId);
+      for (const zone of Object.values(forgedActive.state.zones) as string[][]) {
+        const index = zone.indexOf(third.instanceId);
+        if (index >= 0) zone.splice(index, 1);
+      }
+      forgedActive.isolatedMaterials.push({ instance: third });
+      forgedActive.ephemeralResults[0].provenance = {
+        kind: "JOINKIN_THREE",
+        baseMaterialInstanceIds: provenance.materialInstanceIds,
+        thirdMaterialInstanceId: third.instanceId,
+        thirdMaterialId: third.cardId,
+        resonanceAttribute: thirdAttribute,
+      };
+      const decoded = decodeForgeRuntimeState({ ...envelope.runtime, profile: { discoveredRecipeIds: envelope.profile.discoveredRecipeIds } });
+      expect(decoded.valid, decoded.valid ? undefined : decoded.errors.join("; ")).toBe(true);
+      storage.values.set(key, JSON.stringify(envelope));
+      expect(factory({ storage, resolverContext: BROWSER_RUNTIME_PACKET.resolverContext }).load()).toMatchObject({
+        source: "SAFE_INITIALIZED",
+        snapshot: { persistence: { writeBlocked: true, issues: ["INVALID_RUN"] } },
+      });
+    }
   });
 
   it("fails closed on active grouped-provenance tamper while legacy race states remain pair-shaped", () => {

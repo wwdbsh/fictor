@@ -1,5 +1,5 @@
 import type { StillkinTrack1Event } from "../run";
-import { buildCanonicalForgePreview } from "./forge-codex-preview";
+import { buildCanonicalForgePreview, buildThirdOverlayPreview } from "./forge-codex-preview";
 import type { Track1UiForgePresentation } from "./ui-types";
 
 type ForgeCreatedEvent = Extract<StillkinTrack1Event, { type: "FORGE_RESULT_CREATED" }>;
@@ -31,6 +31,10 @@ export function buildForgePresentation(
   if (!materialIds) return null;
   const canonical = buildCanonicalForgePreview(materialIds, baseUrl);
   if (!canonical || canonical.recipeId !== created.recipeId || canonical.cardId !== created.cardId) return null;
+  const thirdOverlay = created.thirdOverlay
+    ? buildThirdOverlayPreview(created.thirdOverlay.thirdMaterialId, baseUrl, created.thirdOverlay.resonanceAttribute)
+    : null;
+  if (created.thirdOverlay && !thirdOverlay) return null;
 
   return Object.freeze({
     presentationId: `${presentationScopeId}:forge-result:${created.mode}:${created.recipeId}`,
@@ -38,5 +42,6 @@ export function buildForgePresentation(
     mode: created.mode,
     location: created.location,
     canonical,
+    thirdOverlay,
   });
 }

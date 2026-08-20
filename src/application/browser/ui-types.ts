@@ -106,19 +106,20 @@ export interface Track1UiForgeCanonicalPreview {
   };
 }
 
+export interface Track1UiForgeThirdOverlay {
+  readonly materialId: string;
+  readonly nameKo: string;
+  readonly artSrc: string;
+  readonly labelKo: string;
+}
+
 export interface Track1UiForgePreview {
   readonly previewId: string;
   readonly mode: Track1UiForgeMode;
   readonly selectedInstanceIds: readonly [string, string] | readonly [string, string, string];
   readonly requiredMaterialCount: 2 | 3;
   readonly canonical: Track1UiForgeCanonicalPreview;
-  readonly thirdOverlay: null | {
-    readonly materialId: string;
-    readonly nameKo: string;
-    readonly artSrc: string;
-    readonly resonanceAttribute: "STILL" | "BURN" | "SCATTER" | "ROT" | "WASH" | "JOIN" | null;
-    readonly labelKo: string;
-  };
+  readonly thirdOverlay: Track1UiForgeThirdOverlay | null;
   readonly cost: {
     readonly kind: "ACTION" | "FUEL" | "FREE_ENTITLEMENT";
     readonly labelKo: string;
@@ -146,6 +147,7 @@ export interface Track1UiForgePresentation {
   readonly mode: "INSTANT" | "WORKSHOP";
   readonly location: "HAND" | "DECK" | "EQUIPMENT";
   readonly canonical: Track1UiForgeCanonicalPreview;
+  readonly thirdOverlay: Track1UiForgeThirdOverlay | null;
 }
 
 export interface Track1UiCodexEntry {

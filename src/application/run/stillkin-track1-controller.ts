@@ -420,6 +420,31 @@ function joinkinOverlayAuthorityValid(runtime: ForgeRuntimeStateV1, context: For
   return true;
 }
 
+function executionRuntimeAuthorityValid(
+  runtime: ForgeRuntimeStateV1,
+  context: ForgeResolverContextV1,
+  execution: Track1RaceExecution,
+): boolean {
+  const active = runtime.run.activeCombat;
+  const overlays = runtime.run.joinkinThirdOverlays;
+  if (execution.raceId !== "Joinkin") {
+    return overlays === undefined
+      && (!active || (
+        active.joinkinSkillUsedTurn === undefined
+        && active.joinkinBridgeOpen === undefined
+        && active.forgeActionsRemaining !== 2
+        && active.ephemeralResults.every(({ provenance }) => provenance?.kind !== "JOINKIN_THREE")
+      ));
+  }
+
+  if (!overlays) return false;
+  if (active && (active.joinkinSkillUsedTurn === undefined || active.joinkinBridgeOpen === undefined
+    || active.ephemeralResults.some(({ provenance }) => provenance?.kind !== "JOINKIN_THREE"))) return false;
+
+  return runtime.run.ownedInstances.filter(({ cardId }) => canonicalRecipeIdForCard(cardId) !== null).length === overlays.length
+    && joinkinOverlayAuthorityValid(runtime, context);
+}
+
 function enemyIntents(kind: "NORMAL" | "ELITE" | "BOSS"): EnemyIntent[] {
   const damage = (intentId: string, amount: number, labelKo: string): EnemyIntent => ({
     intentId, labelKo, telegraph: "ATTACK", displayAmount: amount,
@@ -803,7 +828,7 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
     if (candidate.profile.discoveredRecipeIds.length !== candidate.runtime.profile.discoveredRecipeIds.length
       || candidate.profile.discoveredRecipeIds.some((id, index) => id !== candidate.runtime.profile.discoveredRecipeIds[index])) return false;
     if (!runtimeReferencesAllowed(candidate.runtime, TRACK1_PERSISTENCE_CATALOG)
-      || !joinkinOverlayAuthorityValid(candidate.runtime, options.context)) return false;
+      || !executionRuntimeAuthorityValid(candidate.runtime, options.context, execution)) return false;
     if ((candidate.flow.phase === "IN_COMBAT") !== (candidate.runtime.run.activeCombat !== null)) return false;
     try {
       return candidate.flow.phase !== "IN_COMBAT" || loadedCombatMatchesAuthority(candidate.runtime, candidate.flow, options.context, execution);
@@ -970,6 +995,7 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
       else if (!candidate.runtime.run.activeCombat || candidate.runtime.run.activeCombat.state.enemy.enemyId !== command.encounterId) failure = "COMBAT_AUTHORITY_MISMATCH";
       else if ((command.type === "BURNKIN_PAY_HP" || command.type === "BURNKIN_KINDLE") && execution.raceId !== "Burnkin") failure = "RACE_COMMAND_UNAVAILABLE";
       else if ((command.type === "JOINKIN_FORGE_INSTANT" || command.type === "JOINKIN_EXTEND") && execution.raceId !== "Joinkin") failure = "RACE_COMMAND_UNAVAILABLE";
+      else if (command.type === "FORGE_INSTANT" && execution.raceId === "Joinkin") failure = "RACE_COMMAND_UNAVAILABLE";
       else {
         const beforeResonance = candidate.runtime.run.activeCombat.state.resonance.activeAttribute;
         let result: { state: ForgeRuntimeStateV1 | null; events: StillkinTrack1Event[]; resolvedCard?: GeneratedCard };

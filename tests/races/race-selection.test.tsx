@@ -76,6 +76,14 @@ describe("race selection", () => {
     expect(dialog.textContent).toContain("영구 소모 세 번째 재료");
     const cancel = screen.getByRole("button", { name: "취소" });
     const confirm = screen.getByRole("button", { name: "영구 소모 확인" });
+    const heading = screen.getByRole("heading", { name: "공방 빚기 최종 확인" });
+    await waitFor(() => expect(document.activeElement).toBe(heading));
+    fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(confirm);
+    fireEvent.keyDown(dialog, { key: "Tab" });
+    expect(document.activeElement).toBe(cancel);
+    fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(confirm);
     confirm.focus();
     fireEvent.keyDown(dialog, { key: "Tab" });
     expect(document.activeElement).toBe(cancel);

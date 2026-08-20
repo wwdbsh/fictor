@@ -255,9 +255,14 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
   for (let index = 0; index < active.ephemeralResults.length; index += 1) {
     const result = active.ephemeralResults[index];
     const countForResult = result.provenance?.kind === "JOINKIN_THREE" ? 3 : 2;
-    const left = active.isolatedMaterials[isolatedCursor]?.instance;
-    const right = active.isolatedMaterials[isolatedCursor + 1]?.instance;
-    if (!left || !right) continue;
+    const group = active.isolatedMaterials.slice(isolatedCursor, isolatedCursor + countForResult);
+    isolatedCursor += countForResult;
+    if (group.length !== countForResult) {
+      errors.push(`${location}.ephemeralResults[${index}] requires exactly ${countForResult} chronological isolated materials`);
+      continue;
+    }
+    const left = group[0].instance;
+    const right = group[1].instance;
     if (left.cardId === right.cardId) {
       errors.push(`${location}.ephemeralResults[${index}] provenance materials must have distinct card ids`);
       continue;
@@ -271,10 +276,10 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
         errors.push(`${location}.ephemeralResults[${index}] pair provenance does not match isolated materials`);
       }
     } else if (result.provenance?.kind === "JOINKIN_THREE") {
-      const third = active.isolatedMaterials[isolatedCursor + 2]?.instance;
-      const ids = [left.instanceId, right.instanceId, third?.instanceId];
-      const cardIds = [left.cardId, right.cardId, third?.cardId];
-      if (!third || new Set(ids).size !== 3 || new Set(cardIds).size !== 3
+      const third = group[2].instance;
+      const ids = [left.instanceId, right.instanceId, third.instanceId];
+      const cardIds = [left.cardId, right.cardId, third.cardId];
+      if (new Set(ids).size !== 3 || new Set(cardIds).size !== 3
         || result.provenance.baseMaterialInstanceIds[0] !== left.instanceId
         || result.provenance.baseMaterialInstanceIds[1] !== right.instanceId
         || result.provenance.thirdMaterialInstanceId !== third.instanceId
@@ -282,7 +287,6 @@ function validateActive(value: unknown, owned: readonly CardInstance[], location
         errors.push(`${location}.ephemeralResults[${index}] Joinkin provenance does not match isolated materials`);
       }
     }
-    isolatedCursor += countForResult;
   }
   if (isolatedCursor !== active.isolatedMaterials.length) errors.push(`${location} isolated material count does not match result provenance`);
   uniqueStrings(active.enrolledPersistentInstanceIds, `${location}.enrolledPersistentInstanceIds`, errors);

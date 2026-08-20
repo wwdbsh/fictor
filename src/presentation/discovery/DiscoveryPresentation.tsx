@@ -76,6 +76,12 @@ export function FirstDiscoveryOverlay({ presentation, onDismiss, clock }: { pres
                 <figcaption>{material.nameKo}</figcaption>
               </figure>
             ))}
+            {presentation.thirdOverlay ? (
+              <figure>
+                <AssetImage assetRole="HAND" src={presentation.thirdOverlay.artSrc} placeholderLabel={presentation.thirdOverlay.nameKo} alt="" />
+                <figcaption>{presentation.thirdOverlay.nameKo}</figcaption>
+              </figure>
+            ) : null}
           </div>
           <span className="discovery-forge-mark" aria-hidden="true">＋</span>
           <figure className="discovery-result">
@@ -91,6 +97,7 @@ export function FirstDiscoveryOverlay({ presentation, onDismiss, clock }: { pres
         {final ? (
           <div className="discovery-final-copy">
             <p>{canonical.materials[0].nameKo}과 {canonical.materials[1].nameKo}의 제법이 도감에 남았습니다.</p>
+            {presentation.thirdOverlay ? <p>세 번째 공명 · {presentation.thirdOverlay.nameKo}</p> : null}
             <p>{MODE_LABELS[presentation.mode]}</p>
             <button ref={continueRef} type="button" className="action-button primary-cta" onClick={onDismiss}>계속</button>
           </div>
@@ -107,7 +114,7 @@ export function RepeatDiscoveryToast({ presentation, onDismiss }: { presentation
   return (
     <aside className="discovery-toast" role="status" data-presentation-id={presentation.presentationId}>
       <ResultArt presentation={presentation} />
-      <div><strong>알고 있는 제법</strong><span>{canonical.result.nameKo}</span><small>{MODE_LABELS[presentation.mode]}</small></div>
+      <div><strong>알고 있는 제법</strong><span>{canonical.result.nameKo}</span>{presentation.thirdOverlay ? <small>세 번째 공명 · {presentation.thirdOverlay.nameKo}</small> : null}<small>{MODE_LABELS[presentation.mode]}</small></div>
       <button type="button" onClick={onDismiss} aria-label={`${canonical.result.nameKo} 알림 닫기`}>닫기</button>
     </aside>
   );

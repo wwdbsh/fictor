@@ -131,6 +131,10 @@ export type ForgeRuntimeEvent =
       cardId: string;
       recipeId: string;
       location: "HAND" | "DECK" | "EQUIPMENT";
+      thirdOverlay?: {
+        thirdMaterialId: string;
+        resonanceAttribute: ForgeAttribute | null;
+      };
     }
   | { type: "RECIPE_DISCOVERED"; recipeId: string }
   | {

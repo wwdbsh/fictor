@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildForgePresentation, type StillkinTrack1Event, type Track1UiForgePresentation } from "../../src/application";
 import { FirstDiscoveryOverlay, RepeatDiscoveryToast, discoveryPhaseAt } from "../../src/presentation/discovery";
 
-function presentation(scope = "presentation-1", discovery = true): Track1UiForgePresentation {
+function presentation(scope = "presentation-1", discovery = true, joinkin = false): Track1UiForgePresentation {
   const events: StillkinTrack1Event[] = [{
     type: "FORGE_RESULT_CREATED",
     mode: "INSTANT",
@@ -17,6 +17,7 @@ function presentation(scope = "presentation-1", discovery = true): Track1UiForge
     cardId: "forge__ore_still__still_01",
     recipeId: "ore_still|still_01",
     location: "HAND",
+    ...(joinkin ? { thirdOverlay: { thirdMaterialId: "join_01", resonanceAttribute: "JOIN" as const } } : {}),
   }];
   if (discovery) events.push({ type: "RECIPE_DISCOVERED", recipeId: "ore_still|still_01" });
   return buildForgePresentation(events, "/fictor-test/", scope)!;
@@ -81,7 +82,7 @@ describe("discovery phase machine", () => {
     act(() => vi.advanceTimersByTime(1));
     expect(overlay).toHaveAttribute("data-discovery-phase", "FINAL");
     expect(screen.getByRole("button", { name: "계속" })).toHaveFocus();
-    expect(screen.getByText("굳은 조각과 서리꽃의 제법이 도감에 남았습니다.")).toBeVisible();
+    expect(screen.getByText(/굳은 조각과 서리꽃의 제법이 도감에 남았습니다/)).toBeVisible();
     expect(timerSpy.mock.calls.filter(([, delay]) => delay === 900)).toHaveLength(3);
 
     view.unmount();
@@ -175,5 +176,14 @@ describe("discovery phase machine", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "굳은 서리꽃 알림 닫기" }));
     expect(onDismiss).toHaveBeenCalledOnce();
+  });
+
+  it("shows all three consumed Joinkin materials and derives the completion cardinality", () => {
+    installMotionPreference(true);
+    render(<FirstDiscoveryOverlay presentation={presentation("joinkin", true, true)} onDismiss={() => undefined} />);
+    const usedMaterials = screen.getByLabelText("사용한 재료");
+    expect(usedMaterials.querySelectorAll("figure")).toHaveLength(3);
+    expect(usedMaterials).toHaveTextContent("엉킨 실");
+    expect(screen.getByText(/세 번째 공명 · 엉킨 실/)).toBeVisible();
   });
 });

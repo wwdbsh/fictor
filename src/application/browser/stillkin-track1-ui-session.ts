@@ -5,7 +5,7 @@ import { BURNKIN_TRACK1_RULES, createTrack1Controller, STILLKIN_TRACK1_PROVISION
 import type { StillkinTrack1Command, StillkinTrack1Snapshot, Track1RaceId } from "../run";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
 import { browserPacketHasCanonicalArt, type BrowserMaterialDisplay } from "./runtime-packet";
-import { buildCanonicalForgePreview, projectCanonicalCodex } from "./forge-codex-preview";
+import { buildCanonicalForgePreview, buildThirdOverlayPreview, projectCanonicalCodex } from "./forge-codex-preview";
 import { buildForgePresentation } from "./forge-result-presentation";
 import type {
   StillkinTrack1UiSession,
@@ -442,7 +442,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
           ? `체력 ${BURNKIN_TRACK1_RULES.hpToEnergy.hpCost} → 에너지 ${BURNKIN_TRACK1_RULES.hpToEnergy.energyGain} · 공명 2배 · 단절 시 체력 ${BURNKIN_TRACK1_RULES.resonanceBreakSelfDamage} 피해`
           : null,
         joinkinExtendAction,
-        joinkinRulesKo: snapshot.raceId === "Joinkin" ? "기본 두 재료의 결과는 그대로 유지되고, 세 번째 재료의 주 속성만 이 결과 인스턴스의 공명을 덮습니다." : null,
+        joinkinRulesKo: snapshot.raceId === "Joinkin" ? "기본 결과 유지. 세 번째 속성만 공명." : null,
       };
     }
     if (snapshot.flow.phase === "AWAITING_REWARD") {
@@ -587,17 +587,8 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       if (snapshot.raceId === "Joinkin" && leftDisplay.category === "TOOL" && rightDisplay.category === "TOOL") return null;
       const canonical = buildCanonicalForgePreview([selected[0].cardId, selected[1].cardId], baseUrl);
       if (!canonical) return null;
-      const thirdDisplay = requiredMaterialCount === 3 ? materials.get(selected[2].cardId)! : null;
-      const thirdRawAttribute = thirdDisplay
-        ? (Array.isArray(thirdDisplay.attribute) ? thirdDisplay.attribute[0] : thirdDisplay.attribute)
-        : null;
-      const thirdOverlay = thirdDisplay ? Object.freeze({
-        materialId: thirdDisplay.id,
-        nameKo: thirdDisplay.nameKo,
-        artSrc: assetUrl(baseUrl, thirdDisplay.art),
-        resonanceAttribute: thirdRawAttribute === "NONE" ? null : thirdRawAttribute as Exclude<typeof thirdRawAttribute, "NONE">,
-        labelKo: thirdRawAttribute === "NONE" ? "기본 결과 공명 유지" : `${thirdRawAttribute} 공명 오버레이`,
-      }) : null;
+      const thirdOverlay = requiredMaterialCount === 3 ? buildThirdOverlayPreview(selected[2].cardId, baseUrl) : null;
+      if (requiredMaterialCount === 3 && !thirdOverlay) return null;
       const fuelBefore = snapshot.runtime.run.fuel;
       const preview: Track1UiForgePreview = Object.freeze({
         previewId: `forge-preview:${snapshot.flow.revision}:${mode}:${selected.map(({ instanceId }) => instanceId).join(":")}`,
