@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "task_key": "T035",
+  "completed_at": "2026-08-20T10:48:42Z",
+  "executor": {
+    "kind": "CODEX",
+    "human_performed": false,
+    "label": "Codex browser QA"
+  },
+  "environments": {
+    "full_run": {
+      "browser": "Chrome for Testing via Puppeteer 25.5.0",
+      "os": "macOS 26.5.2",
+      "command": "npm run smoke:static",
+      "log_sha256": "b17414555ea94f77d71591b8c0192904f92d664ca910cb6cecbb83ab5a99ce3c"
+    },
+    "visible_sample": {
+      "browser": "Codex in-app Browser connected to Chrome",
+      "url": "http://127.0.0.1:4173/",
+      "flow": "종족 선택 → 사름붙이 선택 → 첫 전투 → 턴 시작",
+      "console_errors_or_warnings": 0
+    }
+  },
+  "completion_checklist": [
+    {
+      "race": "Stillkin",
+      "status": "PASS",
+      "terminal_phase": "RUN_WON",
+      "boss_victory": true,
+      "restart_verified": true,
+      "notes_ko": "정적 브라우저 smoke에서 즉석 발견, 도감 reload, 어름 보스 승리, 신의 심장 획득과 새 런 재시작을 연속 확인했다."
+    },
+    {
+      "race": "Burnkin",
+      "status": "PASS",
+      "terminal_phase": "RUN_WON",
+      "boss_victory": true,
+      "restart_verified": true,
+      "notes_ko": "격리된 정적 브라우저 컨텍스트에서 사름붙이를 선택해 무료 공방을 포함한 고정 어름 여정을 완주했다. 별도 가시 Browser 표본에서 지피기와 공명 2배·단절 피해 규칙 문구를 확인했다."
+    },
+    {
+      "race": "Joinkin",
+      "status": "PASS",
+      "terminal_phase": "RUN_WON",
+      "boss_victory": true,
+      "restart_verified": true,
+      "notes_ko": "격리된 정적 브라우저 컨텍스트에서 유료·즉석·무료 3장 빚기, reload와 cleanup, 보스 승리와 재시작을 확인했다. 도감 총계는 기존 canonical 1,326을 유지했다."
+    }
+  ],
+  "visible_sample_checks": {
+    "page_title": "FICTOR · 픽토르",
+    "race_options": ["Stillkin", "Burnkin", "Joinkin"],
+    "selected_race": "Burnkin",
+    "rendered_rule_text_ko": "체력 1 → 에너지 1 · 공명 2배 · 단절 시 체력 1 피해",
+    "rendered_skill_ko": "지피기",
+    "blank_page": false,
+    "framework_error_overlay": false
+  },
+  "provenance_notes_ko": "세 완주는 사람이 직접 플레이한 것으로 주장하지 않는다. Codex가 정적 빌드의 실제 버튼과 저장 상태를 조작한 재현 가능한 브라우저 QA이며, 별도 인앱 Browser 확인은 Burnkin 첫 전투의 가시 렌더링 표본이다."
+}
