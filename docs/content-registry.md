@@ -1,13 +1,13 @@
 # M3–M5 콘텐츠 registry — 세 종족 × 활성 터
 
-T026은 어름의 터, T036은 사름의 터 콘텐츠 팩을 고정한다. registry는 활성 콘텐츠를
+T026은 어름의 터, T036은 사름의 터, T037은 흩음의 터 콘텐츠 팩을 고정한다. registry는 활성 콘텐츠를
 명시적으로 노출하고, 아직 구현되지 않은 후반 콘텐츠는 `DISABLED`로 남긴다. 모르는
 식별자는 `MISSING`으로 구분한다.
 
 ## 활성 범위
 
 - 활성 종족: `Stillkin`, `Burnkin`, `Joinkin` 세 종
-- 활성 터: `GROUND_STILL`(어름의 터), `GROUND_BURN`(사름의 터)
+- 활성 터: `GROUND_STILL`(어름의 터), `GROUND_BURN`(사름의 터), `GROUND_SCATTER`(흩음의 터)
 - 어름의 터 깊이: 1~3, 각각 `서리 낀 들판`, `얼어붙은 폭포와 계단`, `완전히 정지한 거대 구조`
 - 일반 적: `SWARM`, `BULK`, `SHELL`, `REACH`, `MIMIC` 다섯 형태
 - 엘리트: `elite__still__burn`, 기믹 메타데이터 `PRESSED_FIRE`
@@ -30,6 +30,21 @@ T026은 어름의 터, T036은 사름의 터 콘텐츠 팩을 고정한다. regi
 세 깊이와 일반 적·엘리트·보스의 literal asset reference가 이어지고 마지막 노드가
 `the_burning`/`BURNOUT`인지 검증한다. 기존 브라우저 수직 슬라이스의 고정 어름 여정은 이 콘텐츠
 registry 변경과 별도이며 T036에서 route·종족 규칙·최종 밸런스를 바꾸지 않는다.
+
+## T037 흩음의 터 콘텐츠 팩
+
+- 깊이 1~3: `먼지 자욱한 분지`, `떠 있는 바위 군`, `지면이 아예 없는 공중`
+- 일반 적: `scat_01~05`의 명명 필드를 다섯 적 형태와 1:1로 연결한다.
+- 엘리트: `elite__scatter__rot`, 기믹 `SPREADING`. 호출자가 `maxTargets`를 주입하면 입력 순서대로
+  대상에 같은 디버프 ID를 전달하며 registry에는 수치를 저장하지 않는다.
+- 보스: `The Scattering`, 기믹 `DISPERSAL`, 전설 카드 아트 `cards/heart__scatter.png` 재사용.
+  호출자가 `phaseTurns`를 주입한 동안은 명중할 수 없고 남은 턴이 0이 되면 다시 명중할 수 있다.
+- 보상 authority는 기존 터와 같되 일반 보상의 origin은 `GROUND_SCATTER`, 보스 보상은
+  `heart__scatter`다. 이벤트는 `CACHE`·`ODDITY`의 흩음 변주와 네 공용 plate를 사용한다.
+
+세 활성 종족 descriptor는 모두 `GROUND_SCATTER`를 허용한다. T037은 content-level 보스
+reachability만 추가하며 기존 브라우저 수직 슬라이스의 고정 어름 여정, 종족 규칙, 최종 밸런스는
+변경하지 않는다.
 
 보스는 별도 이미지를 만들지 않는다. 전설 카드 아트 `cards/heart__still.png`를 같은 asset
 reference로 재사용한다. 이벤트 중 `CACHE`와 `ODDITY`만 어름 변주 asset을 사용하고, 나머지
@@ -58,7 +73,7 @@ overlay에 기록한다. 선택 단계는 zone을 바꾸지 않으며, enforceme
 
 ## 아직 pending인 수치
 
-`PRESSED_FIRE`, `TOTAL_STOP`, `BLAST`, `BURNOUT`은 registry에서 실행기가 아니라 기믹
+`PRESSED_FIRE`, `TOTAL_STOP`, `BLAST`, `BURNOUT`, `SPREADING`, `DISPERSAL`은 registry에서 실행기가 아니라 기믹
 메타데이터로만 보인다.
 실행기를 만들 때는 `resolvePressedFire({ chargeTurns, explosionPower })`와
 `resolveTotalStop({ shield })`에 안전한 양의 정수 설정을 명시적으로 전달해야 한다. 설정이
@@ -74,6 +89,10 @@ overlay에 기록한다. 선택 단계는 zone을 바꾸지 않으며, enforceme
 - `BURNOUT`: 호출자가 안전한 양의 정수 `hpCost`와 `powerGain`을 주입한다. 보스가 마지막 체력을
   소모하지 않는 범위에서 체력을 공격력으로 바꾸며, 더 지불할 수 없으면 상태를 바꾸지 않고
   `EXHAUSTED`를 반환한다.
+- `SPREADING`: 호출자가 안전한 양의 정수 `maxTargets`를 주입한다. 원본 대상과 중복되지 않는
+  고유 대상에 같은 디버프 ID를 입력 순서대로 전달한다.
+- `DISPERSAL`: 호출자가 안전한 양의 정수 `phaseTurns`를 주입한다. 해당 턴 동안 `DISPERSED`로
+  명중할 수 없고, 남은 턴이 0이 되면 `MATERIALIZED`로 전환한다.
 
 최종 공명률, 적 HP·damage, 보상, 연료, 깊이별 확률은 이 문서와 registry에 넣지 않는다.
 2026-08-21 밸런스 승인 전에는 pending 상태를 유지한다.

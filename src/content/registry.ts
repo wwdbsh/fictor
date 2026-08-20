@@ -3,6 +3,7 @@ import { BURNKIN_DESCRIPTOR } from "./races/burnkin";
 import { JOINKIN_DESCRIPTOR } from "./races/joinkin";
 import { ICE_GROUND_DESCRIPTOR } from "./grounds/ice";
 import { BURN_GROUND_DESCRIPTOR } from "./grounds/burn";
+import { SCATTER_GROUND_DESCRIPTOR } from "./grounds/scatter";
 import type {
   AssetLookup,
   AssetReference,
@@ -31,7 +32,7 @@ const disabledRace = (
   });
 
 const disabledGround = (
-  id: Exclude<GroundId, "GROUND_STILL" | "GROUND_BURN">,
+  id: Exclude<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER">,
   nameKo: string,
   attribute: GroundDescriptor["attribute"],
 ): GroundDescriptor =>
@@ -60,7 +61,7 @@ const KNOWN_RACES: readonly RaceDescriptor[] = Object.freeze([
 const KNOWN_GROUNDS: readonly GroundDescriptor[] = Object.freeze([
   ICE_GROUND_DESCRIPTOR,
   BURN_GROUND_DESCRIPTOR,
-  disabledGround("GROUND_SCATTER", "흩음의 터", "SCATTER"),
+  SCATTER_GROUND_DESCRIPTOR,
   disabledGround("GROUND_ROT", "삭음의 터", "ROT"),
   disabledGround("GROUND_WASH", "씻음의 터", "WASH"),
   disabledGround("GROUND_JOIN", "이음의 터", "JOIN"),
@@ -105,12 +106,12 @@ export const contentRegistry = CONTENT_REGISTRY;
 export const ASSET_PATH_ALLOWLIST = /* @__PURE__ */ cloneAndFreeze(ASSET_ALLOWLIST);
 export const CONTENT_CARDINALITIES = /* @__PURE__ */ Object.freeze({
   enabledRaces: 3,
-  enabledGrounds: 2,
-  enabledDepths: 6,
-  enabledNormalEnemies: 10,
-  enabledElites: 2,
-  enabledBosses: 2,
-  enabledEventVariations: 12,
+  enabledGrounds: 3,
+  enabledDepths: 9,
+  enabledNormalEnemies: 15,
+  enabledElites: 3,
+  enabledBosses: 3,
+  enabledEventVariations: 18,
   stillDepths: 3,
   stillNormalEnemies: 5,
   stillElites: 1,
@@ -121,9 +122,14 @@ export const CONTENT_CARDINALITIES = /* @__PURE__ */ Object.freeze({
   burnElites: 1,
   burnBosses: 1,
   burnEvents: 6,
+  scatterDepths: 3,
+  scatterNormalEnemies: 5,
+  scatterElites: 1,
+  scatterBosses: 1,
+  scatterEvents: 6,
 });
 export const ENABLED_RACE_IDS = /* @__PURE__ */ Object.freeze(["Stillkin", "Burnkin", "Joinkin"] as const);
-export const ENABLED_GROUND_IDS = /* @__PURE__ */ Object.freeze(["GROUND_STILL", "GROUND_BURN"] as const);
+export const ENABLED_GROUND_IDS = /* @__PURE__ */ Object.freeze(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER"] as const);
 
 function lookup<T extends { id: string; enabled: boolean }>(
   values: readonly T[],

@@ -27,13 +27,13 @@ const GENERIC_EVENT_ASSETS: Readonly<Partial<Record<EventType, string>>> = Objec
   RECORD: "event__record",
 });
 
-type GroundStem = "still" | "burn";
+type GroundStem = "still" | "burn" | "scatter";
 
 interface EnabledGroundConfig {
-  readonly id: Extract<GroundId, "GROUND_STILL" | "GROUND_BURN">;
+  readonly id: Extract<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER">;
   readonly stem: GroundStem;
   readonly nameKo: string;
-  readonly attribute: "STILL" | "BURN";
+  readonly attribute: "STILL" | "BURN" | "SCATTER";
   readonly depthLabels: readonly [string, string, string];
   readonly normalLabels: readonly [string, string, string, string, string];
   readonly elite: {

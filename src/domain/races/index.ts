@@ -28,11 +28,15 @@ export {
   MechanicConfigError,
   resolveBlast,
   resolveBurnout,
+  resolveDispersal,
   resolvePressedFire,
+  resolveSpreading,
   resolveTotalStop,
   tryResolveBlast,
   tryResolveBurnout,
+  tryResolveDispersal,
   tryResolvePressedFire,
+  tryResolveSpreading,
   tryResolveTotalStop,
 } from "./mechanics";
 export type * from "./mechanics";

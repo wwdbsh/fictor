@@ -12,59 +12,59 @@ import {
 
 const assetsRoot = resolve(import.meta.dirname, "../../../public/assets");
 
-describe("T036 burn ground content pack", () => {
+describe("T037 scatter ground content pack", () => {
   it("exposes the three approved depths and all seven encounters", () => {
-    const ground = getGroundDescriptor("GROUND_BURN");
+    const ground = getGroundDescriptor("GROUND_SCATTER");
     expect(ground).toMatchObject({
-      id: "GROUND_BURN",
-      nameKo: "사름의 터",
-      attribute: "BURN",
+      id: "GROUND_SCATTER",
+      nameKo: "흩음의 터",
+      attribute: "SCATTER",
       status: "ENABLED",
       enabled: true,
     });
     expect(ground?.depths.map(({ depth, label, assetId }) => [depth, label, assetId])).toEqual([
-      [1, "식은 재밭", "background__burn__depth_01"],
-      [2, "균열 사이로 보이는 불빛", "background__burn__depth_02"],
-      [3, "꺼지지 않는 화심", "background__burn__depth_03"],
+      [1, "먼지 자욱한 분지", "background__scatter__depth_01"],
+      [2, "떠 있는 바위 군", "background__scatter__depth_02"],
+      [3, "지면이 아예 없는 공중", "background__scatter__depth_03"],
     ]);
     expect(ground?.encounters?.normals.map(({ shape, labelKo, assetId }) => [shape, labelKo, assetId])).toEqual([
-      ["SWARM", "달군 잉걸", "enemy__burn__swarm"],
-      ["BULK", "그을린 심지", "enemy__burn__bulk"],
-      ["SHELL", "눌어붙은 재", "enemy__burn__shell"],
-      ["REACH", "뜨거운 열", "enemy__burn__reach"],
-      ["MIMIC", "불붙은 불티", "enemy__burn__mimic"],
+      ["SWARM", "가벼운 뼈", "enemy__scatter__swarm"],
+      ["BULK", "흩날리는 씨", "enemy__scatter__bulk"],
+      ["SHELL", "벗겨진 껍데기", "enemy__scatter__shell"],
+      ["REACH", "뜬 먼지", "enemy__scatter__reach"],
+      ["MIMIC", "마른 바람", "enemy__scatter__mimic"],
     ]);
     expect(ground?.encounters?.elite).toMatchObject({
-      id: "elite__burn__scatter",
-      mechanicId: "BLAST",
-      mechanic: { id: "BLAST", status: "PENDING_2026_08_21" },
-      assetId: "elite__burn__scatter",
+      id: "elite__scatter__rot",
+      mechanicId: "SPREADING",
+      mechanic: { id: "SPREADING", status: "PENDING_2026_08_21" },
+      assetId: "elite__scatter__rot",
     });
     expect(ground?.encounters?.boss).toMatchObject({
-      id: "the_burning",
-      name: "The Burning",
-      labelKo: "사름, 꺼지지 못한 신",
-      mechanicId: "BURNOUT",
-      mechanic: { id: "BURNOUT", status: "PENDING_2026_08_21" },
-      assetId: "heart__burn",
-      reusesCardAssetId: "heart__burn",
+      id: "the_scattering",
+      name: "The Scattering",
+      labelKo: "흩음, 붙잡히지 않은 신",
+      mechanicId: "DISPERSAL",
+      mechanic: { id: "DISPERSAL", status: "PENDING_2026_08_21" },
+      assetId: "heart__scatter",
+      reusesCardAssetId: "heart__scatter",
     });
     expect(ground?.rewards).toEqual({
-      normal: { source: "NORMAL", allowedMaterialCategories: ["ORE", "GROUND_PRODUCT"], origin: "GROUND_BURN" },
+      normal: { source: "NORMAL", allowedMaterialCategories: ["ORE", "GROUND_PRODUCT"], origin: "GROUND_SCATTER" },
       elite: { source: "ELITE", allowedMaterialCategories: ["TOOL", "ODDITY"] },
-      boss: { source: "BOSS", heartId: "heart__burn" },
+      boss: { source: "BOSS", heartId: "heart__scatter" },
     });
   });
 
   it("maps all six event variations to recovered local art", () => {
-    const events = getGroundDescriptor("GROUND_BURN")?.events ?? [];
+    const events = getGroundDescriptor("GROUND_SCATTER")?.events ?? [];
     expect(events.map(({ type, assetId }) => [type, assetId])).toEqual([
-      ["CACHE", "event__cache__burn"],
+      ["CACHE", "event__cache__scatter"],
       ["WORKSHOP", "event__workshop"],
-      ["COLLAPSE", "event__collapse__burn"],
+      ["COLLAPSE", "event__collapse"],
       ["FICTOR", "event__fictor"],
       ["RECORD", "event__record"],
-      ["ODDITY", "event__oddity__burn"],
+      ["ODDITY", "event__oddity__scatter"],
     ]);
     for (const event of events) {
       expect(lookupAsset(event.assetId)).toEqual({ status: "FOUND", asset: event.asset });
@@ -80,13 +80,13 @@ describe("T036 burn ground content pack", () => {
       enabledElites: 3,
       enabledBosses: 3,
       enabledEventVariations: 18,
-      burnDepths: 3,
-      burnNormalEnemies: 5,
-      burnElites: 1,
-      burnBosses: 1,
-      burnEvents: 6,
+      scatterDepths: 3,
+      scatterNormalEnemies: 5,
+      scatterElites: 1,
+      scatterBosses: 1,
+      scatterEvents: 6,
     });
-    const ground = getGroundDescriptor("GROUND_BURN")!;
+    const ground = getGroundDescriptor("GROUND_SCATTER")!;
     const route = [
       ground.depths[0],
       ground.encounters!.normals[0],
@@ -96,9 +96,9 @@ describe("T036 burn ground content pack", () => {
       ground.encounters!.boss,
     ];
     for (const race of listEnabledRaces()) {
-      expect(race.groundIds, race.id).toContain("GROUND_BURN");
+      expect(race.groundIds, race.id).toContain("GROUND_SCATTER");
       expect(route.map(({ assetId }) => lookupAsset(assetId).status), race.id).toEqual(Array(route.length).fill("FOUND"));
-      expect(route.at(-1)).toMatchObject({ id: "the_burning", mechanicId: "BURNOUT" });
+      expect(route.at(-1)).toMatchObject({ id: "the_scattering", mechanicId: "DISPERSAL" });
     }
   });
 });
