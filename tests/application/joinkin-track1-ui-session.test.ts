@@ -64,7 +64,7 @@ describe("Joinkin Track 1 browser session", () => {
     expect(preview).toMatchObject({ requiredMaterialCount: 3, cost: { kind: "FUEL", fuelBefore: 4, fuelAfter: 3 }, lifetime: "PERMANENT" });
     expect(preview.canonical).toEqual(reversed.canonical);
     expect(preview.canonical.recipeId).not.toBe(cAsBase.canonical.recipeId);
-    expect(preview.thirdOverlay).toMatchObject({ materialId: c.cardId, resonanceAttribute: "JOIN" });
+    expect(preview.thirdOverlay).toMatchObject({ materialId: c.cardId, labelKo: "JOIN 공명 오버레이" });
     expect(paid.session.previewForge("WORKSHOP_PAID", [a.instanceId, b.instanceId])).toBeNull();
 
     const instant = create(new MemoryStorage(), "joinkin-instant");
@@ -91,6 +91,7 @@ describe("Joinkin Track 1 browser session", () => {
     const action = first.session.confirmForgeReview(review)!;
     const applied = apply(first.session, action);
     expect(applied.projection.stats).toMatchObject({ fuel: 3, deckCount: 28 });
+    expect(applied.projection.feedback?.messageKo).toContain("세 재료 소모");
     expect(first.session.confirmForgeReview(review)).toBeNull();
 
     const storage = new MemoryStorage();

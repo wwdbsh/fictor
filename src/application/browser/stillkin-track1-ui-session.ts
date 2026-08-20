@@ -197,10 +197,10 @@ function commandFeedback(events: readonly { type: string }[]): Feedback {
   if (last === "RUN_LOST") return { tone: "STATUS", messageKo: "런이 끝났습니다." };
   if (events.some(({ type }) => type === "REWARD_AVAILABLE")) return { tone: "STATUS", messageKo: "전투 보상이 도착했습니다." };
   if (events.some(({ type }) => type === "WORKSHOP_ENTITLEMENT_GRANTED")) return { tone: "STATUS", messageKo: "연료 없이 한 번 빚을 수 있습니다." };
-  const created = events.find((event): event is { type: "FORGE_RESULT_CREATED"; mode: "INSTANT" | "WORKSHOP"; location: "HAND" | "DECK" | "EQUIPMENT" } => event.type === "FORGE_RESULT_CREATED" && "mode" in event && "location" in event);
+  const created = events.find((event): event is { type: "FORGE_RESULT_CREATED"; mode: "INSTANT" | "WORKSHOP"; location: "HAND" | "DECK" | "EQUIPMENT"; thirdOverlay?: unknown } => event.type === "FORGE_RESULT_CREATED" && "mode" in event && "location" in event);
   if (created?.mode === "INSTANT" && created.location === "EQUIPMENT") return { tone: "STATUS", messageKo: "즉석 장비 결과는 전투 동안만 보유하며 손에 놓이지 않습니다. 전투 종료 시 장비 결과는 사라지고 재료는 복구됩니다." };
   if (created?.mode === "INSTANT") return { tone: "STATUS", messageKo: "즉석 결과가 손에 놓였습니다. 전투 종료 시 결과는 사라지고 재료는 복구됩니다." };
-  if (created?.mode === "WORKSHOP") return { tone: "STATUS", messageKo: "두 재료가 영구 소모되고 결과가 덱에 편입되었습니다." };
+  if (created?.mode === "WORKSHOP") return { tone: "STATUS", messageKo: `${created.thirdOverlay ? "세" : "두"} 재료 소모 · 결과 덱 편입.` };
   if (events.some(({ type }) => type === "BURNKIN_RESONANCE_BROKEN")) return { tone: "STATUS", messageKo: "공명이 끊겨 자해 피해를 받았습니다." };
   if (events.some(({ type }) => type === "CARD_PLAYED")) return { tone: "STATUS", messageKo: "카드를 사용했습니다." };
   if (events.some(({ type }) => type === "BURNKIN_CARD_KINDLED")) return { tone: "STATUS", messageKo: "카드 한 장을 지펴 에너지로 바꿨습니다." };
