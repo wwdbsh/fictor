@@ -2,6 +2,7 @@ import { STILLKIN_DESCRIPTOR } from "./races/stillkin";
 import { BURNKIN_DESCRIPTOR } from "./races/burnkin";
 import { JOINKIN_DESCRIPTOR } from "./races/joinkin";
 import { ICE_GROUND_DESCRIPTOR } from "./grounds/ice";
+import { BURN_GROUND_DESCRIPTOR } from "./grounds/burn";
 import type {
   AssetLookup,
   AssetReference,
@@ -30,7 +31,7 @@ const disabledRace = (
   });
 
 const disabledGround = (
-  id: Exclude<GroundId, "GROUND_STILL">,
+  id: Exclude<GroundId, "GROUND_STILL" | "GROUND_BURN">,
   nameKo: string,
   attribute: GroundDescriptor["attribute"],
 ): GroundDescriptor =>
@@ -43,6 +44,7 @@ const disabledGround = (
     enabled: false,
     depths: Object.freeze([]),
     encounters: null,
+    rewards: null,
     events: Object.freeze([]),
   });
 
@@ -57,31 +59,32 @@ const KNOWN_RACES: readonly RaceDescriptor[] = Object.freeze([
 
 const KNOWN_GROUNDS: readonly GroundDescriptor[] = Object.freeze([
   ICE_GROUND_DESCRIPTOR,
-  disabledGround("GROUND_BURN", "사름의 터", "BURN"),
+  BURN_GROUND_DESCRIPTOR,
   disabledGround("GROUND_SCATTER", "흩음의 터", "SCATTER"),
   disabledGround("GROUND_ROT", "삭음의 터", "ROT"),
   disabledGround("GROUND_WASH", "씻음의 터", "WASH"),
   disabledGround("GROUND_JOIN", "이음의 터", "JOIN"),
 ]);
 
-const ASSET_ALLOWLIST: readonly AssetReference[] = Object.freeze([
-  { id: "background__still__depth_01", path: "/assets/backgrounds/background__still__depth_01.png" },
-  { id: "background__still__depth_02", path: "/assets/backgrounds/background__still__depth_02.png" },
-  { id: "background__still__depth_03", path: "/assets/backgrounds/background__still__depth_03.png" },
-  { id: "enemy__still__swarm", path: "/assets/enemies/enemy__still__swarm.png" },
-  { id: "enemy__still__bulk", path: "/assets/enemies/enemy__still__bulk.png" },
-  { id: "enemy__still__shell", path: "/assets/enemies/enemy__still__shell.png" },
-  { id: "enemy__still__reach", path: "/assets/enemies/enemy__still__reach.png" },
-  { id: "enemy__still__mimic", path: "/assets/enemies/enemy__still__mimic.png" },
-  { id: "elite__still__burn", path: "/assets/enemies/elite__still__burn.png" },
-  { id: "heart__still", path: "/assets/cards/heart__still.png" },
-  { id: "event__cache__still", path: "/assets/events/event__cache__still.png" },
-  { id: "event__workshop", path: "/assets/events/event__workshop.png" },
-  { id: "event__collapse", path: "/assets/events/event__collapse.png" },
-  { id: "event__fictor", path: "/assets/events/event__fictor.png" },
-  { id: "event__record", path: "/assets/events/event__record.png" },
-  { id: "event__oddity__still", path: "/assets/events/event__oddity__still.png" },
-].map((reference) => Object.freeze(reference)));
+function createAssetAllowlist(): readonly AssetReference[] {
+  const references = KNOWN_GROUNDS.flatMap((ground) => {
+    const encounterAssets = ground.encounters === null ? [] : [
+      ...ground.encounters.normals.map(({ asset }) => asset),
+      ground.encounters.elite.asset,
+      ground.encounters.boss.asset,
+    ];
+    return [
+      ...ground.depths.map(({ asset }) => asset),
+      ...encounterAssets,
+      ...ground.events.map(({ asset }) => asset),
+    ];
+  });
+  return Object.freeze(Array.from(new Map(
+    references.map((reference) => [reference.id, reference] as const),
+  ).values()));
+}
+
+const ASSET_ALLOWLIST = /* @__PURE__ */ createAssetAllowlist();
 
 const REGISTRY: ContentRegistry = Object.freeze({ races: KNOWN_RACES, grounds: KNOWN_GROUNDS });
 
@@ -99,18 +102,28 @@ function cloneAndFreeze<T>(value: T): T {
 
 export const CONTENT_REGISTRY = cloneAndFreeze(REGISTRY);
 export const contentRegistry = CONTENT_REGISTRY;
-export const ASSET_PATH_ALLOWLIST = cloneAndFreeze(ASSET_ALLOWLIST);
-export const CONTENT_CARDINALITIES = Object.freeze({
+export const ASSET_PATH_ALLOWLIST = /* @__PURE__ */ cloneAndFreeze(ASSET_ALLOWLIST);
+export const CONTENT_CARDINALITIES = /* @__PURE__ */ Object.freeze({
   enabledRaces: 3,
-  enabledGrounds: 1,
+  enabledGrounds: 2,
+  enabledDepths: 6,
+  enabledNormalEnemies: 10,
+  enabledElites: 2,
+  enabledBosses: 2,
+  enabledEventVariations: 12,
   stillDepths: 3,
   stillNormalEnemies: 5,
   stillElites: 1,
   stillBosses: 1,
   stillEvents: 6,
+  burnDepths: 3,
+  burnNormalEnemies: 5,
+  burnElites: 1,
+  burnBosses: 1,
+  burnEvents: 6,
 });
-export const ENABLED_RACE_IDS = Object.freeze(["Stillkin", "Burnkin", "Joinkin"] as const);
-export const ENABLED_GROUND_IDS = Object.freeze(["GROUND_STILL"] as const);
+export const ENABLED_RACE_IDS = /* @__PURE__ */ Object.freeze(["Stillkin", "Burnkin", "Joinkin"] as const);
+export const ENABLED_GROUND_IDS = /* @__PURE__ */ Object.freeze(["GROUND_STILL", "GROUND_BURN"] as const);
 
 function lookup<T extends { id: string; enabled: boolean }>(
   values: readonly T[],

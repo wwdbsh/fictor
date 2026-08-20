@@ -54,10 +54,14 @@ export interface NormalEnemyDescriptor {
   readonly assetPath: string;
 }
 
+export type EliteMechanicId = "PRESSED_FIRE" | "BLAST";
+export type BossMechanicId = "TOTAL_STOP" | "BURNOUT";
+export type EncounterMechanicId = EliteMechanicId | BossMechanicId;
+
 export interface EliteEnemyDescriptor {
   readonly id: string;
   readonly labelKo: string;
-  readonly mechanicId: "PRESSED_FIRE";
+  readonly mechanicId: EliteMechanicId;
   readonly mechanic: MechanicMetadata;
   readonly asset: AssetReference;
   readonly assetId: string;
@@ -65,19 +69,19 @@ export interface EliteEnemyDescriptor {
 }
 
 export interface BossEnemyDescriptor {
-  readonly id: "the_stilling";
-  readonly name: "The Stilling";
+  readonly id: "the_stilling" | "the_burning";
+  readonly name: "The Stilling" | "The Burning";
   readonly labelKo: string;
-  readonly mechanicId: "TOTAL_STOP";
+  readonly mechanicId: BossMechanicId;
   readonly mechanic: MechanicMetadata;
   readonly asset: AssetReference;
   readonly assetId: string;
   readonly assetPath: string;
-  readonly reusesCardAssetId: "heart__still";
+  readonly reusesCardAssetId: "heart__still" | "heart__burn";
 }
 
 export interface MechanicMetadata {
-  readonly id: "PRESSED_FIRE" | "TOTAL_STOP";
+  readonly id: EncounterMechanicId;
   readonly status: "PENDING_2026_08_21";
 }
 
@@ -97,6 +101,22 @@ export interface GroundEncounters {
   readonly boss: BossEnemyDescriptor;
 }
 
+export interface GroundRewardMapping {
+  readonly normal: {
+    readonly source: "NORMAL";
+    readonly allowedMaterialCategories: readonly ["ORE", "GROUND_PRODUCT"];
+    readonly origin: GroundId;
+  };
+  readonly elite: {
+    readonly source: "ELITE";
+    readonly allowedMaterialCategories: readonly ["TOOL", "ODDITY"];
+  };
+  readonly boss: {
+    readonly source: "BOSS";
+    readonly heartId: "heart__still" | "heart__burn";
+  };
+}
+
 export interface GroundDescriptor {
   readonly id: GroundId;
   readonly nameKo: string;
@@ -106,6 +126,7 @@ export interface GroundDescriptor {
   readonly enabled: boolean;
   readonly depths: readonly GroundDepthDescriptor[];
   readonly encounters: GroundEncounters | null;
+  readonly rewards: GroundRewardMapping | null;
   readonly events: readonly EventDescriptor[];
 }
 

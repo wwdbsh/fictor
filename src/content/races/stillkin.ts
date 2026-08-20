@@ -7,7 +7,7 @@ export const STILLKIN_DESCRIPTOR: RaceDescriptor = Object.freeze({
   attribute: "STILL",
   status: "ENABLED",
   enabled: true,
-  groundIds: Object.freeze(["GROUND_STILL"] as const),
+  groundIds: Object.freeze(["GROUND_STILL", "GROUND_BURN"] as const),
   policyId: "Stillkin",
 });
 
