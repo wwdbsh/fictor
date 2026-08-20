@@ -7,7 +7,7 @@ export const JOINKIN_DESCRIPTOR: RaceDescriptor = Object.freeze({
   attribute: "JOIN",
   status: "ENABLED",
   enabled: true,
-  groundIds: Object.freeze(["GROUND_STILL", "GROUND_BURN"] as const),
+  groundIds: Object.freeze(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER"] as const),
   policyId: "Joinkin",
 });
 

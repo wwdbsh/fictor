@@ -54,8 +54,8 @@ export interface NormalEnemyDescriptor {
   readonly assetPath: string;
 }
 
-export type EliteMechanicId = "PRESSED_FIRE" | "BLAST";
-export type BossMechanicId = "TOTAL_STOP" | "BURNOUT";
+export type EliteMechanicId = "PRESSED_FIRE" | "BLAST" | "SPREADING";
+export type BossMechanicId = "TOTAL_STOP" | "BURNOUT" | "DISPERSAL";
 export type EncounterMechanicId = EliteMechanicId | BossMechanicId;
 
 export interface EliteEnemyDescriptor {
@@ -69,15 +69,15 @@ export interface EliteEnemyDescriptor {
 }
 
 export interface BossEnemyDescriptor {
-  readonly id: "the_stilling" | "the_burning";
-  readonly name: "The Stilling" | "The Burning";
+  readonly id: "the_stilling" | "the_burning" | "the_scattering";
+  readonly name: "The Stilling" | "The Burning" | "The Scattering";
   readonly labelKo: string;
   readonly mechanicId: BossMechanicId;
   readonly mechanic: MechanicMetadata;
   readonly asset: AssetReference;
   readonly assetId: string;
   readonly assetPath: string;
-  readonly reusesCardAssetId: "heart__still" | "heart__burn";
+  readonly reusesCardAssetId: "heart__still" | "heart__burn" | "heart__scatter";
 }
 
 export interface MechanicMetadata {
@@ -113,7 +113,7 @@ export interface GroundRewardMapping {
   };
   readonly boss: {
     readonly source: "BOSS";
-    readonly heartId: "heart__still" | "heart__burn";
+    readonly heartId: "heart__still" | "heart__burn" | "heart__scatter";
   };
 }
 

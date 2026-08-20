@@ -94,6 +94,50 @@ export interface BurnoutEvaluator {
   burn(state: BurnoutState): BurnoutStep;
 }
 
+export interface SpreadingConfig {
+  readonly maxTargets: number;
+}
+
+export interface SpreadingHit {
+  readonly targetId: string;
+  readonly debuffId: string;
+}
+
+export interface SpreadingStep {
+  readonly event: "SPREAD_DEBUFF";
+  readonly sourceTargetId: string;
+  readonly hits: readonly SpreadingHit[];
+}
+
+export interface SpreadingEvaluator {
+  readonly maxTargets: number;
+  step(sourceTargetId: string, debuffId: string, targetIds: readonly string[]): SpreadingStep;
+  spread(sourceTargetId: string, debuffId: string, targetIds: readonly string[]): SpreadingStep;
+}
+
+export interface DispersalConfig {
+  readonly phaseTurns: number;
+}
+
+export interface DispersalState {
+  readonly remainingTurns: number;
+}
+
+export type DispersalSignal = "DISPERSED" | "MATERIALIZED";
+
+export interface DispersalStep {
+  readonly state: DispersalState;
+  readonly event: DispersalSignal;
+  readonly canBeHit: boolean;
+}
+
+export interface DispersalEvaluator {
+  readonly phaseTurns: number;
+  initialState(): DispersalState;
+  step(state: DispersalState): DispersalStep;
+  advance(state: DispersalState): DispersalStep;
+}
+
 export type MechanicConfigFailure =
   | "INVALID_CONFIG"
   | "INVALID_CHARGE_TURNS"
@@ -101,12 +145,17 @@ export type MechanicConfigFailure =
   | "INVALID_SHIELD"
   | "INVALID_DAMAGE"
   | "INVALID_HP_COST"
-  | "INVALID_POWER_GAIN";
+  | "INVALID_POWER_GAIN"
+  | "INVALID_MAX_TARGETS"
+  | "INVALID_PHASE_TURNS";
 
 export class MechanicConfigError extends Error {
   readonly reason: MechanicConfigFailure;
 
-  constructor(mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT", reason: MechanicConfigFailure) {
+  constructor(
+    mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT" | "SPREADING" | "DISPERSAL",
+    reason: MechanicConfigFailure,
+  ) {
     super(`Invalid ${mechanic} mechanic configuration: ${reason}`);
     this.name = "MechanicConfigError";
     this.reason = reason;
@@ -172,6 +221,24 @@ function assertBurnoutConfig(value: unknown): asserts value is BurnoutConfig {
   }
 }
 
+function assertSpreadingConfig(value: unknown): asserts value is SpreadingConfig {
+  if (!isRecord(value) || !hasExactKeys(value, ["maxTargets"])) {
+    throw new MechanicConfigError("SPREADING", "INVALID_CONFIG");
+  }
+  if (!isSafePositiveInteger(value.maxTargets)) {
+    throw new MechanicConfigError("SPREADING", "INVALID_MAX_TARGETS");
+  }
+}
+
+function assertDispersalConfig(value: unknown): asserts value is DispersalConfig {
+  if (!isRecord(value) || !hasExactKeys(value, ["phaseTurns"])) {
+    throw new MechanicConfigError("DISPERSAL", "INVALID_CONFIG");
+  }
+  if (!isSafePositiveInteger(value.phaseTurns)) {
+    throw new MechanicConfigError("DISPERSAL", "INVALID_PHASE_TURNS");
+  }
+}
+
 function assertPressedFireState(value: PressedFireState, chargeTurns: number): void {
   if (!isRecord(value) || !isSafeNonnegativeInteger(value.charge) || value.charge >= chargeTurns) {
     throw new Error("Invalid PRESSED_FIRE state");
@@ -208,6 +275,22 @@ function assertBurnoutState(value: unknown): asserts value is BurnoutState {
   if (!isRecord(value) || !hasExactKeys(value, ["hp", "power"]) || !isSafePositiveInteger(value.hp)
     || !isSafeNonnegativeInteger(value.power)) {
     throw new Error("Invalid BURNOUT state");
+  }
+}
+
+function assertSpreadingInput(sourceTargetId: unknown, debuffId: unknown, targetIds: unknown): asserts targetIds is readonly string[] {
+  if (typeof sourceTargetId !== "string" || sourceTargetId.length === 0 || typeof debuffId !== "string" || debuffId.length === 0
+    || !Array.isArray(targetIds) || targetIds.length === 0
+    || targetIds.some((targetId) => typeof targetId !== "string" || targetId.length === 0 || targetId === sourceTargetId)
+    || new Set(targetIds).size !== targetIds.length) {
+    throw new Error("Invalid SPREADING targets");
+  }
+}
+
+function assertDispersalState(value: unknown, phaseTurns: number): asserts value is DispersalState {
+  if (!isRecord(value) || !hasExactKeys(value, ["remainingTurns"])
+    || !isSafeNonnegativeInteger(value.remainingTurns) || value.remainingTurns > phaseTurns) {
+    throw new Error("Invalid DISPERSAL state");
   }
 }
 
@@ -292,6 +375,37 @@ export function resolveBurnout(config: unknown): BurnoutEvaluator {
   return { hpCost, powerGain, step, burn: step };
 }
 
+export function resolveSpreading(config: unknown): SpreadingEvaluator {
+  assertSpreadingConfig(config);
+  const maxTargets = config.maxTargets;
+  const step = (sourceTargetId: string, debuffId: string, targetIds: readonly string[]): SpreadingStep => {
+    assertSpreadingInput(sourceTargetId, debuffId, targetIds);
+    return {
+      event: "SPREAD_DEBUFF",
+      sourceTargetId,
+      hits: targetIds.slice(0, maxTargets).map((targetId) => ({ targetId, debuffId })),
+    };
+  };
+  return { maxTargets, step, spread: step };
+}
+
+export function resolveDispersal(config: unknown): DispersalEvaluator {
+  assertDispersalConfig(config);
+  const phaseTurns = config.phaseTurns;
+  const initialState = (): DispersalState => ({ remainingTurns: phaseTurns });
+  const step = (state: DispersalState): DispersalStep => {
+    assertDispersalState(state, phaseTurns);
+    const remainingTurns = Math.max(0, state.remainingTurns - 1);
+    const canBeHit = remainingTurns === 0;
+    return {
+      state: { remainingTurns },
+      event: canBeHit ? "MATERIALIZED" : "DISPERSED",
+      canBeHit,
+    };
+  };
+  return { phaseTurns, initialState, step, advance: step };
+}
+
 export function tryResolvePressedFire(
   config: unknown,
 ):
@@ -338,6 +452,32 @@ export function tryResolveBurnout(
   | { readonly ok: false; readonly reason: MechanicConfigFailure } {
   try {
     return { ok: true, evaluator: resolveBurnout(config) };
+  } catch (error) {
+    if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
+    throw error;
+  }
+}
+
+export function tryResolveSpreading(
+  config: unknown,
+):
+  | { readonly ok: true; readonly evaluator: SpreadingEvaluator }
+  | { readonly ok: false; readonly reason: MechanicConfigFailure } {
+  try {
+    return { ok: true, evaluator: resolveSpreading(config) };
+  } catch (error) {
+    if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
+    throw error;
+  }
+}
+
+export function tryResolveDispersal(
+  config: unknown,
+):
+  | { readonly ok: true; readonly evaluator: DispersalEvaluator }
+  | { readonly ok: false; readonly reason: MechanicConfigFailure } {
+  try {
+    return { ok: true, evaluator: resolveDispersal(config) };
   } catch (error) {
     if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
     throw error;
