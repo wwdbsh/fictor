@@ -323,9 +323,24 @@ async function main() {
     };
     const lossRestart = await verifyFreshLossAndRestart();
 
-    const verifyBurnkinSelection = async () => {
+    const verifyBurnkinCompletion = async () => {
       const context = await browser.createBrowserContext();
       const burnkinPage = await context.newPage();
+      await burnkinPage.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
+      const errors = [];
+      burnkinPage.on("console", (message) => {
+        if (message.type() === "error") errors.push(`console: ${message.text()}`);
+      });
+      burnkinPage.on("pageerror", (error) => errors.push(`page: ${error.message}`));
+      burnkinPage.on("requestfailed", (request) => errors.push(`request: ${request.url()} (${request.failure()?.errorText ?? "unknown"})`));
+      const clickAndWait = async (selector) => {
+        const before = await burnkinPage.$eval("main", (element) => element.getAttribute("data-screen-key"));
+        await burnkinPage.click(selector);
+        await burnkinPage.waitForFunction((screenKey) => {
+          const main = document.querySelector("main");
+          return main?.getAttribute("aria-busy") === "false" && main.getAttribute("data-screen-key") !== screenKey;
+        }, {}, before);
+      };
       try {
         const response = await burnkinPage.goto(pageUrl, { waitUntil: "networkidle0" });
         if (response === null || !response.ok()) throw new Error(`Burnkin 선택 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
@@ -338,9 +353,9 @@ async function main() {
         });
         if (!selected) throw new Error("Burnkin 선택 버튼을 찾지 못했습니다.");
         await burnkinPage.waitForSelector("main.phase-between_nodes");
-        await burnkinPage.click('button[data-action-kind="ENTER_NEXT_NODE"]');
+        await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
         await burnkinPage.waitForSelector("main.phase-in_combat");
-        await burnkinPage.click('button[data-action-kind="START_TURN"]');
+        await clickAndWait('button[data-action-kind="START_TURN"]');
         await burnkinPage.waitForSelector('button[data-action-kind="BURNKIN_PAY_HP"]');
         const state = await burnkinPage.evaluate(() => {
           const bytes = window.localStorage.getItem("fictor.burnkin.save.v2");
@@ -357,12 +372,101 @@ async function main() {
           || state.resonanceRate !== 0.2 || JSON.stringify(state.starterIds) !== JSON.stringify(["burn_01", "burn_02", "burn_03", "burn_04", "burn_05", "ore_burn"])) {
           throw new Error(`Burnkin browser authority가 일치하지 않습니다: ${JSON.stringify(state)}`);
         }
-        return { race: "Burnkin", phase: "IN_COMBAT", resonanceRate: 0.2, starterCards: 30 };
+
+        let steps = 0;
+        while (!(await burnkinPage.$("main.phase-run_won"))) {
+          if (steps++ > 3_000) throw new Error("Burnkin 브라우저 완주가 종료되지 않았습니다.");
+          if (await burnkinPage.$("main.phase-run_lost")) throw new Error("Burnkin 브라우저 완주가 보스 전에 패배했습니다.");
+          if (await burnkinPage.$("main.phase-in_combat")) {
+            const start = await burnkinPage.$('button[data-action-kind="START_TURN"]:not([disabled])');
+            const card = await burnkinPage.$("button.combat-card:not([disabled])");
+            const end = await burnkinPage.$('button[data-action-kind="END_TURN"]:not([disabled])');
+            if (start) await clickAndWait('button[data-action-kind="START_TURN"]');
+            else if (card) await clickAndWait("button.combat-card:not([disabled])");
+            else if (end) await clickAndWait('button[data-action-kind="END_TURN"]');
+            else throw new Error("Burnkin 전투에서 조작 가능한 행동을 찾지 못했습니다.");
+          } else if (await burnkinPage.$("main.phase-awaiting_reward")) {
+            await clickAndWait(".reward-card button:not([disabled])");
+          } else if (await burnkinPage.$("main.phase-between_nodes")) {
+            await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
+          } else if (await burnkinPage.$("main.phase-in_event")) {
+            await clickAndWait(".event-choice:not([disabled])");
+          } else if (await burnkinPage.$("main.phase-event_resolved")) {
+            const leave = await burnkinPage.$('button[data-action-kind="LEAVE_EVENT"]');
+            if (leave) {
+              await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+            } else {
+              const selected = await burnkinPage.$$eval(".workshop-materials button", (buttons) => {
+                for (let left = 0; left < buttons.length; left += 1) {
+                  const leftId = buttons[left].getAttribute("data-material-card-id");
+                  if (!leftId || leftId.startsWith("forge__")) continue;
+                  const right = buttons.slice(left + 1).find((button) => {
+                    const rightId = button.getAttribute("data-material-card-id");
+                    return rightId && rightId !== leftId && !rightId.startsWith("forge__");
+                  });
+                  if (!(buttons[left] instanceof HTMLButtonElement) || !(right instanceof HTMLButtonElement)) continue;
+                  buttons[left].click();
+                  right.click();
+                  return true;
+                }
+                return false;
+              });
+              if (!selected) throw new Error("Burnkin 무료 공방에서 서로 다른 두 재료를 찾지 못했습니다.");
+              await burnkinPage.waitForSelector(".forge-panel .canonical-preview");
+              await burnkinPage.click(".resolved-screen .primary-cta:not([disabled])");
+              await burnkinPage.waitForSelector('.forge-dialog[role="dialog"]');
+              await clickAndWait('.forge-dialog .primary-cta:not([disabled])');
+              await burnkinPage.waitForSelector(".discovery-overlay, .discovery-toast");
+              if (await burnkinPage.$(".discovery-overlay")) {
+                await burnkinPage.waitForSelector('.discovery-overlay[data-discovery-phase="FINAL"]');
+                await burnkinPage.click(".discovery-overlay button.primary-cta");
+                await burnkinPage.waitForSelector(".discovery-overlay", { hidden: true });
+              } else {
+                await burnkinPage.click(".discovery-toast button");
+                await burnkinPage.waitForSelector(".discovery-toast", { hidden: true });
+              }
+              await clickAndWait('button[data-action-kind="LEAVE_EVENT"]');
+            }
+          } else {
+            const phase = await burnkinPage.$eval("main", (element) => element.className);
+            throw new Error(`Burnkin 브라우저 완주가 알 수 없는 화면에 멈췄습니다: ${phase}`);
+          }
+        }
+
+        const won = await burnkinPage.evaluate(() => {
+          const bytes = window.localStorage.getItem("fictor.burnkin.save.v2");
+          const envelope = bytes ? JSON.parse(bytes) : null;
+          return {
+            phase: envelope?.flow?.phase,
+            activeCombat: envelope?.runtime?.run?.activeCombat,
+            hearts: envelope?.profile?.ownedHeartIds,
+          };
+        });
+        if (won.phase !== "RUN_WON" || won.activeCombat !== null || JSON.stringify(won.hearts) !== JSON.stringify(["heart__still"])) {
+          throw new Error(`Burnkin 보스 승리 상태가 다릅니다: ${JSON.stringify(won)}`);
+        }
+        await clickAndWait('button[data-action-kind="RESTART"]');
+        const restarted = await burnkinPage.evaluate(() => {
+          const bytes = window.localStorage.getItem("fictor.burnkin.save.v2");
+          const envelope = bytes ? JSON.parse(bytes) : null;
+          return {
+            phase: envelope?.flow?.phase,
+            fuel: envelope?.runtime?.run?.fuel,
+            cards: envelope?.runtime?.run?.ownedInstances?.length,
+            hearts: envelope?.profile?.ownedHeartIds,
+          };
+        });
+        if (restarted.phase !== "BETWEEN_NODES" || restarted.fuel !== 4 || restarted.cards !== 30
+          || JSON.stringify(restarted.hearts) !== JSON.stringify(["heart__still"])) {
+          throw new Error(`Burnkin 승리 재시작 상태가 다릅니다: ${JSON.stringify(restarted)}`);
+        }
+        if (errors.length > 0) throw new Error(`Burnkin 브라우저 오류:\n${errors.join("\n")}`);
+        return { race: "Burnkin", phase: "RUN_WON", resonanceRate: 0.2, starterCards: 30, bossVictory: true, restart: true, browserErrors: 0 };
       } finally {
         await context.close();
       }
     };
-    const burnkinSelection = await verifyBurnkinSelection();
+    const burnkinCompletion = await verifyBurnkinCompletion();
 
     const verifyJoinkinSelection = async () => {
       const context = await browser.createBrowserContext();
@@ -976,9 +1080,13 @@ async function main() {
           paid: { fuelBefore: paidBefore.runtime.run.fuel, fuelAfter: paidAfter.runtime.run.fuel, permanentMaterialsConsumed: 2, permanentResultsAdded: 1, canonicalCardId: instantDiscovery.ephemeralCardId, duplicateDiscoveries: 0 },
         },
         boss: { heartId: "heart__still", phase: wonSave.flow.phase, restartPhase: wonRestartSave.flow.phase },
-        burnkinSelection,
+        threeRaceCompletion: {
+          Stillkin: { phase: wonSave.flow.phase, bossVictory: true, restart: true },
+          Burnkin: burnkinCompletion,
+          Joinkin: { phase: "RUN_WON", bossVictory: joinkinSelection.bossVictory, restart: joinkinSelection.restart },
+        },
         joinkinSelection,
-        corePath: "race selection -> Burnkin ice combat; Joinkin paid triple -> instant triple -> Codex -> reload -> cleanup -> free triple -> boss victory -> restart; isolated fresh loss -> RUN_LOST -> restart; Stillkin instant discovery -> Codex -> reload -> full run -> boss victory -> restart -> paid workshop same recipe",
+        corePath: "race selection -> Burnkin full ice run -> boss victory -> restart; Joinkin paid triple -> instant triple -> Codex -> reload -> cleanup -> free triple -> boss victory -> restart; isolated fresh loss -> RUN_LOST -> restart; Stillkin instant discovery -> Codex -> reload -> full run -> boss victory -> restart -> paid workshop same recipe",
         instantDiscovery: { ...instantDiscovery, reloaded: reloadedAfterInstant, codexBeforePaid, codexAfterPaid, fuelAfterPaid },
         missingCanonicalFallback: { cardId: "forge__ore_still__still_03", assetPath: new URL(fallbackAssetUrl).pathname, httpStatus: fallbackAssetResponse.status },
         staticAssets,

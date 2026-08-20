@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "milestone_id": "M4_THREE_RACES",
+  "task_key": "T035",
+  "status": "VERIFIED_LOCAL",
+  "contract_sha256": "d9822ab77bbca10932de568575531f5049367185c294d22722a9b8108f6911a1",
+  "recorded_at": "2026-08-20T10:48:42Z",
+  "candidate": {
+    "revision": "429f74526fbb7ef1f77410b107b7afd5a8a2a419",
+    "tree_sha1": "be8fc2cdf530b0cf189b09b8c867ff64eddc14a2",
+    "build_source_revision": "0eaaea4b299736f285213fbc94d723ec6f64db5e",
+    "build_inputs_unchanged_after_smoke_fix": true,
+    "dist_file_count": 628,
+    "dist_total_bytes": 1266269236,
+    "dist_tree_sha256": "cc2b5c62eeded44804a5e4d96ccde6ffbf379acb8de080c8d9f5ae62815b1cc7"
+  },
+  "verification": {
+    "focused_race_tests": {
+      "files_passed": 5,
+      "tests_passed": 23,
+      "log_sha256": "876e9c72c7e8276150d9570f7366dbf9f4391bff6e4b04e28f4efd0c67d869aa"
+    },
+    "full_tests": {
+      "files_passed": 56,
+      "tests_passed": 817,
+      "log_sha256": "3c5e67f8377441acd419c83931b49973d538bf21cfba1711419431735aa1acf6"
+    },
+    "production_build": {
+      "status": "PASS",
+      "javascript_bytes": 409581,
+      "css_bytes": 29979,
+      "log_sha256": "d38113c0afd54c58af6dd9a196620a8c95c37299b2099ff22446a6af98f421e1"
+    },
+    "static_smoke": {
+      "status": "PASS",
+      "three_race_run_won": true,
+      "browser_errors": 0,
+      "failed_responses": 0,
+      "external_requests": 0,
+      "static_png_verified": 621,
+      "static_png_not_found": 0,
+      "log_sha256": "b17414555ea94f77d71591b8c0192904f92d664ca910cb6cecbb83ab5a99ce3c"
+    },
+    "playtest_evidence_path": "docs/playtests/t035/three-race-completion.json"
+  },
+  "catalog_closure": {
+    "canonical_count": 1326,
+    "canonical_content_sha256": "283054dfb4e97d4f3420d0711ff7affb0dd2afe9d6140b81c6e77ce71b2c2886",
+    "equipment_count": 45,
+    "equipment_content_sha256": "2d363142278173cd34d8dc40faa0fbeb3e918a818e2bedd407ee8084911a8aa7",
+    "joinkin_codex_total": 1326,
+    "new_generated_id_recipe_or_art": false
+  },
+  "m3_rollback": {
+    "milestone_path": "docs/milestones/m3-vertical-slice.json",
+    "candidate_revision": "be79bfbd8d4524523fc89c6a1d0308f62c78d000",
+    "evidence_revision": "ad9ca8bde59c05e88dd4fc888a86605a0e4b52ae",
+    "inspect_candidate_command": "git switch --detach be79bfbd8d4524523fc89c6a1d0308f62c78d000",
+    "inspect_evidence_command": "git switch --detach ad9ca8bde59c05e88dd4fc888a86605a0e4b52ae"
+  },
+  "known_issues": [
+    {
+      "id": "PROVISIONAL_BALANCE",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "세 종족 완주는 잠정 Track 1 수치로 검증했으며 최종 밸런스 승인으로 표현하지 않는다."
+    },
+    {
+      "id": "CODEX_OPERATED_PLAYTEST",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "완주 체크는 사람 플레이테스트가 아니라 Codex가 실제 정적 UI를 조작한 브라우저 QA다."
+    },
+    {
+      "id": "M3_ROLLBACK_SCOPE",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "M3 rollback은 의도대로 Stillkin 수직 슬라이스 기준선이며 Burnkin·Joinkin을 포함하지 않는다."
+    }
+  ],
+  "release_or_submission_performed": false,
+  "remote_ci_required_before_merge": true
+}

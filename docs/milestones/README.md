@@ -32,6 +32,17 @@ tracked allowlist forensic evidence를 사용하므로 CI에서도 실패 ID·mo
 M2 재기준선도 자동 갱신하지 않는다. 승인된 범위·바이트·소유 라우팅이 변하면 별도 Task에서 전체
 621쌍과 폴백·원장을 다시 감사하고 새 기준선을 승인받는다. 기존 JSON hash만 손으로 맞추지 않는다.
 
+## M4 3종족 통합 후보
+
+`m4-three-race.json`은 T035의 Stillkin·Burnkin·Joinkin 어름 여정 완주, Joinkin canonical 1,326
+폐쇄성, production build hash와 M3 rollback 경계를 기록한다. 완주 증거는
+`docs/playtests/t035/three-race-completion.json`에 있으며 사람이 직접 수행한 것으로 표현하지 않는다.
+Codex가 실제 정적 UI를 조작한 브라우저 QA와 별도 가시 Browser 표본을 구분해 남긴다.
+
+M4 후보는 최종 밸런스 승인이나 공개 배포·제출을 의미하지 않는다. M3로 되돌아가야 할 때는
+`m3-vertical-slice.json`의 candidate와 evidence revision을 사용하며, 두 커밋을 현재 브랜치에 섞어
+적용하지 않고 detached checkout에서 먼저 검사한다.
+
 ## M3 수직 슬라이스 후보 — 두 커밋 신뢰 경계
 
 T031은 코드와 증거를 한 커밋에서 자기 참조로 고정하지 않는다. 먼저 **candidate Commit A**에 게임 코드와
