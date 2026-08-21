@@ -234,6 +234,162 @@ async function main() {
       return { hp: 30, fuel: 4, deck: 30, firstNode: "d1-normal-swarm" };
     };
 
+    const verifyFirstUserAccessibilityAndCodexBudget = async () => {
+      const context = await browser.createBrowserContext();
+      const freshPage = await context.newPage();
+      const freshImages = [];
+      const errors = [];
+      freshPage.on("console", (message) => { if (message.type() === "error") errors.push(`console: ${message.text()}`); });
+      freshPage.on("pageerror", (error) => errors.push(`page: ${error.message}`));
+      freshPage.on("requestfailed", (request) => errors.push(`request: ${request.url()} (${request.failure()?.errorText ?? "unknown"})`));
+      freshPage.on("request", (request) => { if (request.resourceType() === "image") freshImages.push(request.url()); });
+      await freshPage.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
+      const clickAndWait = async (selector) => {
+        const before = await freshPage.$eval("main", (element) => element.getAttribute("data-screen-key"));
+        await freshPage.click(selector);
+        await freshPage.waitForFunction((screenKey) => {
+          const main = document.querySelector("main");
+          return main?.getAttribute("aria-busy") === "false" && main.getAttribute("data-screen-key") !== screenKey;
+        }, {}, before);
+      };
+      try {
+        const response = await freshPage.goto(pageUrl, { waitUntil: "networkidle0" });
+        if (response === null || !response.ok()) throw new Error(`fresh user 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
+        await freshPage.waitForSelector(".race-select-screen");
+        const raceInitial = await freshPage.evaluate(() => ({
+          images: document.images.length,
+          headingFocused: document.activeElement === document.querySelector(".race-select-screen h1"),
+          namedButtons: [...document.querySelectorAll(".race-choice button")].every((button) => button.textContent?.trim()),
+        }));
+        if (raceInitial.images !== 0 || freshImages.length !== 0 || !raceInitial.headingFocused || !raceInitial.namedButtons) {
+          throw new Error(`fresh race-select 초기 접근성/asset 경계가 다릅니다: ${JSON.stringify({ ...raceInitial, requests: freshImages.length })}`);
+        }
+        await freshPage.keyboard.press("Tab");
+        const firstChoiceFocused = await freshPage.$eval(".race-choice button", (button) => document.activeElement === button);
+        if (!firstChoiceFocused) throw new Error("race-select H1 다음 Tab이 첫 붙이 선택으로 이동하지 않았습니다.");
+        await freshPage.keyboard.press("Enter");
+        await freshPage.waitForSelector("main.phase-between_nodes");
+        const selectedProfile = await freshPage.evaluate(() => ({
+          images: document.images.length,
+          guideName: document.querySelector(".first-run-guide")?.getAttribute("aria-labelledby"),
+          guideDescription: document.querySelector(".first-run-guide")?.getAttribute("aria-describedby"),
+          guideCopy: document.querySelector(".first-run-guide")?.textContent ?? "",
+        }));
+        if (selectedProfile.images !== 1 || freshImages.length !== 1 || !selectedProfile.guideName || !selectedProfile.guideDescription
+          || !selectedProfile.guideCopy.includes("연료 1") || !selectedProfile.guideCopy.includes("영구 소모")) {
+          throw new Error(`fresh selected profile 안내/asset 경계가 다릅니다: ${JSON.stringify({ ...selectedProfile, requests: freshImages.length })}`);
+        }
+        await freshPage.$eval('button[aria-label^="공방 열기"]', (button) => { button.setAttribute("data-t045-exact-opener", "true"); if (button instanceof HTMLElement) button.focus(); });
+        await freshPage.keyboard.press("Enter");
+        await freshPage.waitForSelector(".forge-panel");
+        const workshopFocused = await freshPage.$eval(".forge-panel h2", (heading) => document.activeElement === heading);
+        if (!workshopFocused) throw new Error("유료 공방이 panel H2로 초점을 이동하지 않았습니다.");
+        await freshPage.keyboard.press("Escape");
+        const returnedToOpener = await freshPage.$eval('[data-t045-exact-opener="true"]', (button) => document.activeElement === button);
+        if (!returnedToOpener) throw new Error("유료 공방 Escape가 정확한 opener로 초점을 돌려보내지 않았습니다.");
+        await clickAndWait('button[data-action-kind="ENTER_NEXT_NODE"]');
+        await freshPage.waitForSelector("main.phase-in_combat");
+        const combatGuide = await freshPage.$eval(".first-run-guide", (guide) => ({ copy: guide.textContent ?? "", named: Boolean(guide.getAttribute("aria-labelledby") && guide.getAttribute("aria-describedby")) }));
+        if (!combatGuide.named || !combatGuide.copy.includes("재료 두 장") || !combatGuide.copy.includes("이번 전투뿐") || !combatGuide.copy.includes("도감에 영구 기록")) {
+          throw new Error(`fresh combat 안내가 다릅니다: ${JSON.stringify(combatGuide)}`);
+        }
+        let forged = false;
+        for (let turns = 0; turns < 8 && !forged; turns += 1) {
+          const start = await freshPage.$('button[data-action-kind="START_TURN"]:not([disabled])');
+          if (start) await clickAndWait('button[data-action-kind="START_TURN"]');
+          const pair = await freshPage.$$eval("button.combat-card:not([disabled])", (cards) => {
+            const left = cards.find((card) => !card.getAttribute("data-card-id")?.startsWith("forge__"));
+            const right = cards.find((card) => !card.getAttribute("data-card-id")?.startsWith("forge__") && card.getAttribute("data-card-id") !== left?.getAttribute("data-card-id"));
+            return left && right ? [left.getAttribute("data-card-id"), right.getAttribute("data-card-id")] : null;
+          });
+          if (!pair) { await clickAndWait('button[data-action-kind="END_TURN"]'); continue; }
+          await freshPage.click(".instant-mode-toggle");
+          await freshPage.$$eval("button.combat-card:not([disabled])", (cards, ids) => ids.forEach((id) => cards.find((card) => card.getAttribute("data-card-id") === id)?.click()), pair);
+          await clickAndWait(".instant-preview .primary-cta");
+          forged = true;
+        }
+        if (!forged) throw new Error("fresh user 첫 전투에서 FIRST 발견을 만들지 못했습니다.");
+        await freshPage.waitForSelector('.discovery-overlay[data-discovery-phase="FINAL"]');
+        const discoveryAx = await freshPage.$eval(".discovery-overlay", (dialog) => ({
+          role: dialog.getAttribute("role"),
+          labelled: Boolean(dialog.getAttribute("aria-labelledby")),
+          namedControls: [...dialog.querySelectorAll("button")].every((button) => button.textContent?.trim() || button.getAttribute("aria-label")),
+        }));
+        if (discoveryAx.role !== "dialog" || !discoveryAx.labelled || !discoveryAx.namedControls) throw new Error(`FIRST discovery AX 이름이 다릅니다: ${JSON.stringify(discoveryAx)}`);
+        await freshPage.click(".discovery-overlay button.primary-cta");
+        await freshPage.click(".codex-open");
+        await freshPage.waitForSelector(".codex-surface");
+        const firstCodex = await freshPage.$eval(".codex-surface", (surface) => ({
+          summary: surface.querySelector(".codex-heading p")?.textContent?.trim(),
+          named: Boolean(surface.getAttribute("aria-labelledby") && surface.getAttribute("aria-describedby")),
+        }));
+        if (firstCodex.summary !== "발견한 기록 1 / 1326" || !firstCodex.named) throw new Error(`fresh FIRST 도감 증거가 다릅니다: ${JSON.stringify(firstCodex)}`);
+      } finally {
+        if (errors.length > 0) browserErrors.push(...errors.map((error) => `fresh-user ${error}`));
+        await context.close();
+      }
+
+      const budgetContext = await browser.createBrowserContext();
+      const budgetPage = await budgetContext.newPage();
+      const budgetImages = [];
+      budgetPage.on("request", (request) => { if (request.resourceType() === "image") budgetImages.push(request.url()); });
+      await budgetPage.evaluateOnNewDocument(() => window.localStorage.setItem("fictor.race.v1", "Stillkin"));
+      const recipeIds = JSON.parse(readFileSync(resolve(process.cwd(), "src/data/generated/cards.generated.json"), "utf8")).items
+        .slice(0, 96).map((card) => card.recipe_id);
+      if (recipeIds.length !== 96 || new Set(recipeIds).size !== 96) throw new Error("high-discovery canonical recipe 96개를 고정할 수 없습니다.");
+      const budgetDevtools = await budgetPage.createCDPSession();
+      try {
+        await budgetPage.goto(pageUrl, { waitUntil: "networkidle0" });
+        await budgetPage.waitForSelector("main.phase-between_nodes");
+        const before = await budgetPage.$eval("main", (element) => element.getAttribute("data-screen-key"));
+        await budgetPage.click('button[data-action-kind="ENTER_NEXT_NODE"]');
+        await budgetPage.waitForFunction((screenKey) => document.querySelector("main")?.getAttribute("data-screen-key") !== screenKey, {}, before);
+        await budgetPage.evaluate((discoveries) => {
+          const bytes = window.localStorage.getItem("fictor.save.v2");
+          if (!bytes) throw new Error("canonical v2 save missing");
+          const envelope = JSON.parse(bytes);
+          envelope.profile.discoveredRecipeIds = discoveries;
+          window.localStorage.setItem("fictor.save.v2", JSON.stringify(envelope));
+        }, recipeIds);
+        await budgetPage.reload({ waitUntil: "networkidle0" });
+        await budgetPage.waitForSelector("main.phase-in_combat");
+        const label = await budgetPage.$eval(".codex-open", (button) => button.getAttribute("aria-label"));
+        if (label !== "도감 열기 · 발견 96 / 1326") throw new Error(`high-discovery save가 valid projection으로 열리지 않았습니다: ${label}`);
+        const imagesBeforeCodex = budgetImages.length;
+        await budgetPage.click(".codex-open");
+        await budgetPage.waitForSelector(".codex-surface");
+        const pageOneImages = await budgetPage.$$(".codex-entry img");
+        if (pageOneImages.length !== 48) throw new Error(`high-discovery page 1 mounted img가 48이 아닙니다: ${pageOneImages.length}`);
+        await budgetPage.click('button[aria-label="다음 도감 페이지"]');
+        await budgetPage.waitForFunction(() => document.querySelector(".codex-pagination span")?.textContent?.trim() === "2 / 28");
+        const pageTwoImages = await budgetPage.$$(".codex-entry img");
+        if (pageTwoImages.length !== 48) throw new Error(`high-discovery page 2 mounted img가 48이 아닙니다: ${pageTwoImages.length}`);
+        await budgetPage.waitForNetworkIdle();
+        const cumulativeCodexRequests = budgetImages.length - imagesBeforeCodex;
+        if (cumulativeCodexRequests > 96) throw new Error(`high-discovery page 1→2 image 요청이 96을 넘었습니다: ${cumulativeCodexRequests}`);
+        await budgetPage.click(".codex-heading .surface-close");
+        const closed = await budgetPage.evaluate(() => ({
+          codexImages: document.querySelectorAll(".codex-entry img").length,
+          imagePreloads: document.querySelectorAll('link[rel="preload"][as="image"], link[rel="modulepreload"][as="image"]').length,
+        }));
+        if (closed.codexImages !== 0 || closed.imagePreloads !== 0) throw new Error(`high-discovery close/preload 경계가 다릅니다: ${JSON.stringify(closed)}`);
+        await budgetDevtools.send("HeapProfiler.enable");
+        await budgetDevtools.send("HeapProfiler.collectGarbage");
+        const heapAfterGc = await budgetDevtools.send("Runtime.getHeapUsage");
+        return {
+          freshRaceImages: 0,
+          selectedProfileImages: 1,
+          reducedMotion: true,
+          firstDiscoveryAndCodex: true,
+          highDiscovery: { validDiscoveries: 96, pageOneMountedImages: 48, pageTwoMountedImages: 48, cumulativeImageRequests: cumulativeCodexRequests, afterCloseCodexImages: 0, imagePreloads: 0 },
+          heapAfterGcObservation: { usedSize: heapAfterGc.usedSize, totalSize: heapAfterGc.totalSize, hardGate: false },
+        };
+      } finally {
+        await budgetContext.close();
+      }
+    };
+    const firstUserAccessibility = await verifyFirstUserAccessibilityAndCodexBudget();
+
     const navigationResponse = await page.goto(pageUrl, { waitUntil: "networkidle0" });
     if (navigationResponse === null || !navigationResponse.ok()) {
       throw new Error(`문서 응답 실패: ${navigationResponse?.status() ?? "응답 없음"}`);
@@ -1069,6 +1225,7 @@ async function main() {
         browserImageRequests: browserImageRequests.length,
         performanceBudgets: { initialRequests: 1, initialAssetBytes, javascriptBytes, cssBytes, noncurrentInitialAssets: 0 },
         unsafeAssetPolicy,
+        firstUserAccessibility,
         discoveryCheckpoints,
         saveCheckpoints,
         lossRestart,

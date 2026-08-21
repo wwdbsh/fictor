@@ -16,11 +16,12 @@ class MemoryStorage implements StorageLike {
 afterEach(cleanup);
 
 describe("race selection", () => {
-  it("offers both enabled races and starts a Burnkin ice run without touching Stillkin save bytes", async () => {
+  it("focuses the first heading, offers enabled races, and starts a Burnkin ice run without touching Stillkin save bytes", async () => {
     const storage = new MemoryStorage();
     render(<RaceSelectApp selection={createTrack1RaceSelection({ storage, baseUrl: "/fictor-test/" })} />);
 
-    expect(screen.getByRole("heading", { name: "붙이를 고르세요" })).toBeTruthy();
+    const selectionHeading = screen.getByRole("heading", { name: "붙이를 고르세요" });
+    await waitFor(() => expect(document.activeElement).toBe(selectionHeading));
     expect(screen.getByRole("button", { name: "어름붙이로 시작" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "사름붙이로 시작" }));
 
@@ -34,6 +35,7 @@ describe("race selection", () => {
     expect(storage.values.has(FICTOR_SAVE_V2_KEY)).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "붙이 바꾸기 · 현재 사름붙이" }));
     expect(screen.getByRole("button", { name: "어름붙이로 시작" })).toBeTruthy();
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("heading", { name: "붙이를 고르세요" })));
   });
 
   it("keeps existing Stillkin v2 users on their current run without showing a new gate", () => {
@@ -49,7 +51,10 @@ describe("race selection", () => {
     const { container } = render(<RaceSelectApp selection={createTrack1RaceSelection({ storage, baseUrl: "/fictor-test/" })} />);
     fireEvent.click(screen.getByRole("button", { name: "이음붙이로 시작" }));
     await waitFor(() => expect(screen.getByRole("button", { name: /공방 열기/ })).toBeTruthy());
-    fireEvent.click(screen.getByRole("button", { name: /공방 열기/ }));
+    const opener = screen.getByRole("button", { name: /공방 열기/ });
+    opener.focus();
+    fireEvent.click(opener);
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("heading", { name: "공방 빚기" })));
 
     const slotList = screen.getByRole("list", { name: "빚기 재료 슬롯" });
     expect(slotList.textContent).toContain("기본 재료 A");

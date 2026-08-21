@@ -75,6 +75,10 @@ describe("Track-1 App", () => {
     const heading = screen.getByRole("heading", { level: 1, name: "어름의 터 · 깊이 1 / 3" });
     await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.getByRole("list", { name: "고정된 런 여정" })).toBeInTheDocument();
+    const guide = screen.getByRole("complementary", { name: "첫 여정 안내" });
+    expect(guide).toHaveTextContent("다음 기록으로");
+    expect(guide).toHaveTextContent("연료 1");
+    expect(guide).toHaveTextContent("재료는 영구 소모");
     expect(screen.getAllByRole("button")).toHaveLength(3);
     expect(screen.getByRole("button", { name: "다음 기록으로" }).tagName).toBe("BUTTON");
   });
@@ -98,6 +102,7 @@ describe("Track-1 App", () => {
     expect(document.querySelectorAll(".codex-entry")).toHaveLength(48);
     expect(document.querySelectorAll(".codex-entry.is-masked")).toHaveLength(48);
     expect(screen.getByText("1 / 28")).toBeVisible();
+    expect(screen.getByRole("note")).toHaveTextContent("아직 발견한 기록이 없습니다");
     const close = screen.getByRole("button", { name: "도감 닫기" });
     const next = screen.getByRole("button", { name: "다음 도감 페이지" });
     fireEvent.keyDown(codexHeading, { key: "Tab" });
@@ -120,7 +125,14 @@ describe("Track-1 App", () => {
     fireEvent.click(codexOpen);
     expect(screen.getByText("발견한 기록 0 / 1326")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "도감 닫기" }));
-    fireEvent.click(screen.getByRole("button", { name: "공방 열기" }));
+    const forgeOpener = screen.getByRole("button", { name: "공방 열기" });
+    forgeOpener.focus();
+    fireEvent.click(forgeOpener);
+    await waitFor(() => expect(screen.getByRole("heading", { level: 2, name: "공방 빚기" })).toHaveFocus());
+    fireEvent.keyDown(screen.getByRole("region", { name: "공방 빚기" }), { key: "Escape" });
+    await waitFor(() => expect(forgeOpener).toHaveFocus());
+    expect(forgeOpener.isConnected).toBe(true);
+    fireEvent.click(forgeOpener);
     const materialButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".workshop-materials button"));
     const left = materialButtons[0];
     const right = materialButtons.find((button) => button.dataset.materialCardId !== left.dataset.materialCardId)!;
@@ -151,15 +163,24 @@ describe("Track-1 App", () => {
     expect(screen.getByRole("main", { hidden: true })).toHaveAttribute("inert");
     fireEvent.click(screen.getByRole("button", { name: "연출 건너뛰기" }));
     expect(discovery).toHaveAttribute("data-discovery-phase", "FINAL");
+    const discoveryImage = document.querySelector<HTMLImageElement>(".discovery-result img");
+    expect(discoveryImage).not.toHaveAttribute("loading", "lazy");
     expect(screen.getByRole("button", { name: "계속" })).toHaveFocus();
     fireEvent.click(screen.getByRole("button", { name: "계속" }));
     await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("두 재료 소모 · 결과 덱 편입"));
     expect(screen.getByRole("main")).not.toHaveAttribute("inert");
     await waitFor(() => expect(screen.getByRole("heading", { level: 1 })).toHaveFocus());
     expect(storage.setCalls).toBe(1);
+    expect(screen.queryByRole("complementary", { name: /첫 .* 안내/ })).not.toBeInTheDocument();
     const refreshedOpen = screen.getByRole("button", { name: "도감 열기 · 발견 1 / 1326" });
     fireEvent.click(refreshedOpen);
     expect(screen.getByText("발견한 기록 1 / 1326")).toBeVisible();
+    for (let page = 0; page < 28 && !document.querySelector(".codex-entry.is-discovered img"); page += 1) {
+      fireEvent.click(screen.getByRole("button", { name: "다음 도감 페이지" }));
+    }
+    const codexThumbnail = document.querySelector<HTMLImageElement>(".codex-entry.is-discovered img");
+    expect(codexThumbnail).toHaveAttribute("loading", "lazy");
+    expect(codexThumbnail).toHaveAttribute("decoding", "async");
   });
 
   it("separates instant-forge selection from card play and puts the canonical result in hand", async () => {
@@ -195,6 +216,11 @@ describe("Track-1 App", () => {
     fireEvent.click(enter);
 
     expect(await screen.findByRole("button", { name: "턴 시작" })).toBeEnabled();
+    expect(screen.getByRole("note")).toHaveTextContent("손에 든 카드가 없습니다");
+    const guide = screen.getByRole("complementary", { name: "첫 전투 안내" });
+    expect(guide).toHaveTextContent("재료 두 장");
+    expect(guide).toHaveTextContent("이번 전투뿐");
+    expect(guide).toHaveTextContent("도감에 영구 기록");
     const heading = screen.getByRole("heading", { level: 1, name: "어름의 터 · 깊이 1 / 3" });
     await waitFor(() => expect(heading).toHaveFocus());
     const enemy = screen.getByRole("img", { name: "얼어붙은 무리" });

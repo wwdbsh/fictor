@@ -60,6 +60,35 @@ function Feedback({ projection, busy }: { projection: Track1UiProjection; busy: 
   return <p className={`feedback ${projection.feedback.tone === "ERROR" ? "is-error" : ""}`} role={projection.feedback.tone === "ERROR" ? "alert" : "status"}>{projection.feedback.messageKo}</p>;
 }
 
+function FirstRunGuide({ projection }: { projection: Track1UiProjection }) {
+  if (projection.codexDiscoveredCount !== 0) return null;
+  if (projection.phase === "BETWEEN_NODES") {
+    return (
+      <aside className="first-run-guide is-journey" aria-labelledby="first-run-guide-heading" aria-describedby="first-run-guide-description">
+        <h2 id="first-run-guide-heading">첫 여정 안내</h2>
+        <div id="first-run-guide-description">
+          <p><strong>다음 기록으로</strong> 들어가 첫 전투를 시작합니다.</p>
+          <p>공방 빚기는 연료 1을 쓰며, 재료는 영구 소모되고 결과는 덱에 영구 편입됩니다.</p>
+        </div>
+      </aside>
+    );
+  }
+  if (projection.phase === "IN_COMBAT") {
+    const materialCountKo = projection.raceId === "Joinkin" ? "세" : "두";
+    return (
+      <aside className="first-run-guide is-combat" aria-labelledby="first-run-guide-heading" aria-describedby="first-run-guide-description">
+        <h2 id="first-run-guide-heading">첫 전투 안내</h2>
+        <div id="first-run-guide-description">
+          <p>턴을 시작하고 손의 카드를 사용한 뒤 턴을 끝냅니다.</p>
+          <p>즉석 빚기는 재료 {materialCountKo} 장을 쓰며, 재료와 결과의 수명은 이번 전투뿐입니다. 전투가 끝나면 재료는 복구되고 결과는 사라집니다.</p>
+          <p>처음 발견한 제법은 도감에 영구 기록됩니다.</p>
+        </div>
+      </aside>
+    );
+  }
+  return null;
+}
+
 function AssetPolicySmokeProbe() {
   if (typeof window === "undefined" || new URLSearchParams(window.location.search).get("t030-asset-policy-probe") !== "1") return null;
   const RuntimeAssetImage = AssetImage as unknown as ComponentType<Record<string, unknown>>;
@@ -141,12 +170,15 @@ function ForgePanel({ mode, materials, requiredCount, session, busy, onAction, o
   const [selected, setSelected] = useState<string[]>([]);
   const [review, setReview] = useState<Track1UiForgeReview | null>(null);
   const reviewButton = useRef<HTMLButtonElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const paidWorkshop = onClose !== undefined;
+  useEffect(() => { if (paidWorkshop) headingRef.current?.focus({ preventScroll: true }); }, [paidWorkshop]);
   const preview = selected.length === requiredCount ? session.previewForge(mode, selected) : null;
   const toggle = (instanceId: string) => setSelected((current) => current.includes(instanceId) ? current.filter((id) => id !== instanceId) : current.length < requiredCount ? [...current, instanceId] : [...current.slice(1), instanceId]);
   const beginReview = () => { if (preview) setReview(session.reviewWorkshopForge(preview)); };
   return (
-    <section className="forge-panel" aria-label={mode === "WORKSHOP_PAID" ? "공방 빚기" : "무료 공방 빚기"}>
-      <div className="forge-panel-heading"><div><h2>공방 빚기</h2><p>{mode === "WORKSHOP_PAID" ? "연료 1 · 재료 영구 소모 · 결과 덱 편입" : "무료 공방 권리 · 재료 영구 소모 · 결과 덱 편입"}</p></div>{onClose ? <button type="button" className="surface-close" onClick={onClose} aria-label="공방 닫기">닫기</button> : null}</div>
+    <section className="forge-panel" aria-label={mode === "WORKSHOP_PAID" ? "공방 빚기" : "무료 공방 빚기"} onKeyDown={(event) => { if (onClose && !event.defaultPrevented && event.key === "Escape") { event.preventDefault(); onClose(); } }}>
+      <div className="forge-panel-heading"><div><h2 ref={headingRef} tabIndex={onClose ? -1 : undefined}>공방 빚기</h2><p>{mode === "WORKSHOP_PAID" ? "연료 1 · 재료 영구 소모 · 결과 덱 편입" : "무료 공방 권리 · 재료 영구 소모 · 결과 덱 편입"}</p></div>{onClose ? <button type="button" className="surface-close" onClick={onClose} aria-label="공방 닫기">닫기</button> : null}</div>
       <div className="forge-panel-body">
         <div><p className="selection-count" role="status">선택한 재료 {selected.length} / {requiredCount}</p><ol className="forge-slots" aria-label="빚기 재료 슬롯">{Array.from({ length: requiredCount }, (_, index) => <li key={index}><strong>{index < 2 ? `기본 재료 ${index === 0 ? "A" : "B"}` : "세 번째 공명 재료"}</strong><span>{materials.find(({ instanceId }) => instanceId === selected[index])?.nameKo ?? "비어 있음"}</span></li>)}</ol><div className="workshop-materials" aria-label="공방 재료 선택">{materials.map((material) => <button key={material.instanceId} type="button" data-material-card-id={material.cardId} aria-pressed={selected.includes(material.instanceId)} onClick={() => toggle(material.instanceId)} disabled={busy}><AssetImage assetRole="HAND" src={material.artSrc} placeholderLabel={material.nameKo} alt="" /><span>{material.nameKo}</span></button>)}</div></div>
         <div className="forge-preview-column">{preview ? <><CanonicalPreview canonical={preview.canonical} compact />{preview.thirdOverlay ? <p className="forge-terms">세 번째 재료 · {preview.thirdOverlay.nameKo} · {preview.thirdOverlay.labelKo}</p> : null}<p className="forge-terms">{preview.cost.labelKo} · {preview.lifetimeLabelKo}</p>{preview.disabledReasonKo ? <p className="inline-error" role="alert">{preview.disabledReasonKo}</p> : null}<button ref={reviewButton} type="button" className="action-button primary-cta" onClick={beginReview} disabled={busy || !preview.executable}>최종 확인으로</button></> : <p className="forge-empty">서로 다른 재료 {requiredCount === 3 ? "세" : "두"} 장을 고르면 정식 결과를 미리 봅니다.</p>}</div>
@@ -162,10 +194,13 @@ function BlockedScreen({ projection }: { projection: Extract<Track1UiProjection,
 
 function JourneyScreen({ projection, session, busy, onAction }: { projection: Extract<Track1UiProjection, { phase: "BETWEEN_NODES" }>; session: StillkinTrack1UiSession; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void }) {
   const [forgeOpen, setForgeOpen] = useState(false);
+  const forgeOpener = useRef<HTMLButtonElement>(null);
+  const closeForge = () => { setForgeOpen(false); queueMicrotask(() => forgeOpener.current?.focus({ preventScroll: true })); };
   return (
     <section className="journey-screen page-screen art-screen">
       <AssetImage assetRole="STATIC_MANIFEST" className="screen-background" src={projection.backgroundSrc} placeholderLabel="어름의 터" alt="" /><JourneyRail projection={projection} />
-      {forgeOpen ? <ForgePanel mode="WORKSHOP_PAID" materials={projection.workshopMaterials} requiredCount={projection.raceId === "Joinkin" ? 3 : 2} session={session} busy={busy} onAction={onAction} onClose={() => setForgeOpen(false)} /> : <div className="journey-record"><p>고정된 여정의 다음 기록</p><h2>{projection.nextLabelKo}</h2><p>경로는 갈라지지 않습니다. 어름의 터를 더 깊이 기록합니다.</p><div className="journey-actions"><ActionButton action={projection.action} busy={busy} onAction={onAction} className="primary-cta" /><button type="button" className="action-button" onClick={() => setForgeOpen(true)} disabled={busy || !projection.paidWorkshopEnabled} aria-label={`공방 열기${projection.paidWorkshopDisabledReasonKo ? ` · ${projection.paidWorkshopDisabledReasonKo}` : ""}`}>공방 빚기 <small>연료 1 · 영구</small></button></div>{projection.paidWorkshopDisabledReasonKo ? <p className="forge-disabled-reason">{projection.paidWorkshopDisabledReasonKo}</p> : null}</div>}
+      {forgeOpen ? <ForgePanel mode="WORKSHOP_PAID" materials={projection.workshopMaterials} requiredCount={projection.raceId === "Joinkin" ? 3 : 2} session={session} busy={busy} onAction={onAction} onClose={closeForge} /> : null}
+      <div className="journey-record" hidden={forgeOpen} inert={forgeOpen ? true : undefined}><p>고정된 여정의 다음 기록</p><h2>{projection.nextLabelKo}</h2><p>경로는 갈라지지 않습니다. 어름의 터를 더 깊이 기록합니다.</p><div className="journey-actions"><ActionButton action={projection.action} busy={busy} onAction={onAction} className="primary-cta" /><button ref={forgeOpener} type="button" className="action-button" onClick={() => setForgeOpen(true)} disabled={busy || !projection.paidWorkshopEnabled} aria-label={`공방 열기${projection.paidWorkshopDisabledReasonKo ? ` · ${projection.paidWorkshopDisabledReasonKo}` : ""}`}>공방 빚기 <small>연료 1 · 영구</small></button></div>{projection.paidWorkshopDisabledReasonKo ? <p className="forge-disabled-reason">{projection.paidWorkshopDisabledReasonKo}</p> : null}</div>
       <StatsStrip projection={projection} />
     </section>
   );
@@ -194,7 +229,7 @@ function CombatScreen({ projection, session, busy, onAction, onCardAction }: { p
       <AssetImage assetRole="STATIC_MANIFEST" className="screen-background" src={projection.backgroundSrc} placeholderLabel="어름의 터" alt="" />
       <div className="enemy-stage"><p className="intent-banner">다음 의도 · <strong>{projection.enemy.intentKo}{projection.enemy.intentAmount === null ? "" : ` ${projection.enemy.intentAmount}`}</strong></p><figure className="enemy-record"><AssetImage assetRole="STATIC_MANIFEST" src={projection.enemy.artSrc} placeholderLabel={projection.enemy.nameKo} alt={projection.enemy.nameKo} /><figcaption><strong>{projection.enemy.nameKo}</strong><span>체력 {projection.enemy.hp} / {projection.enemy.maxHp}</span><span>방어 {projection.enemy.block}</span></figcaption></figure></div>
       <div className="combat-instruction"><p>{selectionMode === "FORGE" ? `즉석 빚기 재료 ${requiredCount === 3 ? "세" : "두"} 장을 고르세요. ${requiredCount === 3 ? "앞의 두 칸이 기본 결과, 세 번째 칸이 공명 오버레이입니다." : "카드 사용과 선택은 분리됩니다."}` : selectionMode === "KINDLE" ? "소멸시켜 코스트만큼 에너지로 바꿀 카드 한 장을 고르세요." : projection.instructionKo}</p><div className="race-combat-actions"><button type="button" className="instant-mode-toggle" aria-pressed={selectionMode === "FORGE"} onClick={toggleForgeMode} disabled={busy || (selectionMode !== "FORGE" && !projection.instantForgeAvailable)} aria-label={`즉석 빚기 선택 모드${projection.instantForgeDisabledReasonKo && selectionMode !== "FORGE" ? ` · ${projection.instantForgeDisabledReasonKo}` : ""}`}>{selectionMode === "FORGE" ? "즉석 빚기 취소" : "즉석 빚기"}<small>행동 1회 · 전투 한정</small></button>{projection.raceId === "Burnkin" ? <>{projection.burnkinPassiveAction ? <ActionButton action={projection.burnkinPassiveAction} busy={busy} onAction={onAction} detailKo="체력 1 → 에너지 1" /> : null}<button type="button" className="instant-mode-toggle" aria-pressed={selectionMode === "KINDLE"} onClick={toggleKindleMode} disabled={busy || projection.hand.every((card) => !card.kindleAction || card.kindleAction.disabled)}>{selectionMode === "KINDLE" ? "지피기 취소" : "지피기"}<small>카드 소멸 · 코스트만큼 에너지</small></button></> : null}{projection.joinkinExtendAction ? <ActionButton action={projection.joinkinExtendAction} busy={busy} onAction={onAction} detailKo="턴당 1회 · 빚기 행동 +1" disabledReasonKo="이번 턴에는 사용할 수 없습니다" /> : null}</div></div>
-      <div className="hand" aria-label="손패">{projection.hand.length > 0 ? projection.hand.map((card, index) => <CombatCard key={card.instanceId} card={card} handIndex={index} busy={busy} selectionMode={selectionMode} selected={selected.includes(card.instanceId)} onAction={onCardAction} onToggleForge={toggleCard} />) : <p className="empty-hand">손에 든 카드가 없습니다.</p>}</div>
+      <div className="hand" aria-label="손패">{projection.hand.length > 0 ? projection.hand.map((card, index) => <CombatCard key={card.instanceId} card={card} handIndex={index} busy={busy} selectionMode={selectionMode} selected={selected.includes(card.instanceId)} onAction={onCardAction} onToggleForge={toggleCard} />) : <p className="empty-hand" role="note">손에 든 카드가 없습니다.</p>}</div>
       {selectionMode === "FORGE" ? <aside className="instant-preview">{preview ? <><CanonicalPreview canonical={preview.canonical} compact />{preview.thirdOverlay ? <p>세 번째 재료 · {preview.thirdOverlay.nameKo} · {preview.thirdOverlay.labelKo}</p> : null}<p>{preview.cost.labelKo} · {preview.lifetimeLabelKo}</p><button type="button" className="action-button primary-cta" onClick={executeInstant} disabled={busy || !instantAction}>즉석 빚기</button></> : <p role="status">{selected.length} / {requiredCount}장 선택</p>}</aside> : null}
       {projection.burnkinRulesKo ? <p className="burnkin-rules-note">{projection.burnkinRulesKo}</p> : null}
       {projection.joinkinRulesKo ? <p className="burnkin-rules-note">{projection.joinkinRulesKo}</p> : null}
@@ -248,9 +283,9 @@ function CodexSurface({ session, onClose }: { session: StillkinTrack1UiSession; 
   const visible = codex.entries.slice(page * codex.pageSize, (page + 1) * codex.pageSize);
   const selected = codex.entries.find(({ entryKey }) => entryKey === selectedKey) ?? null;
   return (
-    <section ref={surfaceRef} className="codex-surface" role="dialog" aria-modal="true" aria-labelledby="codex-heading" onKeyDown={onKeyDown}>
-      <div className="codex-heading"><div><h2 id="codex-heading" ref={headingRef} tabIndex={-1}>도감</h2><p>발견한 기록 {codex.discoveredCount} / {codex.total}</p></div><button type="button" className="surface-close" onClick={onClose}>도감 닫기</button></div>
-      <div className="codex-book"><div className="codex-list"><h3>기록 {page * codex.pageSize + 1}–{Math.min((page + 1) * codex.pageSize, codex.total)}</h3><div className="codex-grid">{visible.map((entry) => entry.discovered && entry.preview ? <button key={entry.entryKey} type="button" className="codex-entry is-discovered" aria-pressed={selectedKey === entry.entryKey} onClick={() => setSelectedKey(entry.entryKey)}><span>No. {String(entry.ordinal).padStart(4, "0")}</span><AssetImage assetRole="DISCOVERY_RESULT" src={entry.preview.result.artSrc} fallbackSrc={entry.preview.materials[0].artSrc} placeholderLabel={entry.preview.result.nameKo} alt="" /><strong>{entry.preview.result.nameKo}</strong></button> : <article key={entry.entryKey} className="codex-entry is-masked" aria-label={`No. ${String(entry.ordinal).padStart(4, "0")} 미발견`}><span>No. {String(entry.ordinal).padStart(4, "0")}</span><div aria-hidden="true">?</div><strong>미발견</strong></article>)}</div><nav className="codex-pagination" aria-label="도감 페이지"><button type="button" onClick={() => { setPage((value) => Math.max(0, value - 1)); setSelectedKey(null); }} disabled={page === 0} aria-label="이전 도감 페이지"><ChevronIcon direction="left" /></button><span>{page + 1} / {pageCount}</span><button type="button" onClick={() => { setPage((value) => Math.min(pageCount - 1, value + 1)); setSelectedKey(null); }} disabled={page === pageCount - 1} aria-label="다음 도감 페이지"><ChevronIcon direction="right" /></button></nav></div><CodexDetail entry={selected} /></div>
+    <section ref={surfaceRef} className="codex-surface" role="dialog" aria-modal="true" aria-labelledby="codex-heading" aria-describedby="codex-summary" onKeyDown={onKeyDown}>
+      <div className="codex-heading"><div><h2 id="codex-heading" ref={headingRef} tabIndex={-1}>도감</h2><p id="codex-summary">발견한 기록 {codex.discoveredCount} / {codex.total}</p>{codex.discoveredCount === 0 ? <p className="codex-empty" role="note">아직 발견한 기록이 없습니다. 전투나 공방에서 처음 빚은 제법이 여기에 남습니다.</p> : null}</div><button type="button" className="surface-close" onClick={onClose}>도감 닫기</button></div>
+      <div className="codex-book"><div className="codex-list"><h3>기록 {page * codex.pageSize + 1}–{Math.min((page + 1) * codex.pageSize, codex.total)}</h3><div className="codex-grid">{visible.map((entry) => entry.discovered && entry.preview ? <button key={entry.entryKey} type="button" className="codex-entry is-discovered" aria-pressed={selectedKey === entry.entryKey} onClick={() => setSelectedKey(entry.entryKey)}><span>No. {String(entry.ordinal).padStart(4, "0")}</span><AssetImage assetRole="DISCOVERY_RESULT" src={entry.preview.result.artSrc} fallbackSrc={entry.preview.materials[0].artSrc} placeholderLabel={entry.preview.result.nameKo} alt="" loading="lazy" decoding="async" /><strong>{entry.preview.result.nameKo}</strong></button> : <article key={entry.entryKey} className="codex-entry is-masked" aria-label={`No. ${String(entry.ordinal).padStart(4, "0")} 미발견`}><span>No. {String(entry.ordinal).padStart(4, "0")}</span><div aria-hidden="true">?</div><strong>미발견</strong></article>)}</div><nav className="codex-pagination" aria-label="도감 페이지"><button type="button" onClick={() => { setPage((value) => Math.max(0, value - 1)); setSelectedKey(null); }} disabled={page === 0} aria-label="이전 도감 페이지"><ChevronIcon direction="left" /></button><span>{page + 1} / {pageCount}</span><button type="button" onClick={() => { setPage((value) => Math.min(pageCount - 1, value + 1)); setSelectedKey(null); }} disabled={page === pageCount - 1} aria-label="다음 도감 페이지"><ChevronIcon direction="right" /></button></nav></div><CodexDetail entry={selected} /></div>
     </section>
   );
 }
@@ -307,6 +342,7 @@ export function App({ session, initialProjection, onChangeRace }: AppProps) {
       <main ref={shell} className={`game-shell phase-${projection.phase.toLowerCase()}`} aria-busy={busy} aria-hidden={underlayLocked ? true : undefined} inert={underlayLocked ? true : undefined} data-screen-key={projection.screenKey}>
         <ScreenHeader projection={projection} onOpenCodex={() => { if (!busy) { codexButton.current?.blur(); setCodexOpen(true); } }} onChangeRace={busy || underlayLocked ? undefined : onChangeRace} codexButtonRef={codexButton} />
         <h1 className="sr-only focus-heading" ref={heading} tabIndex={-1}>{projection.focusHeadingKo}</h1>
+        <FirstRunGuide projection={projection} />
         {projection.phase === "BLOCKED" ? <BlockedScreen projection={projection} /> : null}
         {projection.phase === "BETWEEN_NODES" ? <JourneyScreen key={projection.screenKey} projection={projection} session={session} busy={busy} onAction={onAction} /> : null}
         {projection.phase === "IN_COMBAT" ? <CombatScreen projection={projection} session={session} busy={busy} onAction={onAction} onCardAction={onCombatCardAction} /> : null}
