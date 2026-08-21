@@ -3,6 +3,7 @@ export {
   CONTENT_REGISTRY,
   CONTENT_CARDINALITIES,
   contentRegistry,
+  createContentRegistryView,
   ENABLED_GROUND_IDS,
   ENABLED_RACE_IDS,
   getContentRegistry,

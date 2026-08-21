@@ -94,6 +94,24 @@ reachability만 추가하며 기존 브라우저 수직 슬라이스의 고정 �
 추가하며 Joinkin의 2단계 3장 빚기, 종족 규칙, 기존 브라우저 수직 슬라이스의 고정 어름 여정과 최종
 밸런스는 변경하지 않는다.
 
+## T041 M5 통합 reachability와 rollback seam
+
+T041은 세 활성 종족과 여섯 터를 조합한 18개 content route를 한 matrix로 검증한다. 각 route는
+세 깊이, 일반 적 다섯 형태, 엘리트, 보스와 이벤트 여섯 유형의 registry reference가 로컬 asset으로
+해결되는지 확인한다. 통합 수량은 깊이 18, 일반 적 30, 엘리트 6, 보스 6, 이벤트 변주 36이다.
+엘리트 기믹은 인접 속성의 교차 `Law`, 보스 기믹은 같은 속성의 동일 `Law`와 `laws.json`에서 직접
+대조하므로 별도 수기 법칙 원본을 만들지 않는다.
+
+`createContentRegistryView(disabledGroundIds)`는 미완성 터를 canonical registry 변경 없이 안전하게
+제외하는 build-time view다. 제외된 터는 `DISABLED`가 되고 활성 종족의 `groundIds`에서도 함께 빠진다.
+모르는 ID와 중복 ID는 fail-closed로 거부하며, 빈 목록으로 새 view를 만들면 canonical 활성 범위가
+복원된다. 반환값은 깊게 freeze되며 canonical lookup 상태와 alias를 공유하지 않는다.
+
+이 matrix는 content-level 도달 가능성을 검증하며 여섯 터의 실제 전투 수치나 UI 여정을 활성화했다고
+주장하지 않는다. 현재 브라우저 수직 슬라이스는 계속 고정 어름 여정만 실행한다. M5 build hash,
+대표 Codex 브라우저 완주, known issues와 M3/M4 rollback revision은
+`docs/milestones/m5-content-reachability.json`에 기록한다.
+
 보스는 별도 이미지를 만들지 않는다. 각 터의 전설 카드 아트를 같은 asset reference로 재사용한다.
 이벤트는 회수된 터별 변주가 있을 때만 해당 asset을 쓰고 나머지는 generic plate를 사용한다. 모든
 경로는 registry의 literal allowlist에서만 나온다.
