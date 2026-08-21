@@ -22,9 +22,9 @@ export const BURN_GROUND_DESCRIPTOR = createEnabledGround({
   },
 });
 
-export const BURN_GROUND_ENCOUNTERS = BURN_GROUND_DESCRIPTOR.encounters!;
-export const BURN_GROUND_EVENTS = BURN_GROUND_DESCRIPTOR.events;
-export const BURN_GROUND_REWARDS = BURN_GROUND_DESCRIPTOR.rewards!;
+export const BURN_GROUND_ENCOUNTERS = /* @__PURE__ */ (() => BURN_GROUND_DESCRIPTOR.encounters!)();
+export const BURN_GROUND_EVENTS = /* @__PURE__ */ (() => BURN_GROUND_DESCRIPTOR.events)();
+export const BURN_GROUND_REWARDS = /* @__PURE__ */ (() => BURN_GROUND_DESCRIPTOR.rewards!)();
 export const GROUND_BURN_DESCRIPTOR = BURN_GROUND_DESCRIPTOR;
 
 export default BURN_GROUND_DESCRIPTOR;

@@ -18,15 +18,16 @@ import {
 const assetsRoot = resolve(import.meta.dirname, "../../public/assets");
 
 describe("playable races and content registry", () => {
-  it("enables Stillkin, Burnkin, and Joinkin against the five implemented grounds while distinguishing disabled and missing", () => {
+  it("enables Stillkin, Burnkin, and Joinkin against all six implemented grounds while distinguishing missing content", () => {
     expect(listEnabledRaces().map((race) => race.id)).toEqual(["Stillkin", "Burnkin", "Joinkin"]);
-    expect(listEnabledGrounds().map((ground) => ground.id)).toEqual(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT", "GROUND_WASH"]);
-    expect(lookupRace("Burnkin")).toMatchObject({ status: "ENABLED", value: { groundIds: ["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT", "GROUND_WASH"], policyId: "Burnkin" } });
-    expect(lookupRace("Joinkin")).toMatchObject({ status: "ENABLED", value: { groundIds: ["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT", "GROUND_WASH"], policyId: "Joinkin" } });
+    expect(listEnabledGrounds().map((ground) => ground.id)).toEqual(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT", "GROUND_WASH", "GROUND_JOIN"]);
+    expect(lookupRace("Burnkin")).toMatchObject({ status: "ENABLED", value: { groundIds: ["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT", "GROUND_WASH", "GROUND_JOIN"], policyId: "Burnkin" } });
+    expect(lookupRace("Joinkin")).toMatchObject({ status: "ENABLED", value: { groundIds: ["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT", "GROUND_WASH", "GROUND_JOIN"], policyId: "Joinkin" } });
     expect(lookupGround("GROUND_BURN").status).toBe("ENABLED");
     expect(lookupGround("GROUND_SCATTER").status).toBe("ENABLED");
     expect(lookupGround("GROUND_ROT").status).toBe("ENABLED");
     expect(lookupGround("GROUND_WASH").status).toBe("ENABLED");
+    expect(lookupGround("GROUND_JOIN").status).toBe("ENABLED");
     expect(lookupRace("Unknown").status).toBe("MISSING");
     expect(lookupGround("UNKNOWN").status).toBe("MISSING");
   });
@@ -77,7 +78,7 @@ describe("playable races and content registry", () => {
   });
 
   it("contains a literal allowlist whose active assets exist locally", () => {
-    expect(ASSET_PATH_ALLOWLIST).toHaveLength(66);
+    expect(ASSET_PATH_ALLOWLIST).toHaveLength(78);
     for (const reference of ASSET_PATH_ALLOWLIST) {
       expect(reference.path).not.toMatch(/https?:|\.\.|\\/);
       expect(reference.path.startsWith("/assets/")).toBe(true);
@@ -87,9 +88,9 @@ describe("playable races and content registry", () => {
     expect(lookupAsset("../cards/heart__still.png").status).toBe("MISSING");
   });
 
-  it("does not expose inactive content and protects nested registry data from mutation aliases", () => {
+  it("protects nested registry data from mutation aliases", () => {
     expect(getRaceDescriptor("Burnkin")?.enabled).toBe(true);
-    expect(getGroundDescriptor("GROUND_JOIN")?.depths).toEqual([]);
+    expect(getGroundDescriptor("GROUND_JOIN")?.depths).toHaveLength(3);
     expect(Object.isFrozen(CONTENT_REGISTRY)).toBe(true);
     expect(Object.isFrozen(CONTENT_REGISTRY.grounds[0])).toBe(true);
     expect(Object.isFrozen(CONTENT_REGISTRY.grounds[0].depths[0])).toBe(true);

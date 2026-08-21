@@ -228,6 +228,52 @@ export interface EmptiedEvaluator {
   reset(state: EmptiedState): EmptiedStep;
 }
 
+export interface HardenedConfig {
+  readonly block: number;
+}
+
+export interface HardenedAllyState {
+  readonly id: string;
+  readonly block: number;
+}
+
+export interface HardenedState {
+  readonly allies: readonly HardenedAllyState[];
+}
+
+export interface HardenedStep {
+  readonly state: HardenedState;
+  readonly event: "HARDENED";
+  readonly grantedBlock: number;
+}
+
+export interface HardenedEvaluator {
+  readonly block: number;
+  step(state: HardenedState): HardenedStep;
+  grant(state: HardenedState): HardenedStep;
+}
+
+export interface KnotConfig {
+  readonly healing: number;
+}
+
+export interface KnotState {
+  readonly hp: number;
+  readonly maxHp: number;
+}
+
+export interface KnotStep {
+  readonly state: KnotState;
+  readonly event: "KNOT";
+  readonly healed: number;
+}
+
+export interface KnotEvaluator {
+  readonly healing: number;
+  step(state: KnotState): KnotStep;
+  regenerate(state: KnotState): KnotStep;
+}
+
 export type MechanicConfigFailure =
   | "INVALID_CONFIG"
   | "INVALID_CHARGE_TURNS"
@@ -239,13 +285,14 @@ export type MechanicConfigFailure =
   | "INVALID_MAX_TARGETS"
   | "INVALID_PHASE_TURNS"
   | "INVALID_HEALING"
-  | "INVALID_INTERVAL_TURNS";
+  | "INVALID_INTERVAL_TURNS"
+  | "INVALID_DEFENSE";
 
 export class MechanicConfigError extends Error {
   readonly reason: MechanicConfigFailure;
 
   constructor(
-    mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT" | "SPREADING" | "DISPERSAL" | "NEUTRALIZED" | "SELF_EATING" | "CLARIFIED" | "EMPTIED",
+    mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT" | "SPREADING" | "DISPERSAL" | "NEUTRALIZED" | "SELF_EATING" | "CLARIFIED" | "EMPTIED" | "HARDENED" | "KNOT",
     reason: MechanicConfigFailure,
   ) {
     super(`Invalid ${mechanic} mechanic configuration: ${reason}`);
@@ -367,6 +414,24 @@ function assertEmptiedConfig(value: unknown): asserts value is EmptiedConfig {
   }
 }
 
+function assertHardenedConfig(value: unknown): asserts value is HardenedConfig {
+  if (!isRecord(value) || !hasExactKeys(value, ["block"])) {
+    throw new MechanicConfigError("HARDENED", "INVALID_CONFIG");
+  }
+  if (!isSafePositiveInteger(value.block)) {
+    throw new MechanicConfigError("HARDENED", "INVALID_DEFENSE");
+  }
+}
+
+function assertKnotConfig(value: unknown): asserts value is KnotConfig {
+  if (!isRecord(value) || !hasExactKeys(value, ["healing"])) {
+    throw new MechanicConfigError("KNOT", "INVALID_CONFIG");
+  }
+  if (!isSafePositiveInteger(value.healing)) {
+    throw new MechanicConfigError("KNOT", "INVALID_HEALING");
+  }
+}
+
 function assertPressedFireState(value: PressedFireState, chargeTurns: number): void {
   if (!isRecord(value) || !isSafeNonnegativeInteger(value.charge) || value.charge >= chargeTurns) {
     throw new Error("Invalid PRESSED_FIRE state");
@@ -455,6 +520,23 @@ function assertEmptiedState(value: unknown, intervalTurns: number): asserts valu
     || !isSafePositiveInteger(value.remainingTurns) || value.remainingTurns > intervalTurns
     || !assertStatusIds(value.player) || !assertStatusIds(value.enemy)) {
     throw new Error("Invalid EMPTIED state");
+  }
+}
+
+function assertHardenedState(value: unknown): asserts value is HardenedState {
+  if (!isRecord(value) || !hasExactKeys(value, ["allies"]) || !Array.isArray(value.allies)
+    || value.allies.length === 0 || value.allies.some((ally) => !isRecord(ally)
+      || !hasExactKeys(ally, ["id", "block"]) || typeof ally.id !== "string" || ally.id.length === 0
+      || !isSafeNonnegativeInteger(ally.block))
+    || new Set(value.allies.map((ally) => ally.id)).size !== value.allies.length) {
+    throw new Error("Invalid HARDENED state");
+  }
+}
+
+function assertKnotState(value: unknown): asserts value is KnotState {
+  if (!isRecord(value) || !hasExactKeys(value, ["hp", "maxHp"])
+    || !isSafePositiveInteger(value.hp) || !isSafePositiveInteger(value.maxHp) || value.hp > value.maxHp) {
+    throw new Error("Invalid KNOT state");
   }
 }
 
@@ -642,6 +724,32 @@ export function resolveEmptied(config: unknown): EmptiedEvaluator {
   return { intervalTurns, initialState, step, reset: step };
 }
 
+export function resolveHardened(config: unknown): HardenedEvaluator {
+  assertHardenedConfig(config);
+  const block = config.block;
+  const step = (state: HardenedState): HardenedStep => {
+    assertHardenedState(state);
+    const allies = state.allies.map((ally) => {
+      const nextBlock = ally.block + block;
+      if (!Number.isSafeInteger(nextBlock)) throw new Error("HARDENED block overflow");
+      return { id: ally.id, block: nextBlock };
+    });
+    return { state: { allies }, event: "HARDENED", grantedBlock: block };
+  };
+  return { block, step, grant: step };
+}
+
+export function resolveKnot(config: unknown): KnotEvaluator {
+  assertKnotConfig(config);
+  const healing = config.healing;
+  const step = (state: KnotState): KnotStep => {
+    assertKnotState(state);
+    const hp = Math.min(state.maxHp, state.hp + healing);
+    return { state: { hp, maxHp: state.maxHp }, event: "KNOT", healed: hp - state.hp };
+  };
+  return { healing, step, regenerate: step };
+}
+
 function tryResolveMechanic<T>(resolver: (config: unknown) => T, config: unknown):
   | { readonly ok: true; readonly evaluator: T }
   | { readonly ok: false; readonly reason: MechanicConfigFailure } {
@@ -663,3 +771,5 @@ export const tryResolveNeutralized = (config: unknown) => tryResolveMechanic(res
 export const tryResolveSelfEating = (config: unknown) => tryResolveMechanic(resolveSelfEating, config);
 export const tryResolveClarified = (config: unknown) => tryResolveMechanic(resolveClarified, config);
 export const tryResolveEmptied = (config: unknown) => tryResolveMechanic(resolveEmptied, config);
+export const tryResolveHardened = (config: unknown) => tryResolveMechanic(resolveHardened, config);
+export const tryResolveKnot = (config: unknown) => tryResolveMechanic(resolveKnot, config);

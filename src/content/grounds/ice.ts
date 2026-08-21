@@ -21,9 +21,9 @@ export const ICE_GROUND_DESCRIPTOR = createEnabledGround({
   },
 });
 
-export const STILL_GROUND_ENCOUNTERS = ICE_GROUND_DESCRIPTOR.encounters!;
-export const STILL_GROUND_EVENTS = ICE_GROUND_DESCRIPTOR.events;
-export const STILL_GROUND_REWARDS = ICE_GROUND_DESCRIPTOR.rewards!;
+export const STILL_GROUND_ENCOUNTERS = /* @__PURE__ */ (() => ICE_GROUND_DESCRIPTOR.encounters!)();
+export const STILL_GROUND_EVENTS = /* @__PURE__ */ (() => ICE_GROUND_DESCRIPTOR.events)();
+export const STILL_GROUND_REWARDS = /* @__PURE__ */ (() => ICE_GROUND_DESCRIPTOR.rewards!)();
 export const GROUND_STILL_DESCRIPTOR = ICE_GROUND_DESCRIPTOR;
 
 export default ICE_GROUND_DESCRIPTOR;

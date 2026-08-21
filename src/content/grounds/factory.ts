@@ -34,15 +34,16 @@ export const PLAYABLE_GROUND_IDS = /* @__PURE__ */ freeze([
   "GROUND_SCATTER",
   "GROUND_ROT",
   "GROUND_WASH",
+  "GROUND_JOIN",
 ] as const);
 
-type GroundStem = "still" | "burn" | "scatter" | "rot" | "wash";
+type GroundStem = "still" | "burn" | "scatter" | "rot" | "wash" | "join";
 
 interface EnabledGroundConfig {
-  readonly id: Exclude<GroundId, "GROUND_JOIN">;
+  readonly id: GroundId;
   readonly stem: GroundStem;
   readonly nameKo: string;
-  readonly attribute: "STILL" | "BURN" | "SCATTER" | "ROT" | "WASH";
+  readonly attribute: "STILL" | "BURN" | "SCATTER" | "ROT" | "WASH" | "JOIN";
   readonly depthLabels: readonly [string, string, string];
   readonly normalLabels: readonly [string, string, string, string, string];
   readonly elite: {

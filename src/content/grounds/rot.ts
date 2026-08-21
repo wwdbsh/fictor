@@ -21,9 +21,9 @@ export const ROT_GROUND_DESCRIPTOR = createEnabledGround({
   },
 });
 
-export const ROT_GROUND_ENCOUNTERS = ROT_GROUND_DESCRIPTOR.encounters!;
-export const ROT_GROUND_EVENTS = ROT_GROUND_DESCRIPTOR.events;
-export const ROT_GROUND_REWARDS = ROT_GROUND_DESCRIPTOR.rewards!;
+export const ROT_GROUND_ENCOUNTERS = /* @__PURE__ */ (() => ROT_GROUND_DESCRIPTOR.encounters!)();
+export const ROT_GROUND_EVENTS = /* @__PURE__ */ (() => ROT_GROUND_DESCRIPTOR.events)();
+export const ROT_GROUND_REWARDS = /* @__PURE__ */ (() => ROT_GROUND_DESCRIPTOR.rewards!)();
 export const GROUND_ROT_DESCRIPTOR = ROT_GROUND_DESCRIPTOR;
 
 export default ROT_GROUND_DESCRIPTOR;

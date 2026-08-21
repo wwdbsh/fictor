@@ -54,8 +54,8 @@ export interface NormalEnemyDescriptor {
   readonly assetPath: string;
 }
 
-export type EliteMechanicId = "PRESSED_FIRE" | "BLAST" | "SPREADING" | "NEUTRALIZED" | "CLARIFIED";
-export type BossMechanicId = "TOTAL_STOP" | "BURNOUT" | "DISPERSAL" | "SELF_EATING" | "EMPTIED";
+export type EliteMechanicId = "PRESSED_FIRE" | "BLAST" | "SPREADING" | "NEUTRALIZED" | "CLARIFIED" | "HARDENED";
+export type BossMechanicId = "TOTAL_STOP" | "BURNOUT" | "DISPERSAL" | "SELF_EATING" | "EMPTIED" | "KNOT";
 export type EncounterMechanicId = EliteMechanicId | BossMechanicId;
 
 export interface EliteEnemyDescriptor {
@@ -69,15 +69,15 @@ export interface EliteEnemyDescriptor {
 }
 
 export interface BossEnemyDescriptor {
-  readonly id: "the_stilling" | "the_burning" | "the_scattering" | "the_rotting" | "the_washing";
-  readonly name: "The Stilling" | "The Burning" | "The Scattering" | "The Rotting" | "The Washing";
+  readonly id: "the_stilling" | "the_burning" | "the_scattering" | "the_rotting" | "the_washing" | "the_joining";
+  readonly name: "The Stilling" | "The Burning" | "The Scattering" | "The Rotting" | "The Washing" | "The Joining";
   readonly labelKo: string;
   readonly mechanicId: BossMechanicId;
   readonly mechanic: MechanicMetadata;
   readonly asset: AssetReference;
   readonly assetId: string;
   readonly assetPath: string;
-  readonly reusesCardAssetId: "heart__still" | "heart__burn" | "heart__scatter" | "heart__rot" | "heart__wash";
+  readonly reusesCardAssetId: "heart__still" | "heart__burn" | "heart__scatter" | "heart__rot" | "heart__wash" | "heart__join";
 }
 
 export interface MechanicMetadata {
@@ -113,7 +113,7 @@ export interface GroundRewardMapping {
   };
   readonly boss: {
     readonly source: "BOSS";
-    readonly heartId: "heart__still" | "heart__burn" | "heart__scatter" | "heart__rot" | "heart__wash";
+    readonly heartId: "heart__still" | "heart__burn" | "heart__scatter" | "heart__rot" | "heart__wash" | "heart__join";
   };
 }
 
