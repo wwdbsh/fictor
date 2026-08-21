@@ -1,22 +1,23 @@
 import { decodeCombatState, type CombatState } from "../combat";
 import { RESONANCE_ATTRIBUTES, type ResonanceAttribute } from "../resonance";
+import { freeze } from "../../freeze";
 import type {
   BurnkinPolicy,
   BurnkinProvisionalRules,
   BurnkinTransition,
 } from "./types";
 
-export const BURNKIN_POLICY: BurnkinPolicy = Object.freeze({
+export const BURNKIN_POLICY: BurnkinPolicy = freeze({
   id: "Burnkin",
   attribute: "BURN",
-  passive: Object.freeze({ id: "BLOOD_TO_ENERGY", labelKo: "피 태우기" }),
-  skill: Object.freeze({
+  passive: freeze({ id: "BLOOD_TO_ENERGY", labelKo: "피 태우기" }),
+  skill: freeze({
     id: "KINDLE",
     labelKo: "지피기",
     target: "HAND_CARD_INSTANCE",
     destination: "EXILE",
   }),
-  resonance: Object.freeze({
+  resonance: freeze({
     rateMultiplier: 2,
     breakEffect: "DIRECT_SELF_DAMAGE",
   }),

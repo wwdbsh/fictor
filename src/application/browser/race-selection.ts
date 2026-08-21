@@ -1,4 +1,5 @@
 import { listEnabledRaces } from "../../content";
+import { freeze } from "../../freeze";
 import { FICTOR_SAVE_V2_KEY, type StorageLike } from "../../persistence";
 import { createStillkinTrack1UiSession } from "./stillkin-track1-ui-session";
 import type { StillkinTrack1UiSession } from "./ui-types";
@@ -41,9 +42,9 @@ export function createTrack1RaceSelection(options: Track1RaceSelectionOptions): 
     if (race.id === "Joinkin") return [{ raceId: "Joinkin", labelKo: "이음붙이", attribute: "JOIN", summaryKo: "세 재료와 결속 공명으로 조합을 이어갑니다." }];
     return [];
   });
-  return Object.freeze({
+  return freeze({
     initialRaceId: selectedRace(options.storage),
-    choices: Object.freeze(choices.map((choice) => Object.freeze(choice))),
+    choices: freeze(choices.map((choice) => freeze(choice))),
     select(raceId: PlayableTrack1RaceId) {
       if (!choices.some((choice) => choice.raceId === raceId)) return false;
       try { options.storage.setItem(FICTOR_RACE_SELECTION_KEY, raceId); return true; } catch { return false; }

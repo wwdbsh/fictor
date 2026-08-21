@@ -4,6 +4,8 @@ import { JOINKIN_DESCRIPTOR } from "./races/joinkin";
 import { ICE_GROUND_DESCRIPTOR } from "./grounds/ice";
 import { BURN_GROUND_DESCRIPTOR } from "./grounds/burn";
 import { SCATTER_GROUND_DESCRIPTOR } from "./grounds/scatter";
+import { ROT_GROUND_DESCRIPTOR } from "./grounds/rot";
+import { freeze } from "../freeze";
 import type {
   AssetLookup,
   AssetReference,
@@ -20,36 +22,36 @@ const disabledRace = (
   nameKo: string,
   attribute: RaceDescriptor["attribute"],
 ): RaceDescriptor =>
-  Object.freeze({
+  freeze({
     id,
     nameKo,
     labelKo: nameKo,
     attribute,
     status: "DISABLED",
     enabled: false,
-    groundIds: Object.freeze([]),
+    groundIds: freeze([]),
     policyId: null,
   });
 
 const disabledGround = (
-  id: Exclude<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER">,
+  id: Exclude<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER" | "GROUND_ROT">,
   nameKo: string,
   attribute: GroundDescriptor["attribute"],
 ): GroundDescriptor =>
-  Object.freeze({
+  freeze({
     id,
     nameKo,
     labelKo: nameKo,
     attribute,
     status: "DISABLED",
     enabled: false,
-    depths: Object.freeze([]),
+    depths: freeze([]),
     encounters: null,
     rewards: null,
-    events: Object.freeze([]),
+    events: freeze([]),
   });
 
-const KNOWN_RACES: readonly RaceDescriptor[] = Object.freeze([
+const KNOWN_RACES: readonly RaceDescriptor[] = freeze([
   STILLKIN_DESCRIPTOR,
   BURNKIN_DESCRIPTOR,
   JOINKIN_DESCRIPTOR,
@@ -58,11 +60,11 @@ const KNOWN_RACES: readonly RaceDescriptor[] = Object.freeze([
   disabledRace("Washkin", "씻음붙이", "WASH"),
 ]);
 
-const KNOWN_GROUNDS: readonly GroundDescriptor[] = Object.freeze([
+const KNOWN_GROUNDS: readonly GroundDescriptor[] = freeze([
   ICE_GROUND_DESCRIPTOR,
   BURN_GROUND_DESCRIPTOR,
   SCATTER_GROUND_DESCRIPTOR,
-  disabledGround("GROUND_ROT", "삭음의 터", "ROT"),
+  ROT_GROUND_DESCRIPTOR,
   disabledGround("GROUND_WASH", "씻음의 터", "WASH"),
   disabledGround("GROUND_JOIN", "이음의 터", "JOIN"),
 ]);
@@ -80,23 +82,23 @@ function createAssetAllowlist(): readonly AssetReference[] {
       ...ground.events.map(({ asset }) => asset),
     ];
   });
-  return Object.freeze(Array.from(new Map(
+  return freeze(Array.from(new Map(
     references.map((reference) => [reference.id, reference] as const),
   ).values()));
 }
 
 const ASSET_ALLOWLIST = /* @__PURE__ */ createAssetAllowlist();
 
-const REGISTRY: ContentRegistry = Object.freeze({ races: KNOWN_RACES, grounds: KNOWN_GROUNDS });
+const REGISTRY: ContentRegistry = freeze({ races: KNOWN_RACES, grounds: KNOWN_GROUNDS });
 
 function cloneAndFreeze<T>(value: T): T {
   if (Array.isArray(value)) {
-    return Object.freeze(value.map((item) => cloneAndFreeze(item))) as T;
+    return freeze(value.map((item) => cloneAndFreeze(item))) as T;
   }
   if (typeof value === "object" && value !== null) {
     const copy = {} as Record<string, unknown>;
     for (const [key, item] of Object.entries(value)) copy[key] = cloneAndFreeze(item);
-    return Object.freeze(copy) as T;
+    return freeze(copy) as T;
   }
   return value;
 }
@@ -104,14 +106,14 @@ function cloneAndFreeze<T>(value: T): T {
 export const CONTENT_REGISTRY = cloneAndFreeze(REGISTRY);
 export const contentRegistry = CONTENT_REGISTRY;
 export const ASSET_PATH_ALLOWLIST = /* @__PURE__ */ cloneAndFreeze(ASSET_ALLOWLIST);
-export const CONTENT_CARDINALITIES = /* @__PURE__ */ Object.freeze({
+export const CONTENT_CARDINALITIES = /* @__PURE__ */ freeze({
   enabledRaces: 3,
-  enabledGrounds: 3,
-  enabledDepths: 9,
-  enabledNormalEnemies: 15,
-  enabledElites: 3,
-  enabledBosses: 3,
-  enabledEventVariations: 18,
+  enabledGrounds: 4,
+  enabledDepths: 12,
+  enabledNormalEnemies: 20,
+  enabledElites: 4,
+  enabledBosses: 4,
+  enabledEventVariations: 24,
   stillDepths: 3,
   stillNormalEnemies: 5,
   stillElites: 1,
@@ -127,9 +129,14 @@ export const CONTENT_CARDINALITIES = /* @__PURE__ */ Object.freeze({
   scatterElites: 1,
   scatterBosses: 1,
   scatterEvents: 6,
+  rotDepths: 3,
+  rotNormalEnemies: 5,
+  rotElites: 1,
+  rotBosses: 1,
+  rotEvents: 6,
 });
-export const ENABLED_RACE_IDS = /* @__PURE__ */ Object.freeze(["Stillkin", "Burnkin", "Joinkin"] as const);
-export const ENABLED_GROUND_IDS = /* @__PURE__ */ Object.freeze(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER"] as const);
+export const ENABLED_RACE_IDS = /* @__PURE__ */ freeze(["Stillkin", "Burnkin", "Joinkin"] as const);
+export const ENABLED_GROUND_IDS = /* @__PURE__ */ freeze(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT"] as const);
 
 function lookup<T extends { id: string; enabled: boolean }>(
   values: readonly T[],

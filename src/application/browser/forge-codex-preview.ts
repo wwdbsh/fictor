@@ -1,4 +1,5 @@
 import { resolveForgeCard } from "../../domain/forge";
+import { freeze } from "../../freeze";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
 import { browserPacketHasCanonicalArt, type BrowserMaterialDisplay } from "./runtime-packet";
 import type { Track1UiForgeCanonicalPreview, Track1UiForgeThirdOverlay } from "./ui-types";
@@ -41,12 +42,12 @@ function canonicalRecord(firstId: string, secondId: string): CanonicalPreviewRec
   const hasCanonicalArt = browserPacketHasCanonicalArt(BROWSER_RUNTIME_PACKET, resolved.material_ids);
   const fallback = [...displays].sort((left, right) => compareIds(left.id, right.id))[0];
   const effectId = resolved.combat_effect ?? resolved.passive_effect_id;
-  return Object.freeze({
+  return freeze({
     recipeId: resolved.recipe_id,
     cardId: resolved.card_id,
-    materialIds: Object.freeze([...resolved.material_ids]) as unknown as readonly [string, string],
-    materialNamesKo: Object.freeze([displays[0].nameKo, displays[1].nameKo]) as unknown as readonly [string, string],
-    materialArt: Object.freeze([displays[0].art, displays[1].art]) as unknown as readonly [string, string],
+    materialIds: freeze([...resolved.material_ids]) as unknown as readonly [string, string],
+    materialNamesKo: freeze([displays[0].nameKo, displays[1].nameKo]) as unknown as readonly [string, string],
+    materialArt: freeze([displays[0].art, displays[1].art]) as unknown as readonly [string, string],
     resultNameKo: resolved.name_ko,
     resultArt: hasCanonicalArt ? resolved.art : fallback.art,
     resultArtFallbackLabelKo: hasCanonicalArt ? null : `${fallback.nameKo} 재료 도판`,
@@ -56,7 +57,7 @@ function canonicalRecord(firstId: string, secondId: string): CanonicalPreviewRec
   });
 }
 
-const canonicalCatalog: readonly CanonicalPreviewRecord[] = Object.freeze(
+const canonicalCatalog: readonly CanonicalPreviewRecord[] = freeze(
   BROWSER_RUNTIME_PACKET.resolverContext.materials
     .flatMap((left, leftIndex, materials) => materials.slice(leftIndex + 1).map((right) => canonicalRecord(left.id, right.id)))
     .filter((record): record is CanonicalPreviewRecord => record !== null)
@@ -70,14 +71,14 @@ function assetUrl(baseUrl: string, path: string): string {
 }
 
 function projectRecord(record: CanonicalPreviewRecord, baseUrl: string): Track1UiForgeCanonicalPreview {
-  return Object.freeze({
+  return freeze({
     recipeId: record.recipeId,
     cardId: record.cardId,
-    materials: Object.freeze([
-      Object.freeze({ materialId: record.materialIds[0], nameKo: record.materialNamesKo[0], artSrc: assetUrl(baseUrl, record.materialArt[0]) }),
-      Object.freeze({ materialId: record.materialIds[1], nameKo: record.materialNamesKo[1], artSrc: assetUrl(baseUrl, record.materialArt[1]) }),
+    materials: freeze([
+      freeze({ materialId: record.materialIds[0], nameKo: record.materialNamesKo[0], artSrc: assetUrl(baseUrl, record.materialArt[0]) }),
+      freeze({ materialId: record.materialIds[1], nameKo: record.materialNamesKo[1], artSrc: assetUrl(baseUrl, record.materialArt[1]) }),
     ]) as unknown as Track1UiForgeCanonicalPreview["materials"],
-    result: Object.freeze({
+    result: freeze({
       nameKo: record.resultNameKo,
       artSrc: assetUrl(baseUrl, record.resultArt),
       artFallbackLabelKo: record.resultArtFallbackLabelKo,
@@ -109,7 +110,7 @@ export function buildThirdOverlayPreview(
   const rawAttribute = Array.isArray(material.attribute) ? material.attribute[0] : material.attribute;
   const resonanceAttribute = rawAttribute === "NONE" ? null : rawAttribute;
   if (expectedAttribute !== undefined && resonanceAttribute !== expectedAttribute) return null;
-  return Object.freeze({
+  return freeze({
     materialId,
     nameKo: display.nameKo,
     artSrc: assetUrl(baseUrl, display.art),

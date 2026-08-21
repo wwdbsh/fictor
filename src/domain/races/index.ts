@@ -29,14 +29,18 @@ export {
   resolveBlast,
   resolveBurnout,
   resolveDispersal,
+  resolveNeutralized,
   resolvePressedFire,
   resolveSpreading,
+  resolveSelfEating,
   resolveTotalStop,
   tryResolveBlast,
   tryResolveBurnout,
   tryResolveDispersal,
+  tryResolveNeutralized,
   tryResolvePressedFire,
   tryResolveSpreading,
+  tryResolveSelfEating,
   tryResolveTotalStop,
 } from "./mechanics";
 export type * from "./mechanics";

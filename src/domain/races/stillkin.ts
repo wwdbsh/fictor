@@ -3,6 +3,7 @@ import {
   createResonanceState,
   isResonanceAttribute,
 } from "../resonance";
+import { freeze } from "../../freeze";
 import type {
   ResonanceAttribute,
   ResonanceState,
@@ -14,22 +15,22 @@ import type {
   StillkinResonanceResult,
 } from "./types";
 
-export const STILLKIN_BLOCK_RETENTION: StillkinBlockRetention = Object.freeze({
+export const STILLKIN_BLOCK_RETENTION: StillkinBlockRetention = freeze({
   numerator: 1,
   denominator: 2,
   rounding: "FLOOR",
 });
 
-export const STILLKIN_RESONANCE_RATE: StillkinResonanceRate = Object.freeze({
+export const STILLKIN_RESONANCE_RATE: StillkinResonanceRate = freeze({
   status: "PENDING_2026_08_21",
 });
 
-export const STILLKIN_POLICY: StillkinPolicy = Object.freeze({
+export const STILLKIN_POLICY: StillkinPolicy = freeze({
   id: "Stillkin",
   attribute: "STILL",
   blockRetention: STILLKIN_BLOCK_RETENTION,
   resonanceRate: STILLKIN_RESONANCE_RATE,
-  skill: Object.freeze({
+  skill: freeze({
     id: "HARDEN",
     labelKo: "굳히기",
     target: "CARD_INSTANCE",

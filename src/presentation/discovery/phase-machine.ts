@@ -1,4 +1,6 @@
-export const DISCOVERY_PHASE_DURATIONS_MS = Object.freeze({
+import { freeze } from "../../freeze";
+
+export const DISCOVERY_PHASE_DURATIONS_MS = freeze({
   BURNING: 900,
   REVEALING: 1_200,
   PRINTING: 900,

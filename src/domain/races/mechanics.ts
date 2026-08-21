@@ -138,6 +138,48 @@ export interface DispersalEvaluator {
   advance(state: DispersalState): DispersalStep;
 }
 
+export interface NeutralizedState {
+  readonly player: readonly string[];
+  readonly enemy: readonly string[];
+}
+
+export interface NeutralizedStep {
+  readonly state: NeutralizedState;
+  readonly event: "RESET_STATES";
+  readonly cleared: { readonly player: number; readonly enemy: number };
+}
+
+export interface NeutralizedEvaluator {
+  step(state: NeutralizedState): NeutralizedStep;
+  reset(state: NeutralizedState): NeutralizedStep;
+}
+
+export interface SelfEatingConfig {
+  readonly hpCost: number;
+  readonly powerGain: number;
+}
+
+export interface SelfEatingState {
+  readonly hp: number;
+  readonly power: number;
+}
+
+export type SelfEatingSignal = "SELF_EATING" | "EXHAUSTED";
+
+export interface SelfEatingStep {
+  readonly state: SelfEatingState;
+  readonly event: SelfEatingSignal;
+  readonly hpConsumed: number;
+  readonly powerGained: number;
+}
+
+export interface SelfEatingEvaluator {
+  readonly hpCost: number;
+  readonly powerGain: number;
+  step(state: SelfEatingState): SelfEatingStep;
+  consume(state: SelfEatingState): SelfEatingStep;
+}
+
 export type MechanicConfigFailure =
   | "INVALID_CONFIG"
   | "INVALID_CHARGE_TURNS"
@@ -153,7 +195,7 @@ export class MechanicConfigError extends Error {
   readonly reason: MechanicConfigFailure;
 
   constructor(
-    mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT" | "SPREADING" | "DISPERSAL",
+    mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT" | "SPREADING" | "DISPERSAL" | "NEUTRALIZED" | "SELF_EATING",
     reason: MechanicConfigFailure,
   ) {
     super(`Invalid ${mechanic} mechanic configuration: ${reason}`);
@@ -239,6 +281,24 @@ function assertDispersalConfig(value: unknown): asserts value is DispersalConfig
   }
 }
 
+function assertNeutralizedConfig(value: unknown): void {
+  if (!isRecord(value) || !hasExactKeys(value, [])) {
+    throw new MechanicConfigError("NEUTRALIZED", "INVALID_CONFIG");
+  }
+}
+
+function assertSelfEatingConfig(value: unknown): asserts value is SelfEatingConfig {
+  if (!isRecord(value) || !hasExactKeys(value, ["hpCost", "powerGain"])) {
+    throw new MechanicConfigError("SELF_EATING", "INVALID_CONFIG");
+  }
+  if (!isSafePositiveInteger(value.hpCost)) {
+    throw new MechanicConfigError("SELF_EATING", "INVALID_HP_COST");
+  }
+  if (!isSafePositiveInteger(value.powerGain)) {
+    throw new MechanicConfigError("SELF_EATING", "INVALID_POWER_GAIN");
+  }
+}
+
 function assertPressedFireState(value: PressedFireState, chargeTurns: number): void {
   if (!isRecord(value) || !isSafeNonnegativeInteger(value.charge) || value.charge >= chargeTurns) {
     throw new Error("Invalid PRESSED_FIRE state");
@@ -291,6 +351,26 @@ function assertDispersalState(value: unknown, phaseTurns: number): asserts value
   if (!isRecord(value) || !hasExactKeys(value, ["remainingTurns"])
     || !isSafeNonnegativeInteger(value.remainingTurns) || value.remainingTurns > phaseTurns) {
     throw new Error("Invalid DISPERSAL state");
+  }
+}
+
+function assertStatusIds(value: unknown): value is readonly string[] {
+  return Array.isArray(value)
+    && value.every((statusId) => typeof statusId === "string" && statusId.length > 0)
+    && new Set(value).size === value.length;
+}
+
+function assertNeutralizedState(value: unknown): asserts value is NeutralizedState {
+  if (!isRecord(value) || !hasExactKeys(value, ["player", "enemy"])
+    || !assertStatusIds(value.player) || !assertStatusIds(value.enemy)) {
+    throw new Error("Invalid NEUTRALIZED state");
+  }
+}
+
+function assertSelfEatingState(value: unknown): asserts value is SelfEatingState {
+  if (!isRecord(value) || !hasExactKeys(value, ["hp", "power"])
+    || !isSafePositiveInteger(value.hp) || !isSafeNonnegativeInteger(value.power)) {
+    throw new Error("Invalid SELF_EATING state");
   }
 }
 
@@ -406,80 +486,56 @@ export function resolveDispersal(config: unknown): DispersalEvaluator {
   return { phaseTurns, initialState, step, advance: step };
 }
 
-export function tryResolvePressedFire(
-  config: unknown,
-):
-  | { readonly ok: true; readonly evaluator: PressedFireEvaluator }
+export function resolveNeutralized(config: unknown): NeutralizedEvaluator {
+  assertNeutralizedConfig(config);
+  const step = (state: NeutralizedState): NeutralizedStep => {
+    assertNeutralizedState(state);
+    return {
+      state: { player: [], enemy: [] },
+      event: "RESET_STATES",
+      cleared: { player: state.player.length, enemy: state.enemy.length },
+    };
+  };
+  return { step, reset: step };
+}
+
+export function resolveSelfEating(config: unknown): SelfEatingEvaluator {
+  assertSelfEatingConfig(config);
+  const hpCost = config.hpCost;
+  const powerGain = config.powerGain;
+  const step = (state: SelfEatingState): SelfEatingStep => {
+    assertSelfEatingState(state);
+    if (state.hp <= hpCost) {
+      return { state: { hp: state.hp, power: state.power }, event: "EXHAUSTED", hpConsumed: 0, powerGained: 0 };
+    }
+    const nextPower = state.power + powerGain;
+    if (!Number.isSafeInteger(nextPower)) throw new Error("SELF_EATING power overflow");
+    return {
+      state: { hp: state.hp - hpCost, power: nextPower },
+      event: "SELF_EATING",
+      hpConsumed: hpCost,
+      powerGained: powerGain,
+    };
+  };
+  return { hpCost, powerGain, step, consume: step };
+}
+
+function tryResolveMechanic<T>(resolver: (config: unknown) => T, config: unknown):
+  | { readonly ok: true; readonly evaluator: T }
   | { readonly ok: false; readonly reason: MechanicConfigFailure } {
   try {
-    return { ok: true, evaluator: resolvePressedFire(config) };
+    return { ok: true, evaluator: resolver(config) };
   } catch (error) {
     if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
     throw error;
   }
 }
 
-export function tryResolveTotalStop(
-  config: unknown,
-):
-  | { readonly ok: true; readonly evaluator: TotalStopEvaluator }
-  | { readonly ok: false; readonly reason: MechanicConfigFailure } {
-  try {
-    return { ok: true, evaluator: resolveTotalStop(config) };
-  } catch (error) {
-    if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
-    throw error;
-  }
-}
-
-export function tryResolveBlast(
-  config: unknown,
-):
-  | { readonly ok: true; readonly evaluator: BlastEvaluator }
-  | { readonly ok: false; readonly reason: MechanicConfigFailure } {
-  try {
-    return { ok: true, evaluator: resolveBlast(config) };
-  } catch (error) {
-    if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
-    throw error;
-  }
-}
-
-export function tryResolveBurnout(
-  config: unknown,
-):
-  | { readonly ok: true; readonly evaluator: BurnoutEvaluator }
-  | { readonly ok: false; readonly reason: MechanicConfigFailure } {
-  try {
-    return { ok: true, evaluator: resolveBurnout(config) };
-  } catch (error) {
-    if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
-    throw error;
-  }
-}
-
-export function tryResolveSpreading(
-  config: unknown,
-):
-  | { readonly ok: true; readonly evaluator: SpreadingEvaluator }
-  | { readonly ok: false; readonly reason: MechanicConfigFailure } {
-  try {
-    return { ok: true, evaluator: resolveSpreading(config) };
-  } catch (error) {
-    if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
-    throw error;
-  }
-}
-
-export function tryResolveDispersal(
-  config: unknown,
-):
-  | { readonly ok: true; readonly evaluator: DispersalEvaluator }
-  | { readonly ok: false; readonly reason: MechanicConfigFailure } {
-  try {
-    return { ok: true, evaluator: resolveDispersal(config) };
-  } catch (error) {
-    if (error instanceof MechanicConfigError) return { ok: false, reason: error.reason };
-    throw error;
-  }
-}
+export const tryResolvePressedFire = (config: unknown) => tryResolveMechanic(resolvePressedFire, config);
+export const tryResolveTotalStop = (config: unknown) => tryResolveMechanic(resolveTotalStop, config);
+export const tryResolveBlast = (config: unknown) => tryResolveMechanic(resolveBlast, config);
+export const tryResolveBurnout = (config: unknown) => tryResolveMechanic(resolveBurnout, config);
+export const tryResolveSpreading = (config: unknown) => tryResolveMechanic(resolveSpreading, config);
+export const tryResolveDispersal = (config: unknown) => tryResolveMechanic(resolveDispersal, config);
+export const tryResolveNeutralized = (config: unknown) => tryResolveMechanic(resolveNeutralized, config);
+export const tryResolveSelfEating = (config: unknown) => tryResolveMechanic(resolveSelfEating, config);
