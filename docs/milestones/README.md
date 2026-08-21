@@ -43,6 +43,18 @@ M4 후보는 최종 밸런스 승인이나 공개 배포·제출을 의미하지
 `m3-vertical-slice.json`의 candidate와 evidence revision을 사용하며, 두 커밋을 현재 브랜치에 섞어
 적용하지 않고 detached checkout에서 먼저 검사한다.
 
+## M5 6터 통합 reachability 후보
+
+`m5-content-reachability.json`은 T041의 세 종족×여섯 터 18행 content matrix, 깊이 18, 일반 적 30,
+엘리트 6, 보스 6, 이벤트 36변주, source Law 대조와 registry disable/restore seam을 기록한다. production
+build hash와 M3/M4 detached rollback revision도 한 곳에 보존한다. 대표 완주와 가시 Browser 표본은
+`docs/playtests/t041/m5-representative-completion.json`에 있으며 사람이 수행한 것으로 표현하지 않는다.
+
+이 후보는 다섯 추가 터의 실제 UI 여정을 활성화하거나 최종 밸런스·공개 배포·제출을 완료했다는 뜻이
+아니다. 현재 브라우저 런타임 여정은 계속 어름의 터로 고정되며 나머지 터는 content-level reachability다.
+`target_milestone_date`는 2026-08-25 목표를 나타내고 `recorded_at`은 실제 조기 검증 시각이다. 이후 build
+입력이 바뀌면 기록된 hash를 새 후보에 재사용하지 않는다.
+
 ## M3 수직 슬라이스 후보 — 두 커밋 신뢰 경계
 
 T031은 코드와 증거를 한 커밋에서 자기 참조로 고정하지 않는다. 먼저 **candidate Commit A**에 게임 코드와

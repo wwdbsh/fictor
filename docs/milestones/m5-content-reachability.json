@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "milestone_id": "M5_CONTENT_REACHABILITY",
+  "task_key": "T041",
+  "status": "VERIFIED_LOCAL",
+  "contract_sha256": "f36c7e4a2602fbaa2faaddc715214f5dc7df65a226f1b24bbc07f03dc5357c1e",
+  "target_milestone_date": "2026-08-25",
+  "recorded_at": "2026-08-21T03:12:57Z",
+  "candidate": {
+    "revision": "da434aee6006990e7b182ded51c014aa4af36242",
+    "tree_sha1": "81c8c2b6d5195a3c6e282386dee9136ba7198ea8",
+    "dist_file_count": 628,
+    "dist_total_bytes": 1266267087,
+    "dist_tree_sha256": "fbd45ca32a50fdb35f98997a1bdbfbe8dc620e0c84637b5d77dfabc8d51aac58",
+    "javascript_bytes": 407432,
+    "javascript_cap_bytes": 409600,
+    "javascript_cap_margin_bytes": 2168,
+    "minimum_required_margin_bytes": 2048,
+    "cap_threshold_changed": false
+  },
+  "content_acceptance": {
+    "enabled_races": 3,
+    "enabled_grounds": 6,
+    "race_ground_matrix_rows": 18,
+    "depths": 18,
+    "normal_enemies": 30,
+    "elites": 6,
+    "bosses": 6,
+    "event_types": 6,
+    "event_variations": 36,
+    "elite_cross_laws_match_source": true,
+    "boss_same_laws_match_source": true,
+    "route_assets_local": true
+  },
+  "registry_rollback": {
+    "api": "createContentRegistryView(disabledGroundIds)",
+    "disabled_fixture": "GROUND_JOIN",
+    "ground_marked_disabled": true,
+    "removed_from_enabled_race_routes": true,
+    "canonical_registry_unchanged": true,
+    "empty_view_restores_canonical": true,
+    "unknown_and_duplicate_ids_rejected": true,
+    "returned_view_deep_frozen": true
+  },
+  "verification": {
+    "focused_before_candidate": {
+      "command": "npx vitest run tests/smoke/m5-content-reachability.test.ts",
+      "files_passed": 1,
+      "tests_passed": 3
+    },
+    "typecheck": {
+      "command": "npm run typecheck",
+      "status": "PASS"
+    },
+    "full_tests": {
+      "command": "npm test",
+      "files_passed": 67,
+      "tests_passed": 855,
+      "log_sha256": "c83b4adb3e524518182f176fec2e5dca7fcc069062b7f5fe618ff3fc00c97e76"
+    },
+    "production_build": {
+      "command": "npm run build",
+      "status": "PASS",
+      "javascript_bytes": 407432,
+      "css_bytes": 29979,
+      "log_sha256": "510ba557ed7619620f2ff322fd9ccee1c4aef487aaed33695bd9907cbd17db80"
+    },
+    "static_smoke": {
+      "command": "npm run smoke:static",
+      "status": "PASS",
+      "three_race_run_won": true,
+      "browser_errors": 0,
+      "failed_responses": 0,
+      "external_requests": 0,
+      "api_requests": 0,
+      "websocket_requests": 0,
+      "static_png_verified": 621,
+      "static_png_not_found": 0,
+      "log_sha256": "82668cf56636e1349ea120f0eae44a2b5115f4a542d3453ff9a7335c3c8ae271"
+    },
+    "playtest_evidence_path": "docs/playtests/t041/m5-representative-completion.json"
+  },
+  "rollback_revisions": {
+    "m4": {
+      "milestone_path": "docs/milestones/m4-three-race.json",
+      "candidate_revision": "429f74526fbb7ef1f77410b107b7afd5a8a2a419",
+      "evidence_revision": "f87dfa738c5f2903d86ae8b879add7c3d112082f",
+      "inspect_candidate_command": "git switch --detach 429f74526fbb7ef1f77410b107b7afd5a8a2a419",
+      "inspect_evidence_command": "git switch --detach f87dfa738c5f2903d86ae8b879add7c3d112082f"
+    },
+    "m3": {
+      "milestone_path": "docs/milestones/m3-vertical-slice.json",
+      "candidate_revision": "be79bfbd8d4524523fc89c6a1d0308f62c78d000",
+      "evidence_revision": "ad9ca8bde59c05e88dd4fc888a86605a0e4b52ae",
+      "inspect_candidate_command": "git switch --detach be79bfbd8d4524523fc89c6a1d0308f62c78d000",
+      "inspect_evidence_command": "git switch --detach ad9ca8bde59c05e88dd4fc888a86605a0e4b52ae"
+    }
+  },
+  "known_issues": [
+    {
+      "id": "CONTENT_LEVEL_ONLY_FOR_FIVE_ADDITIONAL_GROUNDS",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "사름·흩음·삭음·씻음·이음 터는 registry와 asset의 content-level reachability이며 현재 브라우저 런타임 여정은 어름의 터로 고정되어 있다."
+    },
+    {
+      "id": "PROVISIONAL_BALANCE",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "적 HP·damage와 최종 계수는 T041 범위 밖이며 승인 전 값을 새로 넣지 않았다."
+    },
+    {
+      "id": "CODEX_OPERATED_PLAYTEST",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "완주와 가시 Browser 표본은 Codex가 조작했으며 사람이 직접 수행한 것으로 표현하지 않는다."
+    },
+    {
+      "id": "EARLY_TARGET_EVIDENCE",
+      "status": "ACCEPTED_RISK",
+      "summary_ko": "2026-08-25 목표 M5 후보를 2026-08-21에 검증했으며 이후 콘텐츠나 build 입력이 바뀌면 T041 증거를 그대로 재사용할 수 없다."
+    }
+  ],
+  "release_or_submission_performed": false,
+  "remote_ci_required_before_merge": true
+}
