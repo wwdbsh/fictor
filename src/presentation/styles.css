@@ -151,7 +151,7 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
   box-shadow: var(--shadow);
   pointer-events: none;
 }
-.first-run-guide.is-journey { top: 5.25rem; right: 1.5rem; }
+.first-run-guide.is-journey { top: 11rem; right: 1.5rem; }
 .first-run-guide.is-combat { top: 5.25rem; left: 1.5rem; }
 .first-run-guide h2 { margin: 0 0 .35rem; font-size: 1rem; }
 .first-run-guide p { margin: .25rem 0; font: .76rem/1.45 system-ui, sans-serif; }

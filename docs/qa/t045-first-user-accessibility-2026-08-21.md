@@ -23,22 +23,24 @@
 
 | 브라우저 | T045 최종 후보 상태 | 요구 증거 | 병합 판정 |
 |---|---|---|---|
-| Chrome/Chromium | PENDING — 최종 smoke 전 | fresh profile, keyboard/focus, reduced motion, FIRST→도감, network/console | 실행 PASS 뒤에만 VERIFIED |
+| Chrome/Chromium | VERIFIED — 2026-08-21 | fresh profile, keyboard/focus, reduced motion, FIRST→도감, network/console | PASS |
 | Edge | UNVERIFIED | 동일 수동 경로와 console/network 캡처 | 명시적 merge blocker |
 | Firefox | UNVERIFIED | 동일 수동 경로와 console/network 캡처 | 명시적 merge blocker |
 | Safari | UNVERIFIED | 동일 수동 경로와 console/network 캡처 | 명시적 merge blocker |
 
 2026-08-15 T030의 Chromium smoke PASS는 이전 기준선이며 T045 최종 후보의 실행을 대신하지 않는다.
-최종 검증자는 Chrome/Chromium 행을 실제 명령 결과와 관찰 시각으로 갱신해야 한다. Edge, Firefox,
-Safari를 검증하지 않은 채 지원 대상에서 제거하거나 지원 완료로 바꾸지 않는다.
+Chrome 자동 경로는 Chrome for Testing(Puppeteer 25.5.0), 수동 가시 경로는 macOS 26.5.2의
+Google Chrome 151.0.7922.172, 1679×1143 CSS px, DPR 1에서 2026-08-21T19:04:47+09:00에 확인했다.
+Edge, Firefox, Safari를 검증하지 않은 채 지원 대상에서 제거하거나 지원 완료로 바꾸지 않는다.
 
 ## 수동 확인 기록
 
 | 항목 | 관찰값 | 상태 |
 |---|---|---|
-| Chrome/Chromium 최종 smoke | 최종 후보에서 기록 | PENDING |
-| 키보드-only 첫 발견 | 최종 후보에서 기록 | PENDING |
-| reduced motion FIRST FINAL | 자동 smoke 포함, 최종 실행값 기록 | PENDING |
+| Chrome/Chromium 최종 smoke | fresh race image 0, selected profile image 1, FIRST→도감, console/network 오류 0 | PASS |
+| 키보드 첫 경로·공방 focus | H1→Tab→붙이 선택, 공방 H2 진입, Escape 뒤 정확한 opener 복귀 | PASS |
+| reduced motion FIRST FINAL | headless Chrome에서 즉시 FINAL과 이름 있는 계속 버튼 확인 | PASS |
+| 가시 layout | 첫 여정 guide와 journey rail overlap `false`, 첫 전투 guide가 적·행동 control을 가리지 않음 | PASS |
 | Edge | 미실행 | BLOCKER |
 | Firefox | 미실행 | BLOCKER |
 | Safari | 미실행 | BLOCKER |

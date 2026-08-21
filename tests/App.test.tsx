@@ -90,7 +90,7 @@ describe("Track-1 App", () => {
     const screenKey = underlay.getAttribute("data-screen-key");
     const open = screen.getByRole("button", { name: "도감 열기 · 발견 0 / 1326" });
     fireEvent.click(open);
-    const dialog = screen.getByRole("dialog", { name: "도감" });
+    const dialog = await screen.findByRole("dialog", { name: "도감" });
     expect(dialog).toBeInTheDocument();
     expect(underlay).toHaveAttribute("inert");
     expect(underlay).toHaveAttribute("aria-hidden", "true");
@@ -123,7 +123,7 @@ describe("Track-1 App", () => {
     const { storage } = mounted();
     const codexOpen = screen.getByRole("button", { name: "도감 열기 · 발견 0 / 1326" });
     fireEvent.click(codexOpen);
-    expect(screen.getByText("발견한 기록 0 / 1326")).toBeVisible();
+    expect(await screen.findByText("발견한 기록 0 / 1326")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "도감 닫기" }));
     const forgeOpener = screen.getByRole("button", { name: "공방 열기" });
     forgeOpener.focus();
@@ -174,7 +174,7 @@ describe("Track-1 App", () => {
     expect(screen.queryByRole("complementary", { name: /첫 .* 안내/ })).not.toBeInTheDocument();
     const refreshedOpen = screen.getByRole("button", { name: "도감 열기 · 발견 1 / 1326" });
     fireEvent.click(refreshedOpen);
-    expect(screen.getByText("발견한 기록 1 / 1326")).toBeVisible();
+    expect(await screen.findByText("발견한 기록 1 / 1326")).toBeVisible();
     for (let page = 0; page < 28 && !document.querySelector(".codex-entry.is-discovered img"); page += 1) {
       fireEvent.click(screen.getByRole("button", { name: "다음 도감 페이지" }));
     }
