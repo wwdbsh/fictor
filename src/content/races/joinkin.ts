@@ -1,5 +1,6 @@
 import type { RaceDescriptor } from "../types";
 import { freeze } from "../../freeze";
+import { PLAYABLE_GROUND_IDS } from "../grounds/factory";
 
 export const JOINKIN_DESCRIPTOR: RaceDescriptor = freeze({
   id: "Joinkin",
@@ -8,7 +9,7 @@ export const JOINKIN_DESCRIPTOR: RaceDescriptor = freeze({
   attribute: "JOIN",
   status: "ENABLED",
   enabled: true,
-  groundIds: freeze(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT"] as const),
+  groundIds: PLAYABLE_GROUND_IDS,
   policyId: "Joinkin",
 });
 

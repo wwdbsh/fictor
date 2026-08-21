@@ -12,59 +12,59 @@ import {
 
 const assetsRoot = resolve(import.meta.dirname, "../../../public/assets");
 
-describe("T038 rot ground content pack", () => {
+describe("T039 wash ground content pack", () => {
   it("exposes the three approved depths and all seven encounters", () => {
-    const ground = getGroundDescriptor("GROUND_ROT");
+    const ground = getGroundDescriptor("GROUND_WASH");
     expect(ground).toMatchObject({
-      id: "GROUND_ROT",
-      nameKo: "삭음의 터",
-      attribute: "ROT",
+      id: "GROUND_WASH",
+      nameKo: "씻음의 터",
+      attribute: "WASH",
       status: "ENABLED",
       enabled: true,
     });
     expect(ground?.depths.map(({ depth, label, assetId }) => [depth, label, assetId])).toEqual([
-      [1, "주저앉은 지표", "background__rot__depth_01"],
-      [2, "겹겹이 무너진 층", "background__rot__depth_02"],
-      [3, "바닥이 계속 내려앉는 곳", "background__rot__depth_03"],
+      [1, "닳은 돌밭", "background__wash__depth_01"],
+      [2, "매끈하게 파인 수로", "background__wash__depth_02"],
+      [3, "완전한 공백", "background__wash__depth_03"],
     ]);
     expect(ground?.encounters?.normals.map(({ shape, labelKo, assetId }) => [shape, labelKo, assetId])).toEqual([
-      ["SWARM", "딱지", "enemy__rot__swarm"],
-      ["BULK", "무른 뿌리", "enemy__rot__bulk"],
-      ["SHELL", "곰팡이 꽃", "enemy__rot__shell"],
-      ["REACH", "번지는 얼룩", "enemy__rot__reach"],
-      ["MIMIC", "내려앉은 냄새", "enemy__rot__mimic"],
+      ["SWARM", "맑은 눈물", "enemy__wash__swarm"],
+      ["BULK", "닳은 돌", "enemy__wash__bulk"],
+      ["SHELL", "빈 껍질", "enemy__wash__shell"],
+      ["REACH", "지워진 자국", "enemy__wash__reach"],
+      ["MIMIC", "가라앉은 앙금", "enemy__wash__mimic"],
     ]);
     expect(ground?.encounters?.elite).toMatchObject({
-      id: "elite__rot__wash",
-      mechanicId: "NEUTRALIZED",
-      mechanic: { id: "NEUTRALIZED", status: "PENDING_2026_08_21" },
-      assetId: "elite__rot__wash",
+      id: "elite__wash__join",
+      mechanicId: "CLARIFIED",
+      mechanic: { id: "CLARIFIED", status: "PENDING_2026_08_21" },
+      assetId: "elite__wash__join",
     });
     expect(ground?.encounters?.boss).toMatchObject({
-      id: "the_rotting",
-      name: "The Rotting",
-      labelKo: "삭음, 스스로를 먹은 신",
-      mechanicId: "SELF_EATING",
-      mechanic: { id: "SELF_EATING", status: "PENDING_2026_08_21" },
-      assetId: "heart__rot",
-      reusesCardAssetId: "heart__rot",
+      id: "the_washing",
+      name: "The Washing",
+      labelKo: "씻음, 흔적을 지운 신",
+      mechanicId: "EMPTIED",
+      mechanic: { id: "EMPTIED", status: "PENDING_2026_08_21" },
+      assetId: "heart__wash",
+      reusesCardAssetId: "heart__wash",
     });
     expect(ground?.rewards).toEqual({
-      normal: { source: "NORMAL", allowedMaterialCategories: ["ORE", "GROUND_PRODUCT"], origin: "GROUND_ROT" },
+      normal: { source: "NORMAL", allowedMaterialCategories: ["ORE", "GROUND_PRODUCT"], origin: "GROUND_WASH" },
       elite: { source: "ELITE", allowedMaterialCategories: ["TOOL", "ODDITY"] },
-      boss: { source: "BOSS", heartId: "heart__rot" },
+      boss: { source: "BOSS", heartId: "heart__wash" },
     });
   });
 
   it("maps all six event variations to recovered local art", () => {
-    const events = getGroundDescriptor("GROUND_ROT")?.events ?? [];
+    const events = getGroundDescriptor("GROUND_WASH")?.events ?? [];
     expect(events.map(({ type, assetId }) => [type, assetId])).toEqual([
-      ["CACHE", "event__cache__rot"],
+      ["CACHE", "event__cache__wash"],
       ["WORKSHOP", "event__workshop"],
-      ["COLLAPSE", "event__collapse"],
+      ["COLLAPSE", "event__collapse__wash"],
       ["FICTOR", "event__fictor"],
       ["RECORD", "event__record"],
-      ["ODDITY", "event__oddity__rot"],
+      ["ODDITY", "event__oddity__wash"],
     ]);
     for (const event of events) {
       expect(lookupAsset(event.assetId)).toEqual({ status: "FOUND", asset: event.asset });
@@ -80,13 +80,13 @@ describe("T038 rot ground content pack", () => {
       enabledElites: 5,
       enabledBosses: 5,
       enabledEventVariations: 30,
-      rotDepths: 3,
-      rotNormalEnemies: 5,
-      rotElites: 1,
-      rotBosses: 1,
-      rotEvents: 6,
+      washDepths: 3,
+      washNormalEnemies: 5,
+      washElites: 1,
+      washBosses: 1,
+      washEvents: 6,
     });
-    const ground = getGroundDescriptor("GROUND_ROT")!;
+    const ground = getGroundDescriptor("GROUND_WASH")!;
     const route = [
       ground.depths[0],
       ground.encounters!.normals[0],
@@ -96,9 +96,9 @@ describe("T038 rot ground content pack", () => {
       ground.encounters!.boss,
     ];
     for (const race of listEnabledRaces()) {
-      expect(race.groundIds, race.id).toContain("GROUND_ROT");
+      expect(race.groundIds, race.id).toContain("GROUND_WASH");
       expect(route.map(({ assetId }) => lookupAsset(assetId).status), race.id).toEqual(Array(route.length).fill("FOUND"));
-      expect(route.at(-1)).toMatchObject({ id: "the_rotting", mechanicId: "SELF_EATING" });
+      expect(route.at(-1)).toMatchObject({ id: "the_washing", mechanicId: "EMPTIED" });
     }
   });
 });

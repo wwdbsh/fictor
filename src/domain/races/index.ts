@@ -33,6 +33,8 @@ export {
   resolvePressedFire,
   resolveSpreading,
   resolveSelfEating,
+  resolveClarified,
+  resolveEmptied,
   resolveTotalStop,
   tryResolveBlast,
   tryResolveBurnout,
@@ -41,6 +43,8 @@ export {
   tryResolvePressedFire,
   tryResolveSpreading,
   tryResolveSelfEating,
+  tryResolveClarified,
+  tryResolveEmptied,
   tryResolveTotalStop,
 } from "./mechanics";
 export type * from "./mechanics";
