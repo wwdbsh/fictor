@@ -74,12 +74,12 @@ describe("T036 burn ground content pack", () => {
 
   it("keeps explicit cardinality and three-race boss reachability", () => {
     expect(CONTENT_CARDINALITIES).toMatchObject({
-      enabledGrounds: 4,
-      enabledDepths: 12,
-      enabledNormalEnemies: 20,
-      enabledElites: 4,
-      enabledBosses: 4,
-      enabledEventVariations: 24,
+      enabledGrounds: 5,
+      enabledDepths: 15,
+      enabledNormalEnemies: 25,
+      enabledElites: 5,
+      enabledBosses: 5,
+      enabledEventVariations: 30,
       burnDepths: 3,
       burnNormalEnemies: 5,
       burnElites: 1,

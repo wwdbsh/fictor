@@ -180,6 +180,54 @@ export interface SelfEatingEvaluator {
   consume(state: SelfEatingState): SelfEatingStep;
 }
 
+export interface ClarifiedConfig {
+  readonly healing: number;
+}
+
+export interface ClarifiedState {
+  readonly hp: number;
+  readonly maxHp: number;
+  readonly statuses: readonly string[];
+}
+
+export interface ClarifiedStep {
+  readonly state: ClarifiedState;
+  readonly event: "CLARIFIED";
+  readonly cleared: number;
+  readonly healed: number;
+}
+
+export interface ClarifiedEvaluator {
+  readonly healing: number;
+  step(state: ClarifiedState): ClarifiedStep;
+  heal(state: ClarifiedState): ClarifiedStep;
+}
+
+export interface EmptiedConfig {
+  readonly intervalTurns: number;
+}
+
+export interface EmptiedState {
+  readonly remainingTurns: number;
+  readonly player: readonly string[];
+  readonly enemy: readonly string[];
+}
+
+export type EmptiedSignal = "COUNTDOWN" | "EMPTIED";
+
+export interface EmptiedStep {
+  readonly state: EmptiedState;
+  readonly event: EmptiedSignal;
+  readonly cleared: { readonly player: number; readonly enemy: number };
+}
+
+export interface EmptiedEvaluator {
+  readonly intervalTurns: number;
+  initialState(): EmptiedState;
+  step(state: EmptiedState): EmptiedStep;
+  reset(state: EmptiedState): EmptiedStep;
+}
+
 export type MechanicConfigFailure =
   | "INVALID_CONFIG"
   | "INVALID_CHARGE_TURNS"
@@ -189,13 +237,15 @@ export type MechanicConfigFailure =
   | "INVALID_HP_COST"
   | "INVALID_POWER_GAIN"
   | "INVALID_MAX_TARGETS"
-  | "INVALID_PHASE_TURNS";
+  | "INVALID_PHASE_TURNS"
+  | "INVALID_HEALING"
+  | "INVALID_INTERVAL_TURNS";
 
 export class MechanicConfigError extends Error {
   readonly reason: MechanicConfigFailure;
 
   constructor(
-    mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT" | "SPREADING" | "DISPERSAL" | "NEUTRALIZED" | "SELF_EATING",
+    mechanic: "PRESSED_FIRE" | "TOTAL_STOP" | "BLAST" | "BURNOUT" | "SPREADING" | "DISPERSAL" | "NEUTRALIZED" | "SELF_EATING" | "CLARIFIED" | "EMPTIED",
     reason: MechanicConfigFailure,
   ) {
     super(`Invalid ${mechanic} mechanic configuration: ${reason}`);
@@ -299,6 +349,24 @@ function assertSelfEatingConfig(value: unknown): asserts value is SelfEatingConf
   }
 }
 
+function assertClarifiedConfig(value: unknown): asserts value is ClarifiedConfig {
+  if (!isRecord(value) || !hasExactKeys(value, ["healing"])) {
+    throw new MechanicConfigError("CLARIFIED", "INVALID_CONFIG");
+  }
+  if (!isSafePositiveInteger(value.healing)) {
+    throw new MechanicConfigError("CLARIFIED", "INVALID_HEALING");
+  }
+}
+
+function assertEmptiedConfig(value: unknown): asserts value is EmptiedConfig {
+  if (!isRecord(value) || !hasExactKeys(value, ["intervalTurns"])) {
+    throw new MechanicConfigError("EMPTIED", "INVALID_CONFIG");
+  }
+  if (!isSafePositiveInteger(value.intervalTurns)) {
+    throw new MechanicConfigError("EMPTIED", "INVALID_INTERVAL_TURNS");
+  }
+}
+
 function assertPressedFireState(value: PressedFireState, chargeTurns: number): void {
   if (!isRecord(value) || !isSafeNonnegativeInteger(value.charge) || value.charge >= chargeTurns) {
     throw new Error("Invalid PRESSED_FIRE state");
@@ -371,6 +439,22 @@ function assertSelfEatingState(value: unknown): asserts value is SelfEatingState
   if (!isRecord(value) || !hasExactKeys(value, ["hp", "power"])
     || !isSafePositiveInteger(value.hp) || !isSafeNonnegativeInteger(value.power)) {
     throw new Error("Invalid SELF_EATING state");
+  }
+}
+
+function assertClarifiedState(value: unknown): asserts value is ClarifiedState {
+  if (!isRecord(value) || !hasExactKeys(value, ["hp", "maxHp", "statuses"])
+    || !isSafePositiveInteger(value.hp) || !isSafePositiveInteger(value.maxHp) || value.hp > value.maxHp
+    || !assertStatusIds(value.statuses)) {
+    throw new Error("Invalid CLARIFIED state");
+  }
+}
+
+function assertEmptiedState(value: unknown, intervalTurns: number): asserts value is EmptiedState {
+  if (!isRecord(value) || !hasExactKeys(value, ["remainingTurns", "player", "enemy"])
+    || !isSafePositiveInteger(value.remainingTurns) || value.remainingTurns > intervalTurns
+    || !assertStatusIds(value.player) || !assertStatusIds(value.enemy)) {
+    throw new Error("Invalid EMPTIED state");
   }
 }
 
@@ -520,6 +604,44 @@ export function resolveSelfEating(config: unknown): SelfEatingEvaluator {
   return { hpCost, powerGain, step, consume: step };
 }
 
+export function resolveClarified(config: unknown): ClarifiedEvaluator {
+  assertClarifiedConfig(config);
+  const healing = config.healing;
+  const step = (state: ClarifiedState): ClarifiedStep => {
+    assertClarifiedState(state);
+    const hp = Math.min(state.maxHp, state.hp + healing);
+    return {
+      state: { hp, maxHp: state.maxHp, statuses: [] },
+      event: "CLARIFIED",
+      cleared: state.statuses.length,
+      healed: hp - state.hp,
+    };
+  };
+  return { healing, step, heal: step };
+}
+
+export function resolveEmptied(config: unknown): EmptiedEvaluator {
+  assertEmptiedConfig(config);
+  const intervalTurns = config.intervalTurns;
+  const initialState = (): EmptiedState => ({ remainingTurns: intervalTurns, player: [], enemy: [] });
+  const step = (state: EmptiedState): EmptiedStep => {
+    assertEmptiedState(state, intervalTurns);
+    if (state.remainingTurns > 1) {
+      return {
+        state: { remainingTurns: state.remainingTurns - 1, player: [...state.player], enemy: [...state.enemy] },
+        event: "COUNTDOWN",
+        cleared: { player: 0, enemy: 0 },
+      };
+    }
+    return {
+      state: { remainingTurns: intervalTurns, player: [], enemy: [] },
+      event: "EMPTIED",
+      cleared: { player: state.player.length, enemy: state.enemy.length },
+    };
+  };
+  return { intervalTurns, initialState, step, reset: step };
+}
+
 function tryResolveMechanic<T>(resolver: (config: unknown) => T, config: unknown):
   | { readonly ok: true; readonly evaluator: T }
   | { readonly ok: false; readonly reason: MechanicConfigFailure } {
@@ -539,3 +661,5 @@ export const tryResolveSpreading = (config: unknown) => tryResolveMechanic(resol
 export const tryResolveDispersal = (config: unknown) => tryResolveMechanic(resolveDispersal, config);
 export const tryResolveNeutralized = (config: unknown) => tryResolveMechanic(resolveNeutralized, config);
 export const tryResolveSelfEating = (config: unknown) => tryResolveMechanic(resolveSelfEating, config);
+export const tryResolveClarified = (config: unknown) => tryResolveMechanic(resolveClarified, config);
+export const tryResolveEmptied = (config: unknown) => tryResolveMechanic(resolveEmptied, config);

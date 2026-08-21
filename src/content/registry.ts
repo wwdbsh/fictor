@@ -5,6 +5,8 @@ import { ICE_GROUND_DESCRIPTOR } from "./grounds/ice";
 import { BURN_GROUND_DESCRIPTOR } from "./grounds/burn";
 import { SCATTER_GROUND_DESCRIPTOR } from "./grounds/scatter";
 import { ROT_GROUND_DESCRIPTOR } from "./grounds/rot";
+import { WASH_GROUND_DESCRIPTOR } from "./grounds/wash";
+import { PLAYABLE_GROUND_IDS } from "./grounds/factory";
 import { freeze } from "../freeze";
 import type {
   AssetLookup,
@@ -34,7 +36,7 @@ const disabledRace = (
   });
 
 const disabledGround = (
-  id: Exclude<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER" | "GROUND_ROT">,
+  id: Extract<GroundId, "GROUND_JOIN">,
   nameKo: string,
   attribute: GroundDescriptor["attribute"],
 ): GroundDescriptor =>
@@ -65,7 +67,7 @@ const KNOWN_GROUNDS: readonly GroundDescriptor[] = freeze([
   BURN_GROUND_DESCRIPTOR,
   SCATTER_GROUND_DESCRIPTOR,
   ROT_GROUND_DESCRIPTOR,
-  disabledGround("GROUND_WASH", "씻음의 터", "WASH"),
+  WASH_GROUND_DESCRIPTOR,
   disabledGround("GROUND_JOIN", "이음의 터", "JOIN"),
 ]);
 
@@ -106,37 +108,24 @@ function cloneAndFreeze<T>(value: T): T {
 export const CONTENT_REGISTRY = cloneAndFreeze(REGISTRY);
 export const contentRegistry = CONTENT_REGISTRY;
 export const ASSET_PATH_ALLOWLIST = /* @__PURE__ */ cloneAndFreeze(ASSET_ALLOWLIST);
+const perGroundCardinalities = Object.fromEntries(
+  ["still", "burn", "scatter", "rot", "wash"].flatMap((ground) =>
+    [["Depths", 3], ["NormalEnemies", 5], ["Elites", 1], ["Bosses", 1], ["Events", 6]]
+      .map(([suffix, count]) => [`${ground}${suffix}`, count]),
+  ),
+);
 export const CONTENT_CARDINALITIES = /* @__PURE__ */ freeze({
   enabledRaces: 3,
-  enabledGrounds: 4,
-  enabledDepths: 12,
-  enabledNormalEnemies: 20,
-  enabledElites: 4,
-  enabledBosses: 4,
-  enabledEventVariations: 24,
-  stillDepths: 3,
-  stillNormalEnemies: 5,
-  stillElites: 1,
-  stillBosses: 1,
-  stillEvents: 6,
-  burnDepths: 3,
-  burnNormalEnemies: 5,
-  burnElites: 1,
-  burnBosses: 1,
-  burnEvents: 6,
-  scatterDepths: 3,
-  scatterNormalEnemies: 5,
-  scatterElites: 1,
-  scatterBosses: 1,
-  scatterEvents: 6,
-  rotDepths: 3,
-  rotNormalEnemies: 5,
-  rotElites: 1,
-  rotBosses: 1,
-  rotEvents: 6,
+  enabledGrounds: 5,
+  enabledDepths: 15,
+  enabledNormalEnemies: 25,
+  enabledElites: 5,
+  enabledBosses: 5,
+  enabledEventVariations: 30,
+  ...perGroundCardinalities,
 });
 export const ENABLED_RACE_IDS = /* @__PURE__ */ freeze(["Stillkin", "Burnkin", "Joinkin"] as const);
-export const ENABLED_GROUND_IDS = /* @__PURE__ */ freeze(["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT"] as const);
+export const ENABLED_GROUND_IDS = PLAYABLE_GROUND_IDS;
 
 function lookup<T extends { id: string; enabled: boolean }>(
   values: readonly T[],

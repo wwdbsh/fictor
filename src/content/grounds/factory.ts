@@ -28,13 +28,21 @@ const GENERIC_EVENT_ASSETS: Readonly<Partial<Record<EventType, string>>> = freez
   RECORD: "event__record",
 });
 
-type GroundStem = "still" | "burn" | "scatter" | "rot";
+export const PLAYABLE_GROUND_IDS = /* @__PURE__ */ freeze([
+  "GROUND_STILL",
+  "GROUND_BURN",
+  "GROUND_SCATTER",
+  "GROUND_ROT",
+  "GROUND_WASH",
+] as const);
+
+type GroundStem = "still" | "burn" | "scatter" | "rot" | "wash";
 
 interface EnabledGroundConfig {
-  readonly id: Extract<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER" | "GROUND_ROT">;
+  readonly id: Exclude<GroundId, "GROUND_JOIN">;
   readonly stem: GroundStem;
   readonly nameKo: string;
-  readonly attribute: "STILL" | "BURN" | "SCATTER" | "ROT";
+  readonly attribute: "STILL" | "BURN" | "SCATTER" | "ROT" | "WASH";
   readonly depthLabels: readonly [string, string, string];
   readonly normalLabels: readonly [string, string, string, string, string];
   readonly elite: {
