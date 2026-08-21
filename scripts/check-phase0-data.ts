@@ -28,7 +28,8 @@ import { validateGeneratedCatalog } from "../src/data/schema/validate-generated-
 import { validateSourceSchemas, type SourceData } from "../src/data/schema/validate-source-data";
 import { validateSourceSemantics } from "../src/data/schema/validate-source-semantics";
 import type { GeneratedCard } from "../src/domain/forge";
-import { runNameReview } from "./review-names";
+import { FORGE_TUNING } from "../src/domain/balance";
+import { runNameReview, T044_BALANCE_REBIND } from "./review-names";
 
 const MILESTONE_PATH = "docs/milestones/m1-phase-0-data.json";
 const SOURCE_PATHS = [
@@ -43,6 +44,7 @@ const CSV_PATH = "docs/reviews/name-review.generated.csv";
 const REVIEWER = "상헌 님 (GitHub: @wwdbsh)";
 const REVIEWED_AT = "2026-08-10T23:53:30.204Z";
 const REVIEW_EVIDENCE = "https://github.com/wwdbsh/fictor/issues/62#issuecomment-5247374256";
+const MILESTONE_FILE_HASH = "6dfea2df7af21df4ed991de63d3d331f356def10caec48a069c4a44394470f8a";
 
 const STATUS_KEYS = ["APPROVED", "CHANGE_REQUIRED", "PENDING", "HOLD"] as const;
 const EXPECTED_STATUS_COUNTS = {
@@ -248,6 +250,9 @@ export function runPhase0MilestoneCheck({ repositoryRoot }: RunPhase0MilestoneOp
   const fixedPath = (relativePath: string) => resolve(repositoryRoot, relativePath);
   const milestoneFile = readStrictJson<unknown>(fixedPath(MILESTONE_PATH));
   validateMilestoneShape(milestoneFile.value);
+  if (hashText(milestoneFile.text) !== MILESTONE_FILE_HASH) {
+    throw new Error("immutable M1 milestone bytes mismatch");
+  }
   const milestone = milestoneFile.value;
 
   const sourceFiles = SOURCE_PATHS.map((path) => readStrictJson<unknown>(fixedPath(path)));
@@ -263,9 +268,13 @@ export function runPhase0MilestoneCheck({ repositoryRoot }: RunPhase0MilestoneOp
   if (!sourceSemantics.valid) fail("source semantic validation failed", sourceSemantics.errors);
 
   const sourceHash = calculateSourceHash([source.materials, source.laws, source.resultClasses]);
-  assertEquals(milestone.source.combined_hash, sourceHash, "milestone source combined hash");
-  milestone.source.files.forEach((entry, index) => {
-    assertEquals(entry.file_hash, hashText(sourceFiles[index].text), `milestone source file hash ${entry.path}`);
+  assertEquals(sourceHash, T044_BALANCE_REBIND.currentTarget.source_hash, "T044 current source hash");
+  sourceFiles.forEach((file, index) => {
+    assertEquals(
+      hashText(file.text),
+      T044_BALANCE_REBIND.currentSourceFileHashes[index],
+      `T044 current source file hash ${SOURCE_PATHS[index]}`,
+    );
   });
 
   const cardsFile = readStrictJson<GeneratedEnvelope<GeneratedCard>>(fixedPath(CARDS_PATH));
@@ -275,32 +284,16 @@ export function runPhase0MilestoneCheck({ repositoryRoot }: RunPhase0MilestoneOp
   const expectedPayloads = generateCatalogPayloads(source.materials, {
     laws: source.laws,
     resultClasses: source.resultClasses,
+    tuning: FORGE_TUNING,
   });
   const expectedCatalog = renderCatalog(expectedPayloads.cards, expectedPayloads.equipment, sourceHash);
   if (cardsFile.text !== expectedCatalog.cardsText) throw new Error("generated cards bytes are stale or tampered");
   if (equipmentFile.text !== expectedCatalog.equipmentText) {
     throw new Error("generated equipment bytes are stale or tampered");
   }
-  assertEquals(
-    milestone.catalog.cards,
-    {
-      path: CARDS_PATH,
-      count: cardsFile.value.count,
-      content_hash: cardsFile.value.content_hash,
-      file_hash: hashText(cardsFile.text),
-    },
-    "milestone cards record",
-  );
-  assertEquals(
-    milestone.catalog.equipment,
-    {
-      path: EQUIPMENT_PATH,
-      count: equipmentFile.value.count,
-      content_hash: equipmentFile.value.content_hash,
-      file_hash: hashText(equipmentFile.text),
-    },
-    "milestone equipment record",
-  );
+  assertEquals(cardsFile.value.content_hash, T044_BALANCE_REBIND.currentTarget.cards_content_hash, "T044 cards content hash");
+  assertEquals(hashText(cardsFile.text), T044_BALANCE_REBIND.currentTarget.cards_file_hash, "T044 cards file hash");
+  assertEquals(equipmentFile.value.content_hash, milestone.catalog.equipment.content_hash, "immutable equipment content hash");
 
   const reviewSummary = runNameReview({ repositoryRoot, checkOnly: true, requireClosed: true });
   const builtReview = buildNameReview({
@@ -310,15 +303,12 @@ export function runPhase0MilestoneCheck({ repositoryRoot }: RunPhase0MilestoneOp
     equipment: equipmentFile.value.items,
   });
   const decisionsFile = readStrictJson<NameReviewDecisions>(fixedPath(DECISIONS_PATH));
-  validateNameReviewDecisions(decisionsFile.value, {
-    generator_version: cardsFile.value.generator_version,
-    source_hash: sourceHash,
-    cards_content_hash: cardsFile.value.content_hash,
-    cards_file_hash: hashText(cardsFile.text),
-    review_rows_hash: sha256(canonicalSerialize(builtReview.rows)),
-    review_csv_hash: hashText(builtReview.csvText),
-    review_row_count: builtReview.rows.length,
-  }, builtReview.rows, true);
+  validateNameReviewDecisions(
+    decisionsFile.value,
+    T044_BALANCE_REBIND.historicalTarget,
+    builtReview.rows,
+    true,
+  );
 
   const csvText = readUtf8(fixedPath(CSV_PATH));
   const csvRows = parseCsv(csvText);
@@ -376,22 +366,28 @@ export function runPhase0MilestoneCheck({ repositoryRoot }: RunPhase0MilestoneOp
     command: "milestone:phase0:check",
     milestone_id: "M1",
     status: "VERIFIED",
-    source_hash: sourceHash,
+    source_hash: milestone.source.combined_hash,
     cards: {
-      count: cardsFile.value.count,
-      content_hash: cardsFile.value.content_hash,
-      file_hash: hashText(cardsFile.text),
+      count: milestone.catalog.cards.count,
+      content_hash: milestone.catalog.cards.content_hash,
+      file_hash: milestone.catalog.cards.file_hash,
     },
     equipment: {
-      count: equipmentFile.value.count,
-      content_hash: equipmentFile.value.content_hash,
-      file_hash: hashText(equipmentFile.text),
+      count: milestone.catalog.equipment.count,
+      content_hash: milestone.catalog.equipment.content_hash,
+      file_hash: milestone.catalog.equipment.file_hash,
     },
     name_review: {
       row_count: builtReview.rows.length,
       branch_counts: reviewSummary.branches,
       approved_names_hash: approvedNamesHash,
       effective_status_counts: effectiveStatusCounts,
+    },
+    t044_application: {
+      source_hash: sourceHash,
+      cards_content_hash: cardsFile.value.content_hash,
+      cards_file_hash: hashText(cardsFile.text),
+      decision_binding: reviewSummary.decision_binding,
     },
   };
 }

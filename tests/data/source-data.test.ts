@@ -75,19 +75,19 @@ describe("hand-authored source data", () => {
 
   it("rejects placeholder or partially approved balance values", () => {
     const pendingMaterialWithNumber = clone(source);
-    pendingMaterialWithNumber.materials[0].potency = 1;
+    pendingMaterialWithNumber.materials[0].balance_status = "PENDING_2026_08_21";
     expect(validateSourceSchemas(pendingMaterialWithNumber).valid).toBe(false);
 
     const approvedMaterialWithNull = clone(source);
-    approvedMaterialWithNull.materials[0].balance_status = "APPROVED";
+    approvedMaterialWithNull.materials[0].potency = null;
     expect(validateSourceSchemas(approvedMaterialWithNull).valid).toBe(false);
 
     const pendingLawWithNumber = clone(source);
-    pendingLawWithNumber.laws[0].power_coefficient = 1;
+    pendingLawWithNumber.laws[0].balance_status = "PENDING_2026_08_21";
     expect(validateSourceSchemas(pendingLawWithNumber).valid).toBe(false);
 
     const approvedLawWithNull = clone(source);
-    approvedLawWithNull.laws[0].balance_status = "APPROVED";
+    approvedLawWithNull.laws[0].power_coefficient = null;
     expect(validateSourceSchemas(approvedLawWithNull).valid).toBe(false);
 
     const approved = clone(source);
@@ -143,9 +143,9 @@ describe("hand-authored source data", () => {
     expect(new Set(materials.map((material) => material.id)).size).toBe(52);
     for (const material of materials) {
       expect(material.art).toBe(`cards/${material.id}.png`);
-      expect(material.balance_status).toBe("PENDING_2026_08_21");
-      expect(material.potency).toBeNull();
-      expect(material.cost_base).toBeNull();
+      expect(material.balance_status).toBe("APPROVED");
+      expect(material.potency).toBeTypeOf("number");
+      expect(material.cost_base).toBeTypeOf("number");
     }
   });
 
@@ -203,8 +203,8 @@ describe("hand-authored source data", () => {
     for (const law of laws) {
       expect(compareAttributes(law.pair[0], law.pair[1])).toBeLessThanOrEqual(0);
       expect(law.actor).toBe(law.pair[0]);
-      expect(law.balance_status).toBe("PENDING_2026_08_21");
-      expect(law.power_coefficient).toBeNull();
+      expect(law.balance_status).toBe("APPROVED");
+      expect(law.power_coefficient).toBeTypeOf("number");
       expect(Boolean(law.drawback)).toBe(law.pair[0] === law.pair[1]);
     }
   });
@@ -316,7 +316,7 @@ describe("hand-authored source data", () => {
     expect(inspectSourceReadiness(source)).toEqual({
       t004CatalogStructure: "READY",
       rewardTables: "BLOCKED_BY_PENDING_RARITY",
-      combatBalance: "BLOCKED_BY_PENDING_BALANCE",
+      combatBalance: "READY",
       artManifest: "READY",
     });
   });

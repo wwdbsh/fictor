@@ -8,6 +8,7 @@ import type { Law, Material, ResultClass } from "../src/data/schema/contracts";
 import { validateGeneratedCatalog } from "../src/data/schema/validate-generated-catalog";
 import { validateSourceSchemas, type SourceData } from "../src/data/schema/validate-source-data";
 import { validateSourceSemantics } from "../src/data/schema/validate-source-semantics";
+import { FORGE_TUNING } from "../src/domain/balance";
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
@@ -62,7 +63,7 @@ export function runDataGeneration(options: RunDataGenerationOptions) {
   const sourceSemantics = validateSourceSemantics(source);
   if (!sourceSemantics.valid) fail("source semantic validation failed", sourceSemantics.errors);
 
-  const payloads = generateCatalogPayloads(materials, { laws, resultClasses });
+  const payloads = generateCatalogPayloads(materials, { laws, resultClasses, tuning: FORGE_TUNING });
   const sourceHash = calculateSourceHash([materials, laws, resultClasses]);
   const rendered = renderCatalog(payloads.cards, payloads.equipment, sourceHash);
   const generatedValidation = validateGeneratedCatalog(

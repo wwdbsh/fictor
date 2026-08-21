@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { FORGE_RUNTIME_RESOLVER_VERSION, FORGE_RUNTIME_SOURCE_HASH } from "../src/domain/forge-runtime";
+import { FORGE_TUNING } from "../src/domain/balance";
 import { calculateSourceHash } from "../src/data/generator/render-generated";
 import type { Law, Material, ResultClass } from "../src/data/schema/contracts";
 
@@ -110,7 +111,7 @@ export function buildBrowserRuntimePacket(materials: readonly Material[], laws: 
       resolverVersion: FORGE_RUNTIME_RESOLVER_VERSION,
       sourceHash: FORGE_RUNTIME_SOURCE_HASH,
       materials: resolverMaterials,
-      inputs: { laws: resolverLaws, resultClasses: resolverResultClasses },
+      inputs: { laws: resolverLaws, resultClasses: resolverResultClasses, tuning: FORGE_TUNING },
     },
     materialDisplay: materials.map((item) => ({
       id: item.id,

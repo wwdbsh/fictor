@@ -4,6 +4,7 @@ import {
   isResonanceAttribute,
 } from "../resonance";
 import { freeze } from "../../freeze";
+import { RESONANCE_RATE } from "../balance";
 import type {
   ResonanceAttribute,
   ResonanceState,
@@ -22,7 +23,8 @@ export const STILLKIN_BLOCK_RETENTION: StillkinBlockRetention = freeze({
 });
 
 export const STILLKIN_RESONANCE_RATE: StillkinResonanceRate = freeze({
-  status: "PENDING_2026_08_21",
+  status: "CONFIGURED",
+  value: RESONANCE_RATE,
 });
 
 export const STILLKIN_POLICY: StillkinPolicy = freeze({

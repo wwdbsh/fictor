@@ -93,12 +93,26 @@ interface SaveEnvelopeV1 {
     schemaVersion: "forge-runtime-state-v1";
     engineVersion: "forge-runtime-engine-v1";
     resolverVersion: "canonical-v1";
-    sourceHash: "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720";
+    sourceHash: "be7a99ea52ecd92438ca8171e4d9d397ff68e56cc9ac59b6b33b9b78dc5446de";
     revision: number; // ForgeRuntime 도메인 revision
     run: ForgeRuntimeStateV1["run"];
   };
 }
 ```
+
+### T044 밸런스 적용과 저장 무효화
+
+T044에서 canonical source hash가
+`7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720`에서
+`be7a99ea52ecd92438ca8171e4d9d397ff68e56cc9ac59b6b33b9b78dc5446de`로 바뀌었다. 재료와 Law의
+승인 수치가 카드 전투 투영을 바꾸므로 이전 hash의 v1 및 세 종족 v2 저장은 현재 런타임에서
+`UNSUPPORTED`로 fail-closed된다. 로더는 starter/profile 기본값을 메모리에 사용하되 기존 bytes를 덮어쓰지
+않고 write-block한다. 자동 마이그레이션이나 과거 카드 수치 재해석은 하지 않는다.
+
+계속하려면 사용자가 명시적으로 reset해야 한다. reset은 새 generation과 revision 0으로 전체 envelope를
+교체하며 도감, 심장, 런 진행을 복구할 수 없게 지우므로 UI 확인이 필요하다. 코드만 이전 T043 이전 revision으로
+롤백하면 반대로 T044 hash로 저장된 새 진행이 지원되지 않는다. 따라서 애플리케이션 rollback과 저장 호환성
+rollback은 같은 작업으로 취급할 수 없고, 배포 전후 save bytes를 상호 호환이라고 가정하면 안 된다.
 
 모든 profile 객체, 배열, `featureFlags`는 허용된 키의 plain own data property만 받는다. 접근자, symbol, sparse 배열, 사용자 정의 prototype, 순환 참조, 안전하게 반사할 수 없는 Proxy는 `INVALID`다. 디코더는 descriptor를 한 번 읽어 만든 동일 스냅샷으로 검증과 반환을 모두 수행하므로 입력 별칭을 보관하지 않는다.
 

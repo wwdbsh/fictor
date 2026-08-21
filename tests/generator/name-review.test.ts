@@ -12,6 +12,7 @@ import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { runNameReview } from "../../scripts/review-names";
+import { T044_BALANCE_REBIND } from "../../scripts/review-names";
 import cardsJson from "../../src/data/generated/cards.generated.json";
 import equipmentJson from "../../src/data/generated/equipment.generated.json";
 import {
@@ -327,7 +328,7 @@ describe("canonical name-review package", () => {
       review_version: "name-review-v1",
       target: { source_hash: oldSourceHash },
     });
-    expect(live.target).toEqual(targetFor());
+    expect(live.target).toEqual(T044_BALANCE_REBIND.historicalTarget);
     expect(live).toMatchObject({
       default_status: "APPROVED",
       all_rows_reviewed: true,
@@ -352,7 +353,9 @@ describe("canonical name-review package", () => {
         reason: "상헌 님이 Issue #62 검수 후보를 확인하고 현재 이름 유지를 승인함.",
       });
     }
-    expect(() => runNameReview({ repositoryRoot, checkOnly: true, requireClosed: true })).not.toThrow();
+    expect(runNameReview({ repositoryRoot, checkOnly: true, requireClosed: true }).decision_binding).toBe(
+      "T044_BALANCE_REBIND",
+    );
   });
 
   it("rejects unknown and duplicate override ids", () => {

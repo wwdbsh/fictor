@@ -10,6 +10,8 @@ import {
   makeNameReviewTarget,
   parseCsv,
   renderNameReviewDecisions,
+  sha256Utf8,
+  sortByRawCardId,
   validateNameReviewDecisions,
   NAME_REVIEW_HEADERS,
   NAME_REVIEW_VERSION,
@@ -17,6 +19,7 @@ import {
 } from "../src/data/generator/name-review";
 import {
   calculateSourceHash,
+  canonicalSerialize,
   renderCatalog,
   type GeneratedEnvelope,
 } from "../src/data/generator/render-generated";
@@ -25,6 +28,35 @@ import { validateGeneratedCatalog } from "../src/data/schema/validate-generated-
 import { validateSourceSchemas, type SourceData } from "../src/data/schema/validate-source-data";
 import { validateSourceSemantics } from "../src/data/schema/validate-source-semantics";
 import type { GeneratedCard } from "../src/domain/forge";
+import { FORGE_TUNING } from "../src/domain/balance";
+
+export const T044_BALANCE_REBIND = {
+  currentTarget: {
+    generator_version: "canonical-v1",
+    source_hash: "be7a99ea52ecd92438ca8171e4d9d397ff68e56cc9ac59b6b33b9b78dc5446de",
+    cards_content_hash: "64be1dfff7c218620ab2aa69708331d59e928eecdacf089b50226af68fbae741",
+    cards_file_hash: "5f7511623cd1b1890da3dcb8fc85a09deb4909fb713b284805bed3d0962eea9b",
+    review_rows_hash: "abe566ce68c9f7abf1b094f88931227bf3fa6c5cd59d0aba52aaeee30f8ee328",
+    review_csv_hash: "53543dac48d591402890bc498463ce6353876efb558bc383822b9c2c0702b960",
+    review_row_count: 1326,
+  },
+  historicalTarget: {
+    generator_version: "canonical-v1",
+    source_hash: "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720",
+    cards_content_hash: "283054dfb4e97d4f3420d0711ff7affb0dd2afe9d6140b81c6e77ce71b2c2886",
+    cards_file_hash: "71eb299228432f906edc0423f6dc5b90ea546e886f0bf12e7a7ebac6ace6f84f",
+    review_rows_hash: "abe566ce68c9f7abf1b094f88931227bf3fa6c5cd59d0aba52aaeee30f8ee328",
+    review_csv_hash: "53543dac48d591402890bc498463ce6353876efb558bc383822b9c2c0702b960",
+    review_row_count: 1326,
+  },
+  decisionsFileHash: "de7466939821bdf973c3431332234fcd6ad2fcfe82b49364da3ab0919be9f9cb",
+  approvedNamesHash: "92a963544860dab6db3d9e3e8ccf8f33bdf6668e1b145a9eed0e19b0476b2e55",
+  currentSourceFileHashes: [
+    "607266635b128fe73dcde391362b0f1ea16619e879081db7c3c06eabe136cd8c",
+    "d4116f3f0f84d01c178940e64198a522eacd6118f57f8e97b0d36ebd6260f85b",
+    "b986c8e787008fd76eb87b396e7153aad8a6679d23dca1111eabd9969c740975",
+  ],
+} as const;
 
 export interface RunNameReviewOptions {
   repositoryRoot: string;
@@ -70,6 +102,49 @@ function checkBytes(path: string, expected: string): void {
   if (actual !== expected) throw new Error(`generated review file is stale or tampered: ${path}`);
 }
 
+function validateExistingDecisions(
+  decisionsText: string,
+  decisions: NameReviewDecisions,
+  target: ReturnType<typeof makeNameReviewTarget>,
+  built: ReturnType<typeof buildNameReview>,
+  cards: readonly GeneratedCard[],
+  sourceFileHashes: readonly string[],
+  requireClosed: boolean,
+): "CURRENT_TARGET" | "T044_BALANCE_REBIND" {
+  if (canonicalSerialize(decisions.target) === canonicalSerialize(target)) {
+    validateNameReviewDecisions(decisions, target, built.rows, requireClosed);
+    return "CURRENT_TARGET";
+  }
+  if (
+    canonicalSerialize(decisions.target) !==
+    canonicalSerialize(T044_BALANCE_REBIND.historicalTarget)
+  ) {
+    validateNameReviewDecisions(decisions, target, built.rows, requireClosed);
+    throw new Error("unreachable stale name-review target");
+  }
+  if (canonicalSerialize(target) !== canonicalSerialize(T044_BALANCE_REBIND.currentTarget)) {
+    validateNameReviewDecisions(decisions, target, built.rows, requireClosed);
+    throw new Error("unreachable stale name-review target");
+  }
+  if (canonicalSerialize(sourceFileHashes) !== canonicalSerialize(T044_BALANCE_REBIND.currentSourceFileHashes)) {
+    throw new Error("T044_BALANCE_REBIND current source bytes mismatch");
+  }
+  if (sha256Utf8(decisionsText) !== T044_BALANCE_REBIND.decisionsFileHash) {
+    throw new Error("T044_BALANCE_REBIND historical decisions bytes mismatch");
+  }
+  validateNameReviewDecisions(
+    decisions,
+    T044_BALANCE_REBIND.historicalTarget,
+    built.rows,
+    requireClosed,
+  );
+  const approvedNames = sortByRawCardId(cards).map(({ card_id, name_ko }) => ({ card_id, name_ko }));
+  if (sha256Utf8(canonicalSerialize(approvedNames)) !== T044_BALANCE_REBIND.approvedNamesHash) {
+    throw new Error("T044_BALANCE_REBIND current approved-name projection mismatch");
+  }
+  return "T044_BALANCE_REBIND";
+}
+
 export function runNameReview(options: RunNameReviewOptions) {
   const sourceRoot = resolve(options.repositoryRoot, "src/data/source");
   const generatedRoot = resolve(options.repositoryRoot, "src/data/generated");
@@ -84,9 +159,12 @@ export function runNameReview(options: RunNameReviewOptions) {
     decisions: resolve(reviewsRoot, "name-review.decisions.json"),
   };
 
-  const materials = readJson<Material[]>(paths.materials).value;
-  const laws = readJson<Law[]>(paths.laws).value;
-  const resultClasses = readJson<ResultClass[]>(paths.resultClasses).value;
+  const materialsFile = readJson<Material[]>(paths.materials);
+  const lawsFile = readJson<Law[]>(paths.laws);
+  const resultClassesFile = readJson<ResultClass[]>(paths.resultClasses);
+  const materials = materialsFile.value;
+  const laws = lawsFile.value;
+  const resultClasses = resultClassesFile.value;
   const cardsFile = readJson<GeneratedEnvelope<GeneratedCard>>(paths.cards);
   const equipmentFile = readJson<GeneratedEnvelope<GeneratedEquipmentDetail>>(paths.equipment);
   const source: SourceData = { materials, laws, resultClasses };
@@ -99,7 +177,11 @@ export function runNameReview(options: RunNameReviewOptions) {
   const catalogValidation = validateGeneratedCatalog(cardsFile.value, equipmentFile.value, source);
   if (!catalogValidation.valid) fail("generated catalog validation failed", catalogValidation);
   const sourceHash = calculateSourceHash([materials, laws, resultClasses]);
-  const expectedPayloads = generateCatalogPayloads(materials, { laws, resultClasses });
+  const expectedPayloads = generateCatalogPayloads(materials, {
+    laws,
+    resultClasses,
+    tuning: FORGE_TUNING,
+  });
   const expectedCatalog = renderCatalog(expectedPayloads.cards, expectedPayloads.equipment, sourceHash);
   if (cardsFile.text !== expectedCatalog.cardsText) {
     throw new Error(`generated catalog file is stale or tampered: ${paths.cards}`);
@@ -124,6 +206,7 @@ export function runNameReview(options: RunNameReviewOptions) {
 
   let decisionsText: string | undefined;
   let decisionsCreated = false;
+  let decisionBinding: "CURRENT_TARGET" | "T044_BALANCE_REBIND" = "CURRENT_TARGET";
   try {
     decisionsText = readUtf8(paths.decisions);
   } catch (error) {
@@ -138,7 +221,15 @@ export function runNameReview(options: RunNameReviewOptions) {
   } else {
     assertNoDuplicateJsonKeys(decisionsText);
     const decisions = JSON.parse(decisionsText) as NameReviewDecisions;
-    validateNameReviewDecisions(decisions, target, built.rows, options.requireClosed);
+    decisionBinding = validateExistingDecisions(
+      decisionsText,
+      decisions,
+      target,
+      built,
+      cardsFile.value.items,
+      [materialsFile.text, lawsFile.text, resultClassesFile.text].map(sha256Utf8),
+      options.requireClosed,
+    );
   }
 
   if (options.checkOnly) {
@@ -177,6 +268,7 @@ export function runNameReview(options: RunNameReviewOptions) {
         flags: row.flags.split("|"),
       })),
     require_closed: options.requireClosed,
+    decision_binding: decisionBinding,
     written: options.checkOnly
       ? []
       : [paths.csv, ...(decisionsCreated ? [paths.decisions] : [])].map((path) =>

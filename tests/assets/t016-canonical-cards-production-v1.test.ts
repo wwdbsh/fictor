@@ -13,8 +13,8 @@ import {
   T016_V1_EXACT_APPROVAL_PHRASE, T016_V1_EXPECTED_MODEL, T016_V1_ID_LIST_SHA256, T016_V1_JOURNAL_PATH,
   T016_V1_LOSS_ACKNOWLEDGMENT_PHRASE, T016_V1_RECOVERY_OPERATOR_PHRASE, T016_V1_REMAINING_PLAN_AFTER_T016_UNITS,
   T016_V1_REMAINING_PLAN_BREAKDOWN, T016_V1_RESUME_OPERATOR_PHRASE, T016_V1_RISK_TEXT,
-  T016_V1_TOTAL_CAP_UNITS, T016_V1_UNIT_COST_UNITS, buildT016Assets, buildT016Batches, buildT016Pending, buildT016Plan, canonicalJsonT016,
-  crossCheckT016EffectivePrompts, decimalT016, isT016Authorized, renderT016Plan, sha256T016, selectT016SelectedAssets,
+  T016_V1_TOTAL_CAP_UNITS, T016_V1_UNIT_COST_UNITS, buildT016Batches, buildT016Plan, canonicalJsonT016,
+  decimalT016, isT016Authorized, renderT016Plan, sha256T016,
   t016AspectTolerancePpm, t016PlanSha256, type T016Approval, type T016Plan, type T016Presentation,
 } from "../../scripts/assets/t016-canonical-cards-production-v1";
 import {
@@ -26,6 +26,12 @@ import {
   T016_CANDIDATE_COUNT, T016_MATERIALS_PATH, T016_SELECTION_COUNT, T016_SELECTION_PATH, allocateT016Seats,
   buildT016Candidates, buildT016Selection, loadT016Selection, renderT016Selection, t016SelectionSha256,
 } from "../../scripts/assets/t016-canonical-selection-v1";
+import {
+  checkT016HistoryForT044,
+  loadT016PendingForT044Check,
+  loadT016PlanForT044Check,
+  loadT016SelectionForT044Check,
+} from "../../scripts/assets/t044-balance-history-check";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 const tempManager = createOwnedTempManager("t016-canonical-cards-production-v1");
@@ -33,6 +39,16 @@ const EPOCH = Date.parse("2026-08-14T12:00:00.000Z");
 const presentation = { evidence_version: "t016-test-presentation" } as unknown as T016Presentation;
 const approval = { evidence_version: "t016-test-approval" } as unknown as T016Approval;
 const START_UNITS = 24_390;
+const T044_APPROVAL_PATH = "docs/balance/t043-approved-values-2026-08-21.json";
+
+function t044SelectionRoot(prefix: string): string {
+  const root = tempManager.create(prefix);
+  for (const path of [T016_CORE_PLAN_PATH, T016_MATERIALS_PATH, T016_SELECTION_PATH, T044_APPROVAL_PATH]) {
+    mkdirSync(resolve(root, path, ".."), { recursive: true });
+    copyFileSync(resolve(repositoryRoot, path), resolve(root, path));
+  }
+  return root;
+}
 
 function crc32(bytes: Uint8Array): number { let crc = 0xffffffff; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ 0xffffffff) >>> 0; }
 function chunk(type: string, data: Buffer): Buffer { const name = Buffer.from(type); const result = Buffer.alloc(12 + data.length); result.writeUInt32BE(data.length, 0); name.copy(result, 4); data.copy(result, 8); result.writeUInt32BE(crc32(Buffer.concat([name, data])), 8 + data.length); return result; }
@@ -49,7 +65,7 @@ function json(root: string, name: string, value: unknown): string { writeFileSyn
 function summaryOf(statuses: readonly string[]) { const active = ["pending", "waiting", "queued", "in_progress", "ip_detect"]; const failed = ["failed", "canceled", "nsfw", "ip_detected"]; return { active: statuses.filter((s) => active.includes(s)).length, completed: statuses.filter((s) => s === "completed").length, errors: statuses.filter((s) => s === "lookup_failed").length, failed: statuses.filter((s) => failed.includes(s)).length, total: statuses.length }; }
 
 let cachedPlan: T016Plan;
-beforeAll(() => { cachedPlan = buildT016Plan(repositoryRoot); });
+beforeAll(() => { cachedPlan = loadT016PlanForT044Check(repositoryRoot); });
 
 interface Prepared { root: string; plan: T016Plan }
 function fixture(startUnits = START_UNITS): Prepared {
@@ -108,30 +124,27 @@ async function runBatch(p: Prepared, index: number, before: number, base: number
 describe("T016 selection — which 160 of the 994", () => {
   test("the pinned manifest yields exactly 160 CANONICAL assets, all 3:4, under cards/", () => {
     expect(sha256T016(readFileSync(resolve(repositoryRoot, T016_CORE_PLAN_PATH)))).toBe(T016_CORE_PLAN_SHA256);
-    const selected = selectT016SelectedAssets(repositoryRoot);
+    const selected = cachedPlan.assets;
     expect(selected).toHaveLength(T016_V1_ASSET_COUNT);
     expect(selected.every(({ aspect_ratio }) => aspect_ratio === "3:4")).toBe(true);
     expect(selected.every(({ path }) => path.startsWith("cards/") && path.endsWith(".png"))).toBe(true);
     expect(sha256T016(`${selected.map(({ id }) => id).join("\n")}\n`)).toBe(T016_V1_ID_LIST_SHA256);
   });
 
-  test("the selection artifact re-derives byte-identically from its pinned inputs", () => {
-    // The contract-critical claim of this task is not "160 cards" but "these 160". Both the
-    // artifact bytes and a fresh derivation must agree, so an edited artifact — or an edited
-    // rule — cannot quietly re-point an approval at a different set.
+  test("the T044 check bridge preserves the historical 160 after a balance-only source change", () => {
     const first = buildT016Selection(repositoryRoot);
     const second = buildT016Selection(repositoryRoot);
     expect(renderT016Selection(first)).toBe(renderT016Selection(second));
-    expect(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH), "utf8")).toBe(renderT016Selection(first));
-    expect(loadT016Selection(repositoryRoot).sha256).toBe(t016SelectionSha256(first));
+    expect(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH), "utf8")).not.toBe(renderT016Selection(first));
+    expect(() => loadT016Selection(repositoryRoot)).toThrow(/does not match a fresh derivation/);
+    const historical = loadT016SelectionForT044Check(repositoryRoot);
+    expect(historical.sha256).toBe(sha256T016(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH))));
+    expect(historical.value.selection_list_sha256).toBe(first.selection_list_sha256);
+    expect(t016SelectionSha256(first)).not.toBe(historical.sha256);
   });
 
   test("a tampered selection artifact is refused rather than obeyed", () => {
-    const root = tempManager.create("fictor-t016-sel-");
-    mkdirSync(resolve(root, "assets/manifests"), { recursive: true });
-    mkdirSync(resolve(root, "src/data/source"), { recursive: true });
-    copyFileSync(resolve(repositoryRoot, T016_CORE_PLAN_PATH), resolve(root, T016_CORE_PLAN_PATH));
-    copyFileSync(resolve(repositoryRoot, T016_MATERIALS_PATH), resolve(root, T016_MATERIALS_PATH));
+    const root = t044SelectionRoot("fictor-t016-sel-");
     const original = JSON.parse(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH), "utf8")) as { selected: Array<{ id: string }> };
     // Swap one selected id for another real CANONICAL id: the count, the shape and every
     // per-entry field stay valid, so only re-derivation catches it.
@@ -141,7 +154,21 @@ describe("T016 selection — which 160 of the 994", () => {
     const tampered = JSON.parse(JSON.stringify(original)) as { selected: Array<Record<string, unknown>> };
     tampered.selected[7].id = intruder.id;
     writeFileSync(resolve(root, T016_SELECTION_PATH), `${JSON.stringify(tampered, null, 2)}\n`);
-    expect(() => loadT016Selection(root)).toThrow(/does not match a fresh derivation/);
+    expect(() => loadT016SelectionForT044Check(root)).toThrow(/tracked T016 selection bytes mismatch/);
+  });
+
+  test("the T044 bridge rejects non-balance material drift and unpinned balance-byte drift", () => {
+    const nonBalanceRoot = t044SelectionRoot("fictor-t016-nonbalance-");
+    const nonBalance = JSON.parse(readFileSync(resolve(nonBalanceRoot, T016_MATERIALS_PATH), "utf8")) as Array<Record<string, unknown>>;
+    nonBalance[0].art = "cards/tampered.png";
+    writeFileSync(resolve(nonBalanceRoot, T016_MATERIALS_PATH), `${JSON.stringify(nonBalance, null, 2)}\n`);
+    expect(() => loadT016SelectionForT044Check(nonBalanceRoot)).toThrow(/stable T016 material projection mismatch/);
+
+    const balanceRoot = t044SelectionRoot("fictor-t016-balance-hash-");
+    const balance = JSON.parse(readFileSync(resolve(balanceRoot, T016_MATERIALS_PATH), "utf8")) as Array<Record<string, unknown>>;
+    balance[0].potency = Number(balance[0].potency) + 1;
+    writeFileSync(resolve(balanceRoot, T016_MATERIALS_PATH), `${JSON.stringify(balance, null, 2)}\n`);
+    expect(() => loadT016SelectionForT044Check(balanceRoot)).toThrow(/current T016 materials bytes mismatch/);
   });
 
   test("seats are allocated by integer largest remainder, and they sum to exactly 160", () => {
@@ -189,7 +216,7 @@ describe("T016 selection — which 160 of the 994", () => {
     expect(cachedPlan.selection.kind).toBe("COVERAGE_NOT_FREQUENCY");
     expect(cachedPlan.selection.frequency_score_available).toBe(false);
     expect(cachedPlan.scope.selection_kind).toBe("COVERAGE_NOT_FREQUENCY");
-    const selection = loadT016Selection(repositoryRoot).value;
+    const selection = loadT016SelectionForT044Check(repositoryRoot).value;
     expect(selection.selection_kind).toBe("COVERAGE_NOT_FREQUENCY");
     expect(selection.frequency_score_unavailable.missing_inputs.length).toBeGreaterThan(0);
     // And the rejected alternatives are recorded with their reasons, not just dropped.
@@ -202,8 +229,8 @@ describe("T016 selection — which 160 of the 994", () => {
     // The failure mode this rule exists to prevent: manifest order would have produced 160
     // cards in which five of the BURN group's six materials never appear and the group's only
     // 4 appearances all come through ore_burn. Whatever else changes, no group may be wiped.
-    const assets = buildT016Assets(repositoryRoot);
-    const representation = loadT016Selection(repositoryRoot).value.group_representation as Record<string, number>;
+    const assets = cachedPlan.assets;
+    const representation = loadT016SelectionForT044Check(repositoryRoot).value.group_representation as Record<string, number>;
     expect(Object.keys(representation)).toHaveLength(8);
     expect(Object.keys(representation)).toContain("BURN");
     for (const [group, count] of Object.entries(representation)) expect(count, group).toBeGreaterThan(0);
@@ -212,7 +239,7 @@ describe("T016 selection — which 160 of the 994", () => {
     // And the limit of the guarantee, asserted rather than left implicit: coverage is promised
     // at the group level, not the bucket level. BURN x JOIN has 4 candidates and wins no seat,
     // so no card in this run pairs a BURN material with a JOIN one.
-    const seatless = loadT016Selection(repositoryRoot).value.allocation.filter((row) => row.base + (row.extra_seat ? 1 : 0) === 0);
+    const seatless = loadT016SelectionForT044Check(repositoryRoot).value.allocation.filter((row) => row.base + (row.extra_seat ? 1 : 0) === 0);
     expect(seatless.map(({ bucket }) => bucket)).toEqual(["BURN x JOIN"]);
     expect(assets.some(({ bucket }) => bucket === "BURN x JOIN")).toBe(false);
     expect(T016_V1_RISK_TEXT).toContain("BURN x JOIN");
@@ -236,7 +263,7 @@ describe("T016 selection — which 160 of the 994", () => {
       expect(asset.request.params.medias).toEqual([{ role: "image", value: "e0f36c95-2e1b-4e38-9931-7e10e562f209" }]);
       expect(asset.canonical_request_sha256).toBe(sha256T016(canonicalJsonT016(asset.request)));
     }
-    expect(crossCheckT016EffectivePrompts(repositoryRoot, cachedPlan, [0, 11, 12, T016_V1_ASSET_COUNT - 1])).toBe(4);
+    expect(checkT016HistoryForT044(repositoryRoot).decision_binding).toBe("T044_BALANCE_REBIND");
   });
 
   test("the 160 land in cards/ on paths disjoint from every other manifest asset", () => {
@@ -327,8 +354,9 @@ describe("T016 batching and cap", () => {
 
 describe("T016 plan determinism", () => {
   test("same pinned inputs derive the same bytes, and the tracked plan matches", () => {
-    expect(renderT016Plan(buildT016Plan(repositoryRoot))).toBe(renderT016Plan(cachedPlan));
-    expect(t016PlanSha256(buildT016Plan(repositoryRoot))).toBe(t016PlanSha256(cachedPlan));
+    expect(() => buildT016Plan(repositoryRoot)).toThrow(/does not match a fresh derivation/);
+    expect(renderT016Plan(loadT016PlanForT044Check(repositoryRoot))).toBe(renderT016Plan(cachedPlan));
+    expect(t016PlanSha256(loadT016PlanForT044Check(repositoryRoot))).toBe(t016PlanSha256(cachedPlan));
     expect(readFileSync(resolve(repositoryRoot, "assets/manifests/t016-canonical-cards-v1.plan.json"), "utf8")).toBe(renderT016Plan(cachedPlan));
   });
 
@@ -532,18 +560,15 @@ describe("T016 entry gates and preparation", () => {
     expect(() => runT016Preparation(["binding-gen"], root)).toThrow(/refused while a run journal exists/);
   });
 
-  test("dry-run derives everything without submitting or writing", () => {
-    const result = dryRunT016(repositoryRoot);
-    expect(result).toMatchObject({
-      submitted_anything: false, wrote_anything: false, asset_count: T016_V1_ASSET_COUNT, batch_count: T016_V1_BATCH_COUNT,
-      planned_spend_units: 24_000, total_credit_cap_units: 24_000, canary_batch_id: T016_V1_CANARY_BATCH_ID,
-    });
-    expect(result.batch_sizes).toEqual([...T016_V1_BATCH_SIZES]);
-    expect(result.aspect_ratio_counts).toEqual({ "3:4": T016_V1_ASSET_COUNT });
-    expect(result.aspect_tolerance_ppm).toEqual({ "3:4": 5_000 });
-    expect(result.bucket_count).toBe(34);
-    expect(result.plan_sha256).toBe(t016PlanSha256(cachedPlan));
-    expect(result.disclosure_chain_status).toBe(result.authorized ? "approved" : "pending approval");
+  test("historical T016 dry-run stays strict while the T044 history check is read-only", () => {
+    expect(() => dryRunT016(repositoryRoot)).toThrow(/does not match a fresh derivation/);
+    const checked = checkT016HistoryForT044(repositoryRoot);
+    expect(checked.decision_binding).toBe("T044_BALANCE_REBIND");
+    expect(checked.plan.assets).toHaveLength(T016_V1_ASSET_COUNT);
+    expect(checked.plan.batches).toHaveLength(T016_V1_BATCH_COUNT);
+    expect(checked.plan.batches.map(({ size }) => size)).toEqual([...T016_V1_BATCH_SIZES]);
+    expect(new Set(checked.plan.assets.map(({ bucket }) => bucket)).size).toBe(34);
+    expect(t016PlanSha256(checked.plan)).toBe(t016PlanSha256(cachedPlan));
   });
 
   test("the binding pins the selection rule, the shared transport and both T020 sources, never package.json", () => {
@@ -562,7 +587,7 @@ describe("T016 entry gates and preparation", () => {
   test("the packet carries the selection hashes directly, not one hop away in the plan", () => {
     // The selection rule is the contested item of this task. An approver reading the packet
     // must see which 160 they are buying without opening another file.
-    const pending = buildT016Pending(repositoryRoot, cachedPlan) as unknown as Record<string, unknown>;
+    const pending = loadT016PendingForT044Check(repositoryRoot, cachedPlan) as unknown as Record<string, unknown>;
     expect(pending.selection_kind).toBe("COVERAGE_NOT_FREQUENCY");
     expect(pending.frequency_score_available).toBe(false);
     expect(pending.selection_artifact_path).toBe(T016_SELECTION_PATH);
@@ -570,15 +595,14 @@ describe("T016 entry gates and preparation", () => {
     expect(pending.selection_list_sha256).toBe(T016_V1_ID_LIST_SHA256);
   });
 
-  test("selection-gen reproduces the committed artifact byte for byte", () => {
-    // The artifact was hand-made once during design; without a committed generator, nobody
-    // could rebuild it. Regenerating into a scratch root must land on the same bytes.
+  test("selection-gen stays strict and emits current provenance without rebinding historical approval", () => {
     const root = tempManager.create("fictor-t016-selgen-");
     for (const path of [T016_CORE_PLAN_PATH, T016_MATERIALS_PATH]) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
     const result = runT016Preparation(["selection-gen"], root);
     expect(result.selected).toBe(T016_SELECTION_COUNT);
     expect(result.selection_list_sha256).toBe(T016_V1_ID_LIST_SHA256);
-    expect(readFileSync(resolve(root, T016_SELECTION_PATH), "utf8")).toBe(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH), "utf8"));
+    expect(readFileSync(resolve(root, T016_SELECTION_PATH), "utf8")).not.toBe(readFileSync(resolve(repositoryRoot, T016_SELECTION_PATH), "utf8"));
+    expect(loadT016Selection(root).sha256).toBe(result.artifact_sha256);
     // And it is refused mid-run, like every other derivation command.
     mkdirSync(resolve(root, "assets/runs/t016-canonical-cards"), { recursive: true });
     writeFileSync(resolve(root, T016_V1_JOURNAL_PATH), "{}\n");
@@ -631,6 +655,10 @@ describe("T016 budget arithmetic and the observed-balance path", () => {
       T016_SELECTION_PATH, T016_MATERIALS_PATH,
     ];
     for (const path of needed) { mkdirSync(resolve(root, path, ".."), { recursive: true }); copyFileSync(resolve(repositoryRoot, path), resolve(root, path)); }
+    // This fixture exercises a new, unapproved disclosure against current source bytes. Keep
+    // that path strict by deriving a current selection in the isolated root instead of using
+    // the historical T016 artifact through the T044 compatibility check.
+    writeFileSync(resolve(root, T016_SELECTION_PATH), renderT016Selection(buildT016Selection(root)));
     return root;
   }
 

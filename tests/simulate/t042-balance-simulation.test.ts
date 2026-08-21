@@ -22,7 +22,7 @@ describe("T042 deterministic balance research", () => {
     expect(report.coverage.filter(({ evidenceKind }) => evidenceKind === "STRUCTURAL_ONLY")).toHaveLength(15);
   });
 
-  it("keeps every proposal inside the approved field allowlist without mutating sources", () => {
+  it("keeps every proposal inside the approved field allowlist and matches the applied sources", () => {
     const report = createReport();
     expect(Object.keys(report.proposals.recommended.tuning).sort()).toEqual([
       "COST_DIVISOR", "RESONANCE_RATE", "SAME_BONUS", "powerCoefficientByEffect", "status",
@@ -34,8 +34,8 @@ describe("T042 deterministic balance research", () => {
     expect(report.proposals.recommended.laws).toHaveLength(21);
     expect(report.proposals.recommended.materials).toHaveLength(52);
     expect(report.proposals.recommended.materials.every(({ potency, cost_base }) => potency >= 1 && potency <= 3 && cost_base >= 0 && cost_base <= 2)).toBe(true);
-    expect(materials.every(({ balance_status, potency, cost_base }) => balance_status === "PENDING_2026_08_21" && potency === null && cost_base === null)).toBe(true);
-    expect(laws.every(({ balance_status, power_coefficient }) => balance_status === "PENDING_2026_08_21" && power_coefficient === null)).toBe(true);
+    expect(materials.every(({ balance_status, potency, cost_base }) => balance_status === "APPROVED" && potency !== null && cost_base !== null)).toBe(true);
+    expect(laws.every(({ balance_status, power_coefficient }) => balance_status === "APPROVED" && power_coefficient !== null)).toBe(true);
   });
 
   it("recalculates the 1,281 non-equipment cards and representative stress envelopes", () => {

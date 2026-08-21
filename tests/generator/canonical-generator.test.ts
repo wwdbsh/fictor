@@ -22,6 +22,7 @@ import type { Law, Material, ResultClass } from "../../src/data/schema/contracts
 import { validateGeneratedCatalog } from "../../src/data/schema/validate-generated-catalog";
 import type { SourceData } from "../../src/data/schema/validate-source-data";
 import { deriveStats, resolveForgeCard, type GeneratedCard } from "../../src/domain/forge";
+import { FORGE_TUNING } from "../../src/domain/balance";
 import type { GeneratedEquipmentDetail } from "../../src/data/generator/generate-catalog";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
@@ -30,7 +31,7 @@ const equipmentPath = resolve(repositoryRoot, "src/data/generated/equipment.gene
 const materials = materialsJson as Material[];
 const laws = lawsJson as Law[];
 const resultClasses = resultClassesJson as ResultClass[];
-const inputs = { laws, resultClasses };
+const inputs = { laws, resultClasses, tuning: FORGE_TUNING };
 const source: SourceData = { materials, laws, resultClasses };
 const committedCards = cardsJson as GeneratedEnvelope<GeneratedCard>;
 const committedEquipment = equipmentJson as GeneratedEnvelope<GeneratedEquipmentDetail>;
@@ -127,10 +128,12 @@ describe("canonical forge generator", () => {
     ).toBe(true);
   });
 
-  it("keeps pending products null and calculates only approved synthetic fixtures", () => {
+  it("calculates every approved non-equipment product and approved synthetic fixtures", () => {
     for (const card of committedCards.items.filter((candidate) => candidate.branch !== "EQUIPMENT")) {
-      expect(card.balance_status).toBe("PENDING_2026_08_21");
-      expect(card.stats).toEqual({ potency: null, cost: null, power: null });
+      expect(card.balance_status).toBe("APPROVED");
+      expect(card.stats?.potency).toBeTypeOf("number");
+      expect(card.stats?.cost).toBeTypeOf("number");
+      expect(card.stats?.power).toBeTypeOf("number");
     }
     const actor = { ...materials[0], balance_status: "APPROVED" as const, potency: 2, cost_base: 1 };
     const receptor = { ...materials[1], balance_status: "APPROVED" as const, potency: 3, cost_base: 2 };

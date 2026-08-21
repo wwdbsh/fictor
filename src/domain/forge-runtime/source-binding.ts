@@ -21,7 +21,7 @@ const INITIAL_WORDS = [
 ] as const;
 
 // Updated only when a reviewed canonical-v1 minimal projection is deliberately rebound.
-export const FORGE_RUNTIME_PROJECTION_HASH = "869c470001baddb984d16e1b059734e987d47a65baaa0ab2b7fba6cb58137a14";
+export const FORGE_RUNTIME_PROJECTION_HASH = "2f33edbd6c2ef0aa05a2a012cab42a2d230fcf1b330a1f53005c79c4743293b2";
 
 function rotateRight(value: number, amount: number): number {
   return (value >>> amount) | (value << (32 - amount));

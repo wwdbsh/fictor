@@ -1,6 +1,7 @@
 import { canonicalSerialize, sha256Hex } from "../../domain/forge-runtime/source-binding";
 import { FORGE_RUNTIME_FUEL_COST } from "../../domain/forge-runtime";
 import type { BurnkinProvisionalRules } from "../../domain/races";
+import { RESONANCE_RATE } from "../../domain/balance";
 import { freeze } from "../../freeze";
 
 export const STILLKIN_TRACK1_PROVISIONAL_STATUS = "PROVISIONAL_USER_DIRECTION_2026_08_15" as const;
@@ -20,7 +21,7 @@ export const STILLKIN_TRACK1_PROVISIONAL_CONFIG = freeze({
   combat: freeze({
     maxEnergy: 3,
     drawCount: 4,
-    resonanceRate: 0.1,
+    resonanceRate: RESONANCE_RATE,
     baselineMaterial: freeze({ effectId: "DELAYED_EXPLOSION", cost: 1, power: 10, resonanceAttribute: "STILL" }),
     forgedCard: freeze({ cost: 1, power: 10 }),
     normal: freeze({ hp: 30, attack: 3 }),

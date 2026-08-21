@@ -117,7 +117,7 @@ describe("Burnkin Track 1 integration", () => {
 
     const combat = enter(burnkin.controller, burnkin.snapshot);
     expect(combat.runtime.run.activeCombat?.state.rules).toMatchObject({
-      resonanceRate: 0.2,
+      resonanceRate: 0.16,
       blockRetention: { numerator: 0, denominator: 1, rounding: "FLOOR" },
     });
     expect(storage.values.has(BURNKIN_TRACK1_SAVE_KEY)).toBe(true);
@@ -127,7 +127,7 @@ describe("Burnkin Track 1 integration", () => {
     const action = started.snapshot;
     const instanceId = action.runtime.run.activeCombat!.state.zones.hand[0];
     const played = dispatch(burnkin.controller, { type: "APPLY_COMBAT", ...binding(action), command: { type: "PLAY_CARD", instanceId, target: { kind: "ENEMY", enemyId: action.flow.combatBinding!.encounterId } } });
-    expect(played.events.find(({ type }) => type === "CARD_PLAYED")).toMatchObject({ effectivePower: 12 });
+    expect(played.events.find(({ type }) => type === "CARD_PLAYED")).toMatchObject({ effectivePower: 11.6 });
 
     const stillkin = createStillkinTrack1Controller({
       storage,

@@ -19,6 +19,7 @@ import {
   type ForgeResolverContextV1,
   type ForgeResultClass,
 } from "../../src/domain";
+import { FORGE_TUNING } from "../../src/domain/balance";
 import { canonicalSerialize, sha256Hex } from "../../src/domain/forge-runtime/source-binding";
 import { FICTOR_SAVE_KEY, FICTOR_SAVE_V2_KEY, type StorageLike } from "../../src/persistence";
 
@@ -50,6 +51,7 @@ function context(): ForgeResolverContextV1 {
         combat_effect: item.combat_effect,
         ...("equipment_interactions" in item ? { equipment_interactions: item.equipment_interactions } : {}),
       })) as ForgeResultClass[],
+      tuning: FORGE_TUNING,
     },
   };
 }

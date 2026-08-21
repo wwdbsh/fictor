@@ -75,6 +75,12 @@ describe("M1 Phase 0 immutable data milestone", () => {
         approved_names_hash: "92a963544860dab6db3d9e3e8ccf8f33bdf6668e1b145a9eed0e19b0476b2e55",
         effective_status_counts: { APPROVED: 1326, CHANGE_REQUIRED: 0, PENDING: 0, HOLD: 0 },
       },
+      t044_application: {
+        source_hash: "be7a99ea52ecd92438ca8171e4d9d397ff68e56cc9ac59b6b33b9b78dc5446de",
+        cards_content_hash: "64be1dfff7c218620ab2aa69708331d59e928eecdacf089b50226af68fbae741",
+        cards_file_hash: "5f7511623cd1b1890da3dcb8fc85a09deb4909fb713b284805bed3d0962eea9b",
+        decision_binding: "T044_BALANCE_REBIND",
+      },
     });
   });
 
@@ -144,7 +150,7 @@ describe("M1 Phase 0 immutable data milestone", () => {
     writeJson(root, decisionsPath, decisions);
 
     expect(() => runPhase0MilestoneCheck({ repositoryRoot: root })).toThrow(
-      /effective name-review status counts mismatch/,
+      /T044_BALANCE_REBIND historical decisions bytes mismatch/,
     );
   });
 
@@ -154,7 +160,7 @@ describe("M1 Phase 0 immutable data milestone", () => {
       record.catalog.cards.file_hash = "0".repeat(64);
     });
 
-    expect(() => runPhase0MilestoneCheck({ repositoryRoot: root })).toThrow(/milestone cards record mismatch/);
+    expect(() => runPhase0MilestoneCheck({ repositoryRoot: root })).toThrow(/immutable M1 milestone bytes mismatch/);
   });
 
   it("rejects a milestone count mutation", () => {

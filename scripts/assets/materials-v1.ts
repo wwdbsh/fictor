@@ -17,6 +17,15 @@ export const T013_MATERIALS_SHA256 = "c1ce53ac380f637b9947211250313db25d03503f83
 export const T013_MASTER_STYLE_PATH = "assets/manifests/master-style-v1.json" as const;
 export const T013_MASTER_STYLE_SHA256 = "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d" as const;
 
+const T044_APPROVAL_PATH = "docs/balance/t043-approved-values-2026-08-21.json" as const;
+export const T013_T044_BALANCE_REBIND = {
+  trackedPlanSha256: "22cc0b976501b6d2f9fc0df5d584e891c214ec0c4da4797ddcbf8b98c86b7611",
+  historicalMaterialsSha256: T013_MATERIALS_SHA256,
+  currentMaterialsSha256: "607266635b128fe73dcde391362b0f1ea16619e879081db7c3c06eabe136cd8c",
+  historicalStableMaterialsProjectionSha256: "2b57d9b7838a929fde8355495595b1974c500b72dcd14a1ed40628d4a895340d",
+  approvalSha256: "1b97e425bd857279f48470c2b59681b012935e6f7d45cf97e7c46b567a9ba086",
+} as const;
+
 export const T013_EXACT_APPROVAL_PHRASE = "위 위험을 확인했고 T013 재료 52장과 초기 78.00 credits 상한, 자동 유료 재시도 0을 승인합니다." as const;
 export const T013_RISK_DISCLOSURE_TEXT = `승인 요청 범위는 T013 재료 이미지 정확히 52장뿐이며 초기 유료 상한은 78.00 credits, 자동 유료 재시도 예산은 0입니다. 요청은 nano_banana_2, use_unlim=false, count=1, 3:4, 1k와 revision 1의 로컬 MEDIA_ONLY 참조로 제한되지만 provider가 보고하는 모델 식별자·batch/job 1:1 응답·현재 가격과 balance는 실행 때 달라질 수 있습니다. 각 batch 직전 첫 자산의 실제 generate_image 요청에 get_cost=true를 붙여 대표 가격을 확인하며, prompt는 provider 가격에 영향을 주지 않는다는 현재 계약에 따라 제외하고 나머지 모든 가격 영향 인자가 batch 전체에서 동일함을 검증합니다. get_cost 계약은 job 제출이 아니며 응답에는 job_created 필드가 없고, numeric cost와 balance는 내부에서 정확한 소수 단위로 정규화합니다. generate_image_batch job의 adjustments·error·warning·preset_recommendation은 실제 wire 선택 필드이며, definite job ID는 먼저 안전하게 보존하되 값 원문은 저장하지 않고 adjustments·error·preset_recommendation 또는 안전하다고 입증되지 않은 warning이 하나라도 있으면 실행을 중단합니다. jobs_wait의 lookup_failed는 제출 실패가 아니므로 retryable=true일 때 같은 유료 job ID만 다시 조회하고, false 또는 누락이면 모호하거나 복구 불가능한 조회 실패로 중단하며 새로 제출하지 않습니다. actual jobs_wait JSON은 파일이나 argv가 아니라 production jobs-handoff stdin으로만 받아 메모리에서 검증·삭제하며, jobs --file과 ingest --input-png는 격리된 diagnostic test seam에서만 허용되어 COMPLETE 근거가 될 수 없습니다. 관찰로 확정된 결과 host allow-list가 없으므로 완료 URL은 generic HTTPS hostname의 기본 443 port만 허용하고 모든 DNS 응답이 public address인지 확인한 뒤 하나를 고정해 원래 hostname/SNI의 TLS 검증으로 직접 연결합니다. redirect마다 URL·DNS·고정을 다시 검증하고 실제 remote address가 고정값과 다르면 중단하며, URL은 제한된 임시 PNG 다운로드에만 사용한 뒤 journal·stdout·파일에 남기지 않습니다. 계정 적용 Terms/Privacy, Google supplemental terms와 provider 조건, 학습 사용 및 opt-out, reference 입력 권리, 공개 기본값과 attribution, 정확한 credit 만료 시각·시간대는 이 52장 범위에서 아직 재검증되지 않았습니다. 제출 모호성·부분 batch 응답·job 실패도 credit을 소비할 수 있으며 자동 재제출하지 않습니다. terminal generation failure 재시도는 최대 3회 범위라도 매회 별도의 새 사용자 승인이 필요합니다. 결과 PNG는 provider-native bytes를 crop/resize 없이 최대 5000ppm의 3:4 오차만 허용해 즉시 local 및 별도 backup에 저장하며, 재료 52장 외 core/bulk 생성은 승인 범위가 아닙니다. 승인 의사는 반드시 “${T013_EXACT_APPROVAL_PHRASE}”라는 정확한 긍정 문구로만 기록합니다.` as const;
 
@@ -225,6 +234,88 @@ function readPinned(root: string, path: string, expectedSha: string): Buffer {
   const bytes = readFileSync(resolve(root, path));
   if (sha256(bytes) !== expectedSha) throw new Error(`T013 pinned source changed: ${path}`);
   return bytes;
+}
+
+function t044StableMaterialsProjection(materialsBytes: string | Uint8Array): unknown[] {
+  const parsed = JSON.parse(Buffer.from(materialsBytes).toString("utf8")) as unknown;
+  if (!Array.isArray(parsed) || parsed.length !== 52) throw new Error("T044_BALANCE_REBIND requires exactly 52 materials");
+  return parsed.map((value, index) => {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      throw new Error(`T044_BALANCE_REBIND material ${index} is not an object`);
+    }
+    const { balance_status: balanceStatus, potency, cost_base: costBase, ...stable } = value as Record<string, unknown>;
+    void balanceStatus;
+    void potency;
+    void costBase;
+    return stable;
+  });
+}
+
+function validateT044Approval(approvalBytes: string): void {
+  if (sha256(approvalBytes) !== T013_T044_BALANCE_REBIND.approvalSha256) {
+    throw new Error("T044_BALANCE_REBIND approval artifact bytes mismatch");
+  }
+  const approval = JSON.parse(approvalBytes) as {
+    status?: unknown;
+    task?: { key?: unknown };
+    scope?: {
+      approved_value_sets?: unknown;
+      card_exceptions?: unknown;
+      structural_changes?: unknown;
+      application_task?: unknown;
+    };
+  };
+  if (
+    approval.status !== "APPROVED_NOT_APPLIED" ||
+    approval.task?.key !== "T043" ||
+    canonicalJson(approval.scope?.approved_value_sets) !== canonicalJson(["global_coefficients", "laws", "materials"]) ||
+    !Array.isArray(approval.scope?.card_exceptions) ||
+    approval.scope.card_exceptions.length !== 0 ||
+    approval.scope.structural_changes !== false ||
+    approval.scope.application_task !== "T044"
+  ) {
+    throw new Error("T044_BALANCE_REBIND approval scope mismatch");
+  }
+}
+
+export function validateT044T013MaterialsRebind(
+  trackedPlanBytes: string,
+  currentMaterialsBytes: string | Uint8Array,
+  approvalBytes: string,
+): T013MaterialsPlan {
+  if (sha256(trackedPlanBytes) !== T013_T044_BALANCE_REBIND.trackedPlanSha256) {
+    throw new Error("T044_BALANCE_REBIND tracked T013 plan bytes mismatch");
+  }
+  const trackedPlan = JSON.parse(trackedPlanBytes) as T013MaterialsPlan;
+  if (trackedPlan.sources.materials.sha256 !== T013_T044_BALANCE_REBIND.historicalMaterialsSha256) {
+    throw new Error("T044_BALANCE_REBIND historical T013 materials hash mismatch");
+  }
+  if (
+    sha256(canonicalJson(t044StableMaterialsProjection(currentMaterialsBytes))) !==
+    T013_T044_BALANCE_REBIND.historicalStableMaterialsProjectionSha256
+  ) {
+    throw new Error("T044_BALANCE_REBIND stable T013 material projection mismatch");
+  }
+  if (sha256(currentMaterialsBytes) !== T013_T044_BALANCE_REBIND.currentMaterialsSha256) {
+    throw new Error("T044_BALANCE_REBIND current T013 materials bytes mismatch");
+  }
+  validateT044Approval(approvalBytes);
+  return trackedPlan;
+}
+
+/** Read-only T044 compatibility check. Generation, approval, and paid operations stay strict. */
+export function loadT013MaterialsPlanForT044Check(repositoryRoot: string): T013MaterialsPlan {
+  return validateT044T013MaterialsRebind(
+    readFileSync(resolve(repositoryRoot, T013_PLAN_PATH), "utf8"),
+    readFileSync(resolve(repositoryRoot, T013_MATERIALS_PATH)),
+    readFileSync(resolve(repositoryRoot, T044_APPROVAL_PATH), "utf8"),
+  );
+}
+
+export function validateT013MaterialsPlanForT044Check(plan: T013MaterialsPlan, repositoryRoot: string): void {
+  if (canonicalJson(plan) !== canonicalJson(loadT013MaterialsPlanForT044Check(repositoryRoot))) {
+    throw new Error("T013 materials plan changed from the immutable T044 check target");
+  }
 }
 
 export function buildT013RiskDisclosure(): T013RiskDisclosure {
