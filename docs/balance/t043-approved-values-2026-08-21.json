@@ -1,0 +1,475 @@
+{
+  "schema": "fictor.t043.final-balance-approval",
+  "schema_version": 1,
+  "status": "APPROVED_NOT_APPLIED",
+  "task": {
+    "key": "T043",
+    "issue": 45,
+    "contract_hash": "6c8c4fad0e74d50f24d72ba5b3627165fdbefba6c128afbf02e6b7441533cd2a"
+  },
+  "source": {
+    "task": "T042",
+    "option": "A",
+    "merge_commit": "f75cd45291260d9ca1d1c557e7ac20773378412f",
+    "path": "docs/playtests/t042/balance-playtest-raw.json",
+    "json_pointer": "/report/proposals/recommended"
+  },
+  "evidence": {
+    "t042_evidence_sha256": "175a9b464e03a2286e38bb236fcc54e1468f855f29a9d2c31f4c1a8867bbe8e3"
+  },
+  "approval": {
+    "decision": "OPTION_A",
+    "approved_by": "상헌 님",
+    "approved_on": "2026-08-21",
+    "timezone": "Asia/Seoul",
+    "message": "A를 최종값으로 승인합니다"
+  },
+  "scope": {
+    "approved_value_sets": [
+      "global_coefficients",
+      "laws",
+      "materials"
+    ],
+    "card_exceptions": [],
+    "structural_changes": false,
+    "application_status": "NOT_APPLIED",
+    "application_task": "T044"
+  },
+  "global_coefficients": {
+    "SAME_BONUS": 1,
+    "COST_DIVISOR": 3,
+    "RESONANCE_RATE": 0.08
+  },
+  "laws": [
+    {
+      "pair": [
+        "STILL",
+        "BURN"
+      ],
+      "combat_effect": "DELAYED_EXPLOSION",
+      "power_coefficient": 2.25
+    },
+    {
+      "pair": [
+        "STILL",
+        "SCATTER"
+      ],
+      "combat_effect": "SLOW_TARGET",
+      "power_coefficient": 0.75
+    },
+    {
+      "pair": [
+        "STILL",
+        "ROT"
+      ],
+      "combat_effect": "EXTEND_DOT",
+      "power_coefficient": 0.75
+    },
+    {
+      "pair": [
+        "STILL",
+        "WASH"
+      ],
+      "combat_effect": "PERMANENT_BLOCK",
+      "power_coefficient": 1.75
+    },
+    {
+      "pair": [
+        "STILL",
+        "JOIN"
+      ],
+      "combat_effect": "AMPLIFY_STILL",
+      "power_coefficient": 0.9
+    },
+    {
+      "pair": [
+        "BURN",
+        "SCATTER"
+      ],
+      "combat_effect": "BURST_AOE",
+      "power_coefficient": 1.5
+    },
+    {
+      "pair": [
+        "BURN",
+        "ROT"
+      ],
+      "combat_effect": "EXILE_AND_DAMAGE",
+      "power_coefficient": 1.5
+    },
+    {
+      "pair": [
+        "BURN",
+        "WASH"
+      ],
+      "combat_effect": "DEBUFF_TO_DAMAGE",
+      "power_coefficient": 1.25
+    },
+    {
+      "pair": [
+        "BURN",
+        "JOIN"
+      ],
+      "combat_effect": "AMPLIFY_BURN",
+      "power_coefficient": 1
+    },
+    {
+      "pair": [
+        "SCATTER",
+        "ROT"
+      ],
+      "combat_effect": "SPREAD_DEBUFF",
+      "power_coefficient": 0.75
+    },
+    {
+      "pair": [
+        "SCATTER",
+        "WASH"
+      ],
+      "combat_effect": "EXILE",
+      "power_coefficient": 0.75
+    },
+    {
+      "pair": [
+        "SCATTER",
+        "JOIN"
+      ],
+      "combat_effect": "AMPLIFY_SCATTER",
+      "power_coefficient": 0.9
+    },
+    {
+      "pair": [
+        "ROT",
+        "WASH"
+      ],
+      "combat_effect": "RESET_STATES",
+      "power_coefficient": 0.75
+    },
+    {
+      "pair": [
+        "ROT",
+        "JOIN"
+      ],
+      "combat_effect": "AMPLIFY_ROT",
+      "power_coefficient": 1
+    },
+    {
+      "pair": [
+        "WASH",
+        "JOIN"
+      ],
+      "combat_effect": "AMPLIFY_WASH",
+      "power_coefficient": 0.9
+    },
+    {
+      "pair": [
+        "STILL",
+        "STILL"
+      ],
+      "combat_effect": "MASSIVE_BLOCK",
+      "power_coefficient": 2
+    },
+    {
+      "pair": [
+        "BURN",
+        "BURN"
+      ],
+      "combat_effect": "MAX_DAMAGE",
+      "power_coefficient": 2
+    },
+    {
+      "pair": [
+        "SCATTER",
+        "SCATTER"
+      ],
+      "combat_effect": "MAX_EVASION",
+      "power_coefficient": 1.75
+    },
+    {
+      "pair": [
+        "ROT",
+        "ROT"
+      ],
+      "combat_effect": "HEAVY_DOT",
+      "power_coefficient": 1.75
+    },
+    {
+      "pair": [
+        "WASH",
+        "WASH"
+      ],
+      "combat_effect": "CLEAR_ALL_STATES",
+      "power_coefficient": 1
+    },
+    {
+      "pair": [
+        "JOIN",
+        "JOIN"
+      ],
+      "combat_effect": "DOUBLE_FORGE",
+      "power_coefficient": 1
+    }
+  ],
+  "materials": [
+    {
+      "id": "ore_still",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "ore_burn",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "ore_scatter",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "ore_rot",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "ore_wash",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "ore_join",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "still_01",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "still_02",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "still_03",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "still_04",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "still_05",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "burn_01",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "burn_02",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "burn_03",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "burn_04",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "burn_05",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "scat_01",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "scat_02",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "scat_03",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "scat_04",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "scat_05",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "rot_01",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "rot_02",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "rot_03",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "rot_04",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "rot_05",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "wash_01",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "wash_02",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "wash_03",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "wash_04",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "wash_05",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "join_01",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "join_02",
+      "potency": 1,
+      "cost_base": 1
+    },
+    {
+      "id": "join_03",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "join_04",
+      "potency": 2,
+      "cost_base": 1
+    },
+    {
+      "id": "join_05",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "tool_01",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_02",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_03",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_04",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_05",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_06",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_07",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_08",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_09",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "tool_10",
+      "potency": 1,
+      "cost_base": 0
+    },
+    {
+      "id": "odd_01",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "odd_02",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "odd_03",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "odd_04",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "odd_05",
+      "potency": 3,
+      "cost_base": 2
+    },
+    {
+      "id": "odd_06",
+      "potency": 3,
+      "cost_base": 2
+    }
+  ]
+}
