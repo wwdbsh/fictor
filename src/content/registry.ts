@@ -88,6 +88,26 @@ function cloneAndFreeze<T>(value: T): T {
   return value;
 }
 
+export function createContentRegistryView(
+  disabledGroundIds: readonly GroundId[] = [],
+): ContentRegistry {
+  const disabled = new Set<GroundId>();
+  const knownGroundIds = new Set(KNOWN_GROUNDS.map(({ id }) => id));
+  for (const id of disabledGroundIds) {
+    if (!knownGroundIds.has(id)) throw new Error(`Unknown ground id: ${id}`);
+    if (disabled.has(id)) throw new Error(`Duplicate disabled ground id: ${id}`);
+    disabled.add(id);
+  }
+
+  const grounds = KNOWN_GROUNDS.map((ground) => disabled.has(ground.id)
+    ? { ...ground, status: "DISABLED" as const, enabled: false }
+    : ground);
+  const races = KNOWN_RACES.map((race) => race.enabled
+    ? { ...race, groundIds: race.groundIds.filter((id) => !disabled.has(id)) }
+    : race);
+  return cloneAndFreeze({ races, grounds });
+}
+
 export const CONTENT_REGISTRY = cloneAndFreeze(REGISTRY);
 export const contentRegistry = CONTENT_REGISTRY;
 export const ASSET_PATH_ALLOWLIST = /* @__PURE__ */ cloneAndFreeze(ASSET_ALLOWLIST);
