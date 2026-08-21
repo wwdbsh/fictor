@@ -24,14 +24,16 @@
 | 브라우저 | T045 최종 후보 상태 | 요구 증거 | 병합 판정 |
 |---|---|---|---|
 | Chrome/Chromium | VERIFIED — 2026-08-21 | fresh profile, keyboard/focus, reduced motion, FIRST→도감, network/console | PASS |
-| Edge | UNVERIFIED | 동일 수동 경로와 console/network 캡처 | 명시적 merge blocker |
-| Firefox | UNVERIFIED | 동일 수동 경로와 console/network 캡처 | 명시적 merge blocker |
-| Safari | UNVERIFIED | 동일 수동 경로와 console/network 캡처 | 명시적 merge blocker |
+| Edge | UNVERIFIED — 사용자 호환성 가정 승인 | 동일 수동 경로와 console/network 캡처 | 이번 T045 병합에서 면제 |
+| Firefox | UNVERIFIED — 사용자 호환성 가정 승인 | 동일 수동 경로와 console/network 캡처 | 이번 T045 병합에서 면제 |
+| Safari | UNVERIFIED — 사용자 호환성 가정 승인 | 동일 수동 경로와 console/network 캡처 | 이번 T045 병합에서 면제 |
 
 2026-08-15 T030의 Chromium smoke PASS는 이전 기준선이며 T045 최종 후보의 실행을 대신하지 않는다.
 Chrome 자동 경로는 Chrome for Testing(Puppeteer 25.5.0), 수동 가시 경로는 macOS 26.5.2의
 Google Chrome 151.0.7922.172, 1679×1143 CSS px, DPR 1에서 2026-08-21T19:04:47+09:00에 확인했다.
-Edge, Firefox, Safari를 검증하지 않은 채 지원 대상에서 제거하거나 지원 완료로 바꾸지 않는다.
+Edge, Firefox, Safari는 검증하지 않았으며 지원 완료로 표기하지 않는다. 2026-08-21 상헌 님이 세 브라우저가
+동작한다고 가정하고 병합하라고 명시적으로 승인했으므로, 지원 범위는 유지하되 이번 T045의 수동 증거
+gate만 면제한다.
 
 ## 수동 확인 기록
 
@@ -41,9 +43,9 @@ Edge, Firefox, Safari를 검증하지 않은 채 지원 대상에서 제거하�
 | 키보드 첫 경로·공방 focus | H1→Tab→붙이 선택, 공방 H2 진입, Escape 뒤 정확한 opener 복귀 | PASS |
 | reduced motion FIRST FINAL | headless Chrome에서 즉시 FINAL과 이름 있는 계속 버튼 확인 | PASS |
 | 가시 layout | 첫 여정 guide와 journey rail overlap `false`, 첫 전투 guide가 적·행동 control을 가리지 않음 | PASS |
-| Edge | 미실행 | BLOCKER |
-| Firefox | 미실행 | BLOCKER |
-| Safari | 미실행 | BLOCKER |
+| Edge | 미실행 | USER-ACCEPTED ASSUMPTION |
+| Firefox | 미실행 | USER-ACCEPTED ASSUMPTION |
+| Safari | 미실행 | USER-ACCEPTED ASSUMPTION |
 
 자동 검증이 PASS해도 보조기기별 읽기 순서와 실제 브라우저 렌더링 차이를 모두 증명하지는 않는다.
-미실행 브라우저는 잔여 위험이 아니라 명시적인 병합 차단 항목으로 유지한다.
+미실행 세 브라우저는 병합 차단에서 해제됐지만 검증 공백과 release risk로 계속 기록한다.
