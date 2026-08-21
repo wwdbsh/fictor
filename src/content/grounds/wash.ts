@@ -22,9 +22,9 @@ export const WASH_GROUND_DESCRIPTOR = createEnabledGround({
   },
 });
 
-export const WASH_GROUND_ENCOUNTERS = WASH_GROUND_DESCRIPTOR.encounters!;
-export const WASH_GROUND_EVENTS = WASH_GROUND_DESCRIPTOR.events;
-export const WASH_GROUND_REWARDS = WASH_GROUND_DESCRIPTOR.rewards!;
+export const WASH_GROUND_ENCOUNTERS = /* @__PURE__ */ (() => WASH_GROUND_DESCRIPTOR.encounters!)();
+export const WASH_GROUND_EVENTS = /* @__PURE__ */ (() => WASH_GROUND_DESCRIPTOR.events)();
+export const WASH_GROUND_REWARDS = /* @__PURE__ */ (() => WASH_GROUND_DESCRIPTOR.rewards!)();
 export const GROUND_WASH_DESCRIPTOR = WASH_GROUND_DESCRIPTOR;
 
 export default WASH_GROUND_DESCRIPTOR;

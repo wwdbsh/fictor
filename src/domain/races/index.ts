@@ -35,6 +35,8 @@ export {
   resolveSelfEating,
   resolveClarified,
   resolveEmptied,
+  resolveHardened,
+  resolveKnot,
   resolveTotalStop,
   tryResolveBlast,
   tryResolveBurnout,
@@ -45,6 +47,8 @@ export {
   tryResolveSelfEating,
   tryResolveClarified,
   tryResolveEmptied,
+  tryResolveHardened,
+  tryResolveKnot,
   tryResolveTotalStop,
 } from "./mechanics";
 export type * from "./mechanics";

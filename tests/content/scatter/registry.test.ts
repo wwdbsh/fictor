@@ -74,12 +74,12 @@ describe("T037 scatter ground content pack", () => {
 
   it("keeps explicit cardinality and three-race boss reachability", () => {
     expect(CONTENT_CARDINALITIES).toMatchObject({
-      enabledGrounds: 5,
-      enabledDepths: 15,
-      enabledNormalEnemies: 25,
-      enabledElites: 5,
-      enabledBosses: 5,
-      enabledEventVariations: 30,
+      enabledGrounds: 6,
+      enabledDepths: 18,
+      enabledNormalEnemies: 30,
+      enabledElites: 6,
+      enabledBosses: 6,
+      enabledEventVariations: 36,
       scatterDepths: 3,
       scatterNormalEnemies: 5,
       scatterElites: 1,

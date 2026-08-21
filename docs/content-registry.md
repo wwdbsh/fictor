@@ -1,14 +1,14 @@
 # M3–M5 콘텐츠 registry — 세 종족 × 활성 터
 
-T026은 어름의 터, T036은 사름의 터, T037은 흩음의 터, T038은 삭음의 터, T039는 씻음의 터 콘텐츠 팩을 고정한다. registry는 활성 콘텐츠를
-명시적으로 노출하고, 아직 구현되지 않은 후반 콘텐츠는 `DISABLED`로 남긴다. 모르는
+T026은 어름의 터, T036은 사름의 터, T037은 흩음의 터, T038은 삭음의 터, T039는 씻음의 터,
+T040은 이음의 터 콘텐츠 팩을 고정한다. registry는 활성 콘텐츠를 명시적으로 노출하고 모르는
 식별자는 `MISSING`으로 구분한다.
 
 ## 활성 범위
 
 - 활성 종족: `Stillkin`, `Burnkin`, `Joinkin` 세 종
 - 활성 터: `GROUND_STILL`(어름의 터), `GROUND_BURN`(사름의 터), `GROUND_SCATTER`(흩음의 터),
-  `GROUND_ROT`(삭음의 터), `GROUND_WASH`(씻음의 터)
+  `GROUND_ROT`(삭음의 터), `GROUND_WASH`(씻음의 터), `GROUND_JOIN`(이음의 터)
 - 어름의 터 깊이: 1~3, 각각 `서리 낀 들판`, `얼어붙은 폭포와 계단`, `완전히 정지한 거대 구조`
 - 일반 적: `SWARM`, `BULK`, `SHELL`, `REACH`, `MIMIC` 다섯 형태
 - 엘리트: `elite__still__burn`, 기믹 메타데이터 `PRESSED_FIRE`
@@ -78,9 +78,25 @@ reachability만 추가하며 기존 브라우저 수직 슬라이스의 고정 �
 추가하며 기존 브라우저 수직 슬라이스의 고정 어름 여정, Washkin 플레이 종족, 최종 밸런스는 변경하지
 않는다.
 
-보스는 별도 이미지를 만들지 않는다. 각 터의 전설 카드 아트를 같은 asset
-reference로 재사용한다. 이벤트 중 `CACHE`와 `ODDITY`만 어름 변주 asset을 사용하고, 나머지
-네 유형은 generic plate를 사용한다. 모든 경로는 registry의 literal allowlist에서만 나온다.
+## T040 이음의 터 콘텐츠 팩
+
+- 깊이 1~3: `붙기 시작한 것들`, `구분 불가능한 덩어리`, `하나의 거대한 유기체`
+- 일반 적: `join_01~05`의 명명 필드를 다섯 적 형태와 1:1로 연결한다.
+- 엘리트: `elite__join__still`, 기믹 `HARDENED`. 호출자가 안전한 양의 정수 `block`을 주입하면
+  고유한 아군 ID 각각의 기존 방어에 같은 값을 더한다. 입력 상태를 변경하지 않으며 overflow는
+  원자적으로 거부한다.
+- 보스: `The Joining`, 기믹 `KNOT`, 전설 카드 아트 `cards/heart__join.png` 재사용. 호출자가 안전한
+  양의 정수 `healing`을 주입하면 최대 체력을 넘지 않는 범위에서 매 step 재생한다.
+- 보상 authority는 기존 터와 같되 일반 보상의 origin은 `GROUND_JOIN`, 보스 보상은 `heart__join`이다.
+  이벤트는 `CACHE`·`ODDITY`의 이음 변주와 네 공용 plate를 사용한다.
+
+세 활성 종족 descriptor는 모두 `GROUND_JOIN`을 허용한다. T040도 content-level 보스 reachability만
+추가하며 Joinkin의 2단계 3장 빚기, 종족 규칙, 기존 브라우저 수직 슬라이스의 고정 어름 여정과 최종
+밸런스는 변경하지 않는다.
+
+보스는 별도 이미지를 만들지 않는다. 각 터의 전설 카드 아트를 같은 asset reference로 재사용한다.
+이벤트는 회수된 터별 변주가 있을 때만 해당 asset을 쓰고 나머지는 generic plate를 사용한다. 모든
+경로는 registry의 literal allowlist에서만 나온다.
 
 `src/content`의 descriptor는 깊게 freeze되어 있으며 lookup은 매번 독립된 깊은 복사본을
 freeze해서 돌려준다. 따라서 UI나 다음 application 계층이 descriptor를 읽거나 실수로
@@ -105,7 +121,7 @@ overlay에 기록한다. 선택 단계는 zone을 바꾸지 않으며, enforceme
 
 ## 아직 pending인 수치
 
-`PRESSED_FIRE`, `TOTAL_STOP`, `BLAST`, `BURNOUT`, `SPREADING`, `DISPERSAL`, `NEUTRALIZED`, `SELF_EATING`, `CLARIFIED`, `EMPTIED`는 registry에서 실행기가 아니라 기믹
+`PRESSED_FIRE`, `TOTAL_STOP`, `BLAST`, `BURNOUT`, `SPREADING`, `DISPERSAL`, `NEUTRALIZED`, `SELF_EATING`, `CLARIFIED`, `EMPTIED`, `HARDENED`, `KNOT`는 registry에서 실행기가 아니라 기믹
 메타데이터로만 보인다.
 실행기를 만들 때는 `resolvePressedFire({ chargeTurns, explosionPower })`와
 `resolveTotalStop({ shield })`에 안전한 양의 정수 설정을 명시적으로 전달해야 한다. 설정이
@@ -133,6 +149,10 @@ overlay에 기록한다. 선택 단계는 zone을 바꾸지 않으며, enforceme
   정화하고 최대 체력을 넘지 않는 범위에서 회복하며 입력 상태는 변경하지 않는다.
 - `EMPTIED`: 호출자가 안전한 양의 정수 `intervalTurns`를 주입한다. 주기 전에는 양측 상태를 보존한
   복사본으로 countdown하고, 주기가 되면 양측의 모든 상태를 함께 비운 뒤 같은 주기를 재설정한다.
+- `HARDENED`: 호출자가 안전한 양의 정수 `block`을 주입한다. 중복 없는 아군 ID의 기존 방어에 같은
+  값을 더하고 입력을 변경하지 않으며, 안전한 정수 범위를 넘는 결과는 원자적으로 거부한다.
+- `KNOT`: 호출자가 안전한 양의 정수 `healing`을 주입한다. 보스 체력을 최대 체력까지 회복하며 입력
+  상태는 변경하지 않는다.
 
 최종 공명률, 적 HP·damage, 보상, 연료, 깊이별 확률은 이 문서와 registry에 넣지 않는다.
 2026-08-21 밸런스 승인 전에는 pending 상태를 유지한다.
