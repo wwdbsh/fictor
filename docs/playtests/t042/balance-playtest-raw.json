@@ -1,0 +1,1618 @@
+{
+  "evidence_sha": "175a9b464e03a2286e38bb236fcc54e1468f855f29a9d2c31f4c1a8867bbe8e3",
+  "report": {
+    "schema_version": 1,
+    "task_key": "T042",
+    "status": "PROPOSAL_ONLY_NOT_APPROVED_OR_APPLIED",
+    "baseline": {
+      "taskKey": "T042",
+      "gitRevision": "4465dab1f70c600654bd2fb997627e7482f2c953",
+      "distTreeSha256": "fbd45ca32a50fdb35f98997a1bdbfbe8dc620e0c84637b5d77dfabc8d51aac58",
+      "sourceHash": "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720",
+      "runtimeGroundId": "GROUND_STILL"
+    },
+    "provenance": {
+      "executor": "CODEX_DETERMINISTIC_CONTROLLER_AUTOPLAY",
+      "human_performed": false,
+      "limitation": "Only GROUND_STILL is executable in the current runtime; the other five grounds are content-level registry routes and are not represented as playtested completions."
+    },
+    "coverage": [
+      {
+        "race": "Stillkin",
+        "groundId": "GROUND_STILL",
+        "evidenceKind": "RUNTIME_AUTOPLAY",
+        "terminalPhase": "RUN_WON"
+      },
+      {
+        "race": "Stillkin",
+        "groundId": "GROUND_BURN",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Stillkin",
+        "groundId": "GROUND_SCATTER",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Stillkin",
+        "groundId": "GROUND_ROT",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Stillkin",
+        "groundId": "GROUND_WASH",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Stillkin",
+        "groundId": "GROUND_JOIN",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Burnkin",
+        "groundId": "GROUND_STILL",
+        "evidenceKind": "RUNTIME_AUTOPLAY",
+        "terminalPhase": "RUN_WON"
+      },
+      {
+        "race": "Burnkin",
+        "groundId": "GROUND_BURN",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Burnkin",
+        "groundId": "GROUND_SCATTER",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Burnkin",
+        "groundId": "GROUND_ROT",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Burnkin",
+        "groundId": "GROUND_WASH",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Burnkin",
+        "groundId": "GROUND_JOIN",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Joinkin",
+        "groundId": "GROUND_STILL",
+        "evidenceKind": "RUNTIME_AUTOPLAY",
+        "terminalPhase": "RUN_WON"
+      },
+      {
+        "race": "Joinkin",
+        "groundId": "GROUND_BURN",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Joinkin",
+        "groundId": "GROUND_SCATTER",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Joinkin",
+        "groundId": "GROUND_ROT",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Joinkin",
+        "groundId": "GROUND_WASH",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      },
+      {
+        "race": "Joinkin",
+        "groundId": "GROUND_JOIN",
+        "evidenceKind": "STRUCTURAL_ONLY",
+        "terminalPhase": null
+      }
+    ],
+    "runtime_runs": [
+      {
+        "race": "Stillkin",
+        "groundId": "GROUND_STILL",
+        "terminalPhase": "RUN_WON",
+        "playerHpRemaining": 25,
+        "fuelStart": 4,
+        "fuelEnd": 3,
+        "workshopPaidForges": 1,
+        "workshopFreeForges": 1,
+        "instantForges": 2,
+        "encounters": [
+          {
+            "encounterId": "enemy__still__swarm",
+            "turns": 1,
+            "cardPlays": 3,
+            "damageDealt": 36,
+            "damageTaken": 0,
+            "blockGained": 0,
+            "maxResonanceStreak": 3,
+            "instantForges": 0
+          },
+          {
+            "encounterId": "elite__still__burn",
+            "turns": 2,
+            "cardPlays": 5,
+            "damageDealt": 52,
+            "damageTaken": 0,
+            "blockGained": 0,
+            "maxResonanceStreak": 5,
+            "instantForges": 1
+          },
+          {
+            "encounterId": "the_stilling",
+            "turns": 3,
+            "cardPlays": 7,
+            "damageDealt": 85,
+            "damageTaken": 5,
+            "blockGained": 0,
+            "maxResonanceStreak": 7,
+            "instantForges": 1
+          }
+        ]
+      },
+      {
+        "race": "Burnkin",
+        "groundId": "GROUND_STILL",
+        "terminalPhase": "RUN_WON",
+        "playerHpRemaining": 30,
+        "fuelStart": 4,
+        "fuelEnd": 3,
+        "workshopPaidForges": 1,
+        "workshopFreeForges": 1,
+        "instantForges": 2,
+        "encounters": [
+          {
+            "encounterId": "enemy__still__swarm",
+            "turns": 1,
+            "cardPlays": 3,
+            "damageDealt": 42,
+            "damageTaken": 0,
+            "blockGained": 0,
+            "maxResonanceStreak": 3,
+            "instantForges": 0
+          },
+          {
+            "encounterId": "elite__still__burn",
+            "turns": 2,
+            "cardPlays": 5,
+            "damageDealt": 64,
+            "damageTaken": 0,
+            "blockGained": 0,
+            "maxResonanceStreak": 5,
+            "instantForges": 1
+          },
+          {
+            "encounterId": "the_stilling",
+            "turns": 2,
+            "cardPlays": 6,
+            "damageDealt": 86,
+            "damageTaken": 0,
+            "blockGained": 0,
+            "maxResonanceStreak": 6,
+            "instantForges": 1
+          }
+        ]
+      },
+      {
+        "race": "Joinkin",
+        "groundId": "GROUND_STILL",
+        "terminalPhase": "RUN_WON",
+        "playerHpRemaining": 22,
+        "fuelStart": 4,
+        "fuelEnd": 3,
+        "workshopPaidForges": 1,
+        "workshopFreeForges": 1,
+        "instantForges": 3,
+        "encounters": [
+          {
+            "encounterId": "enemy__still__swarm",
+            "turns": 2,
+            "cardPlays": 4,
+            "damageDealt": 38,
+            "damageTaken": 3,
+            "blockGained": 0,
+            "maxResonanceStreak": 4,
+            "instantForges": 1
+          },
+          {
+            "encounterId": "elite__still__burn",
+            "turns": 2,
+            "cardPlays": 5,
+            "damageDealt": 53,
+            "damageTaken": 0,
+            "blockGained": 0,
+            "maxResonanceStreak": 5,
+            "instantForges": 1
+          },
+          {
+            "encounterId": "the_stilling",
+            "turns": 3,
+            "cardPlays": 7,
+            "damageDealt": 86,
+            "damageTaken": 5,
+            "blockGained": 0,
+            "maxResonanceStreak": 7,
+            "instantForges": 1
+          }
+        ]
+      }
+    ],
+    "proposals": {
+      "recommended": {
+        "tuning": {
+          "status": "PROPOSED_NOT_APPROVED",
+          "SAME_BONUS": 1,
+          "COST_DIVISOR": 3,
+          "RESONANCE_RATE": 0.08,
+          "powerCoefficientByEffect": {
+            "DELAYED_EXPLOSION": 2.25,
+            "SLOW_TARGET": 0.75,
+            "EXTEND_DOT": 0.75,
+            "PERMANENT_BLOCK": 1.75,
+            "AMPLIFY_STILL": 0.9,
+            "BURST_AOE": 1.5,
+            "EXILE_AND_DAMAGE": 1.5,
+            "DEBUFF_TO_DAMAGE": 1.25,
+            "AMPLIFY_BURN": 1,
+            "SPREAD_DEBUFF": 0.75,
+            "EXILE": 0.75,
+            "AMPLIFY_SCATTER": 0.9,
+            "RESET_STATES": 0.75,
+            "AMPLIFY_ROT": 1,
+            "AMPLIFY_WASH": 0.9,
+            "MASSIVE_BLOCK": 2,
+            "MAX_DAMAGE": 2,
+            "MAX_EVASION": 1.75,
+            "HEAVY_DOT": 1.75,
+            "CLEAR_ALL_STATES": 1,
+            "DOUBLE_FORGE": 1
+          }
+        },
+        "laws": [
+          {
+            "pair": [
+              "STILL",
+              "BURN"
+            ],
+            "combat_effect": "DELAYED_EXPLOSION",
+            "power_coefficient": 2.25
+          },
+          {
+            "pair": [
+              "STILL",
+              "SCATTER"
+            ],
+            "combat_effect": "SLOW_TARGET",
+            "power_coefficient": 0.75
+          },
+          {
+            "pair": [
+              "STILL",
+              "ROT"
+            ],
+            "combat_effect": "EXTEND_DOT",
+            "power_coefficient": 0.75
+          },
+          {
+            "pair": [
+              "STILL",
+              "WASH"
+            ],
+            "combat_effect": "PERMANENT_BLOCK",
+            "power_coefficient": 1.75
+          },
+          {
+            "pair": [
+              "STILL",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_STILL",
+            "power_coefficient": 0.9
+          },
+          {
+            "pair": [
+              "BURN",
+              "SCATTER"
+            ],
+            "combat_effect": "BURST_AOE",
+            "power_coefficient": 1.5
+          },
+          {
+            "pair": [
+              "BURN",
+              "ROT"
+            ],
+            "combat_effect": "EXILE_AND_DAMAGE",
+            "power_coefficient": 1.5
+          },
+          {
+            "pair": [
+              "BURN",
+              "WASH"
+            ],
+            "combat_effect": "DEBUFF_TO_DAMAGE",
+            "power_coefficient": 1.25
+          },
+          {
+            "pair": [
+              "BURN",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_BURN",
+            "power_coefficient": 1
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "ROT"
+            ],
+            "combat_effect": "SPREAD_DEBUFF",
+            "power_coefficient": 0.75
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "WASH"
+            ],
+            "combat_effect": "EXILE",
+            "power_coefficient": 0.75
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_SCATTER",
+            "power_coefficient": 0.9
+          },
+          {
+            "pair": [
+              "ROT",
+              "WASH"
+            ],
+            "combat_effect": "RESET_STATES",
+            "power_coefficient": 0.75
+          },
+          {
+            "pair": [
+              "ROT",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_ROT",
+            "power_coefficient": 1
+          },
+          {
+            "pair": [
+              "WASH",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_WASH",
+            "power_coefficient": 0.9
+          },
+          {
+            "pair": [
+              "STILL",
+              "STILL"
+            ],
+            "combat_effect": "MASSIVE_BLOCK",
+            "power_coefficient": 2
+          },
+          {
+            "pair": [
+              "BURN",
+              "BURN"
+            ],
+            "combat_effect": "MAX_DAMAGE",
+            "power_coefficient": 2
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "SCATTER"
+            ],
+            "combat_effect": "MAX_EVASION",
+            "power_coefficient": 1.75
+          },
+          {
+            "pair": [
+              "ROT",
+              "ROT"
+            ],
+            "combat_effect": "HEAVY_DOT",
+            "power_coefficient": 1.75
+          },
+          {
+            "pair": [
+              "WASH",
+              "WASH"
+            ],
+            "combat_effect": "CLEAR_ALL_STATES",
+            "power_coefficient": 1
+          },
+          {
+            "pair": [
+              "JOIN",
+              "JOIN"
+            ],
+            "combat_effect": "DOUBLE_FORGE",
+            "power_coefficient": 1
+          }
+        ],
+        "materials": [
+          {
+            "id": "ore_still",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_burn",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_scatter",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_rot",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_wash",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_join",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "still_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "still_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "still_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "still_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "still_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "burn_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "scat_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "rot_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "wash_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "join_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "join_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "join_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "join_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "join_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "tool_01",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_02",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_03",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_04",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_05",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_06",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_07",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_08",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_09",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "tool_10",
+            "potency": 1,
+            "cost_base": 0
+          },
+          {
+            "id": "odd_01",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_02",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_03",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_04",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_06",
+            "potency": 3,
+            "cost_base": 2
+          }
+        ],
+        "catalog": {
+          "kind": "RECOMMENDED",
+          "cardCount": 1281,
+          "potency": {
+            "min": 2,
+            "median": 4,
+            "p90": 5,
+            "max": 7
+          },
+          "power": {
+            "min": 1.5,
+            "median": 4,
+            "p90": 8,
+            "max": 14
+          },
+          "costDistribution": {
+            "1": 633,
+            "2": 641,
+            "3": 7
+          },
+          "sameAttributeCount": 127,
+          "extremeSame": {
+            "count": 127,
+            "lowest": [
+              {
+                "recipeId": "ore_wash|wash_01",
+                "potency": 3,
+                "cost": 1,
+                "power": 3,
+                "effect": "CLEAR_ALL_STATES",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "ore_wash|wash_02",
+                "potency": 3,
+                "cost": 1,
+                "power": 3,
+                "effect": "CLEAR_ALL_STATES",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "join_01|ore_join",
+                "potency": 3,
+                "cost": 1,
+                "power": 3,
+                "effect": "DOUBLE_FORGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "join_02|ore_join",
+                "potency": 3,
+                "cost": 1,
+                "power": 3,
+                "effect": "DOUBLE_FORGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "wash_01|wash_02",
+                "potency": 3,
+                "cost": 1,
+                "power": 3,
+                "effect": "CLEAR_ALL_STATES",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "join_01|join_02",
+                "potency": 3,
+                "cost": 1,
+                "power": 3,
+                "effect": "DOUBLE_FORGE",
+                "sameAttribute": true
+              }
+            ],
+            "highest": [
+              {
+                "recipeId": "burn_03|odd_03",
+                "potency": 6,
+                "cost": 2,
+                "power": 12,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "burn_04|burn_05",
+                "potency": 6,
+                "cost": 2,
+                "power": 12,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "burn_04|odd_03",
+                "potency": 6,
+                "cost": 2,
+                "power": 12,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "odd_06|rot_05",
+                "potency": 7,
+                "cost": 3,
+                "power": 12.25,
+                "effect": "HEAVY_DOT",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "odd_02|still_05",
+                "potency": 7,
+                "cost": 3,
+                "power": 14,
+                "effect": "MASSIVE_BLOCK",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "burn_05|odd_03",
+                "potency": 7,
+                "cost": 3,
+                "power": 14,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              }
+            ],
+            "byEffect": [
+              {
+                "effect": "CLEAR_ALL_STATES",
+                "minPower": 3,
+                "maxPower": 7,
+                "count": 21
+              },
+              {
+                "effect": "DOUBLE_FORGE",
+                "minPower": 3,
+                "maxPower": 7,
+                "count": 28
+              },
+              {
+                "effect": "HEAVY_DOT",
+                "minPower": 5.25,
+                "maxPower": 12.25,
+                "count": 21
+              },
+              {
+                "effect": "MASSIVE_BLOCK",
+                "minPower": 6,
+                "maxPower": 14,
+                "count": 21
+              },
+              {
+                "effect": "MAX_DAMAGE",
+                "minPower": 6,
+                "maxPower": 14,
+                "count": 21
+              },
+              {
+                "effect": "MAX_EVASION",
+                "minPower": 5.25,
+                "maxPower": 10.5,
+                "count": 15
+              }
+            ]
+          }
+        },
+        "resonance": [
+          {
+            "race": "Stillkin",
+            "effectiveRate": 0.08,
+            "values": [
+              {
+                "streak": 1,
+                "power": 4.32
+              },
+              {
+                "streak": 3,
+                "power": 4.96
+              },
+              {
+                "streak": 5,
+                "power": 5.6
+              }
+            ]
+          },
+          {
+            "race": "Burnkin",
+            "effectiveRate": 0.16,
+            "values": [
+              {
+                "streak": 1,
+                "power": 4.64
+              },
+              {
+                "streak": 3,
+                "power": 5.92
+              },
+              {
+                "streak": 5,
+                "power": 7.2
+              }
+            ]
+          },
+          {
+            "race": "Joinkin",
+            "effectiveRate": 0.08,
+            "values": [
+              {
+                "streak": 1,
+                "power": 4.32
+              },
+              {
+                "streak": 3,
+                "power": 4.96
+              },
+              {
+                "streak": 5,
+                "power": 5.6
+              }
+            ]
+          }
+        ]
+      },
+      "conservative": {
+        "tuning": {
+          "status": "PROPOSED_NOT_APPROVED",
+          "SAME_BONUS": 0,
+          "COST_DIVISOR": 2,
+          "RESONANCE_RATE": 0.05
+        },
+        "derivation": {
+          "powerCoefficientScale": 0.85
+        },
+        "laws": [
+          {
+            "pair": [
+              "STILL",
+              "BURN"
+            ],
+            "combat_effect": "DELAYED_EXPLOSION",
+            "power_coefficient": 1.9125
+          },
+          {
+            "pair": [
+              "STILL",
+              "SCATTER"
+            ],
+            "combat_effect": "SLOW_TARGET",
+            "power_coefficient": 0.6375
+          },
+          {
+            "pair": [
+              "STILL",
+              "ROT"
+            ],
+            "combat_effect": "EXTEND_DOT",
+            "power_coefficient": 0.6375
+          },
+          {
+            "pair": [
+              "STILL",
+              "WASH"
+            ],
+            "combat_effect": "PERMANENT_BLOCK",
+            "power_coefficient": 1.4875
+          },
+          {
+            "pair": [
+              "STILL",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_STILL",
+            "power_coefficient": 0.765
+          },
+          {
+            "pair": [
+              "BURN",
+              "SCATTER"
+            ],
+            "combat_effect": "BURST_AOE",
+            "power_coefficient": 1.275
+          },
+          {
+            "pair": [
+              "BURN",
+              "ROT"
+            ],
+            "combat_effect": "EXILE_AND_DAMAGE",
+            "power_coefficient": 1.275
+          },
+          {
+            "pair": [
+              "BURN",
+              "WASH"
+            ],
+            "combat_effect": "DEBUFF_TO_DAMAGE",
+            "power_coefficient": 1.0625
+          },
+          {
+            "pair": [
+              "BURN",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_BURN",
+            "power_coefficient": 0.85
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "ROT"
+            ],
+            "combat_effect": "SPREAD_DEBUFF",
+            "power_coefficient": 0.6375
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "WASH"
+            ],
+            "combat_effect": "EXILE",
+            "power_coefficient": 0.6375
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_SCATTER",
+            "power_coefficient": 0.765
+          },
+          {
+            "pair": [
+              "ROT",
+              "WASH"
+            ],
+            "combat_effect": "RESET_STATES",
+            "power_coefficient": 0.6375
+          },
+          {
+            "pair": [
+              "ROT",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_ROT",
+            "power_coefficient": 0.85
+          },
+          {
+            "pair": [
+              "WASH",
+              "JOIN"
+            ],
+            "combat_effect": "AMPLIFY_WASH",
+            "power_coefficient": 0.765
+          },
+          {
+            "pair": [
+              "STILL",
+              "STILL"
+            ],
+            "combat_effect": "MASSIVE_BLOCK",
+            "power_coefficient": 1.7
+          },
+          {
+            "pair": [
+              "BURN",
+              "BURN"
+            ],
+            "combat_effect": "MAX_DAMAGE",
+            "power_coefficient": 1.7
+          },
+          {
+            "pair": [
+              "SCATTER",
+              "SCATTER"
+            ],
+            "combat_effect": "MAX_EVASION",
+            "power_coefficient": 1.4875
+          },
+          {
+            "pair": [
+              "ROT",
+              "ROT"
+            ],
+            "combat_effect": "HEAVY_DOT",
+            "power_coefficient": 1.4875
+          },
+          {
+            "pair": [
+              "WASH",
+              "WASH"
+            ],
+            "combat_effect": "CLEAR_ALL_STATES",
+            "power_coefficient": 0.85
+          },
+          {
+            "pair": [
+              "JOIN",
+              "JOIN"
+            ],
+            "combat_effect": "DOUBLE_FORGE",
+            "power_coefficient": 0.85
+          }
+        ],
+        "materials": [
+          {
+            "id": "ore_still",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_burn",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_scatter",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_rot",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_wash",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "ore_join",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "still_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "still_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "still_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "still_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "still_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "burn_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "burn_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "scat_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "scat_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "rot_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "rot_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "wash_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "wash_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "join_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "join_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "join_03",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "join_04",
+            "potency": 2,
+            "cost_base": 1
+          },
+          {
+            "id": "join_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "tool_01",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_02",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_03",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_04",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_05",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_06",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_07",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_08",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_09",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "tool_10",
+            "potency": 1,
+            "cost_base": 1
+          },
+          {
+            "id": "odd_01",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_02",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_03",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_04",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_05",
+            "potency": 3,
+            "cost_base": 2
+          },
+          {
+            "id": "odd_06",
+            "potency": 3,
+            "cost_base": 2
+          }
+        ],
+        "catalog": {
+          "kind": "CONSERVATIVE",
+          "cardCount": 1281,
+          "potency": {
+            "min": 2,
+            "median": 3,
+            "p90": 5,
+            "max": 6
+          },
+          "power": {
+            "min": 1.275,
+            "median": 3.4,
+            "p90": 6.375,
+            "max": 11.475
+          },
+          "costDistribution": {
+            "1": 333,
+            "2": 738,
+            "3": 210
+          },
+          "sameAttributeCount": 127,
+          "extremeSame": {
+            "count": 127,
+            "lowest": [
+              {
+                "recipeId": "ore_wash|wash_01",
+                "potency": 2,
+                "cost": 1,
+                "power": 1.7,
+                "effect": "CLEAR_ALL_STATES",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "ore_wash|wash_02",
+                "potency": 2,
+                "cost": 1,
+                "power": 1.7,
+                "effect": "CLEAR_ALL_STATES",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "join_01|ore_join",
+                "potency": 2,
+                "cost": 1,
+                "power": 1.7,
+                "effect": "DOUBLE_FORGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "join_02|ore_join",
+                "potency": 2,
+                "cost": 1,
+                "power": 1.7,
+                "effect": "DOUBLE_FORGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "wash_01|wash_02",
+                "potency": 2,
+                "cost": 1,
+                "power": 1.7,
+                "effect": "CLEAR_ALL_STATES",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "join_01|join_02",
+                "potency": 2,
+                "cost": 1,
+                "power": 1.7,
+                "effect": "DOUBLE_FORGE",
+                "sameAttribute": true
+              }
+            ],
+            "highest": [
+              {
+                "recipeId": "burn_03|odd_03",
+                "potency": 5,
+                "cost": 3,
+                "power": 8.5,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "burn_04|burn_05",
+                "potency": 5,
+                "cost": 3,
+                "power": 8.5,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "burn_04|odd_03",
+                "potency": 5,
+                "cost": 3,
+                "power": 8.5,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "odd_06|rot_05",
+                "potency": 6,
+                "cost": 3,
+                "power": 8.925,
+                "effect": "HEAVY_DOT",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "odd_02|still_05",
+                "potency": 6,
+                "cost": 3,
+                "power": 10.2,
+                "effect": "MASSIVE_BLOCK",
+                "sameAttribute": true
+              },
+              {
+                "recipeId": "burn_05|odd_03",
+                "potency": 6,
+                "cost": 3,
+                "power": 10.2,
+                "effect": "MAX_DAMAGE",
+                "sameAttribute": true
+              }
+            ],
+            "byEffect": [
+              {
+                "effect": "CLEAR_ALL_STATES",
+                "minPower": 1.7,
+                "maxPower": 5.1,
+                "count": 21
+              },
+              {
+                "effect": "DOUBLE_FORGE",
+                "minPower": 1.7,
+                "maxPower": 5.1,
+                "count": 28
+              },
+              {
+                "effect": "HEAVY_DOT",
+                "minPower": 2.975,
+                "maxPower": 8.925,
+                "count": 21
+              },
+              {
+                "effect": "MASSIVE_BLOCK",
+                "minPower": 3.4,
+                "maxPower": 10.2,
+                "count": 21
+              },
+              {
+                "effect": "MAX_DAMAGE",
+                "minPower": 3.4,
+                "maxPower": 10.2,
+                "count": 21
+              },
+              {
+                "effect": "MAX_EVASION",
+                "minPower": 2.975,
+                "maxPower": 7.4375,
+                "count": 15
+              }
+            ]
+          }
+        },
+        "resonance": [
+          {
+            "race": "Stillkin",
+            "effectiveRate": 0.05,
+            "values": [
+              {
+                "streak": 1,
+                "power": 3.57
+              },
+              {
+                "streak": 3,
+                "power": 3.91
+              },
+              {
+                "streak": 5,
+                "power": 4.25
+              }
+            ]
+          },
+          {
+            "race": "Burnkin",
+            "effectiveRate": 0.1,
+            "values": [
+              {
+                "streak": 1,
+                "power": 3.74
+              },
+              {
+                "streak": 3,
+                "power": 4.42
+              },
+              {
+                "streak": 5,
+                "power": 5.1
+              }
+            ]
+          },
+          {
+            "race": "Joinkin",
+            "effectiveRate": 0.05,
+            "values": [
+              {
+                "streak": 1,
+                "power": 3.57
+              },
+              {
+                "streak": 3,
+                "power": 3.91
+              },
+              {
+                "streak": 5,
+                "power": 4.25
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "fuel_stress": {
+      "startFuel": 4,
+      "paidForgeCost": 1,
+      "freeWorkshopEntitlementsPerCurrentRoute": 1,
+      "paidForgeCapacityWithoutPurchases": 4,
+      "representativePlan": {
+        "paidForges": 1,
+        "freeForges": 1,
+        "endingFuel": 3
+      }
+    }
+  }
+}
