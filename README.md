@@ -16,6 +16,8 @@ OpenAI Game Builders Seoul 2026 출품을 위한 게임 프로젝트입니다.
 - [제출 체크리스트](docs/SUBMISSION_CHECKLIST.md)
 - [Codex 사용 기록 템플릿](docs/CODEX_USAGE_LOG.md)
 - [에셋·라이선스 기록 템플릿](docs/ASSET_LICENSES.md)
+- [T045 첫 사용자·접근성 QA](docs/qa/t045-first-user-accessibility-2026-08-21.md)
+- [T045 브라우저 성능 예산](docs/performance/t045-browser-budget-2026-08-21.md)
 
 ## 개발 환경
 

@@ -12,6 +12,8 @@
   --paper-light: #f6f1e6;
   --rust: #a74417;
   --rust-dark: #6e2a12;
+  --focus-ring: #00878f;
+  --intent-accent: #f9824b;
   --line: rgba(16, 54, 65, 0.58);
   --shadow: 0 0.35rem 1rem rgba(9, 31, 37, 0.28);
 }
@@ -21,7 +23,7 @@ html { min-width: 20rem; min-height: 100%; background: var(--ice); }
 body { margin: 0; min-width: 20rem; min-height: 100vh; }
 button { font: 600 1rem/1.2 Georgia, "Noto Serif KR", "Batang", serif; }
 button, [tabindex] { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, [tabindex]:focus-visible { outline: 0.2rem solid #00a7a7; outline-offset: 0.2rem; }
+button:focus-visible, [tabindex]:focus-visible { outline: 0.2rem solid var(--focus-ring); outline-offset: 0.2rem; }
 button:disabled { cursor: not-allowed; opacity: 0.48; }
 
 .asset-placeholder {
@@ -138,6 +140,22 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
 .feedback.is-error { color: #762812; font-weight: 700; }
 .feedback.is-busy { color: var(--ink); }
 
+.first-run-guide {
+  position: absolute;
+  z-index: 12;
+  width: min(21rem, calc(100% - 3rem));
+  padding: .8rem 1rem;
+  border: 2px solid var(--ink);
+  background: rgb(246 241 230 / 96%);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}
+.first-run-guide.is-journey { top: 11rem; right: 1.5rem; }
+.first-run-guide.is-combat { top: 5.25rem; left: 1.5rem; }
+.first-run-guide h2 { margin: 0 0 .35rem; font-size: 1rem; }
+.first-run-guide p { margin: .25rem 0; font: .76rem/1.45 system-ui, sans-serif; }
+
 .action-button {
   min-width: 2.75rem;
   min-height: 2.75rem;
@@ -249,7 +267,7 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
   text-align: center;
   box-shadow: var(--shadow);
 }
-.intent-banner strong { color: #e2642c; }
+.intent-banner strong { color: var(--intent-accent); }
 .enemy-record {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
@@ -425,6 +443,7 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
 .codex-heading > div { flex: 1; }
 .codex-heading h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.4rem); letter-spacing: .2em; }
 .codex-heading p { margin: 0.2rem 0 0; }
+.codex-heading .codex-empty { color: var(--ink-muted); font: .78rem/1.4 system-ui, sans-serif; }
 .codex-book { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 25rem); min-height: 0; }
 .codex-list { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; padding: 0.8rem 1rem; border-right: 1px solid var(--line); }
 .codex-list > h3 { margin: 0 0 0.5rem; text-align: center; }
@@ -617,6 +636,7 @@ button.codex-entry { cursor: pointer; }
   .codex-heading h2 { font-size: 1.8rem; }
   .codex-list { min-height: 48rem; padding-inline: 0.25rem; }
   .codex-grid { grid-template-columns: repeat(3, minmax(4.6rem, 1fr)); grid-auto-rows: 7rem; }
+  .first-run-guide { top: 7.5rem; right: .75rem; left: auto; width: calc(100% - 1.5rem); }
   .discovery-overlay { padding: .35rem; }
   .discovery-record { min-height: calc(100svh - .7rem); padding: 1rem .65rem; }
   .discovery-stage { grid-template-columns: 1fr; min-height: 0; }
