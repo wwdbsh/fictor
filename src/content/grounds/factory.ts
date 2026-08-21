@@ -9,10 +9,11 @@ import type {
   GroundDescriptor,
   GroundId,
 } from "../types";
+import { freeze } from "../../freeze";
 
 const SHAPES = ["SWARM", "BULK", "SHELL", "REACH", "MIMIC"] as const;
 const EVENT_TYPES = ["CACHE", "WORKSHOP", "COLLAPSE", "FICTOR", "RECORD", "ODDITY"] as const;
-const EVENT_LABELS: Readonly<Record<EventType, string>> = Object.freeze({
+const EVENT_LABELS: Readonly<Record<EventType, string>> = freeze({
   CACHE: "조각 무더기",
   WORKSHOP: "버려진 공방",
   COLLAPSE: "무너진 갱도",
@@ -20,20 +21,20 @@ const EVENT_LABELS: Readonly<Record<EventType, string>> = Object.freeze({
   RECORD: "옛 기록",
   ODDITY: "이상한 것",
 });
-const GENERIC_EVENT_ASSETS: Readonly<Partial<Record<EventType, string>>> = Object.freeze({
+const GENERIC_EVENT_ASSETS: Readonly<Partial<Record<EventType, string>>> = freeze({
   WORKSHOP: "event__workshop",
   COLLAPSE: "event__collapse",
   FICTOR: "event__fictor",
   RECORD: "event__record",
 });
 
-type GroundStem = "still" | "burn" | "scatter";
+type GroundStem = "still" | "burn" | "scatter" | "rot";
 
 interface EnabledGroundConfig {
-  readonly id: Extract<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER">;
+  readonly id: Extract<GroundId, "GROUND_STILL" | "GROUND_BURN" | "GROUND_SCATTER" | "GROUND_ROT">;
   readonly stem: GroundStem;
   readonly nameKo: string;
-  readonly attribute: "STILL" | "BURN" | "SCATTER";
+  readonly attribute: "STILL" | "BURN" | "SCATTER" | "ROT";
   readonly depthLabels: readonly [string, string, string];
   readonly normalLabels: readonly [string, string, string, string, string];
   readonly elite: {
@@ -64,59 +65,59 @@ function assetPath(id: string): string {
 
 function withAsset(id: string) {
   const path = assetPath(id);
-  const asset: AssetReference = Object.freeze({ id, path });
+  const asset: AssetReference = freeze({ id, path });
   return { asset, assetId: id, assetPath: path };
 }
 
 export function createEnabledGround(config: EnabledGroundConfig): GroundDescriptor {
-  const depths = Object.freeze(config.depthLabels.map((label, index) => {
+  const depths = freeze(config.depthLabels.map((label, index) => {
     const depth = (index + 1) as GroundDepth;
-    return Object.freeze({
+    return freeze({
       depth,
       label,
       labelKo: label,
       ...withAsset(`background__${config.stem}__depth_0${depth}`),
     });
   }));
-  const normals = Object.freeze(SHAPES.map((shape, index) => Object.freeze({
+  const normals = freeze(SHAPES.map((shape, index) => freeze({
     id: `enemy__${config.stem}__${shape.toLowerCase()}`,
     shape,
     labelKo: config.normalLabels[index],
     ...withAsset(`enemy__${config.stem}__${shape.toLowerCase()}`),
   })));
-  const elite = Object.freeze({
+  const elite = freeze({
     ...config.elite,
-    mechanic: Object.freeze({ id: config.elite.mechanicId, status: "PENDING_2026_08_21" as const }),
+    mechanic: freeze({ id: config.elite.mechanicId, status: "PENDING_2026_08_21" as const }),
     ...withAsset(config.elite.id),
   });
-  const boss = Object.freeze({
+  const boss = freeze({
     id: config.boss.id,
     name: config.boss.name,
     labelKo: config.boss.labelKo,
     mechanicId: config.boss.mechanicId,
-    mechanic: Object.freeze({ id: config.boss.mechanicId, status: "PENDING_2026_08_21" as const }),
+    mechanic: freeze({ id: config.boss.mechanicId, status: "PENDING_2026_08_21" as const }),
     ...withAsset(config.boss.heartId),
     reusesCardAssetId: config.boss.heartId,
   });
-  const events: readonly EventDescriptor[] = Object.freeze(EVENT_TYPES.map((type) => {
+  const events: readonly EventDescriptor[] = freeze(EVENT_TYPES.map((type) => {
     const assetId = config.eventAssetOverrides[type] ?? GENERIC_EVENT_ASSETS[type];
     if (!assetId) throw new Error(`Missing ${type} asset for ${config.id}`);
-    return Object.freeze({ type, labelKo: EVENT_LABELS[type], ...withAsset(assetId) });
+    return freeze({ type, labelKo: EVENT_LABELS[type], ...withAsset(assetId) });
   }));
-  const encounters = Object.freeze({ normals, elite, boss });
-  const rewards = Object.freeze({
-    normal: Object.freeze({
+  const encounters = freeze({ normals, elite, boss });
+  const rewards = freeze({
+    normal: freeze({
       source: "NORMAL" as const,
-      allowedMaterialCategories: Object.freeze(["ORE", "GROUND_PRODUCT"] as const),
+      allowedMaterialCategories: freeze(["ORE", "GROUND_PRODUCT"] as const),
       origin: config.id,
     }),
-    elite: Object.freeze({
+    elite: freeze({
       source: "ELITE" as const,
-      allowedMaterialCategories: Object.freeze(["TOOL", "ODDITY"] as const),
+      allowedMaterialCategories: freeze(["TOOL", "ODDITY"] as const),
     }),
-    boss: Object.freeze({ source: "BOSS" as const, heartId: config.boss.heartId }),
+    boss: freeze({ source: "BOSS" as const, heartId: config.boss.heartId }),
   });
-  return Object.freeze({
+  return freeze({
     id: config.id,
     nameKo: config.nameKo,
     labelKo: config.nameKo,

@@ -1,6 +1,7 @@
 import { resolveForgeCard, type GeneratedCard } from "../../domain/forge";
 import type { ForgeResolverContextV1 } from "../../domain/forge-runtime";
 import type { StorageLike } from "../../persistence";
+import { freeze } from "../../freeze";
 import { BURNKIN_TRACK1_RULES, createTrack1Controller, STILLKIN_TRACK1_PROVISIONAL_CONFIG as CONFIG } from "../run";
 import type { StillkinTrack1Command, StillkinTrack1Snapshot, Track1RaceId } from "../run";
 import { BROWSER_RUNTIME_PACKET } from "./runtime-packet.generated";
@@ -234,7 +235,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   let latchedBlockingIssuesKo: readonly string[] | null = null;
 
   const bind = (actionId: string, kind: Track1UiActionKind, labelKo: string, command: StillkinTrack1Command, disabled = false): Track1UiActionDescriptor => {
-    const descriptor = Object.freeze({ actionId, kind, labelKo, disabled });
+    const descriptor = freeze({ actionId, kind, labelKo, disabled });
     commandByDescriptor.set(descriptor, command);
     return descriptor;
   };
@@ -590,14 +591,14 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       const thirdOverlay = requiredMaterialCount === 3 ? buildThirdOverlayPreview(selected[2].cardId, baseUrl) : null;
       if (requiredMaterialCount === 3 && !thirdOverlay) return null;
       const fuelBefore = snapshot.runtime.run.fuel;
-      const preview: Track1UiForgePreview = Object.freeze({
+      const preview: Track1UiForgePreview = freeze({
         previewId: `forge-preview:${snapshot.flow.revision}:${mode}:${selected.map(({ instanceId }) => instanceId).join(":")}`,
         mode,
-        selectedInstanceIds: Object.freeze(selected.map(({ instanceId }) => instanceId)) as unknown as readonly [string, string] | readonly [string, string, string],
+        selectedInstanceIds: freeze(selected.map(({ instanceId }) => instanceId)) as unknown as readonly [string, string] | readonly [string, string, string],
         requiredMaterialCount,
         canonical,
         thirdOverlay,
-        cost: Object.freeze({
+        cost: freeze({
           kind: mode === "INSTANT" ? "ACTION" : mode === "WORKSHOP_PAID" ? "FUEL" : "FREE_ENTITLEMENT",
           labelKo: mode === "INSTANT" ? "행동 1회" : mode === "WORKSHOP_PAID" ? "연료 1" : "무료 공방 권리",
           fuelBefore,
@@ -621,7 +622,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
       const snapshot = ensureLoaded();
       const authority = previewAuthority.get(preview);
       if (!authority || authority.mode === "INSTANT" || !matchesForgeAuthority(authority, snapshot) || !preview.executable) return null;
-      const review: Track1UiForgeReview = Object.freeze({
+      const review: Track1UiForgeReview = freeze({
         reviewId: `forge-review:${preview.previewId}`,
         preview,
         headingKo: authority.mode === "WORKSHOP_PAID" ? "공방 빚기 최종 확인" : "무료 공방 빚기 최종 확인",
@@ -644,23 +645,23 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     codexSnapshot() {
       const snapshot = ensureLoaded();
       const discovered = new Set(snapshot.profile.discoveredRecipeIds);
-      return Object.freeze({
+      return freeze({
         total: 1326,
         pageSize: 48,
         discoveredCount: discovered.size,
-        entries: Object.freeze(codexCanonical.map((canonical, index) => {
+        entries: freeze(codexCanonical.map((canonical, index) => {
           const isDiscovered = discovered.has(canonical.recipeId);
-          return Object.freeze({
+          return freeze({
             entryKey: `codex-entry-${String(index + 1).padStart(4, "0")}`,
             ordinal: index + 1,
             discovered: isDiscovered,
             recipeId: isDiscovered ? canonical.recipeId : null,
             preview: isDiscovered ? canonical : null,
-            availableModes: isDiscovered ? Object.freeze(["INSTANT", "WORKSHOP"] as const) : null,
+            availableModes: isDiscovered ? freeze(["INSTANT", "WORKSHOP"] as const) : null,
           });
         })),
       });
     },
   };
-  return Object.freeze(session);
+  return freeze(session);
 }

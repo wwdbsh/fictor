@@ -1,4 +1,5 @@
 import type { StillkinTrack1Event } from "../run";
+import { freeze } from "../../freeze";
 import { buildCanonicalForgePreview, buildThirdOverlayPreview } from "./forge-codex-preview";
 import type { Track1UiForgePresentation } from "./ui-types";
 
@@ -8,7 +9,7 @@ type RecipeDiscoveredEvent = Extract<StillkinTrack1Event, { type: "RECIPE_DISCOV
 function exactRecipeMaterialIds(recipeId: string): readonly [string, string] | null {
   const parts = recipeId.split("|");
   if (parts.length !== 2 || !parts[0] || !parts[1] || parts[0] === parts[1]) return null;
-  return Object.freeze([parts[0], parts[1]]) as unknown as readonly [string, string];
+  return freeze([parts[0], parts[1]]) as unknown as readonly [string, string];
 }
 
 /**
@@ -36,7 +37,7 @@ export function buildForgePresentation(
     : null;
   if (created.thirdOverlay && !thirdOverlay) return null;
 
-  return Object.freeze({
+  return freeze({
     presentationId: `${presentationScopeId}:forge-result:${created.mode}:${created.recipeId}`,
     discovery: discoveredEvents.length === 1 ? "FIRST" : "REPEAT",
     mode: created.mode,

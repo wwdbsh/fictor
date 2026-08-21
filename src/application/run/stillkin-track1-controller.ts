@@ -10,6 +10,7 @@ import {
   type EnemyIntent,
 } from "../../domain/combat";
 import { resolveForgeCard, type GeneratedCard } from "../../domain/forge";
+import { freeze } from "../../freeze";
 import {
   decodeForgeResolverContext,
   decodeForgeRuntimeState,
@@ -108,7 +109,7 @@ type Track1RaceExecution = {
   burnkinRules: BurnkinProvisionalRules | null;
 };
 
-const STILLKIN_EXECUTION: Track1RaceExecution = Object.freeze({
+const STILLKIN_EXECUTION: Track1RaceExecution = freeze({
   raceId: "Stillkin",
   raceLabelKo: "어름붙이",
   runPrefix: "stillkin-track1-run",
@@ -127,7 +128,7 @@ const STILLKIN_EXECUTION: Track1RaceExecution = Object.freeze({
 
 export const BURNKIN_TRACK1_SAVE_KEY = "fictor.burnkin.save.v2" as const;
 
-const BURNKIN_EXECUTION: Track1RaceExecution = Object.freeze({
+const BURNKIN_EXECUTION: Track1RaceExecution = freeze({
   raceId: "Burnkin",
   raceLabelKo: "사름붙이",
   runPrefix: "burnkin-track1-run",
@@ -138,7 +139,7 @@ const BURNKIN_EXECUTION: Track1RaceExecution = Object.freeze({
   starterDeck: BURNKIN_TRACK1_PROVISIONAL_CONFIG.starterDeck,
   baselineAttribute: "BURN",
   resonanceRate: CONFIG.combat.resonanceRate * BURNKIN_TRACK1_RULES.resonanceRateMultiplier,
-  blockRetention: Object.freeze({ numerator: 0, denominator: 1, rounding: "FLOOR" }),
+  blockRetention: freeze({ numerator: 0, denominator: 1, rounding: "FLOOR" }),
   saveV2Key: BURNKIN_TRACK1_SAVE_KEY,
   migrateV1: false,
   burnkinRules: BURNKIN_TRACK1_RULES,
@@ -146,7 +147,7 @@ const BURNKIN_EXECUTION: Track1RaceExecution = Object.freeze({
 
 export const JOINKIN_TRACK1_SAVE_KEY = "fictor.joinkin.save.v2" as const;
 
-const JOINKIN_EXECUTION: Track1RaceExecution = Object.freeze({
+const JOINKIN_EXECUTION: Track1RaceExecution = freeze({
   raceId: "Joinkin",
   raceLabelKo: "이음붙이",
   runPrefix: "joinkin-track1-run",
@@ -157,7 +158,7 @@ const JOINKIN_EXECUTION: Track1RaceExecution = Object.freeze({
   starterDeck: JOINKIN_TRACK1_PROVISIONAL_CONFIG.starterDeck,
   baselineAttribute: "JOIN",
   resonanceRate: CONFIG.combat.resonanceRate,
-  blockRetention: Object.freeze({ numerator: 0, denominator: 1, rounding: "FLOOR" }),
+  blockRetention: freeze({ numerator: 0, denominator: 1, rounding: "FLOOR" }),
   saveV2Key: JOINKIN_TRACK1_SAVE_KEY,
   migrateV1: false,
   burnkinRules: null,
@@ -1264,7 +1265,7 @@ function createTrack1ControllerInternal(rawOptions: StillkinTrack1ControllerOpti
     return { applied: true, snapshot: makeSnapshot(state, execution), events: clone(events), persistence };
   };
 
-  return Object.freeze({ load, snapshot, dispatch });
+  return freeze({ load, snapshot, dispatch });
 }
 
 export function createStillkinTrack1Controller(rawOptions: StillkinTrack1ControllerOptions | unknown): StillkinTrack1Controller {

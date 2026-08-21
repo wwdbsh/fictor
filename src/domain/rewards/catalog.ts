@@ -1,4 +1,5 @@
 import type { MaterialAuthorityEntryV1 } from "./types";
+import { freeze } from "../../freeze";
 
 const grounds = ["still", "burn", "scat", "rot", "wash", "join"] as const;
 const groundIds = ["GROUND_STILL", "GROUND_BURN", "GROUND_SCATTER", "GROUND_ROT", "GROUND_WASH", "GROUND_JOIN"] as const;
@@ -19,13 +20,13 @@ for (let index = 1; index <= 6; index += 1) {
   authority.push({ id: `odd_${String(index).padStart(2, "0")}`, category: "ODDITY", origin: "NONE" });
 }
 
-export const CANONICAL_MATERIAL_AUTHORITY_V1: readonly MaterialAuthorityEntryV1[] = Object.freeze(
-  authority.map((item) => Object.freeze(item)),
+export const CANONICAL_MATERIAL_AUTHORITY_V1: readonly MaterialAuthorityEntryV1[] = freeze(
+  authority.map((item) => freeze(item)),
 );
-export const CANONICAL_MATERIAL_IDS_V1 = Object.freeze(CANONICAL_MATERIAL_AUTHORITY_V1.map(({ id }) => id).sort());
-export const TOOL_MATERIAL_IDS_V1 = Object.freeze(CANONICAL_MATERIAL_AUTHORITY_V1.filter(({ category }) => category === "TOOL").map(({ id }) => id));
-export const ODDITY_MATERIAL_IDS_V1 = Object.freeze(CANONICAL_MATERIAL_AUTHORITY_V1.filter(({ category }) => category === "ODDITY").map(({ id }) => id));
-export const STILL_GROUND_MATERIAL_IDS_V1 = Object.freeze(CANONICAL_MATERIAL_AUTHORITY_V1.filter(({ origin }) => origin === "GROUND_STILL").map(({ id }) => id));
+export const CANONICAL_MATERIAL_IDS_V1 = freeze(CANONICAL_MATERIAL_AUTHORITY_V1.map(({ id }) => id).sort());
+export const TOOL_MATERIAL_IDS_V1 = freeze(CANONICAL_MATERIAL_AUTHORITY_V1.filter(({ category }) => category === "TOOL").map(({ id }) => id));
+export const ODDITY_MATERIAL_IDS_V1 = freeze(CANONICAL_MATERIAL_AUTHORITY_V1.filter(({ category }) => category === "ODDITY").map(({ id }) => id));
+export const STILL_GROUND_MATERIAL_IDS_V1 = freeze(CANONICAL_MATERIAL_AUTHORITY_V1.filter(({ origin }) => origin === "GROUND_STILL").map(({ id }) => id));
 
 const byId = new Map(CANONICAL_MATERIAL_AUTHORITY_V1.map((item) => [item.id, item]));
 
