@@ -1,4 +1,5 @@
 export * from "./forge";
+export * from "./balance";
 export * from "./forge-runtime";
 export * from "./combat";
 export * from "./resonance";

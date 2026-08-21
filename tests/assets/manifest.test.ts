@@ -5,6 +5,7 @@ import { describe, expect, test } from "vitest";
 import { createOwnedTempManager } from "../helpers/owned-temp";
 
 import { buildPlanManifest, renderPlanManifest, validatePlanManifest } from "../../scripts/assets/manifest";
+import { validateT044AssetPlanRebind } from "../../scripts/assets/cli";
 import { paperToneForId } from "../../scripts/assets/prompt";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
@@ -79,6 +80,42 @@ describe("core asset plan", () => {
     const after = buildPlanManifest(temporaryRoot);
     expect(after.source_hashes.materials).not.toBe(before.source_hashes.materials);
     expect(after.source_hashes.canonical_cards).toBe(before.source_hashes.canonical_cards);
+  });
+
+  test("accepts only the pinned historical plan through the T044 balance source rebind", () => {
+    const trackedBytes = readFileSync(resolve(repositoryRoot, "assets/manifests/core-v1.plan.json"), "utf8");
+    const approvalBytes = readFileSync(
+      resolve(repositoryRoot, "docs/balance/t043-approved-values-2026-08-21.json"),
+      "utf8",
+    );
+    expect(validateT044AssetPlanRebind(trackedBytes, buildPlanManifest(repositoryRoot), approvalBytes)).toBe(
+      "T044_BALANCE_REBIND",
+    );
+  });
+
+  test("rejects tracked bytes, stable plan content, or current source hashes outside the pinned bridge", () => {
+    const trackedBytes = readFileSync(resolve(repositoryRoot, "assets/manifests/core-v1.plan.json"), "utf8");
+    const approvalBytes = readFileSync(
+      resolve(repositoryRoot, "docs/balance/t043-approved-values-2026-08-21.json"),
+      "utf8",
+    );
+    const current = buildPlanManifest(repositoryRoot);
+
+    expect(() => validateT044AssetPlanRebind(`${trackedBytes} `, current, approvalBytes)).toThrow(
+      /tracked asset plan bytes mismatch/,
+    );
+
+    const changedStablePlan = structuredClone(current);
+    changedStablePlan.assets[0].prompt += " tampered";
+    expect(() => validateT044AssetPlanRebind(trackedBytes, changedStablePlan, approvalBytes)).toThrow(
+      /stable asset plan projection mismatch/,
+    );
+
+    const changedSource = structuredClone(current);
+    changedSource.source_hashes.materials = "0".repeat(64);
+    expect(() => validateT044AssetPlanRebind(trackedBytes, changedSource, approvalBytes)).toThrow(
+      /current asset source hashes mismatch/,
+    );
   });
 
   test("records catalyst density provenance without inventing a density enum", () => {

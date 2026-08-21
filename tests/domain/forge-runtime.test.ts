@@ -15,6 +15,7 @@ import {
   FORGE_RUNTIME_RESOLVER_VERSION,
   FORGE_RUNTIME_SCHEMA_VERSION,
   FORGE_RUNTIME_SOURCE_HASH,
+  FORGE_TUNING,
   reduceForgeRuntime,
   reduceCombat,
   resolveForgeCard,
@@ -62,7 +63,7 @@ function context(): ForgeResolverContextV1 {
     resolverVersion: FORGE_RUNTIME_RESOLVER_VERSION,
     sourceHash,
     materials,
-    inputs: { laws, resultClasses },
+    inputs: { laws, resultClasses, tuning: FORGE_TUNING },
   };
 }
 

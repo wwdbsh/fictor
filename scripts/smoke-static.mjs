@@ -369,7 +369,7 @@ async function main() {
           };
         });
         if (state.selectedRace !== "Burnkin" || state.stillkinSavePresent || state.configId !== "burnkin-track1-provisional-v1"
-          || state.resonanceRate !== 0.2 || JSON.stringify(state.starterIds) !== JSON.stringify(["burn_01", "burn_02", "burn_03", "burn_04", "burn_05", "ore_burn"])) {
+          || state.resonanceRate !== 0.16 || JSON.stringify(state.starterIds) !== JSON.stringify(["burn_01", "burn_02", "burn_03", "burn_04", "burn_05", "ore_burn"])) {
           throw new Error(`Burnkin browser authority가 일치하지 않습니다: ${JSON.stringify(state)}`);
         }
 
@@ -461,7 +461,7 @@ async function main() {
           throw new Error(`Burnkin 승리 재시작 상태가 다릅니다: ${JSON.stringify(restarted)}`);
         }
         if (errors.length > 0) throw new Error(`Burnkin 브라우저 오류:\n${errors.join("\n")}`);
-        return { race: "Burnkin", phase: "RUN_WON", resonanceRate: 0.2, starterCards: 30, bossVictory: true, restart: true, browserErrors: 0 };
+        return { race: "Burnkin", phase: "RUN_WON", resonanceRate: 0.16, starterCards: 30, bossVictory: true, restart: true, browserErrors: 0 };
       } finally {
         await context.close();
       }

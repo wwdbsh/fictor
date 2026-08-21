@@ -36,11 +36,13 @@ import {
   buildT013ProviderSchemaEvidence,
   buildT013RiskDisclosure,
   isT013Authorized,
+  loadT013MaterialsPlanForT044Check,
   renderCanonicalJson,
   renderT013MaterialsPlan,
+  validateT044T013MaterialsRebind,
   validateT013ApprovalEvidence,
   validateT013DisclosurePresentationEvidence,
-  validateT013MaterialsPlan,
+  validateT013MaterialsPlanForT044Check,
   type T013ApprovalEvidence,
   type T013DisclosurePresentationEvidence,
   type T013MaterialsPlan,
@@ -159,7 +161,7 @@ function regularFiles(root: string): string[] {
 }
 
 function fixture() {
-  const plan = buildT013MaterialsPlan(repositoryRoot);
+  const plan = loadT013MaterialsPlanForT044Check(repositoryRoot);
   const risk = buildT013RiskDisclosure();
   const now = new Date("2026-08-11T13:10:00.000Z");
   const presentation = buildT013DisclosurePresentationEvidence(plan, risk, "2026-08-11T13:00:00.000Z", now);
@@ -264,8 +266,9 @@ async function submitAndHandoffJobs(
 
 describe("T013 materials-v1 local preparation", () => {
   test("pins exact sources, live schema, 52 requests, batch sizes, and deterministic request hashes", () => {
-    const first = buildT013MaterialsPlan(repositoryRoot);
-    const second = buildT013MaterialsPlan(repositoryRoot);
+    expect(() => buildT013MaterialsPlan(repositoryRoot)).toThrow(/T013 pinned source changed/);
+    const first = loadT013MaterialsPlanForT044Check(repositoryRoot);
+    const second = loadT013MaterialsPlanForT044Check(repositoryRoot);
     expect(renderT013MaterialsPlan(first)).toBe(renderT013MaterialsPlan(second));
     expect(readFileSync(resolve(repositoryRoot, T013_PLAN_PATH), "utf8")).toBe(renderT013MaterialsPlan(first));
     expect(readFileSync(resolve(repositoryRoot, T013_RISK_PATH), "utf8")).toBe(renderCanonicalJson(buildT013RiskDisclosure()));
@@ -300,8 +303,33 @@ describe("T013 materials-v1 local preparation", () => {
     }
   });
 
+  test("T044 check-only bridge rejects non-balance drift, current hash drift, and historical byte drift", () => {
+    const trackedPlanBytes = readFileSync(resolve(repositoryRoot, T013_PLAN_PATH), "utf8");
+    const approvalBytes = readFileSync(resolve(repositoryRoot, "docs/balance/t043-approved-values-2026-08-21.json"), "utf8");
+    const currentMaterials = JSON.parse(readFileSync(resolve(repositoryRoot, "src/data/source/materials.json"), "utf8")) as Array<Record<string, unknown>>;
+
+    const nonBalanceDrift = structuredClone(currentMaterials);
+    nonBalanceDrift[0].art = "cards/tampered.png";
+    expect(() => validateT044T013MaterialsRebind(trackedPlanBytes, renderCanonicalJson(nonBalanceDrift), approvalBytes)).toThrow(
+      /stable T013 material projection mismatch/,
+    );
+
+    const balanceHashDrift = structuredClone(currentMaterials);
+    balanceHashDrift[0].potency = Number(balanceHashDrift[0].potency) + 1;
+    expect(() => validateT044T013MaterialsRebind(trackedPlanBytes, renderCanonicalJson(balanceHashDrift), approvalBytes)).toThrow(
+      /current T013 materials bytes mismatch/,
+    );
+
+    expect(() => validateT044T013MaterialsRebind(`${trackedPlanBytes} `, readFileSync(resolve(repositoryRoot, "src/data/source/materials.json")), approvalBytes)).toThrow(
+      /tracked T013 plan bytes mismatch/,
+    );
+    expect(() => validateT044T013MaterialsRebind(trackedPlanBytes, readFileSync(resolve(repositoryRoot, "src/data/source/materials.json")), `${approvalBytes} `)).toThrow(
+      /approval artifact bytes mismatch/,
+    );
+  });
+
   test("rejects plan, request, batch, reference, and recovery-policy drift", () => {
-    const plan = buildT013MaterialsPlan(repositoryRoot);
+    const plan = loadT013MaterialsPlanForT044Check(repositoryRoot);
     const mutations: Array<(value: any) => void> = [
       (value) => { value.issue_contract_sha256 = "0".repeat(64); },
       (value) => { value.assets.pop(); },
@@ -314,7 +342,7 @@ describe("T013 materials-v1 local preparation", () => {
     for (const mutate of mutations) {
       const changed = clone(plan) as any;
       mutate(changed);
-      expect(() => validateT013MaterialsPlan(changed, repositoryRoot)).toThrow("Issue 15 contract");
+      expect(() => validateT013MaterialsPlanForT044Check(changed, repositoryRoot)).toThrow("immutable T044 check target");
     }
   });
 
@@ -472,14 +500,14 @@ describe("T013 materials-v1 local preparation", () => {
   });
 
   test("adapts exact jobs_wait envelopes, strips sensitive fields, and fail-stops failures/model drift", () => {
-    const live = validLiveJobs(buildT013MaterialsPlan(repositoryRoot), 0);
+    const live = validLiveJobs(loadT013MaterialsPlanForT044Check(repositoryRoot), 0);
     const redacted = redactT013JobsWaitResponse(live, "2026-08-11T14:01:00.000Z");
     expect(redacted.transient_downloads).toHaveLength(12);
     expect(JSON.stringify(redacted.observation)).not.toContain("https://");
     expect(JSON.stringify(redacted.observation)).not.toContain("result_url");
     expect(JSON.stringify(redacted.observation)).not.toContain("thumbnail_url");
     expect(JSON.stringify(redacted.observation)).not.toContain("error");
-    const inProgress = validLiveJobs(buildT013MaterialsPlan(repositoryRoot), 0);
+    const inProgress = validLiveJobs(loadT013MaterialsPlanForT044Check(repositoryRoot), 0);
     inProgress.all_terminal = false;
     inProgress.jobs[0] = { index: 0, job_id: "job-0", status: "in_progress", retryable: true, type: "image" };
     expect(redactT013JobsWaitResponse(inProgress, "2026-08-11T14:00:59.000Z").observation.jobs[0]).toMatchObject({ status: "in_progress", model: null, download_available: false, permanent_lookup_failure: false });
@@ -518,7 +546,7 @@ describe("T013 materials-v1 local preparation", () => {
   });
 
   test("rejects localhost, numeric IP, IPv6, mapped IPv6, and malformed result hosts at the wire boundary", () => {
-    const base = validLiveJobs(buildT013MaterialsPlan(repositoryRoot), 0);
+    const base = validLiveJobs(loadT013MaterialsPlanForT044Check(repositoryRoot), 0);
     const unsafeUrls = [
       "https://localhost/result.png",
       "https://worker.localhost/result.png",

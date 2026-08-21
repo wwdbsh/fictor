@@ -2,7 +2,7 @@ import type { BrowserRuntimePacketV1 } from "./runtime-packet";
 
 export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
   "schemaVersion": "fictor-browser-runtime-packet-v1",
-  "sourceHash": "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720",
+  "sourceHash": "be7a99ea52ecd92438ca8171e4d9d397ff68e56cc9ac59b6b33b9b78dc5446de",
   "counts": {
     "materials": 52,
     "laws": 21,
@@ -15,7 +15,7 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
   },
   "resolverContext": {
     "resolverVersion": "canonical-v1",
-    "sourceHash": "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720",
+    "sourceHash": "be7a99ea52ecd92438ca8171e4d9d397ff68e56cc9ac59b6b33b9b78dc5446de",
     "materials": [
       {
         "id": "ore_still",
@@ -24,9 +24,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "덩이",
         "representation": "SOLID",
         "category": "ORE",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "ore_burn",
@@ -35,9 +35,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "불씨",
         "representation": "SOLID",
         "category": "ORE",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "ore_scatter",
@@ -46,9 +46,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "티끌",
         "representation": "PHENOMENON",
         "category": "ORE",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "ore_rot",
@@ -57,9 +57,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "부스러기",
         "representation": "SOLID",
         "category": "ORE",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "ore_wash",
@@ -68,9 +68,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "속살",
         "representation": "SOLID",
         "category": "ORE",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "ore_join",
@@ -79,9 +79,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "뭉치",
         "representation": "SOLID",
         "category": "ORE",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "still_01",
@@ -90,9 +90,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "서리꽃",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "still_02",
@@ -101,9 +101,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "물방울",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "still_03",
@@ -112,9 +112,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "발자국",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "still_04",
@@ -123,9 +123,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "입김",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "still_05",
@@ -134,9 +134,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "종소리",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "burn_01",
@@ -145,9 +145,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "잉걸",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "burn_02",
@@ -156,9 +156,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "심지",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "burn_03",
@@ -167,9 +167,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "재",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "burn_04",
@@ -178,9 +178,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "열",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "burn_05",
@@ -189,9 +189,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "불티",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "scat_01",
@@ -200,9 +200,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "뼈",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "scat_02",
@@ -211,9 +211,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "씨",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "scat_03",
@@ -222,9 +222,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "껍데기",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "scat_04",
@@ -233,9 +233,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "먼지",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "scat_05",
@@ -244,9 +244,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "바람",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "rot_01",
@@ -255,9 +255,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "딱지",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "rot_02",
@@ -266,9 +266,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "뿌리",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "rot_03",
@@ -277,9 +277,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "곰팡이",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "rot_04",
@@ -288,9 +288,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "얼룩",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "rot_05",
@@ -299,9 +299,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "냄새",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "wash_01",
@@ -310,9 +310,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "눈물",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "wash_02",
@@ -321,9 +321,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "돌",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "wash_03",
@@ -332,9 +332,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "껍질",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "wash_04",
@@ -343,9 +343,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "자국",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "wash_05",
@@ -354,9 +354,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "앙금",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "join_01",
@@ -365,9 +365,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "실",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "join_02",
@@ -376,9 +376,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "손",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 1
       },
       {
         "id": "join_03",
@@ -387,9 +387,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "매듭",
         "representation": "SOLID",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "join_04",
@@ -398,9 +398,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "그림자",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 2,
+        "cost_base": 1
       },
       {
         "id": "join_05",
@@ -409,9 +409,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "소리",
         "representation": "PHENOMENON",
         "category": "GROUND_PRODUCT",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "tool_01",
@@ -420,9 +420,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "도가니",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "FORGE"
       },
       {
@@ -432,9 +432,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "집게",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "HAND"
       },
       {
@@ -444,9 +444,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "체",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "DECK"
       },
       {
@@ -456,9 +456,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "등불",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "INFO"
       },
       {
@@ -468,9 +468,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "계측기",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "SCALE"
       },
       {
@@ -480,9 +480,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "풀무",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "ENERGY"
       },
       {
@@ -492,9 +492,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "저울",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "BALANCE"
       },
       {
@@ -504,9 +504,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "표본 상자",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "KEEP"
       },
       {
@@ -516,9 +516,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "지도",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "ROUTE"
       },
       {
@@ -528,9 +528,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "손수레",
         "representation": "SOLID",
         "category": "TOOL",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null,
+        "balance_status": "APPROVED",
+        "potency": 1,
+        "cost_base": 0,
         "tool_domain": "CARRY"
       },
       {
@@ -543,9 +543,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "주전자",
         "representation": "SOLID",
         "category": "ODDITY",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "odd_02",
@@ -557,9 +557,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "사다리",
         "representation": "SOLID",
         "category": "ODDITY",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "odd_03",
@@ -571,9 +571,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "초",
         "representation": "SOLID",
         "category": "ODDITY",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "odd_04",
@@ -585,9 +585,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "장갑",
         "representation": "SOLID",
         "category": "ODDITY",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "odd_05",
@@ -599,9 +599,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "못",
         "representation": "SOLID",
         "category": "ODDITY",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       },
       {
         "id": "odd_06",
@@ -613,9 +613,9 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
         "noun_form": "자",
         "representation": "SOLID",
         "category": "ODDITY",
-        "balance_status": "PENDING_2026_08_21",
-        "potency": null,
-        "cost_base": null
+        "balance_status": "APPROVED",
+        "potency": 3,
+        "cost_base": 2
       }
     ],
     "inputs": {
@@ -628,8 +628,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "PRESSED_FIRE",
           "actor": "STILL",
           "combat_effect": "DELAYED_EXPLOSION",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 2.25
         },
         {
           "pair": [
@@ -639,8 +639,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "SETTLING",
           "actor": "STILL",
           "combat_effect": "SLOW_TARGET",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.75
         },
         {
           "pair": [
@@ -650,8 +650,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "SCAB",
           "actor": "STILL",
           "combat_effect": "EXTEND_DOT",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.75
         },
         {
           "pair": [
@@ -661,8 +661,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "CRYSTAL",
           "actor": "STILL",
           "combat_effect": "PERMANENT_BLOCK",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 1.75
         },
         {
           "pair": [
@@ -672,8 +672,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "HARDENED",
           "actor": "STILL",
           "combat_effect": "AMPLIFY_STILL",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.9
         },
         {
           "pair": [
@@ -683,8 +683,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "BLAST",
           "actor": "BURN",
           "combat_effect": "BURST_AOE",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 1.5
         },
         {
           "pair": [
@@ -694,8 +694,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "INCINERATION",
           "actor": "BURN",
           "combat_effect": "EXILE_AND_DAMAGE",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 1.5
         },
         {
           "pair": [
@@ -705,8 +705,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "SEARING",
           "actor": "BURN",
           "combat_effect": "DEBUFF_TO_DAMAGE",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 1.25
         },
         {
           "pair": [
@@ -716,8 +716,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "KINDLED",
           "actor": "BURN",
           "combat_effect": "AMPLIFY_BURN",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 1
         },
         {
           "pair": [
@@ -727,8 +727,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "SPREADING",
           "actor": "SCATTER",
           "combat_effect": "SPREAD_DEBUFF",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.75
         },
         {
           "pair": [
@@ -738,8 +738,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "VANISHING",
           "actor": "SCATTER",
           "combat_effect": "EXILE",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.75
         },
         {
           "pair": [
@@ -749,8 +749,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "QUICKENED",
           "actor": "SCATTER",
           "combat_effect": "AMPLIFY_SCATTER",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.9
         },
         {
           "pair": [
@@ -760,8 +760,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "NEUTRALIZED",
           "actor": "ROT",
           "combat_effect": "RESET_STATES",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.75
         },
         {
           "pair": [
@@ -771,8 +771,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "FESTERED",
           "actor": "ROT",
           "combat_effect": "AMPLIFY_ROT",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 1
         },
         {
           "pair": [
@@ -782,8 +782,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "CLARIFIED",
           "actor": "WASH",
           "combat_effect": "AMPLIFY_WASH",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null
+          "balance_status": "APPROVED",
+          "power_coefficient": 0.9
         },
         {
           "pair": [
@@ -793,8 +793,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "TOTAL_STOP",
           "actor": "STILL",
           "combat_effect": "MASSIVE_BLOCK",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null,
+          "balance_status": "APPROVED",
+          "power_coefficient": 2,
           "drawback": "자신도 행동할 수 없다."
         },
         {
@@ -805,8 +805,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "BURNOUT",
           "actor": "BURN",
           "combat_effect": "MAX_DAMAGE",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null,
+          "balance_status": "APPROVED",
+          "power_coefficient": 2,
           "drawback": "자기 체력을 소모한다."
         },
         {
@@ -817,8 +817,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "DISPERSAL",
           "actor": "SCATTER",
           "combat_effect": "MAX_EVASION",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null,
+          "balance_status": "APPROVED",
+          "power_coefficient": 1.75,
           "drawback": "공격할 수 없다."
         },
         {
@@ -829,8 +829,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "SELF_EATING",
           "actor": "ROT",
           "combat_effect": "HEAVY_DOT",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null,
+          "balance_status": "APPROVED",
+          "power_coefficient": 1.75,
           "drawback": "자신도 삭는다."
         },
         {
@@ -841,8 +841,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "EMPTIED",
           "actor": "WASH",
           "combat_effect": "CLEAR_ALL_STATES",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null,
+          "balance_status": "APPROVED",
+          "power_coefficient": 1,
           "drawback": "아군 버프도 제거한다."
         },
         {
@@ -853,8 +853,8 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "result_class": "KNOT",
           "actor": "JOIN",
           "combat_effect": "DOUBLE_FORGE",
-          "balance_status": "PENDING_2026_08_21",
-          "power_coefficient": null,
+          "balance_status": "APPROVED",
+          "power_coefficient": 1,
           "drawback": "그 턴에는 다른 행동을 할 수 없다."
         }
       ],
@@ -1459,7 +1459,11 @@ export const BROWSER_RUNTIME_PACKET: BrowserRuntimePacketV1 = {
           "density_status": "APPROVED",
           "combat_effect": null
         }
-      ]
+      ],
+      "tuning": {
+        "SAME_BONUS": 1,
+        "COST_DIVISOR": 3
+      }
     }
   },
   "materialDisplay": [

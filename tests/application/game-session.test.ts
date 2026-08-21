@@ -22,6 +22,7 @@ import {
   type ForgeResultClass,
   type ForgeRuntimeStateV1,
 } from "../../src/domain";
+import { FORGE_TUNING } from "../../src/domain/balance";
 import {
   VersionedSaveStore,
   type PersistenceCatalog,
@@ -79,7 +80,7 @@ function context(): ForgeResolverContextV1 {
     resolverVersion: FORGE_RUNTIME_RESOLVER_VERSION,
     sourceHash: FORGE_RUNTIME_SOURCE_HASH,
     materials,
-    inputs: { laws, resultClasses },
+    inputs: { laws, resultClasses, tuning: FORGE_TUNING },
   };
 }
 

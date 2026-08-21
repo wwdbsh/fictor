@@ -325,9 +325,9 @@ describe("Joinkin Track 1 integration", () => {
     current = dispatch(resumed, { type: "APPLY_COMBAT", ...binding(current), command: { type: "START_TURN" } }).snapshot;
 
     const expected = [
-      { instanceId: "track1-instance-0", attribute: "BURN", streak: 1, power: 11, bridge: false },
-      { instanceId: "track1-instance-1", attribute: "BURN", streak: 2, power: 12, bridge: true },
-      { instanceId: "track1-instance-2", attribute: "WASH", streak: 3, power: 13, bridge: false },
+      { instanceId: "track1-instance-0", attribute: "BURN", streak: 1, power: 10.8, bridge: false },
+      { instanceId: "track1-instance-1", attribute: "BURN", streak: 2, power: 11.6, bridge: true },
+      { instanceId: "track1-instance-2", attribute: "WASH", streak: 3, power: 12.4, bridge: false },
     ] as const;
     for (const step of expected) {
       const result = dispatch(resumed, {

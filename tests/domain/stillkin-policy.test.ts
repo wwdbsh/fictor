@@ -14,11 +14,11 @@ import {
 } from "../../src/domain";
 
 describe("Stillkin pure policy", () => {
-  it("uses exactly half-floor retention and keeps resonance rate pending", () => {
+  it("uses exactly half-floor retention and the approved configured resonance rate", () => {
     expect(STILLKIN_BLOCK_RETENTION).toEqual({ numerator: 1, denominator: 2, rounding: "FLOOR" });
     expect(Object.keys(STILLKIN_BLOCK_RETENTION)).toEqual(["numerator", "denominator", "rounding"]);
     expect(STILLKIN_POLICY.blockRetention).toBe(STILLKIN_BLOCK_RETENTION);
-    expect(STILLKIN_RESONANCE_RATE).toEqual({ status: "PENDING_2026_08_21" });
+    expect(STILLKIN_RESONANCE_RATE).toEqual({ status: "CONFIGURED", value: 0.08 });
   });
 
   it("preserves every attribute streak while changing the active attribute", () => {
@@ -37,8 +37,9 @@ describe("Stillkin pure policy", () => {
     });
   });
 
-  it("rejects pending resonance explicitly and delegates configured math", () => {
-    expect(calculateStillkinResonantPower(3, 1)).toEqual({
+  it("uses the configured default and still rejects an explicitly pending rate", () => {
+    expect(calculateStillkinResonantPower(3, 1)).toEqual({ ok: true, value: 3.24 });
+    expect(calculateStillkinResonantPower(3, 1, { status: "PENDING_2026_08_21" })).toEqual({
       ok: false,
       reason: "PENDING_RESONANCE_RATE",
     });

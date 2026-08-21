@@ -9,7 +9,7 @@ import type { ForgeAttribute, ForgeInputs, ForgeMaterial, GeneratedCard } from "
 export const FORGE_RUNTIME_SCHEMA_VERSION = "forge-runtime-state-v1" as const;
 export const FORGE_RUNTIME_ENGINE_VERSION = "forge-runtime-engine-v1" as const;
 export const FORGE_RUNTIME_RESOLVER_VERSION = "canonical-v1" as const;
-export const FORGE_RUNTIME_SOURCE_HASH = "7e05e02b3db844ccba7806067e196d0e4477ea4f7ce2c661440ea3820d87d720" as const;
+export const FORGE_RUNTIME_SOURCE_HASH = "be7a99ea52ecd92438ca8171e4d9d397ff68e56cc9ac59b6b33b9b78dc5446de" as const;
 export const FORGE_RUNTIME_FUEL_COST = 1 as const;
 
 export type EphemeralLocation = "HAND" | "DECK" | "DISCARD" | "EXILE" | "EQUIPMENT";

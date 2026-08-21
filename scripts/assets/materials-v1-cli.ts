@@ -16,12 +16,14 @@ import {
   buildT013ProviderSchemaEvidence,
   buildT013RiskDisclosure,
   isT013Authorized,
+  loadT013MaterialsPlanForT044Check,
   renderCanonicalJson,
   renderT013MaterialsPlan,
   t013PlanSha256,
   validateT013ApprovalEvidence,
   validateT013DisclosurePresentationEvidence,
   validateT013MaterialsPlan,
+  validateT013MaterialsPlanForT044Check,
   type T013MaterialsPlan,
 } from "./materials-v1";
 
@@ -82,6 +84,20 @@ function checkTracked(): { plan: T013MaterialsPlan; plan_sha256: string; risk_sh
   return { plan: parsed, plan_sha256: sha256(planBytes), risk_sha256: sha256(riskBytes), schema_sha256: sha256(schemaBytes), authorized: isT013Authorized(repositoryRoot, parsed) };
 }
 
+function checkTrackedForT044(): { plan: T013MaterialsPlan; plan_sha256: string; risk_sha256: string; schema_sha256: string; authorized: boolean } {
+  const expectedPlan = loadT013MaterialsPlanForT044Check(repositoryRoot);
+  const expectedRisk = buildT013RiskDisclosure();
+  const planBytes = readFileSync(safeResolve(repositoryRoot, T013_PLAN_PATH), "utf8");
+  const riskBytes = readFileSync(safeResolve(repositoryRoot, T013_RISK_PATH), "utf8");
+  const schemaBytes = readFileSync(safeResolve(repositoryRoot, T013_SCHEMA_EVIDENCE_PATH), "utf8");
+  if (planBytes !== renderT013MaterialsPlan(expectedPlan)) throw new Error("tracked T013 plan bytes changed");
+  if (riskBytes !== renderCanonicalJson(expectedRisk)) throw new Error("tracked T013 risk disclosure bytes changed");
+  if (schemaBytes !== renderCanonicalJson(buildT013ProviderSchemaEvidence())) throw new Error("tracked T013 provider schema evidence bytes changed");
+  const parsed = JSON.parse(planBytes) as T013MaterialsPlan;
+  validateT013MaterialsPlanForT044Check(parsed, repositoryRoot);
+  return { plan: parsed, plan_sha256: sha256(planBytes), risk_sha256: sha256(riskBytes), schema_sha256: sha256(schemaBytes), authorized: isT013Authorized(repositoryRoot, parsed) };
+}
+
 export function runT013MaterialsCli(args: readonly string[]): Record<string, unknown> {
   const command = args[0];
   if (command === "gen") {
@@ -94,8 +110,8 @@ export function runT013MaterialsCli(args: readonly string[]): Record<string, unk
   }
   if (command === "check") {
     if (args.length !== 1) throw new Error("usage: assets:materials:v1 check");
-    const result = checkTracked();
-    return { command, plan_sha256: result.plan_sha256, risk_sha256: result.risk_sha256, schema_sha256: result.schema_sha256, authorized: result.authorized };
+    const result = checkTrackedForT044();
+    return { command, decision_binding: "T044_BALANCE_REBIND", plan_sha256: result.plan_sha256, risk_sha256: result.risk_sha256, schema_sha256: result.schema_sha256, authorized: result.authorized };
   }
   if (command === "disclosure-record") {
     if (args.length !== 3) throw new Error("usage: assets:materials:v1 disclosure-record --disclosed-at <actual-ISO-timestamp>");
