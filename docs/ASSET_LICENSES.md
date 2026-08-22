@@ -29,7 +29,7 @@
 | 결정론적 폴백 | 873 | T022: canonical 837 + `HEART_FORGE` 36 | 파일·외부 에셋 아님 |
 | 번들 폰트·오디오·비디오 | 0 | `dist` 확장자 inventory | system font fallback only; 외부 media 없음 |
 | React / react-dom / scheduler | 19.2.8 / 19.2.8 / 0.27.0 | MIT; 공통 LICENSE SHA-256 `da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93` | 코드 포함, 배포 고지 누락으로 `BLOCKED_FOR_RELEASE` |
-| Vite modulepreload polyfill | Vite 8.2.1 | MIT; `LICENSE.md` SHA-256 `387dd7baa307083401a27c58c362c30832f5ba1dba84f10cc22c33401523f45c` | 코드 포함, 배포 고지 누락으로 `BLOCKED_FOR_RELEASE` |
+| Vite modulepreload polyfill + preload helper | Vite 8.2.1 | MIT; `LICENSE.md` SHA-256 `387dd7baa307083401a27c58c362c30832f5ba1dba84f10cc22c33401523f45c` | 코드 포함, 배포 고지 누락으로 `BLOCKED_FOR_RELEASE` |
 | 작성 데이터·FICTOR 코드 | repository authored | Git history·handwritten source·결정론적 generator | 외부 항목 아님 |
 
 `package-lock.json` SHA-256은
@@ -38,8 +38,10 @@
 제3자 `LICENSE`/`NOTICE`/`COPYING` 파일과 보존된 license header가 없다. 공개 전 후속 구현에서 고지를
 포함하고 새 산출물을 재감사해야 한다.
 
-현재 Higgsfield 공개 Terms(updated 2026-07-26)의 commercial use 조건과 AI disclosure 조항, 2026-08-02
-공식 Help Center의 attribution 불필요·commercial use 가능 안내를 확인했다. 그러나 2026-08-11–14 생성
+현재 Higgsfield 공개 Terms(updated 2026-07-26)의 commercial use 조건과 AI disclosure 조항, live UI에
+`Updated Aug 3, 2026`으로 표시된 공식 Help Center의 attribution 불필요·commercial use 가능 안내를
+확인했다. 같은 Help Center의 semantic text extractor가 `Aug 2, 2026`으로 렌더링한 하루 차이는 T046
+감사에 기록했으며 어느 표시도 생성 당시 적용 약관 revision으로 쓰지 않는다. 그러나 2026-08-11–14 생성
 당시 계정 적용 revision·조기 동의와 요청 `nano_banana_2` 대 보고 `nano_banana_flash`의 supplemental
 policy가 미확인이다. 현재 도움말을 과거 권리로 소급하지 않으며 AI PNG 625장 전부를 비면제 공개
 blocker로 유지한다. 원문은 [Terms](https://higgsfield.ai/terms-of-use-agreement),

@@ -60,7 +60,7 @@ T045 merge commit의 기존 `dist/`를 읽기 전용으로 감사했다. 빌드�
 | React | 19.2.8 | MIT | `node_modules/react/LICENSE` / `da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93` | 누락 |
 | react-dom | 19.2.8 | MIT | 같은 React LICENSE SHA-256 | 누락 |
 | scheduler | 0.27.0 | MIT | 같은 React LICENSE SHA-256 | 누락 |
-| Vite modulepreload polyfill | Vite 8.2.1 | MIT | `node_modules/vite/LICENSE.md` / `387dd7baa307083401a27c58c362c30832f5ba1dba84f10cc22c33401523f45c` | 누락 |
+| Vite modulepreload polyfill + preload helper | Vite 8.2.1 | MIT | `node_modules/vite/LICENSE.md` / `387dd7baa307083401a27c58c362c30832f5ba1dba84f10cc22c33401523f45c` | 누락 |
 
 `dist`에는 제3자 `LICENSE`, `NOTICE`, `COPYING` 파일이 없고 minified JS에도 보존된 license header가 없다.
 MIT 고지를 배포물에 보존하지 않은 현재 상태는 release blocker다. T047은 처리 방식을 승인하고, 공개 전
@@ -80,7 +80,10 @@ MIT 고지를 배포물에 보존하지 않은 현재 상태는 release blocker�
   요구할 때 AI 생성 사실을 고지하고 provider provenance를 훼손하지 않도록 하며, §11.7은 출력을
   사람 생성물이라고 표시하지 말고 법령상 필요한 고지를 하도록 한다.
 - [공식 Help Center의 소유·상업 이용 안내](https://higgsfield.ai/creator-hub/help-center/account/who-owns-my-generations-and-can-i-use-them-commercially)는
-  2026-08-02 현재 attribution이 필요 없고 commercial use가 허용된다고 안내한다.
+  live UI에서 `Updated Aug 3, 2026`으로 표시되며 attribution이 필요 없고 commercial use가 허용된다고
+  안내한다. 같은 페이지의 semantic text extractor는 `Aug 2, 2026`으로 렌더링해 하루 차이가 있으므로,
+  이 문서는 공식 표시일 2026-08-03과 실제 접근일 2026-08-22 KST를 함께 기록하고 해당 날짜를 약관
+  revision 또는 생성 당시 적용일로 사용하지 않는다.
 - [Privacy Policy](https://higgsfield.ai/privacy-policy)는 입력·출력 처리 조건을 별도로 둔다.
 
 ### 미확인과 판정
@@ -107,15 +110,31 @@ Task에서 UI나 README에 적용하지 않았다.
 
 ### 고정된 공개 명칭 목록
 
-| 종류 | 이번 감사의 고정 문자열 | 판정 |
+| 종류 | 이번 감사의 고정 문자열 | 검색 상태·판정 |
 | --- | --- | --- |
-| 타이틀 | `FICTOR`, `픽토르` | T047 decision blocker |
-| 조어 종족 | `STILLKIN`, `BURNKIN`, `JOINKIN` | KIPRIS exact quick search 0; 제한 검색 통과만 의미 |
-| 옛 신 영문명 | `The Stilling`, `The Burning`, `The Scattering`, `The Rotting`, `The Washing`, `The Joining` | 일반 단어 조합이라 quick search가 noisy함; 유사·지정상품 clearance 미완료 |
-| 옛 신·종족 한국어명 | `어름`, `사름`, `흩음`, `삭음`, `씻음`, `이음`, `어름붙이`, `사름붙이`, `이음붙이` | 저장소 노출 목록 고정; 정식 clearance 미완료 |
-| 일반 게임 용어 | `옛 신`, `조각`, `빚기`, `도감`, `신의 심장`, `터`, `공명` | 넓고 noisy한 일반·신화 표현; 클리어런스 미완료 |
+| 타이틀 | `FICTOR`, `픽토르` | `SEARCHED` — 아래 USPTO·KIPRIS register; T047 decision blocker |
+| 조어 종족 | `STILLKIN`, `BURNKIN`, `JOINKIN` | `SEARCHED_KIPRIS_ONLY` — 각 quick search 0; USPTO·유사 검색 미완료 |
+| 옛 신 영문명 | `The Stilling`, `The Burning`, `The Scattering`, `The Rotting`, `The Washing`, `The Joining` | `PARTIAL_KIPRIS_BROAD_SEARCH` — 일반 단어 조합이라 noisy하며 `The Scattering` 결과 캡처 미완료 |
+| 옛 신·종족 한국어명 | `어름`, `사름`, `흩음`, `삭음`, `씻음`, `이음`, `어름붙이`, `사름붙이`, `이음붙이` | `NOT_SEARCHED` — 저장소 노출 목록만 고정; blocker에 포함 |
+| 일반 게임 용어 | `옛 신`, `조각`, `빚기`, `도감`, `신의 심장`, `터`, `공명` | `NOT_SEARCHED` — 일반·설명 용어이며 정식 clearance 미완료 |
 
-2026-08-22 current quick search 관찰은 다음과 같다.
+### 2026-08-22 KST source register
+
+검색 화면은 공개 브라우저에서 secret-free DOM으로 검토했다. 검색 state가 URL에 영구 인코딩되지 않는
+KIPRIS·USPTO 결과 화면의 raw session capture는 커밋하지 않고, 재현 가능한 query·filter와 관찰 결과를
+아래 register에 전사했다. USPTO TSDR 상세 페이지 자체 생성 시각은 `2026-08-22 06:53:41 EDT`
+(`2026-08-22 19:53:41 KST`)였다.
+
+| source·직접 URL | query·filter | secret-free 관찰·evidence locator | 상태 |
+| --- | --- | --- | --- |
+| [USPTO Trademark Search](https://tmsearch.uspto.gov/search/search-results) | refinement `Wordmark`; query `FICTOR`; Live·Dead 모두, class 전체 | `3 results`, 모두 Live/Registered. serial `79167034` IC009 DWS SRL, `97196195` IC020, `98723270` IC028. 이 표와 아래 TSDR가 dated capture summary다. | `SEARCHED` |
+| [USPTO TSDR 79167034](https://tsdr.uspto.gov/#caseNumber=79167034&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch) | US serial `79167034`; Status | registration `4868924`, `LIVE/REGISTRATION/Issued and Active`, IC009 active, owner DWS SRL, goods `Computer software for design of three-dimensional objects` | `SEARCHED` |
+| [KIPRIS 검색 결과](https://www.kipris.or.kr/khome/search/searchResult.do) | tab `상표`; quick query `FICTOR`; 기본 전체 필터 | 4 results. exact `FICTOR` registration `1251481`, IC09, DWS SRL, `등록`. 이 표가 session-bound 결과의 dated capture summary다. | `SEARCHED` |
+| [KIPRIS 검색 결과](https://www.kipris.or.kr/khome/search/searchResult.do) | tab `상표`; quick query `픽토르`; 기본 전체 필터 | 2 results: `픽토르 (PIKTOR)` IC25 `포기`, IC16 `소멸` | `SEARCHED` |
+| [KIPRIS 검색 결과](https://www.kipris.or.kr/khome/search/searchResult.do) | tab `상표`; quick query를 각각 `STILLKIN`, `BURNKIN`, `JOINKIN` | 각 0 results | `SEARCHED_KIPRIS_ONLY` |
+| [KIPRIS 검색 결과](https://www.kipris.or.kr/khome/search/searchResult.do) | tab `상표`; quick query를 각각 `THE STILLING`, `THE BURNING`, `THE SCATTERING`, `THE ROTTING`, `THE WASHING`, `THE JOINING` | broad result가 각각 2,263 / 1,060 / 미캡처 / 155 / 8,776 / 357. exact phrase나 지정상품 필터가 아니므로 충돌 수로 해석하지 않음 | `PARTIAL_KIPRIS_BROAD_SEARCH` |
+
+### 관찰 요약과 한계
 
 - USPTO Wordmark `FICTOR`: live registered 3건. serial `79167034`, registration `4868924`, IC009,
   DWS SRL의 활성 표장은 goods가 “Computer software for design of three-dimensional objects”다.
@@ -125,9 +144,10 @@ Task에서 UI나 README에 적용하지 않았다.
 - KIPRIS quick search `픽토르`: 2 results지만 IC16·IC25이고 abandoned/expired다.
 - KIPRIS quick search에 각 문자열 `STILLKIN`, `BURNKIN`, `JOINKIN`을 넣었을 때 각각 0 results.
 
-이는 exact·quick 데이터베이스 screening이다. 유사·음성 표장, 지정상품 전체, common-law 사용, 게임
-스토어, 앱 이름, 도메인 검색과 법률 판단은 완료하지 않았다. 따라서 `FICTOR` 유지나 변경 어느 쪽도
-이번 감사가 승인하지 않으며 T047의 명시적 결정 없이는 공개할 수 없다.
+위 `SEARCHED` 행도 제한된 wordmark·quick 데이터베이스 screening이다. `PARTIAL`과 `NOT_SEARCHED` 행,
+유사·음성 표장, 지정상품 전체, common-law 사용, 게임 스토어, 앱 이름, 도메인 검색과 법률 판단은
+완료하지 않았다. 따라서 `FICTOR` 유지나 변경 어느 쪽도 이번 감사가 승인하지 않으며, 미완료 검색은
+B-03에 그대로 남고 T047의 명시적 결정 없이는 공개할 수 없다.
 
 ## 행사 규정·실제 제출 폼
 
