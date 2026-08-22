@@ -17,7 +17,7 @@
 - [ ] 생성 당시 Higgsfield 계정 적용 Terms·Privacy revision과 조기 동의 여부를 확인했습니다.
 - [ ] 요청 `nano_banana_2` 대 provider 보고 `nano_banana_flash`의 관계와 supplemental policy를 확인했습니다. 해소 전 공개 AI 표기에 모델명을 넣지 않습니다.
 - [ ] T047에서 `FICTOR` 유지 또는 변경과 잔여 상표 위험을 명시적으로 결정했습니다.
-- [ ] `style/master-candidate-01`만 `SELECTED`임을 확인하고, dist-copied `NOT_SELECTED` 후보 02–04를 제거하거나 공개 포함을 명시 승인했습니다.
+- [x] [T060 packaging 기록](asset-runs/t060-release-packaging-2026-08-22.md)에 따라 `style/master-candidate-01`만 production에 포함하고 `NOT_SELECTED` 후보 02–04는 원본·backup·provenance를 보존한 채 build 입력과 `dist`에서 제외했습니다.
 - [ ] production artifact에 React·react-dom·scheduler·Vite modulepreload polyfill의 MIT license/NOTICE가 포함됐습니다.
 - [ ] T047에서 승인한 동일 AI 표기 문구를 게임 크레딧, README, 제출 설명, `ASSET_LICENSES.md` 네 위치에 적용하고 byte 기준으로 대조했습니다.
 

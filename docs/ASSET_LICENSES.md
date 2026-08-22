@@ -57,6 +57,17 @@ T047에서 타이틀과 최종 문구를 승인한 뒤에만 게임 크레딧·R
 문구를 적용한다. 요청/보고 모델 불일치를 해소하기 전에는 모델명을 추가하지 않는다. 현재 게임 UI,
 README와 dist에는 이 표기를 적용하지 않았다.
 
+## T060 production packaging — 2026-08-22 KST
+
+[T060 release packaging 기록](asset-runs/t060-release-packaging-2026-08-22.md)에 따라 T011 evidence 원본
+4장과 별도 backup·provenance는 보존하고, production build 입력과 `dist`는 T022 게임 에셋 621장과
+T012 선택 후보 01 한 장만 허용한다. 저장소 evidence inventory는 625장이지만 production PNG inventory는
+정확히 622장이며 `NOT_SELECTED` 후보 02–04는 포함하지 않는다.
+
+이 분리는 `B-05`만 닫는다. production에 남은 AI PNG 622장의 생성 당시 계정·모델 권리 확인은 T055,
+공개 release 결정은 T047 범위로 계속 blocked다. T046의 625장 표와 판단은 그 시점의 역사적 snapshot으로
+수정하지 않았다.
+
 ## AI 생성물 provenance 연결
 
 - 계획과 ID·경로·프롬프트 hash: `assets/manifests/core-v1.plan.json`
@@ -72,9 +83,10 @@ T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과
 
 - [x] T046 기준 실제 이미지·폰트·오디오·비디오·AI·오픈소스·작성 항목 inventory를 구분했습니다.
 - [x] T022 621장과 T011 스타일 4장의 provenance·manifest·결정 링크를 보존했습니다.
+- [x] T060에서 후보 02–04를 evidence-only로 보존하고 production build 입력·`dist`에서 제외해 PNG 622장을 고정했습니다.
 - [x] T046 문서에 계정 ID, 이메일, API 키, form 개인정보나 signed URL을 복제하지 않았습니다.
 - [x] 번들 폰트·오디오·비디오가 없고 system font fallback만 쓰는 것을 확인했습니다.
 - [ ] 생성 당시 계정 적용 Terms·Privacy와 요청/보고 모델의 supplemental policy가 확인됐습니다.
 - [ ] 게임 크레딧·README·제출 설명·이 문서의 AI 표기가 T047 승인 문구로 일치합니다.
 - [ ] 배포 산출물에 React·Vite 계열 MIT 고지가 포함됐습니다.
-- [ ] `FICTOR` 공개 타이틀과 스타일 후보 02–04의 배포 포함 여부가 승인됐습니다.
+- [ ] `FICTOR` 공개 타이틀이 승인됐습니다.
