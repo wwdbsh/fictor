@@ -47,7 +47,7 @@ T045 merge commit의 기존 `dist/`를 읽기 전용으로 감사했다. 빌드�
   생성기의 산출물이지 제3자 데이터셋이 아니다.
 - T045 산출물은 630 files, 1,266,270,321 bytes다. T031과 같은
   `<sha256> <bytes> <relative-path>\n` 정렬 목록 방식의 `dist` tree SHA-256은
-  `c173128667aacb118382e0eb781e0a6289b9c2fa3736c21e1bde196fd03ad88b`다.
+  `c0076e9a0e311fd7922dfd787b59876173ea80d41e98f1a09270e8bf4247313a`다.
 
 ## 배포 오픈소스
 
