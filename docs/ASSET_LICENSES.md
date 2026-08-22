@@ -36,7 +36,8 @@
 `13471a5f8fefa27551d342f9c0d45863cad31677557f528d7039524ff4abe6c4`다. modulepreload polyfill 외 Vite
 구현과 나머지 package-lock 항목은 빌드·개발 도구 inventory이며 독립 package 파일로 현재 public dist에 포함되지 않는다. `dist`에는
 제3자 `LICENSE`/`NOTICE`/`COPYING` 파일과 보존된 license header가 없다. 공개 전 후속 구현에서 고지를
-포함하고 새 산출물을 재감사해야 한다.
+포함하고 새 산출물을 재감사해야 한다. 이 React·Vite 계열 고지 누락은
+[T046 blocker `B-04`](legal/t046-release-audit-2026-08-22.md#공개-blocker-원장과-t047-handoff)와 같은 항목이다.
 
 현재 Higgsfield 공개 Terms(updated 2026-07-26)의 commercial use 조건과 AI disclosure 조항, live UI에
 `Updated Aug 3, 2026`으로 표시된 공식 Help Center의 attribution 불필요·commercial use 가능 안내를
