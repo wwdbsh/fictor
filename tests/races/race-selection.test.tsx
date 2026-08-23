@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+import "@testing-library/jest-dom/vitest";
+
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -22,10 +24,22 @@ describe("race selection", () => {
 
     const selectionHeading = screen.getByRole("heading", { name: "붙이를 고르세요" });
     await waitFor(() => expect(document.activeElement).toBe(selectionHeading));
+    const legalBefore = screen.getAllByRole("link", { name: "제3자 라이선스 고지" });
+    expect(legalBefore).toHaveLength(1);
+    expect(legalBefore[0]).toHaveAttribute("href", "/fictor-test/THIRD_PARTY_NOTICES.txt");
+    expect(legalBefore[0]).not.toHaveAttribute("target");
+    expect(legalBefore[0]).not.toHaveAttribute("tabindex");
+    legalBefore[0].focus();
+    expect(legalBefore[0]).toHaveFocus();
     expect(screen.getByRole("button", { name: "어름붙이로 시작" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "사름붙이로 시작" }));
 
     await waitFor(() => expect(screen.getByRole("button", { name: "다음 기록으로" })).toBeTruthy());
+    const legalAfter = screen.getAllByRole("link", { name: "제3자 라이선스 고지" });
+    expect(legalAfter).toHaveLength(1);
+    expect(legalAfter[0]).toHaveAttribute("href", "/fictor-test/THIRD_PARTY_NOTICES.txt");
+    legalAfter[0].focus();
+    expect(legalAfter[0]).toHaveFocus();
     expect(storage.values.get(FICTOR_RACE_SELECTION_KEY)).toBe("Burnkin");
     fireEvent.click(screen.getByRole("button", { name: "다음 기록으로" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "턴 시작" })).toBeTruthy());

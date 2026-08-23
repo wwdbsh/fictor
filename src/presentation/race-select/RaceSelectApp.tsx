@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { PlayableTrack1RaceId, StillkinTrack1UiSession, Track1RaceSelection } from "../../application";
 import { App } from "../App";
+import { LegalNoticeLink } from "../legal/LegalNoticeLink";
 
 export interface RaceSelectAppProps {
   readonly selection: Track1RaceSelection;
@@ -40,6 +41,7 @@ export function RaceSelectApp({ selection }: RaceSelectAppProps) {
         ))}
       </div>
       {errorKo ? <p role="alert">{errorKo}</p> : null}
+      <LegalNoticeLink baseUrl={selection.baseUrl} />
     </main>
   );
 }

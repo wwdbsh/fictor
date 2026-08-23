@@ -89,6 +89,8 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
   background: rgba(220, 234, 237, 0.9);
 }
 .header-actions { justify-self: end; display: flex; align-items: center; gap: 1rem; }
+.legal-notice-link { display: inline-flex; min-height: 2.75rem; align-items: center; padding: 0.35rem 0.55rem; border-bottom: 1px solid currentColor; color: inherit; font: 0.72rem/1.2 system-ui, sans-serif; text-decoration: underline; text-underline-offset: 0.2em; }
+.legal-notice-link:focus-visible { outline: 0.2rem solid var(--focus-ring); outline-offset: 0.2rem; }
 .race-change { flex: 0 0 auto; min-height: 2.75rem; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: var(--ink); cursor: pointer; font-size: .78rem; white-space: nowrap; }
 .codex-open { display: inline-flex; min-height: 2.75rem; align-items: center; gap: 0.4rem; padding: 0.4rem 0.65rem; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font-size: 0.82rem; }
 .codex-open svg { width: 1.45rem; height: 1.45rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
@@ -663,6 +665,7 @@ button.codex-entry { cursor: pointer; }
 }
 
 .race-select-screen > header { max-width: 52rem; }
+.race-select-screen > .legal-notice-link { justify-self: start; color: #f4efe5; }
 .race-select-screen h1 { margin: .25rem 0; font-size: clamp(2.5rem, 7vw, 5rem); }
 .race-select-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 24rem)); gap: 1rem; }
 .race-choice { min-height: 18rem; padding: 2rem; border: 1px solid #6d6257; background: rgb(17 18 19 / 88%); display: flex; flex-direction: column; justify-content: flex-end; }

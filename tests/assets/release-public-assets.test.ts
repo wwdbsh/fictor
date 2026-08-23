@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 
@@ -43,6 +43,8 @@ function makeFixture(): Fixture {
   const selectedPath = join(publicRoot, "assets/style/master-candidate-01.png");
   mkdirSync(resolve(selectedPath, ".."), { recursive: true });
   writeFileSync(selectedPath, "selected");
+  const legalNotice = Buffer.from("fixture third-party notice\n");
+  writeFileSync(join(publicRoot, "THIRD_PARTY_NOTICES.txt"), legalNotice);
   for (const evidencePath of EVIDENCE_ONLY_PUBLIC_PATHS) {
     const path = join(root, evidencePath);
     mkdirSync(resolve(path, ".."), { recursive: true });
@@ -69,6 +71,8 @@ function makeFixture(): Fixture {
       publicRoot,
       manifestPath,
       selectedStyleSha256: sha256("selected"),
+      legalNoticeSha256: sha256(legalNotice),
+      legalNoticeBytes: legalNotice.length,
       expectedT022AssetCount: records.length,
       expectedProductionCount: records.length + 1,
     },
@@ -76,6 +80,19 @@ function makeFixture(): Fixture {
 }
 
 describe("T060 release public allowlist", () => {
+  test("stages the pinned production notice through semantic validation", async () => {
+    const staged = await stageReleasePublicAssets();
+    try {
+      expect(staged.inventory.productionCount).toBe(622);
+      expect(staged.inventory.legalNotice.relativePath).toBe("THIRD_PARTY_NOTICES.txt");
+      expect(readFileSync(join(staged.stageRoot, staged.inventory.legalNotice.relativePath))).toEqual(
+        readFileSync(join(resolve(import.meta.dirname, "../.."), staged.inventory.legalNotice.publicPath)),
+      );
+    } finally {
+      await staged.cleanup();
+    }
+  });
+
   test("stages exactly the production allowlist and excludes candidates 02–04", async () => {
     const fixture = makeFixture();
     const staged = await stageReleasePublicAssets(fixture.options);
@@ -88,6 +105,7 @@ describe("T060 release public allowlist", () => {
       for (const path of EVIDENCE_ONLY_PUBLIC_PATHS) {
         expect(existsSync(join(staged.stageRoot, path.slice("public/".length)))).toBe(false);
       }
+      expect(readFileSync(join(staged.stageRoot, "THIRD_PARTY_NOTICES.txt"), "utf8")).toBe("fixture third-party notice\n");
     } finally {
       await staged.cleanup();
     }
@@ -145,6 +163,44 @@ describe("T060 release public allowlist", () => {
     );
   });
 
+  test("fails closed for missing, tampered, symlinked, or unexpected legal files", async () => {
+    const missing = makeFixture();
+    unlinkSync(join(missing.publicRoot, "THIRD_PARTY_NOTICES.txt"));
+    await expect(stageReleasePublicAssets(missing.options)).rejects.toThrow(/MISSING_(LEGAL_NOTICE|TREE_ENTRY)/);
+
+    const tampered = makeFixture();
+    writeFileSync(join(tampered.publicRoot, "THIRD_PARTY_NOTICES.txt"), "tampered\n");
+    await expect(stageReleasePublicAssets(tampered.options)).rejects.toThrow(/LEGAL_(HASH|SIZE)_DRIFT/);
+
+    const linked = makeFixture();
+    const legalPath = join(linked.publicRoot, "THIRD_PARTY_NOTICES.txt");
+    unlinkSync(legalPath);
+    symlinkSync(join(linked.publicRoot, "assets/cards/one.png"), legalPath);
+    await expect(stageReleasePublicAssets(linked.options)).rejects.toThrow(/SYMLINK/);
+
+    const unexpected = makeFixture();
+    writeFileSync(join(unexpected.publicRoot, "NOTICE.txt"), "unexpected legal file\n");
+    await expect(stageReleasePublicAssets(unexpected.options)).rejects.toThrow(/UNEXPECTED_TREE_ENTRY/);
+
+    const distFixture = makeFixture();
+    const staged = await stageReleasePublicAssets(distFixture.options);
+    const distRoot = tempManager.create("fictor-release-legal-dist-");
+    try {
+      for (const asset of staged.inventory.assets) {
+        const destination = join(distRoot, asset.relativePath);
+        mkdirSync(resolve(destination, ".."), { recursive: true });
+        writeFileSync(destination, readFileSync(join(staged.stageRoot, asset.relativePath)));
+      }
+      const legalDestination = join(distRoot, staged.inventory.legalNotice.relativePath);
+      mkdirSync(resolve(legalDestination, ".."), { recursive: true });
+      writeFileSync(legalDestination, readFileSync(join(staged.stageRoot, staged.inventory.legalNotice.relativePath)));
+      writeFileSync(join(distRoot, "OTHER_LICENSES.txt"), "unexpected legal file\n");
+      await expect(verifyReleaseDist(distRoot, staged.inventory)).rejects.toThrow(/DIST_UNEXPECTED_LEGAL_FILE/);
+    } finally {
+      await staged.cleanup();
+    }
+  });
+
   test("dist verification accepts exact hashes and rejects an evidence candidate", async () => {
     const fixture = makeFixture();
     const staged = await stageReleasePublicAssets(fixture.options);
@@ -156,6 +212,9 @@ describe("T060 release public allowlist", () => {
         mkdirSync(resolve(destination, ".."), { recursive: true });
         writeFileSync(destination, readFileSync(source));
       }
+      const legalDestination = join(distRoot, staged.inventory.legalNotice.relativePath);
+      mkdirSync(resolve(legalDestination, ".."), { recursive: true });
+      writeFileSync(legalDestination, readFileSync(join(staged.stageRoot, staged.inventory.legalNotice.relativePath)));
       await expect(verifyReleaseDist(distRoot, staged.inventory)).resolves.toBeUndefined();
       const evidence = join(distRoot, EVIDENCE_ONLY_PUBLIC_PATHS[0].slice("public/".length));
       mkdirSync(resolve(evidence, ".."), { recursive: true });

@@ -15,6 +15,7 @@ export interface Track1RaceSelectionChoice {
 }
 
 export interface Track1RaceSelection {
+  readonly baseUrl: string;
   readonly initialRaceId: PlayableTrack1RaceId | null;
   readonly choices: readonly Track1RaceSelectionChoice[];
   select(raceId: PlayableTrack1RaceId): boolean;
@@ -43,6 +44,7 @@ export function createTrack1RaceSelection(options: Track1RaceSelectionOptions): 
     return [];
   });
   return freeze({
+    baseUrl: options.baseUrl,
     initialRaceId: selectedRace(options.storage),
     choices: freeze(choices.map((choice) => freeze(choice))),
     select(raceId: PlayableTrack1RaceId) {

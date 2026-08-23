@@ -12,6 +12,7 @@ import type {
 import { AssetImage } from "./assets";
 import { FirstDiscoveryOverlay, RepeatDiscoveryToast } from "./discovery";
 import { CanonicalPreview } from "./forge/CanonicalPreview";
+import { LegalNoticeLink } from "./legal/LegalNoticeLink";
 
 const AssetPolicySmokeProbe = lazy(() => import("./assets/AssetPolicySmokeProbe"));
 const CodexSurface = lazy(() => import("./codex/CodexSurface"));
@@ -30,7 +31,7 @@ function BookIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.2c2.9-.9 5.4-.4 8.5 1.5v13c-3.1-1.9-5.6-2.4-8.5-1.5zM20.5 5.2c-2.9-.9-5.4-.4-8.5 1.5v13c3.1-1.9 5.6-2.4 8.5-1.5z" /></svg>;
 }
 
-function ScreenHeader({ projection, onOpenCodex, onChangeRace, codexButtonRef }: { projection: Track1UiProjection; onOpenCodex: () => void; onChangeRace?: () => void; codexButtonRef: RefObject<HTMLButtonElement | null> }) {
+function ScreenHeader({ projection, baseUrl, onOpenCodex, onChangeRace, codexButtonRef }: { projection: Track1UiProjection; baseUrl: string; onOpenCodex: () => void; onChangeRace?: () => void; codexButtonRef: RefObject<HTMLButtonElement | null> }) {
   const saveLabel = projection.phase === "BLOCKED" ? "저장 차단" : projection.feedback?.tone === "ERROR" ? "변경 안 됨" : "저장됨";
   return (
     <header className="screen-header">
@@ -38,6 +39,7 @@ function ScreenHeader({ projection, onOpenCodex, onChangeRace, codexButtonRef }:
       <p className="depth-label">{projection.headingKo}</p>
       <div className="header-actions">
         {onChangeRace ? <button type="button" className="race-change" onClick={onChangeRace} aria-label={`붙이 바꾸기 · 현재 ${projection.raceLabelKo}`}>{projection.raceLabelKo}</button> : null}
+        <LegalNoticeLink baseUrl={baseUrl} />
         {projection.phase !== "BLOCKED" ? (
           <button ref={codexButtonRef} type="button" className="codex-open" onClick={onOpenCodex} aria-label={`도감 열기 · 발견 ${projection.codexDiscoveredCount} / 1326`}>
             <BookIcon /><span>도감 {projection.codexDiscoveredCount}</span>
@@ -256,7 +258,7 @@ export function App({ session, initialProjection, onChangeRace }: AppProps) {
   return (
     <>
       <main ref={shell} className={`game-shell phase-${projection.phase.toLowerCase()}`} aria-busy={busy} aria-hidden={underlayLocked ? true : undefined} inert={underlayLocked ? true : undefined} data-screen-key={projection.screenKey}>
-        <ScreenHeader projection={projection} onOpenCodex={() => { if (!busy) { codexButton.current?.blur(); setCodexOpen(true); } }} onChangeRace={busy || underlayLocked ? undefined : onChangeRace} codexButtonRef={codexButton} />
+        <ScreenHeader projection={projection} baseUrl={session.baseUrl} onOpenCodex={() => { if (!busy) { codexButton.current?.blur(); setCodexOpen(true); } }} onChangeRace={busy || underlayLocked ? undefined : onChangeRace} codexButtonRef={codexButton} />
         <h1 className="sr-only focus-heading" ref={heading} tabIndex={-1}>{projection.focusHeadingKo}</h1>
         <FirstRunGuide projection={projection} />
         {projection.phase === "BLOCKED" ? <BlockedScreen projection={projection} /> : null}
