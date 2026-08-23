@@ -16,7 +16,9 @@
 - [x] [T046 공개 직전 감사](legal/t046-release-audit-2026-08-22.md)에서 실제 PNG 625장, 폰트·미디어, 배포 OSS와 폴백 inventory를 대조했습니다.
 - [ ] 생성 당시 Higgsfield 계정 적용 Terms·Privacy revision과 조기 동의 여부를 확인했습니다.
 - [ ] 요청 `nano_banana_2` 대 provider 보고 `nano_banana_flash`의 관계와 supplemental policy를 확인했습니다. 해소 전 공개 AI 표기에 모델명을 넣지 않습니다.
-- [ ] T047에서 `FICTOR` 유지 또는 변경과 잔여 상표 위험을 명시적으로 결정했습니다.
+- [x] [T056 공개 명칭 source register](legal/t056-b03-naming-screening-2026-08-23.md)와 [T057 비결정 자료](decisions/t056-b03-naming-decision-brief-2026-08-23.md)에 20개 대상의 공식 원장·스토어 관찰, 후보와 조사 한계를 기록했습니다.
+- [ ] T047에서 T057의 exact 공개 명칭 결정과 기록된 잔여 상표 위험 수용을 release 판단에 결속했습니다.
+- [ ] T057에서 타이틀·종족·옛 신의 exact 공개 명칭과 각 잔여 위험 수용 또는 변경을 명시적으로 결정했습니다.
 - [x] [T060 packaging 기록](asset-runs/t060-release-packaging-2026-08-22.md)에 따라 `style/master-candidate-01`만 production에 포함하고 `NOT_SELECTED` 후보 02–04는 원본·backup·provenance를 보존한 채 build 입력과 `dist`에서 제외했습니다.
 - [ ] production artifact에 React·react-dom·scheduler·Vite modulepreload polyfill의 MIT license/NOTICE가 포함됐습니다.
 - [ ] T047에서 승인한 동일 AI 표기 문구를 게임 크레딧, README, 제출 설명, `ASSET_LICENSES.md` 네 위치에 적용하고 byte 기준으로 대조했습니다.
