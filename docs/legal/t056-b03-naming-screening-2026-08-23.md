@@ -1,6 +1,6 @@
 # T056 B-03 공개 명칭 확대 스크리닝
 
-> 조사 기준일: 2026-08-23 KST, 일부 공식 detail 재확인은 2026-08-24 00:08 KST까지 이어졌습니다.  
+> 조사 기준일: 2026-08-23 KST, 일부 공식 detail 재확인은 2026-08-24 00:08 KST까지 이어졌습니다.
 > Task: T056 / Issue #106 / contract `20fe6da858187585380296c0de4d32d1d4173913f930c67753829da0535c0458`
 
 ## 1. 범위와 해석 한계
@@ -148,6 +148,13 @@ USPTO는 이 UI에서 독립 phonetic 결과 집합을 제공하지 않았다. �
 | `ST-18` `AP-18` `GP-18` | N18 `씻음` | 0 | 1 unrelated | 12 | S/P `LIMITED` |
 | `ST-19` `AP-19` `GP-19` | N19 `The Joining` | 2,558 noisy | 16 | 30 | no standalone exact in sampled top; S/P `LIMITED` |
 | `ST-20` `AP-20` `GP-20` | N20 `이음` | 0 | 24 US / 22 KR; common Korean service names | 30 | `인천e음` detail `AD-03`; S/P `LIMITED` |
+
+`ST-08` 이후 표의 Steam `S/P LIMITED`는 같은 관찰 창에서 variant 요청 응답이 JSON이 아니게 된 뒤
+동일 실패를 반복하지 않아, 각 행에 표시된 exact 또는 shared-core 결과 외의 동결 S/P literal을 끝까지
+실행하지 못했다는 뜻이다. 영향은 N08–N20의 Steam 유사·음성 listing coverage가 미완료라는 것이며,
+T057에서 해당 명칭을 유지하려면 공식 Steam 검색 UI에서 §2의 남은 literal을 사람이 재실행하거나 이
+공백을 잔여 위험으로 명시적으로 수용해야 한다. Apple·Google 행의 숫자도 relevance-ranked 반환 수일
+뿐 exact-title count가 아니므로 같은 판단을 대신하지 않는다.
 
 ## 6. 후보 detail register
 

@@ -1,6 +1,6 @@
 # T056 → T057 공개 명칭 결정 자료
 
-> 근거: [T056 dated source register](../legal/t056-b03-naming-screening-2026-08-23.md)  
+> 근거: [T056 dated source register](../legal/t056-b03-naming-screening-2026-08-23.md)
 > 이 문서는 선택지를 준비할 뿐 결정을 내리지 않습니다.
 
 ## 결정 상태
@@ -54,4 +54,3 @@ T057은 20개를 한 번에 묵시적으로 승인하지 않고, 적어도 타�
 - [ ] 명칭 변경 구현
 - [ ] 외부 권리자 접촉
 - [ ] 새 AI 이미지 생성
-
