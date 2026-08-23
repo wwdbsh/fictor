@@ -40,8 +40,8 @@ lockfile이나 package 버전을 변경하지 않았다. React·react-dom·sched
 | `npx vitest run tests/assets/release-public-assets.test.ts --reporter=dot` | PASS |
 | `npx vitest run tests/races/race-selection.test.tsx --reporter=dot` | PASS (T059 link assertions 포함) |
 | `npm run typecheck -- --pretty false` | PASS |
-| 전체 `npm test` | T062 예약 — 이 Task에서 실행하지 않음 |
-| production build / exact `dist` inventory / static smoke | T062 예약 — 이 Task에서 실행하지 않음 |
+| 전체 `npm test` | 로컬 수동 실행하지 않음. PR #115의 저장소 자동 `verify` run 2개는 exact commit `74a4daf`에서 PASS |
+| production build / `dist` inventory / static smoke | PR #115 자동 `verify`는 PASS. T062의 최종 exact-candidate 재검증과 B-01~B-06 재감사는 그대로 예약 |
 
 ## 범위 밖
 
