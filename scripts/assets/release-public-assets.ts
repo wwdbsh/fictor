@@ -5,6 +5,14 @@ import { tmpdir } from "node:os";
 import { dirname, join, posix, resolve, sep } from "node:path";
 import type { Plugin, ResolvedConfig } from "vite";
 
+import {
+  THIRD_PARTY_NOTICE_PUBLIC_PATH,
+  THIRD_PARTY_NOTICE_RELATIVE_PATH,
+  THIRD_PARTY_NOTICE_BYTES,
+  THIRD_PARTY_NOTICE_SHA256,
+  validateThirdPartyNoticeBytes,
+} from "../legal/third-party-notices";
+
 /**
  * The release public tree is deliberately an allowlist.  The T022 audit is
  * the source of truth for the 621 ordinary PNGs; the approved T012 style
@@ -23,6 +31,9 @@ export const EVIDENCE_ONLY_PUBLIC_PATHS = [
   "public/assets/style/master-candidate-04.png",
 ] as const;
 export const EVIDENCE_ONLY_RELATIVE_PATHS = EVIDENCE_ONLY_PUBLIC_PATHS.map((path) => path.slice("public/".length));
+export const RELEASE_LEGAL_NOTICE_PUBLIC_PATH = THIRD_PARTY_NOTICE_PUBLIC_PATH;
+export const RELEASE_LEGAL_NOTICE_RELATIVE_PATH = THIRD_PARTY_NOTICE_RELATIVE_PATH;
+export const RELEASE_LEGAL_NOTICE_SHA256 = THIRD_PARTY_NOTICE_SHA256;
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const PUBLIC_PREFIX = "public/";
@@ -36,8 +47,17 @@ export interface ReleasePublicAsset {
   readonly bytes?: number;
 }
 
+export interface ReleaseLegalNotice {
+  readonly publicPath: string;
+  readonly relativePath: string;
+  readonly sourcePath: string;
+  readonly sha256: string;
+  readonly bytes: number;
+}
+
 export interface ReleasePublicInventory {
   readonly assets: readonly ReleasePublicAsset[];
+  readonly legalNotice: ReleaseLegalNotice;
   readonly productionPaths: readonly string[];
   readonly evidenceOnlyPaths: readonly string[];
   readonly productionCount: number;
@@ -65,6 +85,12 @@ export interface ReleasePublicAssetsOptions {
   readonly stageRoot?: string;
   /** Test-only parent used for owned mkdtemp staging. */
   readonly stageParent?: string;
+  /** Test-only override for the single legal artifact path. */
+  readonly legalNoticePublicPath?: string;
+  /** Test-only override for the legal artifact hash. */
+  readonly legalNoticeSha256?: string;
+  /** Test-only override for the legal artifact byte count. */
+  readonly legalNoticeBytes?: number;
 }
 
 export interface StagedReleasePublicAssets {
@@ -138,6 +164,23 @@ export function validateReleasePublicPath(value: unknown, field = "public_path")
   if (normalized !== value || normalized.startsWith("../") || normalized === "..") {
     throw pathError("TRAVERSAL_PATH", value);
   }
+  return value.slice(PUBLIC_PREFIX.length);
+}
+
+/** Validate the one non-PNG release file without allowing path aliases. */
+export function validateReleaseLegalNoticePath(value: unknown, field = "legal_notice_path"): string {
+  if (typeof value !== "string") throw fail("INVALID_LEGAL_PATH", field);
+  if (value.includes("\0")) throw pathError("NUL_PATH", value);
+  if (/^[\\/]/.test(value) || /^[A-Za-z]:/.test(value)) throw pathError("ABSOLUTE_PATH", value);
+  if (value.includes("\\") || !value.startsWith(PUBLIC_PREFIX) || !value.endsWith(".txt")) {
+    throw pathError("INVALID_LEGAL_PATH", value);
+  }
+  const segments = value.split("/");
+  if (segments.some((segment) => segment.length === 0 || segment === "." || segment === "..")) {
+    throw pathError(segments.includes("..") ? "TRAVERSAL_PATH" : "INVALID_LEGAL_PATH", value);
+  }
+  const normalized = posix.normalize(value);
+  if (normalized !== value || normalized.startsWith("../") || normalized === "..") throw pathError("TRAVERSAL_PATH", value);
   return value.slice(PUBLIC_PREFIX.length);
 }
 
@@ -227,12 +270,30 @@ function buildInventoryFromManifest(
     sha256: options.selectedStyleSha256 ?? SELECTED_STYLE_SHA256,
   });
 
+  const legalPublicPath = options.legalNoticePublicPath ?? RELEASE_LEGAL_NOTICE_PUBLIC_PATH;
+  const legalRelativePath = validateReleaseLegalNoticePath(legalPublicPath);
+  const legalSha256 = options.legalNoticeSha256 ?? RELEASE_LEGAL_NOTICE_SHA256;
+  assertRegularHash(legalSha256, "INVALID_LEGAL_HASH");
+  if (paths.has(legalRelativePath) || evidenceOnlyPaths.includes(legalRelativePath)) {
+    throw pathError("DESTINATION_COLLISION", legalRelativePath);
+  }
+  const legalBytes = options.legalNoticeBytes ?? THIRD_PARTY_NOTICE_BYTES;
+  if (!Number.isSafeInteger(legalBytes) || legalBytes < 1) throw fail("INVALID_LEGAL_BYTES");
+  const legalNotice: ReleaseLegalNotice = {
+    publicPath: legalPublicPath,
+    relativePath: legalRelativePath,
+    sourcePath: resolveExpectedPath(options.publicRoot, legalRelativePath),
+    sha256: legalSha256,
+    bytes: legalBytes,
+  };
+
   const sortedAssets = [...assets].sort((a, b) => a.relativePath.localeCompare(b.relativePath));
   const productionPaths = sortedAssets.map(({ relativePath }) => relativePath);
   const expectedProductionCount = options.expectedProductionCount ?? RELEASE_PNG_COUNT;
   if (sortedAssets.length !== expectedProductionCount) throw fail("PRODUCTION_COUNT", String(sortedAssets.length));
   return {
     assets: sortedAssets,
+    legalNotice,
     productionPaths,
     evidenceOnlyPaths: [...evidenceOnlyPaths].sort((a, b) => a.localeCompare(b)),
     productionCount: sortedAssets.length,
@@ -284,7 +345,7 @@ function hasAllowedPrefix(path: string, allowedPaths: ReadonlySet<string>): bool
 }
 
 interface TreeScanOptions {
-  readonly expectedFiles: ReadonlyMap<string, ReleasePublicAsset>;
+  readonly expectedFiles: ReadonlyMap<string, unknown>;
   readonly evidenceOnlyPaths: ReadonlySet<string>;
   readonly hashExpectedFiles: boolean;
   readonly rootCode: string;
@@ -390,6 +451,33 @@ async function verifySourceAsset(asset: ReleasePublicAsset): Promise<void> {
   if (actual.sha256 !== asset.sha256) throw pathError("SOURCE_HASH_DRIFT", asset.relativePath);
 }
 
+async function verifyLegalNoticeSource(asset: ReleaseLegalNotice): Promise<void> {
+  let stat;
+  try {
+    stat = await lstat(asset.sourcePath);
+  } catch {
+    throw pathError("MISSING_LEGAL_NOTICE", asset.relativePath);
+  }
+  if (stat.isSymbolicLink()) throw pathError("SYMLINK", asset.relativePath);
+  if (!stat.isFile()) throw pathError("INVALID_ENTRY_TYPE", asset.relativePath);
+  const actual = await hashFile(asset.sourcePath);
+  if (actual.bytes !== asset.bytes) throw pathError("LEGAL_SIZE_DRIFT", asset.relativePath);
+  if (actual.sha256 !== asset.sha256) throw pathError("LEGAL_HASH_DRIFT", asset.relativePath);
+  // Production uses the generated T059 artifact. Isolated tests may provide
+  // a fixture hash/size, in which case the PNG staging contract remains the
+  // only concern and the fixture need not carry the full 115 KiB license.
+  if (asset.publicPath === RELEASE_LEGAL_NOTICE_PUBLIC_PATH && asset.sha256 === RELEASE_LEGAL_NOTICE_SHA256) {
+    try {
+      validateThirdPartyNoticeBytes(await readFile(asset.sourcePath));
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("THIRD_PARTY_NOTICES_")) {
+        throw fail("LEGAL_NOTICE_INVALID", error.message);
+      }
+      throw error;
+    }
+  }
+}
+
 async function verifyStagedAsset(stageRoot: string, asset: ReleasePublicAsset): Promise<void> {
   const stagePath = resolveExpectedPath(stageRoot, asset.relativePath);
   let stat;
@@ -403,6 +491,21 @@ async function verifyStagedAsset(stageRoot: string, asset: ReleasePublicAsset): 
   const actual = await hashFile(stagePath);
   if (asset.bytes !== undefined && actual.bytes !== asset.bytes) throw pathError("STAGED_SIZE_DRIFT", asset.relativePath);
   if (actual.sha256 !== asset.sha256) throw pathError("STAGED_HASH_DRIFT", asset.relativePath);
+}
+
+async function verifyStagedLegalNotice(stageRoot: string, asset: ReleaseLegalNotice): Promise<void> {
+  const stagePath = resolveExpectedPath(stageRoot, asset.relativePath);
+  let stat;
+  try {
+    stat = await lstat(stagePath);
+  } catch {
+    throw pathError("MISSING_STAGED_LEGAL_NOTICE", asset.relativePath);
+  }
+  if (stat.isSymbolicLink()) throw pathError("SYMLINK", asset.relativePath);
+  if (!stat.isFile()) throw pathError("INVALID_ENTRY_TYPE", asset.relativePath);
+  const actual = await hashFile(stagePath);
+  if (actual.bytes !== asset.bytes) throw pathError("STAGED_LEGAL_SIZE_DRIFT", asset.relativePath);
+  if (actual.sha256 !== asset.sha256) throw pathError("STAGED_LEGAL_HASH_DRIFT", asset.relativePath);
 }
 
 async function captureStageIdentity(path: string): Promise<OwnedStageIdentity> {
@@ -453,7 +556,8 @@ export async function stageReleasePublicAssets(
     : resolve(import.meta.dirname, "../..");
   const publicRoot = resolve(options.publicRoot ?? join(repositoryRoot, "public"));
   const inventory = await buildReleaseInventory({ ...options, repositoryRoot, publicRoot });
-  const expectedFiles = new Map(inventory.assets.map((asset) => [asset.relativePath, asset]));
+  const expectedFiles = new Map<string, unknown>(inventory.assets.map((asset) => [asset.relativePath, asset]));
+  expectedFiles.set(inventory.legalNotice.relativePath, inventory.legalNotice);
   const evidenceOnly = new Set(inventory.evidenceOnlyPaths);
   await scanExactTree(publicRoot, {
     expectedFiles,
@@ -464,6 +568,7 @@ export async function stageReleasePublicAssets(
   await verifyEvidencePaths(publicRoot, inventory.evidenceOnlyPaths);
 
   for (const asset of inventory.assets) await verifySourceAsset(asset);
+  await verifyLegalNoticeSource(inventory.legalNotice);
 
   const suppliedStage = options.stageRoot !== undefined;
   let stageRoot: string;
@@ -506,8 +611,19 @@ export async function stageReleasePublicAssets(
       await mkdir(dirname(destination), { recursive: true });
       await copyFile(asset.sourcePath, destination);
     }
+    const legalDestination = resolveExpectedPath(stageRoot, inventory.legalNotice.relativePath);
+    try {
+      await lstat(legalDestination);
+      throw pathError("DESTINATION_COLLISION", inventory.legalNotice.relativePath);
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("RELEASE_PUBLIC_ASSETS_DESTINATION_COLLISION")) throw error;
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw fail("DESTINATION_STAT", inventory.legalNotice.relativePath);
+    }
+    await mkdir(dirname(legalDestination), { recursive: true });
+    await copyFile(inventory.legalNotice.sourcePath, legalDestination);
 
-    const stagedMap = new Map(inventory.assets.map((asset) => [asset.relativePath, asset]));
+    const stagedMap = new Map<string, unknown>(inventory.assets.map((asset) => [asset.relativePath, asset]));
+    stagedMap.set(inventory.legalNotice.relativePath, inventory.legalNotice);
     await scanExactTree(stageRoot, {
       expectedFiles: stagedMap,
       evidenceOnlyPaths: new Set(),
@@ -515,6 +631,7 @@ export async function stageReleasePublicAssets(
       rootCode: "stage",
     });
     for (const asset of inventory.assets) await verifyStagedAsset(stageRoot, asset);
+    await verifyStagedLegalNotice(stageRoot, inventory.legalNotice);
     return { stageRoot, inventory, owned, cleanup };
   } catch (error) {
     try {
@@ -526,9 +643,16 @@ export async function stageReleasePublicAssets(
   }
 }
 
-async function verifyPngOutputTree(distRoot: string, inventory: ReleasePublicInventory): Promise<void> {
+function isUnexpectedLegalArtifactPath(relativePath: string, expectedLegalPath: string): boolean {
+  if (relativePath === expectedLegalPath) return false;
+  const basename = relativePath.slice(relativePath.lastIndexOf("/") + 1).toLowerCase();
+  return basename.endsWith(".txt") || /^(?:third[-_ ]party[-_ ]notice(?:s)?|notice(?:s)?|license(?:s)?|copying)(?:[._-].*)?$/.test(basename);
+}
+
+async function verifyReleaseOutputTree(distRoot: string, inventory: ReleasePublicInventory): Promise<void> {
   const expected = new Map(inventory.assets.map((asset) => [asset.relativePath, asset]));
   const seen = new Set<string>();
+  let legalSeen = false;
   await assertDirectory(distRoot, "dist");
 
   async function visit(current: string, currentRelative: string): Promise<void> {
@@ -543,6 +667,17 @@ async function verifyPngOutputTree(distRoot: string, inventory: ReleasePublicInv
         continue;
       }
       if (!stat.isFile()) throw pathError("DIST_ENTRY_TYPE", childRelative);
+      if (childRelative === inventory.legalNotice.relativePath) {
+        if (legalSeen) throw pathError("DIST_DUPLICATE_LEGAL_NOTICE", childRelative);
+        legalSeen = true;
+        const actual = await hashFile(child);
+        if (actual.bytes !== inventory.legalNotice.bytes) throw pathError("DIST_LEGAL_SIZE_DRIFT", childRelative);
+        if (actual.sha256 !== inventory.legalNotice.sha256) throw pathError("DIST_LEGAL_HASH_DRIFT", childRelative);
+        continue;
+      }
+      if (isUnexpectedLegalArtifactPath(childRelative, inventory.legalNotice.relativePath)) {
+        throw pathError("DIST_UNEXPECTED_LEGAL_FILE", childRelative);
+      }
       if (!childRelative.endsWith(".png")) continue;
       if (inventory.evidenceOnlyPaths.includes(childRelative)) throw pathError("DIST_EVIDENCE_ONLY", childRelative);
       const asset = expected.get(childRelative);
@@ -556,6 +691,7 @@ async function verifyPngOutputTree(distRoot: string, inventory: ReleasePublicInv
   }
   await visit(distRoot, "");
   for (const asset of inventory.assets) if (!seen.has(asset.relativePath)) throw pathError("DIST_MISSING_PNG", asset.relativePath);
+  if (!legalSeen) throw pathError("DIST_MISSING_LEGAL_NOTICE", inventory.legalNotice.relativePath);
   if (seen.size !== RELEASE_PNG_COUNT && seen.size !== inventory.productionCount) {
     throw fail("DIST_PNG_COUNT", String(seen.size));
   }
@@ -566,7 +702,7 @@ export async function verifyReleaseDist(
   distRoot: string,
   inventory: ReleasePublicInventory,
 ): Promise<void> {
-  await verifyPngOutputTree(resolve(distRoot), inventory);
+  await verifyReleaseOutputTree(resolve(distRoot), inventory);
 }
 
 /**

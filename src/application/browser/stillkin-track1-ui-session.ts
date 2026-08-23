@@ -507,6 +507,7 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
   };
 
   const session: StillkinTrack1UiSession = {
+    baseUrl,
     load() {
       acceptedSnapshot = controller.load().snapshot;
       latchedBlockingIssuesKo = acceptedSnapshot.persistence.writeBlocked

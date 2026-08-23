@@ -1,0 +1,11 @@
+/package-lock.json text eol=lf
+/public/THIRD_PARTY_NOTICES.txt text eol=lf
+/scripts/legal/third-party-notices.ts text eol=lf
+/scripts/assets/release-public-assets.ts text eol=lf
+/src/presentation/legal/LegalNoticeLink.tsx text eol=lf
+/src/presentation/App.tsx text eol=lf
+/src/presentation/race-select/RaceSelectApp.tsx text eol=lf
+/src/presentation/styles.css text eol=lf
+/docs/legal/t059-oss-mit-notices-2026-08-24.md text eol=lf
+/docs/ASSET_LICENSES.md text eol=lf
+/docs/SUBMISSION_CHECKLIST.md text eol=lf

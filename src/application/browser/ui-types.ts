@@ -277,6 +277,8 @@ export interface Track1UiDispatchResult {
 }
 
 export interface StillkinTrack1UiSession {
+  /** Base path used by this static build, exposed for same-origin legal links. */
+  readonly baseUrl: string;
   load(): Track1UiProjection;
   snapshot(): Track1UiProjection;
   dispatch(action: Track1UiActionDescriptor): Track1UiDispatchResult;

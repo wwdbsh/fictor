@@ -20,10 +20,13 @@
 - [ ] T047에서 T057의 exact 공개 명칭 결정과 기록된 잔여 상표 위험 수용을 release 판단에 결속했습니다.
 - [ ] T057에서 타이틀·종족·옛 신의 exact 공개 명칭과 각 잔여 위험 수용 또는 변경을 명시적으로 결정했습니다.
 - [x] [T060 packaging 기록](asset-runs/t060-release-packaging-2026-08-22.md)에 따라 `style/master-candidate-01`만 production에 포함하고 `NOT_SELECTED` 후보 02–04는 원본·backup·provenance를 보존한 채 build 입력과 `dist`에서 제외했습니다.
-- [ ] production artifact에 React·react-dom·scheduler·Vite modulepreload polyfill의 MIT license/NOTICE가 포함됐습니다.
+- [x] [T059 법적 고지 기록](legal/t059-oss-mit-notices-2026-08-24.md)에 따라 lockfile 버전·원문 SHA·canonical MIT block을 입력과 staging에서 검증했고, 게임의 접근 가능한 고지 링크를 확인했습니다. exact production `dist` 포함 여부는 T062에서 재검증합니다.
 - [ ] T047에서 승인한 동일 AI 표기 문구를 게임 크레딧, README, 제출 설명, `ASSET_LICENSES.md` 네 위치에 적용하고 byte 기준으로 대조했습니다.
 
 ### 실행 링크
+
+- [x] race selection과 gameplay 상태에서 `제3자 라이선스 고지` native link가 각각 정확히 하나이고, `/fictor-test/` BASE_URL 하위 href와 keyboard focus-visible을 focused test로 확인했습니다.
+- [ ] exact production `dist`의 법적 고지와 PNG inventory를 확인했습니다. T062 예약 항목이며 T059에서 완료로 표시하지 않습니다.
 
 - [ ] 게임이 브라우저에서 바로 실행되는 웹 빌드입니다.
 - [ ] 심사 기간 내 링크가 공개 상태이고 별도 승인·설치 없이 접근됩니다.

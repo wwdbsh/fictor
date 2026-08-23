@@ -68,6 +68,25 @@ T012 선택 후보 01 한 장만 허용한다. 저장소 evidence inventory는 6
 공개 release 결정은 T047 범위로 계속 blocked다. T046의 625장 표와 판단은 그 시점의 역사적 snapshot으로
 수정하지 않았다.
 
+## T059 배포 OSS MIT 고지 — 2026-08-24 KST
+
+[T059 법적 고지 기록](legal/t059-oss-mit-notices-2026-08-24.md)에 따라 실제 배포 dependency인
+React `19.2.8`, react-dom `19.2.8`, scheduler `0.27.0`, Vite `8.2.1`의 package-lock 버전과
+설치 원문 경로·SHA-256을 추적합니다. `package-lock.json` SHA-256은
+`13471a5f8fefa27551d342f9c0d45863cad31677557f528d7039524ff4abe6c4`이며 T059에서 dependency와
+lockfile은 변경하지 않았습니다.
+
+유일한 별도 배포 법적 artifact는 `public/THIRD_PARTY_NOTICES.txt`입니다. React·react-dom·scheduler는
+동일한 `da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93` 1088-byte MIT 원문을
+`react-mit-canonical-v1` 하나로 매핑하고, Vite의 `node_modules/vite/LICENSE.md` 전체 112425-byte
+원문은 `vite-mit-full-v1`로 보존합니다. 이 artifact의 SHA-256은
+`eb74e08cf7c0f51294ae2df39874ae9d11b22729615401aa5a4777f80e460703`입니다.
+
+빌드 훅은 법적 파일을 생성하지 않고 regular-file·symlink·source/stage/dist hash·예상 밖 legal file을
+fail-closed 검사한 뒤 복사합니다. PNG production inventory는 기존 T060 계약대로 정확히 622장을
+유지하며 법적 파일은 그 수량에 포함하지 않습니다. T062에서 exact production `dist`와 전체 검증을
+독립적으로 재감사합니다.
+
 ## AI 생성물 provenance 연결
 
 - 계획과 ID·경로·프롬프트 hash: `assets/manifests/core-v1.plan.json`
@@ -88,5 +107,6 @@ T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과
 - [x] 번들 폰트·오디오·비디오가 없고 system font fallback만 쓰는 것을 확인했습니다.
 - [ ] 생성 당시 계정 적용 Terms·Privacy와 요청/보고 모델의 supplemental policy가 확인됐습니다.
 - [ ] 게임 크레딧·README·제출 설명·이 문서의 AI 표기가 T047 승인 문구로 일치합니다.
-- [ ] 배포 산출물에 React·Vite 계열 MIT 고지가 포함됐습니다.
+- [x] T059 입력·staging·법적 링크 집중 검증이 완료됐습니다. exact production `dist` 포함 여부와
+  전체 build/static smoke는 T062에서 수행하므로 최종 배포 완료로 표시하지 않습니다.
 - [ ] `FICTOR` 공개 타이틀이 승인됐습니다.
