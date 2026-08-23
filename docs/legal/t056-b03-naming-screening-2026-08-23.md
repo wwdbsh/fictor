@@ -52,28 +52,28 @@ WIPO 국제등록은 미국·한국의 국가별 효력을 뜻하지 않는다. 
 
 각 셀은 아래 source register의 evidence ID를 가리킨다. `LIMITED`도 이유와 영향이 등록된 coverage다.
 
-| ID | exact string | exact marks | similar literal marks | phonetic literal marks | game/app use |
+| ID | exact string | exact marks | similar literal coverage | phonetic literal coverage | game/app use |
 |---|---|---|---|---|---|
-| N01 | `FICTOR` | `US-01`, `KR-01`, `WO-01` | `US-02`, `ST-01`, `AP-01`, `GP-01` | `US-02`, `ST-01`, `AP-01`, `GP-01` | `SD-01`, `GD-01`, `GD-02` |
-| N02 | `픽토르` | `KR-02`, `US-02`, `WO-01` | `KR-12`, `ST-02`, `AP-02`, `GP-02` | `KR-12`, `ST-02`, `AP-02`, `GP-02` | `AD-01` |
-| N03 | `Stillkin` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-03`, `AP-03`, `GP-03` | `KR-12`, `ST-03`, `AP-03`, `GP-03` | `ST-03`, `AP-03`, `GP-03` |
-| N04 | `어름붙이` | `KR-03`, `US-02`, `WO-01` | `KR-12`, `ST-04`, `AP-04`, `GP-04` | `KR-12`, `ST-04`, `AP-04`, `GP-04` | `ST-04`, `AP-04`, `GP-04` |
-| N05 | `Burnkin` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-05`, `AP-05`, `GP-05` | `KR-12`, `ST-05`, `AP-05`, `GP-05` | `ST-05`, `AP-05`, `GP-05` |
-| N06 | `사름붙이` | `KR-04`, `US-02`, `WO-01` | `KR-12`, `ST-06`, `AP-06`, `GP-06` | `KR-12`, `ST-06`, `AP-06`, `GP-06` | `ST-06`, `AP-06`, `GP-06` |
-| N07 | `Joinkin` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-07`, `AP-07`, `GP-07` | `KR-12`, `ST-07`, `AP-07`, `GP-07` | `ST-07`, `AP-07`, `GP-07` |
-| N08 | `이음붙이` | `KR-05`, `US-02`, `WO-01` | `KR-12`, `ST-08`, `AP-08`, `GP-08` | `KR-12`, `ST-08`, `AP-08`, `GP-08` | `ST-08`, `AP-08`, `GP-08` |
-| N09 | `The Stilling` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-09`, `AP-09`, `GP-09` | `KR-12`, `ST-09`, `AP-09`, `GP-09` | `ST-09`, `AP-09`, `GP-09` |
-| N10 | `어름` | `KR-06`, `US-02`, `WO-01` | `KR-12`, `ST-10`, `AP-10`, `GP-10` | `KR-12`, `ST-10`, `AP-10`, `GP-10` | `ST-10`, `AP-10`, `GP-10` |
-| N11 | `The Burning` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-11`, `AP-11`, `GP-11` | `KR-12`, `ST-11`, `AP-11`, `GP-11` | `SD-02`, `SD-03`, `AD-02` |
-| N12 | `사름` | `KR-07`, `US-02`, `WO-01` | `KR-12`, `ST-12`, `AP-12`, `GP-12` | `KR-12`, `ST-12`, `AP-12`, `GP-12` | `ST-12`, `AP-12`, `GP-12` |
-| N13 | `The Scattering` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-13`, `AP-13`, `GP-13` | `KR-12`, `ST-13`, `AP-13`, `GP-13` | `ST-13`, `AP-13`, `GP-13` |
-| N14 | `흩음` | `KR-08`, `US-02`, `WO-01` | `KR-12`, `ST-14`, `AP-14`, `GP-14` | `KR-12`, `ST-14`, `AP-14`, `GP-14` | `ST-14`, `AP-14`, `GP-14` |
-| N15 | `The Rotting` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-15`, `AP-15`, `GP-15` | `KR-12`, `ST-15`, `AP-15`, `GP-15` | `SD-04`, `SD-05` |
-| N16 | `삭음` | `KR-09`, `US-02`, `WO-01` | `KR-12`, `ST-16`, `AP-16`, `GP-16` | `KR-12`, `ST-16`, `AP-16`, `GP-16` | `ST-16`, `AP-16`, `GP-16` |
-| N17 | `The Washing` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-17`, `AP-17`, `GP-17` | `KR-12`, `ST-17`, `AP-17`, `GP-17` | `SD-06`, `AP-17`, `GP-17` |
-| N18 | `씻음` | `KR-10`, `US-02`, `WO-01` | `KR-12`, `ST-18`, `AP-18`, `GP-18` | `KR-12`, `ST-18`, `AP-18`, `GP-18` | `ST-18`, `AP-18`, `GP-18` |
-| N19 | `The Joining` | `KR-13`, `US-02`, `WO-01` | `KR-12`, `ST-19`, `AP-19`, `GP-19` | `KR-12`, `ST-19`, `AP-19`, `GP-19` | `ST-19`, `AP-19`, `GP-19` |
-| N20 | `이음` | `KR-11`, `US-02`, `WO-01` | `KR-12`, `ST-20`, `AP-20`, `GP-20` | `KR-12`, `ST-20`, `AP-20`, `GP-20` | `AD-03`, `ST-20`, `GP-20` |
+| N01 | `FICTOR` | `US-01`, `KR-01`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-01`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-01`, `SG-01` | `SD-01`, `GD-01`, `GD-02` |
+| N02 | `픽토르` | `KR-02`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-02`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-02`, `SG-01` | `AD-01` |
+| N03 | `Stillkin` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-03`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-03`, `SG-01` | `ST-03`, `AP-03`, `GP-03` |
+| N04 | `어름붙이` | `KR-03`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-04`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-04`, `SG-01` | `ST-04`, `AP-04`, `GP-04` |
+| N05 | `Burnkin` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-05`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-05`, `SG-01` | `ST-05`, `AP-05`, `GP-05` |
+| N06 | `사름붙이` | `KR-04`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-06`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-06`, `SG-01` | `ST-06`, `AP-06`, `GP-06` |
+| N07 | `Joinkin` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-07`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-07`, `SG-01` | `ST-07`, `AP-07`, `GP-07` |
+| N08 | `이음붙이` | `KR-05`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-08`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-08`, `SG-01` | `ST-08`, `AP-08`, `GP-08` |
+| N09 | `The Stilling` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-09`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-09`, `SG-01` | `ST-09`, `AP-09`, `GP-09` |
+| N10 | `어름` | `KR-06`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-10`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-10`, `SG-01` | `ST-10`, `AP-10`, `GP-10` |
+| N11 | `The Burning` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-11`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-11`, `SG-01` | `SD-02`, `SD-03`, `AD-02` |
+| N12 | `사름` | `KR-07`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-12`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-12`, `SG-01` | `ST-12`, `AP-12`, `GP-12` |
+| N13 | `The Scattering` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-13`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-13`, `SG-01` | `ST-13`, `AP-13`, `GP-13` |
+| N14 | `흩음` | `KR-08`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-14`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-14`, `SG-01` | `ST-14`, `AP-14`, `GP-14` |
+| N15 | `The Rotting` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-15`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-15`, `SG-01` | `SD-04`, `SD-05` |
+| N16 | `삭음` | `KR-09`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-16`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-16`, `SG-01` | `ST-16`, `AP-16`, `GP-16` |
+| N17 | `The Washing` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-17`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-17`, `SG-01` | `SD-06`, `AP-17`, `GP-17` |
+| N18 | `씻음` | `KR-10`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-18`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-18`, `SG-01` | `ST-18`, `AP-18`, `GP-18` |
+| N19 | `The Joining` | `KR-13`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-19`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-19`, `SG-01` | `ST-19`, `AP-19`, `GP-19` |
+| N20 | `이음` | `KR-11`, `US-02`, `WO-01` | `US-02`, `KR-12`, `WO-01`, `ST-20`, `SG-01` | `US-02`, `KR-12`, `WO-01`, `ST-20`, `SG-01` | `AD-03`, `ST-20`, `GP-20` |
 
 ## 4. 공식 상표 원장 query ledger
 
@@ -90,7 +90,7 @@ USPTO는 이 UI에서 독립 phonetic 결과 집합을 제공하지 않았다. �
 
 ### 4.2 KIPRIS
 
-공식 [KIPRIS 상표 검색](https://www.kipris.or.kr/khome/search/searchResult.do)의 국내상표, all classes/all statuses를 사용했다. generic 결과 URL은 session-bound다. `TNM=[…]` expression과 표시 건수를 전사하고 application number(`AN`)·registration number가 있는 후보는 stable identifier로 남겼다. 관찰 창은 2026-08-23 23:56–2026-08-24 00:08 KST / 2026-08-23 14:56–15:08Z다.
+공식 [KIPRIS 상표 검색](https://www.kipris.or.kr/khome/search/searchResult.do)의 국내상표, all classes/all statuses를 사용했다. generic 결과 URL은 session-bound다. `TNM=[…]` expression과 표시 건수를 전사하고 application number(`AN`)·registration number를 남겼다. 후보별 원문은 상세 화면의 `DOI 복사`가 노출한 application-number 기반 KIPRIS DOI(`doi.org/10.8080/{AN}`)로 결속했다. `KC-01` DOI는 2026-08-24 KST에 실제 detail로 resolve해 명칭·상태·IC09 지정상품을 재확인했고, 나머지는 같은 공식 DOI 규칙과 각 행의 AN을 사용한다. 관찰 창은 2026-08-23 23:56–2026-08-24 00:08 KST / 2026-08-23 14:56–15:08Z다.
 
 | evidence | target/source/mode | literal query·class·status | displayed result / observation | limitation·impact·follow-up |
 |---|---|---|---|---|
@@ -106,7 +106,7 @@ USPTO는 이 UI에서 독립 phonetic 결과 집합을 제공하지 않았다. �
 | `KR-10` | N18 / KIPRIS / exact broad | `TNM=[씻음]`; all/all | 2: AN `4020260029221` IC03, `4020260029222` IC35, 둘 다 `PENDING_APPLICATION` | lower-relevance candidate details `KC-10A/B` |
 | `KR-11` | N20 / KIPRIS / exact broad+focus | `TNM=[이음]` all/all; focus `TNM=[이음]*TC=[09+28+41+42]` | `이음` broad 58, focus display 13. 관련 active detail 3건은 `KC-11A/B/C` | focus 결과에 IC35/37도 섞여 strict filter로 신뢰하지 않음 |
 | `KR-12` | N01–N20 / KIPRIS / similar·phonetic literal | §2 S/P variants; all/all then focus intended | per-variant 실행을 완료하지 않음 | `LIMITED`: exact Korean batch와 detail 검증을 우선했고 session-bound UI에서 variant grid를 완료하지 못함. T057 유지 선택 전 수동 literal 재실행 선택 필요 |
-| `KR-13` | N03/N05/N07/N09/N11/N13/N15/N17/N19 / KIPRIS / English exact current reproduction | T046 exact race names and noisy god-phrase broad searches; all/all | 이번 관찰 창에서 재실행하지 않음 | `LIMITED_NOT_REPRODUCED`: 세 영문 종족의 T046 exact 0과 여섯 phrase의 noisy count를 현재 exact 결과로 재사용하지 않음. T057 유지 선택 전 current exact E와 focus query 필요 |
+| `KR-13` | N03/N05/N07/N09/N11/N13/N15/N17/N19 / KIPRIS / English exact current reproduction | T046 exact race names and noisy god-phrase broad searches; all/all | 이번 관찰 창에서 재실행하지 않았고, 왜 제외했는지에 대한 contemporaneous reason은 조사 기록에 남아 있지 않음 | `LIMITED_NOT_REPRODUCED`: 이유 기록의 부재 자체도 limitation이다. 아홉 영문 명칭의 current exact all-class/all-status와 009/028/041/042 focus coverage가 미확정이며 T046의 세 exact 0·여섯 noisy count를 현재 결과로 재사용하지 않음. T057 유지 선택 전 공식 KIPRIS에서 current E broad→focus를 수동 재실행하거나 이 정확한 공백을 잔여 위험으로 명시적으로 수용해야 함 |
 
 `The Stilling` 등 여섯 영문 phrase의 T046 noisy broad counts는 exact/similar 결과가 아니므로 이번 register가 숫자를 승계하지 않는다. 한국어 종족·옛 신 9개는 T046에서 미검색이었고 `KR-03`–`KR-11`이 그 공백을 일부 해소했다.
 
@@ -125,6 +125,10 @@ USPTO는 이 UI에서 독립 phonetic 결과 집합을 제공하지 않았다. �
 - Steam US/en: `https://store.steampowered.com/search/?term=<literal>` 및 official results endpoint, accessed 2026-08-23 23:45–23:59 KST (14:45–14:59Z)
 - Apple US/en, KR/ko: `https://itunes.apple.com/search?term=<literal>&entity=software&country=<us|kr>&limit=25`, accessed 2026-08-24 00:00–00:03 KST (2026-08-23 15:00–15:03Z); candidate는 direct `apps.apple.com` ID 재확인
 - Google Play US/en: `https://play.google.com/store/search?q=<literal>&c=apps&hl=en_US&gl=US`, accessed 2026-08-24 00:08–00:10 KST (2026-08-23 15:08–15:10Z); candidate는 direct package ID 재확인
+
+| evidence | target/source/mode | literal query·locale·filter | observation | limitation·impact·follow-up |
+|---|---|---|---|---|
+| `SG-01` | N01–N20 / Apple App Store + Google Play / similar·phonetic literals | §2의 S/P; Apple US/en·KR/ko, Google Play US/en; app/software search, status filter N/A | `AP-01`–`AP-20`, `GP-01`–`GP-20`은 각 target의 E 단일 query와 그 relevance-ranked 반환만 기록한다. S/P literal은 개별 실행하지 않았고, 제외 이유에 대한 contemporaneous reason도 조사 기록에 남아 있지 않다 | `LIMITED`: AP/GP exact query count는 S/P evidence가 아니다. 이유 기록 부재도 limitation이며 20개 모두의 Apple/Google S/P listing coverage가 미확정이다. T057 유지 선택 전 해당 공식 스토어에서 §2 S/P를 수동 재실행하거나 이 공백을 잔여 위험으로 명시적으로 수용해야 한다 |
 
 | IDs | target | Steam exact result | Apple US (`KR` if different) | Google Play displayed IDs | variant pass / visibility limitation |
 |---|---|---|---|---|---|
@@ -165,13 +169,13 @@ T057에서 해당 명칭을 유지하려면 공식 Steam 검색 UI에서 §2의 
 | `UC-01` | `FICTOR` / DWS SRL | `ACTIVE_REGISTRATION`; US serial `79167034`; IC009, 3D object design computer software | [USPTO TSDR 79167034](https://tsdr.uspto.gov/#caseNumber=79167034&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch) | `GAME_APP_ADJACENT_SOFTWARE`; T046 confirmed |
 | `UC-02` | `FICTOR` / He, Aijuan | `ACTIVE_REGISTRATION`; serial `98723270`; IC028, boxing bags/gloves/rings/focus mitts | [USPTO TSDR 98723270](https://tsdr.uspto.gov/#caseNumber=98723270&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch) | `BROAD_CLASS_028_LOWER_RELEVANCE`; T046 confirmed |
 | `UC-03` | `FICTOR` / He, Aijuan | `ACTIVE_REGISTRATION`; serial `97196195`; IC020, furniture/cots/cushions/coat racks etc. | [USPTO TSDR 97196195](https://tsdr.uspto.gov/#caseNumber=97196195&caseSearchType=US_APPLICATION&caseType=DEFAULT&searchType=statusSearch) | `OTHER_CLASS_LOWER_RELEVANCE`; T046 confirmed |
-| `KC-01` | `FICTOR` / DWS SRL | `ACTIVE_REGISTRATION`; KR registration `1251481`; IC09, 3D object design computer software and electronic controllers for machines creating 3D objects; not identified as game software | [KIPRIS result entry](https://www.kipris.or.kr/khome/search/searchResult.do) | `GAME_APP_ADJACENT_SOFTWARE`; likely related international mark, but counted as KR record not extra global conflict |
-| `KC-06` | `어름` / 임나현 | `ACTIVE_REGISTRATION`; AN `4020250155982`, reg `4024709250000` (2025-12-10); IC43 restaurant/café/bakery/tea-house/takeout | [KIPRIS result entry](https://www.kipris.or.kr/khome/search/searchResult.do) | `OTHER_CLASS_LOWER_RELEVANCE` |
-| `KC-10A` | `씻음` / applicant 이기쁨 | `PENDING_APPLICATION`; AN `4020260029221` (2026-02-10); IC03 cosmetics/personal care | [KIPRIS result entry](https://www.kipris.or.kr/khome/search/searchResult.do) | `OTHER_CLASS_LOWER_RELEVANCE` |
-| `KC-10B` | `씻음` / applicant 이기쁨 | `PENDING_APPLICATION`; AN `4020260029222` (2026-02-10); IC35 cosmetics retail/online intermediation/advertising | [KIPRIS result entry](https://www.kipris.or.kr/khome/search/searchResult.do) | `OTHER_CLASS_LOWER_RELEVANCE` |
-| `KC-11A` | `이음` / (주)코아테크코리아 | `ACTIVE_REGISTRATION`; AN `4020220226362`, reg `4022756320000` (2024-11-13); IC09 laboratory/scientific equipment, not game/software goods | [KIPRIS result entry](https://www.kipris.or.kr/khome/search/searchResult.do) | `SAME_CLASS_DIFFERENT_GOODS_OBSERVED` |
-| `KC-11B` | `이음 (IEUM)` / 김윤선 | `ACTIVE_REGISTRATION`; AN `4020200033728`, reg `4017228530000` (2021-05-03); IC42 logo/building/space design and environmental research | [KIPRIS result entry](https://www.kipris.or.kr/khome/search/searchResult.do) | `SAME_CLASS_DIFFERENT_SERVICES_OBSERVED` |
-| `KC-11C` | `이음 (ium)` / 김영식 | `ACTIVE_REGISTRATION`; AN `4020170121653`, reg `4013804860000` (2018-07-23); IC28 rubber/metal/wood/plastic toys, dolls, blocks, toy vehicles/instruments | [KIPRIS result entry](https://www.kipris.or.kr/khome/search/searchResult.do) | `ADJACENT_CLASS_028_TOYS` |
+| `KC-01` | `FICTOR` / DWS SRL | `ACTIVE_REGISTRATION`; AN `4020157006010`, KR registration `1251481`; IC09, 3D object design computer software and electronic controllers for machines creating 3D objects; not identified as game software | [KIPRIS DOI 4020157006010](https://doi.org/10.8080/4020157006010) | `GAME_APP_ADJACENT_SOFTWARE`; likely related international mark, but counted as KR record not extra global conflict |
+| `KC-06` | `어름` / 임나현 | `ACTIVE_REGISTRATION`; AN `4020250155982`, reg `4024709250000` (2025-12-10); IC43 restaurant/café/bakery/tea-house/takeout | [KIPRIS DOI 4020250155982](https://doi.org/10.8080/4020250155982) | `OTHER_CLASS_LOWER_RELEVANCE` |
+| `KC-10A` | `씻음` / applicant 이기쁨 | `PENDING_APPLICATION`; AN `4020260029221` (2026-02-10); IC03 cosmetics/personal care | [KIPRIS DOI 4020260029221](https://doi.org/10.8080/4020260029221) | `OTHER_CLASS_LOWER_RELEVANCE` |
+| `KC-10B` | `씻음` / applicant 이기쁨 | `PENDING_APPLICATION`; AN `4020260029222` (2026-02-10); IC35 cosmetics retail/online intermediation/advertising | [KIPRIS DOI 4020260029222](https://doi.org/10.8080/4020260029222) | `OTHER_CLASS_LOWER_RELEVANCE` |
+| `KC-11A` | `이음` / (주)코아테크코리아 | `ACTIVE_REGISTRATION`; AN `4020220226362`, reg `4022756320000` (2024-11-13); IC09 laboratory/scientific equipment, not game/software goods | [KIPRIS DOI 4020220226362](https://doi.org/10.8080/4020220226362) | `SAME_CLASS_DIFFERENT_GOODS_OBSERVED` |
+| `KC-11B` | `이음 (IEUM)` / 김윤선 | `ACTIVE_REGISTRATION`; AN `4020200033728`, reg `4017228530000` (2021-05-03); IC42 logo/building/space design and environmental research | [KIPRIS DOI 4020200033728](https://doi.org/10.8080/4020200033728) | `SAME_CLASS_DIFFERENT_SERVICES_OBSERVED` |
+| `KC-11C` | `이음 (ium)` / 김영식 | `ACTIVE_REGISTRATION`; AN `4020170121653`, reg `4013804860000` (2018-07-23); IC28 rubber/metal/wood/plastic toys, dolls, blocks, toy vehicles/instruments | [KIPRIS DOI 4020170121653](https://doi.org/10.8080/4020170121653) | `ADJACENT_CLASS_028_TOYS` |
 
 KIPRIS `픽토르` IC25 포기·IC16 소멸, `사름` IC29/30/31 포기, `이음` focus의 거절·포기·소멸 records도 `DEAD_RECORD`로 보존하지만 위 active/pending 후보보다 상세 전사 우선순위를 낮췄다. dead status를 사용 가능성 근거로 쓰지 않는다.
 

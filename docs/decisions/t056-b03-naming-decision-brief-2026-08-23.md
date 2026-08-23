@@ -10,31 +10,33 @@
 - 어느 행에도 권고·법률 의견·clearance assurance가 없다.
 - `CHANGE_REQUIRED`인데 screened replacement가 없으면 T057은 미스크리닝 대체 명칭을 구현할 수 없다. 새 후보 조사 Task가 먼저 필요하다.
 - 내부 ID·save key 변경, UI·metadata·README·제출 title source 수정은 T056 범위 밖이다.
+- `SG-01`에 따라 Apple·Google은 target별 E 단일 query만 기록됐고 S/P literal은 개별 실행되지 않았다. 제외 이유의 contemporaneous record도 없으므로 T057은 전 명칭에서 store S/P를 재실행하거나 그 공백을 명시적으로 수용해야 한다.
+- `KR-13`의 아홉 영문 명칭은 current KIPRIS exact를 재실행하지 않았고 제외 이유도 contemporaneous record에 없다. T057은 해당 E broad→focus를 재실행하거나 current exact coverage 공백을 명시적으로 수용해야 한다.
 
 ## 명칭별 비결정 요약
 
 | ID | exact public name | T057가 확인할 primary-source facts | recorded residual risk if retained | T057 choice |
 |---|---|---|---|---|
-| N01 | `FICTOR` | US/KR IC009 active exact; US IC028/020 active exact; `Fictorum`, Fictor finance apps observed | 동일 표장 active records와 `Fictor…` store use; WIPO unavailable | `UNDECIDED_T057` |
-| N02 | `픽토르` | KR IC16/25 exact records are dead; Apple `픽토르뒤 성` observed | dead records are not availability evidence; S/P and WIPO incomplete | `UNDECIDED_T057` |
-| N03 | `Stillkin` | T046 KIPRIS exact 0 historic only; current store exact title not observed in returned set | current USPTO/KIPRIS S/P and WIPO incomplete | `UNDECIDED_T057` |
-| N04 | `어름붙이` | current KIPRIS exact 0; storefront exact not observed | absence is not absence of use; S/P and WIPO incomplete | `UNDECIDED_T057` |
-| N05 | `Burnkin` | T046 KIPRIS exact 0 historic only; store relevance results noisy | current USPTO/KIPRIS S/P and WIPO incomplete | `UNDECIDED_T057` |
-| N06 | `사름붙이` | current KIPRIS exact 0; storefront exact not observed | absence is not absence of use; S/P and WIPO incomplete | `UNDECIDED_T057` |
-| N07 | `Joinkin` | T046 KIPRIS exact 0 historic only; `Join Kin` search noisy | current USPTO/KIPRIS S/P and WIPO incomplete | `UNDECIDED_T057` |
-| N08 | `이음붙이` | current KIPRIS exact 0; storefront exact not observed | Steam S/P stopped; other registry S/P and WIPO incomplete | `UNDECIDED_T057` |
-| N09 | `The Stilling` | common-phrase store search has broad noise; no standalone exact sampled | exact/S/P trademark coverage incomplete; common phrase use not exhaustively searched | `UNDECIDED_T057` |
-| N10 | `어름` | KR exact active IC43 restaurant-related registration | lower-relevance class does not resolve legal scope; S/P/WIPO incomplete | `UNDECIDED_T057` |
-| N11 | `The Burning` | Steam `The Burning Owl`/`The Burning Descent`; Apple `1944 Burning Bridges` | actual game listings share core words; trademark E/S/P incomplete | `UNDECIDED_T057` |
-| N12 | `사름` | KR exact three dead IC29/30/31 records | dead records are not availability evidence; S/P/WIPO incomplete | `UNDECIDED_T057` |
-| N13 | `The Scattering` | official stores returned many scatter-related listings | common phrase and variants noisy; trademark E/S/P incomplete | `UNDECIDED_T057` |
-| N14 | `흩음` | current KIPRIS exact 0 | absence is not absence of use; S/P/WIPO incomplete | `UNDECIDED_T057` |
-| N15 | `The Rotting` | Steam `The Rotting Chronicles`/`The Rotting Man` current listings | actual game listings share full core phrase; trademark E/S/P incomplete | `UNDECIDED_T057` |
-| N16 | `삭음` | current KIPRIS exact 0; store results unrelated/noisy | absence is not absence of use; S/P/WIPO incomplete | `UNDECIDED_T057` |
-| N17 | `The Washing` | Steam `The Joy of Hand Washing`; broad registry/store term noise | common phrase; trademark exact/S/P incomplete | `UNDECIDED_T057` |
-| N18 | `씻음` | two KR pending exact applications, IC03/35 cosmetics/retail | pending state and lower-relevance goods still require recorded treatment; S/P/WIPO incomplete | `UNDECIDED_T057` |
-| N19 | `The Joining` | official stores returned many join-related listings, no standalone exact sampled | common phrase and variants noisy; trademark E/S/P incomplete | `UNDECIDED_T057` |
-| N20 | `이음` | KR broad 58; active exact IC009 scientific equipment, IC028 toys, IC042 design; Korean apps use `…e음` | exact active records across focus classes; scope is not decided here; WIPO/S/P incomplete | `UNDECIDED_T057` |
+| N01 | `FICTOR` | US/KR IC009 active exact; US IC028/020 active exact; `Fictorum`, Fictor finance apps observed | 동일 표장 active records와 `Fictor…` store use; WIPO 및 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N02 | `픽토르` | KR IC16/25 exact records are dead; Apple `픽토르뒤 성` observed | dead records are not availability evidence; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N03 | `Stillkin` | T046 KIPRIS exact 0 historic only; current store exact title not observed in returned set | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N04 | `어름붙이` | current KIPRIS exact 0; storefront exact not observed | absence is not absence of use; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N05 | `Burnkin` | T046 KIPRIS exact 0 historic only; store relevance results noisy | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N06 | `사름붙이` | current KIPRIS exact 0; storefront exact not observed | absence is not absence of use; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N07 | `Joinkin` | T046 KIPRIS exact 0 historic only; `Join Kin` search noisy | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N08 | `이음붙이` | current KIPRIS exact 0; storefront exact not observed | Steam S/P stopped; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N09 | `The Stilling` | common-phrase store search has broad noise; no standalone exact sampled | current KIPRIS E 미재현(이유 기록 없음); exact/S/P registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N10 | `어름` | KR exact active IC43 restaurant-related registration | lower-relevance class does not resolve legal scope; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N11 | `The Burning` | Steam `The Burning Owl`/`The Burning Descent`; Apple `1944 Burning Bridges` | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N12 | `사름` | KR exact three dead IC29/30/31 records | dead records are not availability evidence; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N13 | `The Scattering` | official stores returned many scatter-related listings | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N14 | `흩음` | current KIPRIS exact 0 | absence is not absence of use; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N15 | `The Rotting` | Steam `The Rotting Chronicles`/`The Rotting Man` current listings | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N16 | `삭음` | current KIPRIS exact 0; store results unrelated/noisy | absence is not absence of use; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N17 | `The Washing` | Steam `The Joy of Hand Washing`; broad registry/store term noise | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N18 | `씻음` | two KR pending exact applications, IC03/35 cosmetics/retail | pending/lower-relevance records; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N19 | `The Joining` | official stores returned many join-related listings, no standalone exact sampled | current KIPRIS E 미재현(이유 기록 없음); registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
+| N20 | `이음` | KR broad 58; active exact IC009 scientific equipment, IC028 toys, IC042 design; Korean apps use `…e음` | exact active records across focus classes; registry와 Apple/Google S/P 공백 | `UNDECIDED_T057` |
 
 ## T057 기록 템플릿
 
