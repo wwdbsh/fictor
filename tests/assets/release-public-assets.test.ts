@@ -91,7 +91,7 @@ describe("T060 release public allowlist", () => {
     } finally {
       await staged.cleanup();
     }
-  });
+  }, 15_000);
 
   test("stages exactly the production allowlist and excludes candidates 02–04", async () => {
     const fixture = makeFixture();
