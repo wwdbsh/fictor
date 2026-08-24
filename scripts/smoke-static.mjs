@@ -239,6 +239,7 @@ async function main() {
       const freshPage = await context.newPage();
       const freshImages = [];
       const errors = [];
+      const aiDisclosureSmallViewports = [];
       freshPage.on("console", (message) => { if (message.type() === "error") errors.push(`console: ${message.text()}`); });
       freshPage.on("pageerror", (error) => errors.push(`page: ${error.message}`));
       freshPage.on("requestfailed", (request) => errors.push(`request: ${request.url()} (${request.failure()?.errorText ?? "unknown"})`));
@@ -252,6 +253,45 @@ async function main() {
           return main?.getAttribute("aria-busy") === "false" && main.getAttribute("data-screen-key") !== screenKey;
         }, {}, before);
       };
+      const verifyAiDisclosureAtSmallViewports = async (surface) => {
+        const originalViewport = freshPage.viewport();
+        try {
+          for (const width of [320, 375]) {
+            await freshPage.setViewport({ width, height: 568, deviceScaleFactor: 1 });
+            await freshPage.click(".ai-disclosure-trigger");
+            await freshPage.waitForFunction(() => document.querySelector(".ai-disclosure-trigger")?.getAttribute("aria-expanded") === "true");
+            const observation = await freshPage.$eval(".ai-disclosure-panel", (panel, expected) => {
+              const rect = panel.getBoundingClientRect();
+              const style = getComputedStyle(panel);
+              return {
+                exactText: panel.querySelector("p")?.textContent === expected,
+                visible: !panel.hidden && style.display !== "none" && style.visibility !== "hidden",
+                left: rect.left,
+                right: rect.right,
+                top: rect.top,
+                bottom: rect.bottom,
+                panelWidth: rect.width,
+                panelHeight: rect.height,
+                viewportWidth: window.innerWidth,
+                viewportHeight: window.innerHeight,
+                overflowY: style.overflowY,
+                documentScrollWidth: document.documentElement.scrollWidth,
+              };
+            }, "카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.");
+            if (!observation.exactText || !observation.visible || observation.panelWidth <= 0 || observation.panelHeight <= 0
+              || observation.left < 0 || observation.right > observation.viewportWidth
+              || observation.top < 0 || observation.bottom > observation.viewportHeight
+              || observation.overflowY !== "auto" || observation.documentScrollWidth > observation.viewportWidth) {
+              throw new Error(`${surface} AI 제작 고지 ${width}px viewport 경계가 다릅니다: ${JSON.stringify(observation)}`);
+            }
+            aiDisclosureSmallViewports.push({ surface, targetViewportWidth: width, ...observation });
+            await freshPage.click(".ai-disclosure-trigger");
+            await freshPage.waitForFunction(() => document.querySelector(".ai-disclosure-trigger")?.getAttribute("aria-expanded") === "false");
+          }
+        } finally {
+          if (originalViewport) await freshPage.setViewport(originalViewport);
+        }
+      };
       try {
         const response = await freshPage.goto(pageUrl, { waitUntil: "networkidle0" });
         if (response === null || !response.ok()) throw new Error(`fresh user 문서 응답 실패: ${response?.status() ?? "응답 없음"}`);
@@ -264,6 +304,8 @@ async function main() {
         if (raceInitial.images !== 0 || freshImages.length !== 0 || !raceInitial.headingFocused || !raceInitial.namedButtons) {
           throw new Error(`fresh race-select 초기 접근성/asset 경계가 다릅니다: ${JSON.stringify({ ...raceInitial, requests: freshImages.length })}`);
         }
+        await verifyAiDisclosureAtSmallViewports("pre-run");
+        await freshPage.$eval(".race-select-screen h1", (heading) => { if (heading instanceof HTMLElement) heading.focus(); });
         await freshPage.keyboard.press("Tab");
         const firstChoiceFocused = await freshPage.$eval(".race-choice button", (button) => document.activeElement === button);
         if (!firstChoiceFocused) throw new Error("race-select H1 다음 Tab이 첫 붙이 선택으로 이동하지 않았습니다.");
@@ -279,6 +321,7 @@ async function main() {
           || !selectedProfile.guideCopy.includes("연료 1") || !selectedProfile.guideCopy.includes("영구 소모")) {
           throw new Error(`fresh selected profile 안내/asset 경계가 다릅니다: ${JSON.stringify({ ...selectedProfile, requests: freshImages.length })}`);
         }
+        await verifyAiDisclosureAtSmallViewports("active-gameplay");
         await freshPage.$eval('button[aria-label^="공방 열기"]', (button) => { button.setAttribute("data-t045-exact-opener", "true"); if (button instanceof HTMLElement) button.focus(); });
         await freshPage.keyboard.press("Enter");
         await freshPage.waitForSelector(".forge-panel");
@@ -381,6 +424,7 @@ async function main() {
           selectedProfileImages: 1,
           reducedMotion: true,
           firstDiscoveryAndCodex: true,
+          aiDisclosureSmallViewports,
           highDiscovery: { validDiscoveries: 96, pageOneMountedImages: 48, pageTwoMountedImages: 48, cumulativeImageRequests: cumulativeCodexRequests, afterCloseCodexImages: 0, imagePreloads: 0 },
           heapAfterGcObservation: { usedSize: heapAfterGc.usedSize, totalSize: heapAfterGc.totalSize, hardGate: false },
         };

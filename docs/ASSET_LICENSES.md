@@ -4,7 +4,7 @@
 
 | 에셋/서비스 | provider·model | 약관 revision·적용 상태 | 권리 상태 | 결정·증빙 | manifest·run ledger | AI 표기 | 확인자·일자 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| FICTOR 카드·세계 아트 계획 1,494개 | Higgsfield / `nano_banana_2` 계획 | Terms updated 2026-07-26 / 계정 적용 revision·Privacy·모델 추가 조건 `PENDING_T011_PREFLIGHT` | `CONDITIONAL_APPROVAL` — 무브랜드·비민감·텍스트 없는 입력만, `use_unlim=false`; 2026-08-11 당시 공개 타이틀 미승인. 현재는 T057이 `FICTOR · 픽토르` 명칭만 승인했고 최종 AI 표기·T047 release는 미승인 | [T009 report r1](legal/art-policy-decision-2026-08-11.md) / [T010 조건부 승인](decisions/t010-art-policy-approval-2026-08-11.md) | `assets/manifests/core-v1.plan.json` / T010 생성 없음, T011 preflight 전 | 2026-08-11 당시: 공개 타이틀 승인 뒤 표기 템플릿을 최종 타이틀에 결속해 게임 크레딧·README·제출 설명·이 문서에 적용하고 그 전은 공개 적용 금지. 현재: T057 명칭 승인만 반영하며 최종 AI 표기·T047 release는 미승인 | 상헌 님, 2026-08-11 |
+| FICTOR 카드·세계 아트 계획 1,494개 | Higgsfield / `nano_banana_2` 계획 | Terms updated 2026-07-26 / 계정 적용 revision·Privacy·모델 추가 조건 `PENDING_T011_PREFLIGHT` | `CONDITIONAL_APPROVAL` — 무브랜드·비민감·텍스트 없는 입력만, `use_unlim=false`; 2026-08-11 당시 공개 타이틀 미승인. 현재는 T057이 `FICTOR · 픽토르` 명칭을, T058이 AI 표기를 승인했지만 T047 release는 미승인 | [T009 report r1](legal/art-policy-decision-2026-08-11.md) / [T010 조건부 승인](decisions/t010-art-policy-approval-2026-08-11.md) / [T058 AI 표기 승인](decisions/t058-ai-disclosure-approval-2026-08-24.md) | `assets/manifests/core-v1.plan.json` / T010 생성 없음, T011 preflight 전 | 2026-08-11 당시: 공개 타이틀 승인 뒤 표기 템플릿을 최종 타이틀에 결속해 네 공개 위치에 적용하는 조건. 현재: T058 exact 문구를 네 위치에 적용했으며 T047 release는 별도 미승인 gate | 상헌 님, 2026-08-11·2026-08-24 |
 | T013 기본 재료 52장 | Higgsfield / 요청 `nano_banana_2`, 보고 `nano_banana_flash` | T013 위험 공개·정확 범위 승인 적용; 미확인 계정 약관 항목은 기존 조건부 상태 유지 | `APPROVED_EXISTING_T013_52_ONLY` — `tool_08` 텍스트, 일부 style·paper·3D·color drift, `odd_01` 마스터 구도·관절 다리 형상 누출 flag를 기존 bytes에만 수용; 미래 정책 완화 아님 | [T013 실행 기록](asset-runs/t013-materials-local-preparation-2026-08-11.md) / [T014 결정](decisions/t014-material-style-approval-2026-08-12.md) | `assets/manifests/materials-v1.plan.json` / `assets/evidence/t013-materials-actual-run-v1.json` / `assets/manifests/material-style-approval-v1.json` / ignored canonical journal+별도 backup | 공개 타이틀과 최종 attribution gate 전 게시 금지; 현재 저장소 내부 표본 | 상헌 님, 2026-08-12 |
 | T015 canonical 332장 | Higgsfield / 요청 `nano_banana_2`, 보고 `nano_banana_flash` | T015 범위별 위험 공개·승인 및 T010 조건 유지 | `CONDITIONAL_APPROVAL_EXISTING_BYTES_ONLY` — 생성 완료는 미확인 약관·공개 타이틀 권리를 확장하지 않음 | [T015 실행·복구 기록](asset-runs/t015-canonical-shard-1-v3-recovery-2026-08-13.md) | `assets/manifests/canonical-shard-1-v1.plan.json`, `canonical-shard-1-v4.plan.json` / T015 tracked evidence / owner backup | 최종 attribution·공개 타이틀 gate 전 공개 금지 | 상헌 님, 2026-08-13 |
 | T016 선별 canonical 157장 | Higgsfield / 요청 `nano_banana_2`, 보고 `nano_banana_flash` | T016 위험 공개·160장 승인 중 157장 회수; 기존 조건 유지 | `CONDITIONAL_APPROVAL_EXISTING_BYTES_ONLY`; 실패 3개는 권리나 생성 완료를 주장하지 않음 | [T016 실행 기록](asset-runs/t016-canonical-selected-run-2026-08-14.md) | `assets/manifests/t016-canonical-cards-v1.plan.json` / per-batch tracked evidence / owner backup | 최종 attribution·공개 타이틀 gate 전 공개 금지 | 상헌 님, 2026-08-14 |
@@ -49,13 +49,13 @@ blocker로 유지한다. 원문은 [Terms](https://higgsfield.ai/terms-of-use-ag
 [Help Center](https://higgsfield.ai/creator-hub/help-center/account/who-owns-my-generations-and-can-i-use-them-commercially),
 [Privacy Policy](https://higgsfield.ai/privacy-policy)다.
 
-T009/T010의 다음 문구는 **T047 판단용 미승인 초안**이다.
+T009/T010에서 다음 문구는 **T047 판단용 미승인 초안**이었다. [T058 AI 표기 승인](decisions/t058-ai-disclosure-approval-2026-08-24.md)으로 `FICTOR · 픽토르`와 T055 release digest에 결속된 최종 공개 문구가 됐다.
 
-> 카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.
+카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.
 
-T047에서 타이틀과 최종 문구를 승인한 뒤에만 게임 크레딧·README·제출 설명·이 문서의 네 위치에 같은
-문구를 적용한다. 요청/보고 모델 불일치를 해소하기 전에는 모델명을 추가하지 않는다. 현재 게임 UI,
-README와 dist에는 이 표기를 적용하지 않았다.
+T058은 게임 크레딧·README·제출 설명·이 문서의 네 위치에 이 문구를 byte-identical하게 적용하는 범위만
+승인했다. 요청/보고 모델 불일치를 해소하기 전에는 모델 ID를 추가하지 않는다. T055의 substantive gap 6과
+역사적 `completionEligible=false`는 유지되며 T047 공개 release는 별도 gate로 남는다.
 
 ## T060 production packaging — 2026-08-22 KST
 
@@ -116,7 +116,7 @@ gap 6과 역사적 `completionEligible=false`는 그대로이며, 이는 권리 
 
 계정 ID, 이메일, API 키, 세션 URL, 서명된 다운로드 URL과 원문 prompt에 포함된 비공개 정보는 공개 저장소에 기록하지 않습니다.
 
-T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과 T013 재료 표본 52장은 각각의 제한 승인 아래 생성됐습니다. T013은 balance `939.90→861.90`, 총 `78.00 credits`, 자동 유료 재시도 0으로 완료됐고 local+backup SHA가 actual evidence에 결속됩니다. T014는 고지된 QA flag를 포함한 기존 T013 52개 bytes를 승인해 canonical bulk style gate와 T015 dependency를 열었지만 provider 호출은 승인하지 않습니다. T015–T021의 후속 생성·회수는 각 행의 독립 승인·증거에 결속됩니다. 공개 타이틀 `FICTOR · 픽토르`는 [T057 공개 명칭 결정](decisions/t057-public-naming-decision-2026-08-24.md)으로 승인됐지만 최종 AI 표기와 T047 공개 release는 계속 미승인입니다.
+T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과 T013 재료 표본 52장은 각각의 제한 승인 아래 생성됐습니다. T013은 balance `939.90→861.90`, 총 `78.00 credits`, 자동 유료 재시도 0으로 완료됐고 local+backup SHA가 actual evidence에 결속됩니다. T014는 고지된 QA flag를 포함한 기존 T013 52개 bytes를 승인해 canonical bulk style gate와 T015 dependency를 열었지만 provider 호출은 승인하지 않습니다. T015–T021의 후속 생성·회수는 각 행의 독립 승인·증거에 결속됩니다. 공개 타이틀 `FICTOR · 픽토르`는 [T057 공개 명칭 결정](decisions/t057-public-naming-decision-2026-08-24.md)으로, 최종 AI 표기는 [T058 AI 표기 승인](decisions/t058-ai-disclosure-approval-2026-08-24.md)으로 승인됐지만 T047 공개 release는 계속 미승인입니다.
 
 ## 확인 메모
 
@@ -127,7 +127,7 @@ T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과
 - [x] T046 문서에 계정 ID, 이메일, API 키, form 개인정보나 signed URL을 복제하지 않았습니다.
 - [x] 번들 폰트·오디오·비디오가 없고 system font fallback만 쓰는 것을 확인했습니다.
 - [ ] 생성 당시 계정 적용 Terms·Privacy와 요청/보고 모델의 supplemental policy가 확인됐습니다.
-- [ ] 게임 크레딧·README·제출 설명·이 문서의 AI 표기가 T047 승인 문구로 일치합니다.
+- [x] 게임 크레딧·README·canonical 제출 설명·이 문서에 T058 승인 AI 표기를 byte-identical하게 적용했습니다. 권리 확인과 T047 release gate는 완료시키지 않습니다.
 - [x] T059 입력·staging·법적 링크 집중 검증이 완료됐습니다. exact production `dist` 포함 여부와
   전체 build/static smoke는 T062에서 수행하므로 최종 배포 완료로 표시하지 않습니다.
 - [x] [T057 공개 명칭 결정](decisions/t057-public-naming-decision-2026-08-24.md)으로 `FICTOR · 픽토르` 공개 타이틀이 승인됐습니다. T047 release는 별도 gate입니다.

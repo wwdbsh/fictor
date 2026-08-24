@@ -23,7 +23,7 @@
 - [x] [T057 공개 명칭 결정](decisions/t057-public-naming-decision-2026-08-24.md)에서 타이틀·종족·옛 신 20개의 exact 공개 명칭과 기록된 잔여 위험 수용을 명시적으로 결정했습니다.
 - [x] [T060 packaging 기록](asset-runs/t060-release-packaging-2026-08-22.md)에 따라 `style/master-candidate-01`만 production에 포함하고 `NOT_SELECTED` 후보 02–04는 원본·backup·provenance를 보존한 채 build 입력과 `dist`에서 제외했습니다.
 - [x] [T059 법적 고지 기록](legal/t059-oss-mit-notices-2026-08-24.md)에 따라 lockfile 버전·원문 SHA·canonical MIT block을 입력과 staging에서 검증했고, 게임의 접근 가능한 고지 링크를 확인했습니다. exact production `dist` 포함 여부는 T062에서 재검증합니다.
-- [ ] T047에서 승인한 동일 AI 표기 문구를 게임 크레딧, README, 제출 설명, `ASSET_LICENSES.md` 네 위치에 적용하고 byte 기준으로 대조했습니다.
+- [x] [T058 AI 제작 고지 승인](decisions/t058-ai-disclosure-approval-2026-08-24.md)의 exact 문구를 게임 크레딧, README, [canonical Track 1 제출 설명](submission/track1-description.ko.json), `ASSET_LICENSES.md` 네 위치에 적용하고 byte 기준으로 대조했습니다. 이는 B-02/T058 준비만 완료하며 권리 확인과 T047 release를 완료하지 않습니다.
 
 ### 실행 링크
 
@@ -41,7 +41,7 @@
 ### 폼 항목과 파일
 
 - [ ] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`이며 DOM `maxlength=80` 이내입니다.
-- [ ] required 게임 소개가 200자 이내이며 핵심 플레이와 특징을 설명합니다.
+- [ ] required 게임 소개는 [canonical Track 1 제출 설명](submission/track1-description.ko.json)의 `description_ko`를 사용하며 200자 이내입니다. 실제 제출 폼 반영은 아직 하지 않았습니다.
 - [ ] required 플레이 가능한 URL이 심사 기간에 접근됩니다.
 - [ ] required 썸네일이 file input의 JPEG/PNG accept에 맞습니다. UI recommendation인 16:9·최대 10MB도 따랐습니다.
 - [ ] optional 데모 URL을 넣을지 결정했습니다.

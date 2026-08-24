@@ -72,7 +72,6 @@ describe("Track-1 App", () => {
 
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByLabelText("FICTOR · 픽토르")).toHaveTextContent("FICTOR · 픽토르");
-    expect(screen.getByText("FICTOR", { exact: false })).toBeInTheDocument();
     const heading = screen.getByRole("heading", { level: 1, name: "어름의 터 · 깊이 1 / 3" });
     await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.getByRole("list", { name: "고정된 런 여정" })).toBeInTheDocument();
@@ -80,8 +79,25 @@ describe("Track-1 App", () => {
     expect(guide).toHaveTextContent("다음 기록으로");
     expect(guide).toHaveTextContent("연료 1");
     expect(guide).toHaveTextContent("재료는 영구 소모");
-    expect(screen.getAllByRole("button")).toHaveLength(3);
+    expect(screen.getAllByRole("button")).toHaveLength(4);
     expect(screen.getByRole("button", { name: "다음 기록으로" }).tagName).toBe("BUTTON");
+    expect(screen.getAllByRole("link", { name: "제3자 라이선스 고지" })).toHaveLength(1);
+
+    const disclosure = screen.getByRole("button", { name: "AI 제작 고지" });
+    expect(disclosure.tagName).toBe("BUTTON");
+    expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("region", { name: "AI 제작 고지" })).not.toBeInTheDocument();
+    disclosure.focus();
+    fireEvent.click(disclosure);
+    expect(disclosure).toHaveFocus();
+    expect(disclosure).toHaveAttribute("aria-expanded", "true");
+    const disclosureRegion = screen.getByRole("region", { name: "AI 제작 고지" });
+    expect(disclosureRegion).toHaveTextContent("카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.");
+    expect(disclosureRegion).toHaveTextContent("게임 실행 중에는 생성형 AI나 외부 API를 호출하지 않습니다.");
+    fireEvent.click(disclosure);
+    expect(disclosure).toHaveFocus();
+    expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("region", { name: "AI 제작 고지" })).not.toBeInTheDocument();
   });
 
   it("opens a paginated masked Codex and restores focus when closed", async () => {
@@ -318,7 +334,7 @@ describe("Track-1 App", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("저장 기록을 보존했습니다");
     expect(screen.getByRole("alert")).toHaveTextContent("형식을 읽을 수 없습니다");
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toEqual([screen.getByRole("button", { name: "AI 제작 고지" })]);
     expect(storage.values.get(FICTOR_SAVE_V2_KEY)).toBe("{bad");
   });
 
@@ -332,7 +348,7 @@ describe("Track-1 App", () => {
 
     expect(await screen.findByRole("heading", { level: 1, name: "저장 기록을 열 수 없습니다" })).toHaveFocus();
     expect(screen.getByRole("alert")).toHaveTextContent("저장 기록을 보존했습니다");
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toEqual([screen.getByRole("button", { name: "AI 제작 고지" })]);
     expect(storage.values.get(FICTOR_SAVE_V2_KEY)).toBe("{bad");
   });
 });

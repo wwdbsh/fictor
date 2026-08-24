@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { PlayableTrack1RaceId, StillkinTrack1UiSession, Track1RaceSelection } from "../../application";
 import { PUBLIC_NAMES } from "../../content/public-names";
 import { App } from "../App";
+import { AiDisclosure } from "../legal/AiDisclosure";
 import { LegalNoticeLink } from "../legal/LegalNoticeLink";
 
 export interface RaceSelectAppProps {
@@ -42,6 +43,7 @@ export function RaceSelectApp({ selection }: RaceSelectAppProps) {
         ))}
       </div>
       {errorKo ? <p role="alert">{errorKo}</p> : null}
+      <AiDisclosure />
       <LegalNoticeLink baseUrl={selection.baseUrl} />
     </main>
   );

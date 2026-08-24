@@ -117,7 +117,7 @@ describe("T057 exact public naming contract", () => {
     expect(html.match(/<meta name="description"/g)).toHaveLength(1);
   });
 
-  it("extracts the exact title and public pairs from README and the still-gated submission source", () => {
+  it("extracts the exact title and public pairs from README and preserves the release gates", () => {
     const readme = source("README.md");
     expect(readme.split("\n", 1)[0]).toBe("# FICTOR · 픽토르");
     for (const pair of [
@@ -137,7 +137,7 @@ describe("T057 exact public naming contract", () => {
     const assetLicenses = source("docs/ASSET_LICENSES.md");
     expect(assetLicenses).toContain("2026-08-11 당시 공개 타이틀 미승인");
     expect(assetLicenses.match(/공개 타이틀 미승인/g)).toHaveLength(1);
-    expect(assetLicenses).toContain("현재는 T057이 `FICTOR · 픽토르` 명칭만 승인했고 최종 AI 표기·T047 release는 미승인");
+    expect(assetLicenses).toContain("현재는 T057이 `FICTOR · 픽토르` 명칭을, T058이 AI 표기를 승인했지만 T047 release는 미승인");
   });
 
   it("records all 20 retained decisions, approval evidence, limitations, and authorization boundaries once", () => {

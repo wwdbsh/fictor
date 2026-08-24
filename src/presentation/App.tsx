@@ -13,6 +13,7 @@ import { PUBLIC_NAMES } from "../content/public-names";
 import { AssetImage } from "./assets";
 import { FirstDiscoveryOverlay, RepeatDiscoveryToast } from "./discovery";
 import { CanonicalPreview } from "./forge/CanonicalPreview";
+import { AiDisclosure } from "./legal/AiDisclosure";
 import { LegalNoticeLink } from "./legal/LegalNoticeLink";
 
 const AssetPolicySmokeProbe = lazy(() => import("./assets/AssetPolicySmokeProbe"));
@@ -40,6 +41,7 @@ function ScreenHeader({ projection, baseUrl, onOpenCodex, onChangeRace, codexBut
       <p className="depth-label">{projection.headingKo}</p>
       <div className="header-actions">
         {onChangeRace ? <button type="button" className="race-change" onClick={onChangeRace} aria-label={`붙이 바꾸기 · 현재 ${projection.raceLabelKo}`}>{projection.raceLabelKo}</button> : null}
+        <AiDisclosure />
         <LegalNoticeLink baseUrl={baseUrl} />
         {projection.phase !== "BLOCKED" ? (
           <button ref={codexButtonRef} type="button" className="codex-open" onClick={onOpenCodex} aria-label={`도감 열기 · 발견 ${projection.codexDiscoveredCount} / 1326`}>
