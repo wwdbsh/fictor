@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "disposition_version": "t055-owner-release-risk-disposition-v1",
+  "task_key": "T055",
+  "issue_number": 105,
+  "goal_binding": {
+    "goal_key": "ship-fictor-track1-2026",
+    "issue_number": 2,
+    "contract_sha256": "2cfe2bbafb93b432d82179ec33ef1c6b042f666de3a1fe816ac9e60f1f77ea04"
+  },
+  "task_contract_sha256": "f94931653c2b44096e260245056302703480a6dc0dd4c3505c1a0a90e0c1afd2",
+  "approved_at": "2026-08-24T04:05:07Z",
+  "owner_decision": {
+    "disposition": "OWNER_RELEASE_RISK_ACCEPTED_WITH_UNRESOLVED_GENERATION_TIME_RIGHTS_EVIDENCE",
+    "exact_statement": "ship-fictor-track1-2026 Goal amendment를 승인합니다. AI PNG 622개의 미해소 생성 당시 권리 증거 위험을 제가 수용하며, 이를 권리 검증이나 법률 보증으로 간주하지 않습니다. 관련 Goal·Task 계약 갱신과 T055 재개를 승인합니다."
+  },
+  "historical_audit_binding": {
+    "path": "assets/manifests/t055-release-ai-rights-audit-v1.json",
+    "sha256": "78f87523b51c854cb28a2e503b5a3592e233f3e5447bc449f05bef033afc22de",
+    "completion_eligible": false
+  },
+  "release_scope": {
+    "digest_encoding": "UTF8:RELEASE_AI_PATH_SHA_V1\n + codepoint-sorted(public_path + TAB + sha256 + LF)",
+    "digest_sha256": "a691621e04e44c1ee45d79722e83fbe1765c3f1e148b9740985fe60a6f81d632",
+    "production_ai_png": 622,
+    "structural_gaps": 0,
+    "substantive_gaps": 6
+  },
+  "non_claims": {
+    "rights_verification": false,
+    "legal_warranty": false
+  },
+  "authorization_boundaries": {
+    "release": false,
+    "deploy": false,
+    "submission": false,
+    "provider_call": false,
+    "paid_call": false,
+    "t047_release_decision_remains_separate": true
+  },
+  "rollback": {
+    "applies_only_while_release_digest_matches": true,
+    "automatic_carry_forward": false,
+    "conditions": [
+      "OWNER_WITHDRAWAL",
+      "RELEASE_DIGEST_CHANGE",
+      "EXPLICIT_RULE_CONFLICT"
+    ],
+    "non_inferable_resolution": "REQUIRES_MANUAL_SUPERSEDING_DATED_OWNER_DECISION"
+  }
+}
