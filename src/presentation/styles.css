@@ -89,6 +89,12 @@ button:disabled { cursor: not-allowed; opacity: 0.48; }
   background: rgba(220, 234, 237, 0.9);
 }
 .header-actions { justify-self: end; display: flex; align-items: center; gap: 1rem; }
+.ai-disclosure { position: relative; }
+.ai-disclosure-trigger { min-height: 2.75rem; padding: 0.35rem 0.55rem; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; font: 0.72rem/1.2 system-ui, sans-serif; text-decoration: underline; text-underline-offset: 0.2em; }
+.ai-disclosure-trigger:focus-visible { outline: 0.2rem solid var(--focus-ring); outline-offset: 0.2rem; }
+.ai-disclosure-panel { position: absolute; z-index: 30; top: calc(100% + 0.5rem); right: 0; width: min(28rem, calc(100vw - 2rem)); padding: 0.85rem 1rem; border: 1px solid var(--line); background: #f4efe5; color: #19272a; box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 28%); font: 0.82rem/1.5 system-ui, sans-serif; }
+.ai-disclosure-panel p { margin: 0; }
+.ai-disclosure-panel p + p { margin-top: 0.6rem; }
 .legal-notice-link { display: inline-flex; min-height: 2.75rem; align-items: center; padding: 0.35rem 0.55rem; border-bottom: 1px solid currentColor; color: inherit; font: 0.72rem/1.2 system-ui, sans-serif; text-decoration: underline; text-underline-offset: 0.2em; }
 .legal-notice-link:focus-visible { outline: 0.2rem solid var(--focus-ring); outline-offset: 0.2rem; }
 .race-change { flex: 0 0 auto; min-height: 2.75rem; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: var(--ink); cursor: pointer; font-size: .78rem; white-space: nowrap; }

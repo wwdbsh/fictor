@@ -34,6 +34,19 @@ describe("race selection", () => {
     expect(legalBefore[0]).not.toHaveAttribute("tabindex");
     legalBefore[0].focus();
     expect(legalBefore[0]).toHaveFocus();
+    const disclosureBefore = screen.getAllByRole("button", { name: "AI 제작 고지" });
+    expect(disclosureBefore).toHaveLength(1);
+    expect(disclosureBefore[0]).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("region", { name: "AI 제작 고지" })).toBeNull();
+    disclosureBefore[0].focus();
+    fireEvent.click(disclosureBefore[0]);
+    expect(disclosureBefore[0]).toHaveFocus();
+    const disclosureRegion = screen.getByRole("region", { name: "AI 제작 고지" });
+    expect(disclosureRegion).toHaveTextContent("카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.");
+    expect(disclosureRegion).toHaveTextContent("게임 실행 중에는 생성형 AI나 외부 API를 호출하지 않습니다.");
+    fireEvent.click(disclosureBefore[0]);
+    expect(disclosureBefore[0]).toHaveFocus();
+    expect(screen.queryByRole("region", { name: "AI 제작 고지" })).toBeNull();
     expect(screen.getByRole("button", { name: "어름붙이로 시작" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "사름붙이로 시작" }));
 
@@ -43,6 +56,7 @@ describe("race selection", () => {
     expect(legalAfter[0]).toHaveAttribute("href", "/fictor-test/THIRD_PARTY_NOTICES.txt");
     legalAfter[0].focus();
     expect(legalAfter[0]).toHaveFocus();
+    expect(screen.getAllByRole("button", { name: "AI 제작 고지" })).toHaveLength(1);
     expect(storage.values.get(FICTOR_RACE_SELECTION_KEY)).toBe("Burnkin");
     fireEvent.click(screen.getByRole("button", { name: "다음 기록으로" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "턴 시작" })).toBeTruthy());

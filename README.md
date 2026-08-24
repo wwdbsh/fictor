@@ -4,6 +4,12 @@
 
 공개 종족 명칭은 `Stillkin · 어름붙이`, `Burnkin · 사름붙이`, `Joinkin · 이음붙이`입니다. 옛 신 명칭은 `The Stilling · 어름`, `The Burning · 사름`, `The Scattering · 흩음`, `The Rotting · 삭음`, `The Washing · 씻음`, `The Joining · 이음`입니다. 명칭 유지와 잔여 위험 수용은 [T057 공개 명칭 결정](docs/decisions/t057-public-naming-decision-2026-08-24.md)에 기록했습니다.
 
+## AI 제작 고지
+
+카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.
+
+게임 실행 중에는 생성형 AI나 외부 API를 호출하지 않습니다. 게임은 정적 웹 빌드이며, 진행 기록은 브라우저 `localStorage`에만 저장합니다.
+
 ## 참가 범위
 
 - 브라우저에서 바로 실행되는 웹 빌드를 제출해야 합니다.
@@ -21,6 +27,7 @@
 - [T045 첫 사용자·접근성 QA](docs/qa/t045-first-user-accessibility-2026-08-21.md)
 - [T045 브라우저 성능 예산](docs/performance/t045-browser-budget-2026-08-21.md)
 - [T057 공개 명칭 결정](docs/decisions/t057-public-naming-decision-2026-08-24.md)
+- [T058 AI 제작 고지 승인](docs/decisions/t058-ai-disclosure-approval-2026-08-24.md)
 
 ## 개발 환경
 
