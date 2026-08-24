@@ -1,6 +1,6 @@
 # 제출 체크리스트
 
-제출 직전에는 공식 [참여 페이지](https://openaigame2026.com/)의 최신 안내와 실제 폼을 함께 확인합니다. Track 1 공개 접수 기간은 2026-08-04–2026-08-26입니다. 페이지 countdown은 8월 26일 KST 종료를 시사하지만 정확한 cutoff와 마감 후 수정 가능 여부는 공개 규정이 보증하지 않습니다.
+제출 직전에는 공식 [참여 페이지](https://openaigame2026.com/)의 최신 안내와 실제 폼을 함께 확인합니다. Track 1 공개 접수 기간은 2026-08-04–2026-08-26입니다. 정확한 cutoff와 마감 후 제출 정보 수정·URL 교체 가능 여부는 UNKNOWN이지만 FICTOR는 이에 의존하지 않습니다. 현재 산출물은 `DRAFT_NON_SUBMITTABLE`이며 실제 폼 입력·제출을 의미하지 않습니다.
 
 ## 제출 전
 
@@ -8,8 +8,22 @@
 
 - [ ] 팀원이 3명 이하인지 확인합니다.
 - [ ] 대표자 1명과 본선 서울 행사 참석 가능 여부를 확정합니다.
-- [ ] 2026-08-26 이전 제출 계획을 세우고, 정확한 마감 시각은 운영진 공지로 재확인합니다.
+- [ ] 2026-08-26 접수 기간 안에 여유를 둔 제출 계획을 세웠습니다. UNKNOWN인 정확한 cutoff를 일정 보증으로 사용하지 않습니다.
 - [ ] 기존 프로젝트라면 기존 범위와 챌린지 기간에 새로 개발·개선한 범위를 구분해 적습니다.
+
+### T061 B-06 비의존 운영 gate
+
+- [x] [T061 공식 근거 기록](decisions/t061-submission-edit-policy-evidence-2026-08-24.md)에 2026-08-24 기준 FAQ·참가 약관의 공개 근거와 사실/운영 가정을 분리했습니다.
+- [x] 마감 전에는 완전한 수정본을 다시 제출할 수 있고, 운영진은 원칙적으로 가장 최신에 제출된 버전을 기준으로 확인할 예정임을 확인했습니다. 최신본 사용·대체 보장은 아니며 개별 폼 필드 편집 가능 여부도 열거되지 않았습니다.
+- [x] 제출 후에는 동일한 제출 URL에서 게임 콘텐츠를 업데이트할 수 있음을 확인했습니다. 늦은 변경이 심사에 반영된다는 보장은 없고 링크는 계속 플레이 가능해야 합니다.
+- [x] 정확한 cutoff는 `UNKNOWN / NOT_DEPENDED_ON`, 마감 후 폼 수정과 URL 교체는 `UNKNOWN / NOT_REQUIRED / OUT_OF_SCOPE`로 보존했습니다.
+- [x] `B06_OPERATIONALLY_CLOSED_WITH_UNKNOWN_CUTOFF_AND_NO_LATE_MUTATION_DEPENDENCY`가 정책 PASS·법률 보증·운영 보증이 아님을 기록했습니다.
+- [x] [repository-safe 폼 필드 초안](submission/track1-form-field-draft.md)을 `REPO_SAFE_STATIC`·`FINAL_CANDIDATE_BOUND`·`OWNER_LIVE_ENTRY`로 분류했습니다.
+- [x] [완성 프로젝트 데모 프리프로덕션](submission/track1-demo-preproduction.md)에 storyboard·script·shot checklist와 final-only binding을 작성했습니다.
+- [ ] 상헌 님이 T061 local-only 산출물을 검토하고 T061 complete·PR #119 merge를 별도로 승인했습니다. 2026-08-24 drafting 승인은 재사용하지 않습니다.
+- [ ] 상헌 님이 dated exact commit을 직접 플레이하고 `NO_CHANGE_REQUIRED` 또는 구체적인 bounded change Tasks를 확정했습니다.
+- [ ] 변경이 있다면 bounded change Tasks를 모두 완료하고 변경된 exact commit을 다시 플레이했습니다.
+- [ ] 상헌 님이 exact candidate를 별도로 승인해 T062를 시작했습니다.
 
 ### T046 공개 차단 gate
 
@@ -32,6 +46,7 @@
 
 - [ ] 게임이 브라우저에서 바로 실행되는 웹 빌드입니다.
 - [ ] 심사 기간 내 링크가 공개 상태이고 별도 승인·설치 없이 접근됩니다.
+- [ ] 제출 뒤에도 같은 URL이 유지되며, URL 교체 가능성을 전제로 하지 않습니다.
 - [ ] 로그인 없이 플레이할 수 있습니다. 로그인이 필요하면 만료되지 않는 테스트 계정과 접속 안내를 제공합니다.
 - [ ] 심사위원이 다른 계정·기기에서도 링크를 열어 핵심 플레이를 완료할 수 있습니다.
 - [ ] 조작법, 실행 방법, 필요한 키보드·마우스 입력을 링크 주변 설명에 적었습니다.
@@ -40,12 +55,13 @@
 
 ### 폼 항목과 파일
 
-- [ ] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`이며 DOM `maxlength=80` 이내입니다.
-- [ ] required 게임 소개는 [canonical Track 1 제출 설명](submission/track1-description.ko.json)의 `description_ko`를 사용하며 200자 이내입니다. 실제 제출 폼 반영은 아직 하지 않았습니다.
+- [ ] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`이며 DOM `maxlength=80` 이내입니다. 최종 폼 반영은 T051 승인 뒤에만 완료합니다.
+- [x] [폼 필드 초안](submission/track1-form-field-draft.md)에 위 canonical title source와 12/80 Unicode code-point 검사를 기록했습니다.
+- [x] required 게임 소개는 [canonical Track 1 제출 설명](submission/track1-description.ko.json)의 `description_ko`를 사용하며 200자 이내임을 초안에서 확인했습니다. 실제 제출 폼 반영은 아직 하지 않았습니다.
 - [ ] required 플레이 가능한 URL이 심사 기간에 접근됩니다.
 - [ ] required 썸네일이 file input의 JPEG/PNG accept에 맞습니다. UI recommendation인 16:9·최대 10MB도 따랐습니다.
-- [ ] optional 데모 URL을 넣을지 결정했습니다.
-- [ ] optional Codex 서술이 DOM `maxlength=5000` 이내이며 사용 위치·기능·해결한 문제·사람의 결정을 설명합니다.
+- [x] 공식 optional 데모 URL을 owner-required 품질 산출물로 결정했습니다. URL은 완성 프로젝트 capture·upload 뒤 T048에서만 채웁니다.
+- [x] optional Codex 서술의 exact draft가 DOM `maxlength=5000` 이내이며 사용 위치·기능·해결한 문제·사람의 결정을 설명합니다. T048에서 final candidate와 다시 대조합니다.
 - [ ] Google login/account, 국가, 생년월일, 신청자·팀·연락처, 참석·동의 항목을 라이브 폼에 직접 입력했습니다.
 - [ ] 폼 개인정보·화면·network payload를 캡처하거나 저장소에 커밋하지 않았습니다. 제출 완료 증거도 PII 없는 receipt/reference만 보관합니다.
 
