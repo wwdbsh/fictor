@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { PlayableTrack1RaceId, StillkinTrack1UiSession, Track1RaceSelection } from "../../application";
+import { PUBLIC_NAMES } from "../../content/public-names";
 import { App } from "../App";
 import { LegalNoticeLink } from "../legal/LegalNoticeLink";
 
@@ -29,7 +30,7 @@ export function RaceSelectApp({ selection }: RaceSelectAppProps) {
 
   return (
     <main className="race-select-screen page-screen">
-      <header><p>FICTOR · 픽토르</p><h1 ref={headingRef} tabIndex={-1}>붙이를 고르세요</h1><p>같은 어름의 터에서도 몸에 밴 규칙이 달라집니다.</p></header>
+      <header><p>{PUBLIC_NAMES.title.en} · {PUBLIC_NAMES.title.ko}</p><h1 ref={headingRef} tabIndex={-1}>붙이를 고르세요</h1><p>같은 {PUBLIC_NAMES.elderGods.the_stilling.ko}의 터에서도 몸에 밴 규칙이 달라집니다.</p></header>
       <div className="race-select-grid">
         {selection.choices.map((race) => (
           <article key={race.raceId} className={`race-choice race-${race.attribute.toLowerCase()}`}>

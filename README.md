@@ -1,6 +1,8 @@
-# fictor
+# FICTOR · 픽토르
 
-OpenAI Game Builders Seoul 2026 출품을 위한 게임 프로젝트입니다.
+`FICTOR · 픽토르`는 OpenAI Game Builders Seoul 2026 출품을 위한 조합 기반 로그라이크 덱빌더입니다.
+
+공개 종족 명칭은 `Stillkin · 어름붙이`, `Burnkin · 사름붙이`, `Joinkin · 이음붙이`입니다. 옛 신 명칭은 `The Stilling · 어름`, `The Burning · 사름`, `The Scattering · 흩음`, `The Rotting · 삭음`, `The Washing · 씻음`, `The Joining · 이음`입니다. 명칭 유지와 잔여 위험 수용은 [T057 공개 명칭 결정](docs/decisions/t057-public-naming-decision-2026-08-24.md)에 기록했습니다.
 
 ## 참가 범위
 
@@ -18,6 +20,7 @@ OpenAI Game Builders Seoul 2026 출품을 위한 게임 프로젝트입니다.
 - [에셋·라이선스 기록 템플릿](docs/ASSET_LICENSES.md)
 - [T045 첫 사용자·접근성 QA](docs/qa/t045-first-user-accessibility-2026-08-21.md)
 - [T045 브라우저 성능 예산](docs/performance/t045-browser-budget-2026-08-21.md)
+- [T057 공개 명칭 결정](docs/decisions/t057-public-naming-decision-2026-08-24.md)
 
 ## 개발 환경
 

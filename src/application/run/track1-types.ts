@@ -1,6 +1,7 @@
 import type { CombatCommand } from "../../domain/combat";
 import type { ForgeRuntimeEvent, ForgeRuntimeStateV1 } from "../../domain/forge-runtime";
 import type { PersistentProfileV1, SaveFailureCode, SaveLoadIssue } from "../../persistence";
+import type { PublicRaceId, PublicRaceNameKo } from "../../content/public-names";
 
 export const STILLKIN_TRACK1_FLOW_SCHEMA_VERSION = "stillkin-track1-flow-v1" as const;
 export const STILLKIN_TRACK1_CONTROLLER_VERSION = "stillkin-track1-controller-v1" as const;
@@ -36,8 +37,8 @@ export interface StillkinTrack1FlowState {
 }
 
 export interface StillkinTrack1Snapshot {
-  raceId: "Stillkin" | "Burnkin" | "Joinkin";
-  raceLabelKo: "어름붙이" | "사름붙이" | "이음붙이";
+  raceId: PublicRaceId;
+  raceLabelKo: PublicRaceNameKo;
   profile: PersistentProfileV1;
   runtime: ForgeRuntimeStateV1;
   flow: StillkinTrack1FlowState;

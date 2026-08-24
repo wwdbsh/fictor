@@ -10,6 +10,7 @@ import {
   type EnemyIntent,
 } from "../../domain/combat";
 import { resolveForgeCard, type GeneratedCard } from "../../domain/forge";
+import { PUBLIC_NAMES, type PublicRaceNameKo } from "../../content/public-names";
 import { freeze } from "../../freeze";
 import {
   decodeForgeResolverContext,
@@ -94,7 +95,7 @@ type ControllerState = {
 
 type Track1RaceExecution = {
   raceId: Track1RaceId;
-  raceLabelKo: "어름붙이" | "사름붙이" | "이음붙이";
+  raceLabelKo: PublicRaceNameKo;
   runPrefix: "stillkin-track1-run" | "burnkin-track1-run" | "joinkin-track1-run";
   scenarioId: StillkinTrack1FlowState["scenarioId"];
   scenarioHash: string;
@@ -111,7 +112,7 @@ type Track1RaceExecution = {
 
 const STILLKIN_EXECUTION: Track1RaceExecution = freeze({
   raceId: "Stillkin",
-  raceLabelKo: "어름붙이",
+  raceLabelKo: PUBLIC_NAMES.races.Stillkin.ko,
   runPrefix: "stillkin-track1-run",
   scenarioId: STILLKIN_TRACK1_SCENARIO_ID,
   scenarioHash: STILLKIN_TRACK1_SCENARIO_HASH,
@@ -130,7 +131,7 @@ export const BURNKIN_TRACK1_SAVE_KEY = "fictor.burnkin.save.v2" as const;
 
 const BURNKIN_EXECUTION: Track1RaceExecution = freeze({
   raceId: "Burnkin",
-  raceLabelKo: "사름붙이",
+  raceLabelKo: PUBLIC_NAMES.races.Burnkin.ko,
   runPrefix: "burnkin-track1-run",
   scenarioId: BURNKIN_TRACK1_SCENARIO_ID,
   scenarioHash: BURNKIN_TRACK1_SCENARIO_HASH,
@@ -149,7 +150,7 @@ export const JOINKIN_TRACK1_SAVE_KEY = "fictor.joinkin.save.v2" as const;
 
 const JOINKIN_EXECUTION: Track1RaceExecution = freeze({
   raceId: "Joinkin",
-  raceLabelKo: "이음붙이",
+  raceLabelKo: PUBLIC_NAMES.races.Joinkin.ko,
   runPrefix: "joinkin-track1-run",
   scenarioId: JOINKIN_TRACK1_SCENARIO_ID,
   scenarioHash: JOINKIN_TRACK1_SCENARIO_HASH,

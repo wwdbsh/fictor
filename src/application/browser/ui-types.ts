@@ -1,3 +1,5 @@
+import type { PublicRaceId, PublicRaceNameKo } from "../../content/public-names";
+
 export type Track1UiPhase =
   | "BLOCKED"
   | "BETWEEN_NODES"
@@ -179,8 +181,8 @@ interface Track1UiBaseProjection {
   readonly feedback: null | { readonly tone: "STATUS" | "ERROR"; readonly messageKo: string };
   readonly featureFlags: { readonly heartForge: false };
   readonly codexDiscoveredCount: number;
-  readonly raceId: "Stillkin" | "Burnkin" | "Joinkin";
-  readonly raceLabelKo: "어름붙이" | "사름붙이" | "이음붙이";
+  readonly raceId: PublicRaceId;
+  readonly raceLabelKo: PublicRaceNameKo;
 }
 
 export interface Track1UiBlockedProjection extends Track1UiBaseProjection {

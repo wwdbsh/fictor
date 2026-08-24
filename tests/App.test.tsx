@@ -71,6 +71,7 @@ describe("Track-1 App", () => {
     mounted();
 
     expect(screen.getByRole("main")).toBeInTheDocument();
+    expect(screen.getByLabelText("FICTOR · 픽토르")).toHaveTextContent("FICTOR · 픽토르");
     expect(screen.getByText("FICTOR", { exact: false })).toBeInTheDocument();
     const heading = screen.getByRole("heading", { level: 1, name: "어름의 터 · 깊이 1 / 3" });
     await waitFor(() => expect(heading).toHaveFocus());
@@ -265,6 +266,7 @@ describe("Track-1 App", () => {
 
     expect(document.querySelector(".screen-header .depth-label")).toHaveTextContent("어름의 터 · 깊이 1 / 3");
     expect(screen.getByRole("heading", { level: 2, name: "전투에서 살아남았습니다." })).toBeInTheDocument();
+    expect(document.querySelector(".reward-card p")).toHaveTextContent("· 어름");
     const focusHeading = screen.getByRole("heading", { level: 1, name: "전투에서 살아남았습니다" });
     await waitFor(() => expect(focusHeading).toHaveFocus());
   });

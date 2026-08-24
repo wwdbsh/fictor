@@ -1,3 +1,4 @@
+import { PUBLIC_NAMES } from "../../content/public-names";
 import { resolveForgeCard, type GeneratedCard } from "../../domain/forge";
 import type { ForgeResolverContextV1 } from "../../domain/forge-runtime";
 import type { StorageLike } from "../../persistence";
@@ -55,7 +56,7 @@ const EVENT_CHOICE_LABELS: Record<string, string> = {
 const ENEMY_NAMES: Record<string, string> = {
   enemy__still__swarm: "얼어붙은 무리",
   elite__still__burn: "눌린 불의 잔해",
-  the_stilling: "어름, 처음 멈춘 신",
+  the_stilling: `${PUBLIC_NAMES.elderGods.the_stilling.ko}, 처음 멈춘 신`,
 };
 const ISSUE_MESSAGES: Record<string, string> = {
   INVALID_JSON: "저장 기록의 형식을 읽을 수 없습니다.",
@@ -194,7 +195,7 @@ function recipeDisplay(recipeId: string, context: ForgeResolverContextV1): { nam
 function commandFeedback(events: readonly { type: string }[]): Feedback {
   const last = events.at(-1)?.type;
   if (events.some(({ type }) => type === "INSTANT_FORGE_CLEANED")) return { tone: "STATUS", messageKo: "전투가 끝나 즉석 결과가 사라지고 사용한 재료가 덱으로 복구되었습니다." };
-  if (last === "RUN_WON") return { tone: "STATUS", messageKo: "어름의 잔영이 멈췄습니다." };
+  if (last === "RUN_WON") return { tone: "STATUS", messageKo: `${PUBLIC_NAMES.elderGods.the_stilling.ko}의 잔영이 멈췄습니다.` };
   if (last === "RUN_LOST") return { tone: "STATUS", messageKo: "런이 끝났습니다." };
   if (events.some(({ type }) => type === "REWARD_AVAILABLE")) return { tone: "STATUS", messageKo: "전투 보상이 도착했습니다." };
   if (events.some(({ type }) => type === "WORKSHOP_ENTITLEMENT_GRANTED")) return { tone: "STATUS", messageKo: "연료 없이 한 번 빚을 수 있습니다." };
@@ -344,8 +345,8 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     const shared = {
       screenKey: screenKey(snapshot),
       focusKey: focusKey(snapshot),
-      headingKo: `어름의 터 · 깊이 ${depth} / 3`,
-      focusHeadingKo: `어름의 터 · 깊이 ${depth} / 3`,
+      headingKo: `${PUBLIC_NAMES.elderGods.the_stilling.ko}의 터 · 깊이 ${depth} / 3`,
+      focusHeadingKo: `${PUBLIC_NAMES.elderGods.the_stilling.ko}의 터 · 깊이 ${depth} / 3`,
       depth,
       stats: stats(snapshot),
       journey: journey(snapshot),
@@ -493,8 +494,8 @@ export function createStillkinTrack1UiSession(options: StillkinTrack1UiSessionOp
     return {
       ...shared,
       phase: won ? "RUN_WON" : "RUN_LOST",
-      headingKo: won ? "어름의 잔영이 멈췄습니다" : "기록이 여기서 끊겼습니다",
-      focusHeadingKo: won ? "어름의 잔영이 멈췄습니다" : "기록이 여기서 끊겼습니다",
+      headingKo: won ? `${PUBLIC_NAMES.elderGods.the_stilling.ko}의 잔영이 멈췄습니다` : "기록이 여기서 끊겼습니다",
+      focusHeadingKo: won ? `${PUBLIC_NAMES.elderGods.the_stilling.ko}의 잔영이 멈췄습니다` : "기록이 여기서 끊겼습니다",
       messageKo: won ? "신의 심장이 도감에 남았습니다." : "영구 기록은 남아 있습니다. 새 런을 시작할 수 있습니다.",
       artSrc: assetUrl(baseUrl, won ? "cards/heart__still.png" : `backgrounds/background__still__depth_0${depth}.png`),
       action: bind(`restart:${snapshot.flow.revision}`, "RESTART", "새 런", { type: "RESTART", ...baseCommand(snapshot) }),
