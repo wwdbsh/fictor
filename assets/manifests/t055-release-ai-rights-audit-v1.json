@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "audit_version": "t055-release-ai-rights-audit-v1",
+  "task_key": "T055",
+  "issue_number": 105,
+  "contract_sha256": "c5cd05800a5fffd715aa7fc693c1e597de5e1b5672024680bff4ea0ca24f0db0",
+  "recorded_at": "2026-08-24T02:37:04Z",
+  "secret_free": true,
+  "raw_evidence_stored": false,
+  "observed_evidence": {
+    "path": "assets/evidence/t055-account-observed-v1.json",
+    "sha256": "f15244f55b53800080b324f5f26c8806d69de439a880e26eea88e473ba418ba3"
+  },
+  "source_register": [
+    {
+      "path": "assets/manifests/t022-m2-assets-audit-v1.json",
+      "sha256": "1456506d259c95f3e68d8383b9fafe2ed026ffa260b9f82fc65960d5395a429b",
+      "kind": "RELEASE_INVENTORY"
+    },
+    {
+      "path": "assets/manifests/master-style-v1.json",
+      "sha256": "b03c82a3b4ad352de62b8364b158ede047c62c0fd3defea7ad96b83366d15e0d",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t011-style-actual-run-v2.json",
+      "sha256": "1b633074376cdb8d93dfa738a7a0c5c85d05c74b9b184c29fc94331018859058",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t013-materials-actual-run-v1.json",
+      "sha256": "722937487ecf6d4248c1ce6aa0fdec44cd730b3ddfbc4ca3a008762d6812d610",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t015-canonical-shard-1-forensics-v4.json",
+      "sha256": "3c01a0749cda3ffacb56e198446603a4910efc1a26051d0acd22481cac0d877f",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t016-canonical-cards-final-forensic-v1.json",
+      "sha256": "8aaaec756fbe9179f2ee179ad3eac351cf37e115aa0fb1481285dd2e13391532",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t019-heart-cards-v1-final-journal-forensic.json",
+      "sha256": "f363fb4ef9f8779db153491dd60f9d088c97b438867a5ed878a5de5e71e5ad92",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t020-world-art-v1-final-journal-forensic.json",
+      "sha256": "2f017a34afb7aadef6d0bd2ff93e30bc02e7c916fb36066225e78ce6b6e51636",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t020-world-art-v2-final-journal-forensic.json",
+      "sha256": "8cd7e479ce35658f2062cb77097077439b359b31cb09cc5c454ca3536a122236",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "assets/evidence/t021-event-art-v1-final-journal-forensic.json",
+      "sha256": "a41ca419f107a1e37f7bed063add9609713d688b82bc40c3ab0d1bbd877a52b1",
+      "kind": "LOCAL_PROVENANCE"
+    },
+    {
+      "path": "scripts/assets/release-public-assets.ts",
+      "sha256": "481775a7db42677c098980e7fbd63afb5cca0da177550eab7c3777e6cdc3a814",
+      "kind": "RELEASE_ALLOWLIST_IMPLEMENTATION"
+    }
+  ],
+  "release_inventory": {
+    "t022_assets": 621,
+    "selected_style_assets": 1,
+    "production_assets": 622,
+    "evidence_only_candidates": [
+      {
+        "path": "public/assets/style/master-candidate-02.png",
+        "production_count": 0
+      },
+      {
+        "path": "public/assets/style/master-candidate-03.png",
+        "production_count": 0
+      },
+      {
+        "path": "public/assets/style/master-candidate-04.png",
+        "production_count": 0
+      }
+    ],
+    "source_task_counts": {
+      "T013": 52,
+      "T015": 332,
+      "T016": 157,
+      "T019": 6,
+      "T020": 54,
+      "T021": 20
+    },
+    "digest_encoding": "UTF8:RELEASE_AI_PATH_SHA_V1\n + codepoint-sorted(public_path + TAB + sha256 + LF)",
+    "digest_sha256": "a691621e04e44c1ee45d79722e83fbe1765c3f1e148b9740985fe60a6f81d632",
+    "full_rows_replicated": false
+  },
+  "coverage": {
+    "structural": {
+      "status": "VERIFIED",
+      "release_assets": 622,
+      "path_sha_rows": 622,
+      "duplicate_paths": 0,
+      "duplicate_rows": 0,
+      "gaps": 0
+    },
+    "substantive": {
+      "status": "UNRESOLVED",
+      "claims": 6,
+      "verified": 0,
+      "unresolved": 6,
+      "not_applicable": 0,
+      "gaps": 6
+    }
+  },
+  "substantive_claims": [
+    {
+      "claim_id": "ALL_622_SAME_ACCOUNT_HISTORICAL_BINDING",
+      "status": "UNRESOLVED",
+      "reason": "두 개의 알려진 job만 동일 로그인 계정 UI와 결속되었으며 이를 나머지 620개에 확대하지 않는다."
+    },
+    {
+      "claim_id": "GENERATION_TIME_ACCOUNT_TERMS_REVISION_EFFECTIVE_INTERVAL",
+      "status": "UNRESOLVED",
+      "reason": "계정 UI에 2026-08-11~14 생성 당시 적용 Terms revision과 effective interval이 표시되지 않았다."
+    },
+    {
+      "claim_id": "GENERATION_TIME_TERMS_ACCEPTANCE_OR_EARLY_CONSENT_TIMESTAMP",
+      "status": "UNRESOLVED",
+      "reason": "계정 UI에 약관 acceptance 또는 early-consent timestamp가 표시되지 않았다."
+    },
+    {
+      "claim_id": "GENERATION_TIME_APPLICABLE_PRIVACY_REVISION",
+      "status": "UNRESOLVED",
+      "reason": "계정 UI에 생성 당시 계정에 적용된 Privacy revision이 표시되지 않았다."
+    },
+    {
+      "claim_id": "REQUEST_TO_REPORTED_MODEL_OFFICIAL_RELATIONSHIP",
+      "status": "UNRESOLVED",
+      "reason": "요청 nano_banana_2와 provider 보고 nano_banana_flash의 공식 관계를 설명하는 과거 적용 증거가 없다."
+    },
+    {
+      "claim_id": "UPSTREAM_SUPPLEMENTAL_POLICY_COVERAGE",
+      "status": "UNRESOLVED",
+      "reason": "생성 당시 상위 제공자 supplemental policy가 622개 출력에 적용된 범위를 입증하는 증거가 없다."
+    }
+  ],
+  "decision": {
+    "completion_eligible": false,
+    "t055": "BLOCKED",
+    "b_01": "BLOCKED",
+    "t047": "BLOCKED",
+    "generation_or_paid_call_performed": false,
+    "exclusion_or_replacement_started": false,
+    "next_authorized_step": "OBTAIN_GENERATION_TIME_ACCOUNT_AND_PROVIDER_POLICY_EVIDENCE_OR_APPROVE_A_SEPARATE_GOAL_AMENDMENT"
+  }
+}

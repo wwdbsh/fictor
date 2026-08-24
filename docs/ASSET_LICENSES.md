@@ -87,6 +87,18 @@ fail-closed 검사한 뒤 복사합니다. PNG production inventory는 기존 T0
 유지하며 법적 파일은 그 수량에 포함하지 않습니다. T062에서 exact production `dist`와 전체 검증을
 독립적으로 재감사합니다.
 
+## T055 생성 계정·모델 권리 audit — 2026-08-24 KST
+
+[T055 blocked audit](legal/t055-account-model-rights-blocked-audit-2026-08-24.md)에서 T060 production
+AI PNG 622개의 경로·SHA-256 구조적 coverage를 gap 0으로 고정했다. 로그인 계정 UI에서 T011·T016
+known job 각 1개가 local evidence와 일치하는 것은 확인했으나, 생성 당시 Terms revision/effective
+interval·동의 시각·Privacy revision·요청/보고 모델 공식 관계·상위 제공자 supplemental policy와
+나머지 620개 계정 결속은 확인되지 않았다.
+
+substantive gap은 6이며 `completionEligible=false`다. 이 결과는 기존 조건부 권리 상태를 격상하지
+않고 T055, B-01, T047을 계속 blocked로 유지한다. 계정 비밀·개인정보·원본 화면은 저장하지 않았고
+새 생성·유료 호출·제외·대체 작업도 수행하지 않았다.
+
 ## AI 생성물 provenance 연결
 
 - 계획과 ID·경로·프롬프트 hash: `assets/manifests/core-v1.plan.json`

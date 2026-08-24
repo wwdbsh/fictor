@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "evidence_version": "t055-account-observed-v1",
+  "task_key": "T055",
+  "issue_number": 105,
+  "observed_at": "2026-08-24T02:37:04Z",
+  "observed_local_date": "2026-08-24",
+  "timezone": "Asia/Seoul",
+  "secret_free": true,
+  "raw_evidence_stored": false,
+  "access": {
+    "mode": "AUTHENTICATED_READ_ONLY_UI",
+    "account_state_changes": 0,
+    "provider_calls": 0,
+    "paid_calls": 0,
+    "downloads": 0,
+    "external_transfers": 0
+  },
+  "account_ui": {
+    "visible_asset_count": 685,
+    "account_identifier_stored": false,
+    "policy_history_visible": false,
+    "current_session_used_as_historical_acceptance_evidence": false
+  },
+  "known_job_bindings": [
+    {
+      "task_key": "T011",
+      "job_id": "e0f36c95-2e1b-4e38-9931-7e10e562f209",
+      "local_source_path": "assets/evidence/t011-style-actual-run-v2.json",
+      "local_asset_id": "style/master-candidate-01",
+      "local_requested_model": "nano_banana_2",
+      "local_provider_reported_model": "nano_banana_flash",
+      "account_ui_model_text": "Nano Banana 2",
+      "account_ui_created_text": "August 11, 2026 at 7:17 PM",
+      "account_ui_time_zone": "NOT_DISPLAYED",
+      "status": "VERIFIED"
+    },
+    {
+      "task_key": "T016",
+      "job_id": "ccdeba78-06a5-4d3f-b3fa-8ab165353803",
+      "local_source_path": "assets/evidence/t016-canonical-cards-final-forensic-v1.json",
+      "local_asset_id": "forge__tool_01__tool_07",
+      "local_provider_reported_model": "nano_banana_flash",
+      "account_ui_list_date_text": "August 14, 2026",
+      "account_ui_detail_fields_stored": false,
+      "status": "VERIFIED"
+    }
+  ],
+  "redaction": {
+    "allowlist_only": true,
+    "excluded": [
+      "username",
+      "display name",
+      "profile path",
+      "email",
+      "account identifier",
+      "cookie",
+      "token",
+      "signed download address",
+      "screenshot",
+      "HTML",
+      "HAR",
+      "raw dump"
+    ],
+    "raw_capture_retained": false,
+    "review_result": "SECRET_FREE_ALLOWLIST_ONLY"
+  }
+}
