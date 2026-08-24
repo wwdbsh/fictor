@@ -1,17 +1,18 @@
 import { createEnabledGround } from "./factory";
+import { PUBLIC_NAMES } from "../public-names";
 
 export const ICE_GROUND_DESCRIPTOR = createEnabledGround({
   id: "GROUND_STILL",
   stem: "still",
-  nameKo: "어름의 터",
+  nameKo: `${PUBLIC_NAMES.elderGods.the_stilling.ko}의 터`,
   attribute: "STILL",
   depthLabels: ["서리 낀 들판", "얼어붙은 폭포와 계단", "완전히 정지한 거대 구조"],
   normalLabels: ["무리", "덩치", "껍데기", "손길", "흉내"],
   elite: { id: "elite__still__burn", labelKo: "눌린 불", mechanicId: "PRESSED_FIRE" },
   boss: {
     id: "the_stilling",
-    name: "The Stilling",
-    labelKo: "어름, 처음 멈춘 신",
+    name: PUBLIC_NAMES.elderGods.the_stilling.en,
+    labelKo: `${PUBLIC_NAMES.elderGods.the_stilling.ko}, 처음 멈춘 신`,
     mechanicId: "TOTAL_STOP",
     heartId: "heart__still",
   },

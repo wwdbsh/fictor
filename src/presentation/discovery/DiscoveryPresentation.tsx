@@ -1,6 +1,7 @@
 import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
 
 import type { Track1UiForgePresentation } from "../../application";
+import { PUBLIC_NAMES } from "../../content/public-names";
 import { AssetImage } from "../assets";
 import { useDiscoveryPhase, type DiscoveryClock } from "./use-discovery-phase";
 
@@ -85,7 +86,7 @@ export function FirstDiscoveryOverlay({ presentation, onDismiss, clock }: { pres
           </div>
           <span className="discovery-forge-mark" aria-hidden="true">＋</span>
           <figure className="discovery-result">
-            <div className="discovery-card-back" aria-hidden="true"><span>FICTOR</span></div>
+            <div className="discovery-card-back" aria-hidden="true"><span>{PUBLIC_NAMES.title.en}</span></div>
             <ResultArt presentation={presentation} />
             <figcaption>
               <strong>{canonical.result.nameKo}</strong>

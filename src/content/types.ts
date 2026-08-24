@@ -1,3 +1,5 @@
+import type { PublicElderGodNameEn } from "./public-names";
+
 export type RaceId =
   | "Stillkin"
   | "Burnkin"
@@ -70,7 +72,7 @@ export interface EliteEnemyDescriptor {
 
 export interface BossEnemyDescriptor {
   readonly id: "the_stilling" | "the_burning" | "the_scattering" | "the_rotting" | "the_washing" | "the_joining";
-  readonly name: "The Stilling" | "The Burning" | "The Scattering" | "The Rotting" | "The Washing" | "The Joining";
+  readonly name: PublicElderGodNameEn;
   readonly labelKo: string;
   readonly mechanicId: BossMechanicId;
   readonly mechanic: MechanicMetadata;

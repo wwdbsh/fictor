@@ -1,11 +1,12 @@
 import type { RaceDescriptor } from "../types";
 import { freeze } from "../../freeze";
 import { PLAYABLE_GROUND_IDS } from "../grounds/factory";
+import { PUBLIC_NAMES } from "../public-names";
 
 export const STILLKIN_DESCRIPTOR: RaceDescriptor = freeze({
   id: "Stillkin",
-  nameKo: "어름붙이",
-  labelKo: "어름붙이",
+  nameKo: PUBLIC_NAMES.races.Stillkin.ko,
+  labelKo: PUBLIC_NAMES.races.Stillkin.ko,
   attribute: "STILL",
   status: "ENABLED",
   enabled: true,

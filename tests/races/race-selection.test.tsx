@@ -22,6 +22,9 @@ describe("race selection", () => {
     const storage = new MemoryStorage();
     render(<RaceSelectApp selection={createTrack1RaceSelection({ storage, baseUrl: "/fictor-test/" })} />);
 
+    expect(screen.getByText("FICTOR · 픽토르")).toBeVisible();
+    expect(screen.getByText("같은 어름의 터에서도 몸에 밴 규칙이 달라집니다.")).toBeVisible();
+    for (const attribute of ["STILL", "BURN", "JOIN"]) expect(screen.getByText(attribute)).toBeVisible();
     const selectionHeading = screen.getByRole("heading", { name: "붙이를 고르세요" });
     await waitFor(() => expect(document.activeElement).toBe(selectionHeading));
     const legalBefore = screen.getAllByRole("link", { name: "제3자 라이선스 고지" });

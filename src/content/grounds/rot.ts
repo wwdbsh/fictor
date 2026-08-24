@@ -1,17 +1,18 @@
 import { createEnabledGround } from "./factory";
+import { PUBLIC_NAMES } from "../public-names";
 
 export const ROT_GROUND_DESCRIPTOR = createEnabledGround({
   id: "GROUND_ROT",
   stem: "rot",
-  nameKo: "삭음의 터",
+  nameKo: `${PUBLIC_NAMES.elderGods.the_rotting.ko}의 터`,
   attribute: "ROT",
   depthLabels: ["주저앉은 지표", "겹겹이 무너진 층", "바닥이 계속 내려앉는 곳"],
   normalLabels: ["딱지", "무른 뿌리", "곰팡이 꽃", "번지는 얼룩", "내려앉은 냄새"],
   elite: { id: "elite__rot__wash", labelKo: "중화", mechanicId: "NEUTRALIZED" },
   boss: {
     id: "the_rotting",
-    name: "The Rotting",
-    labelKo: "삭음, 스스로를 먹은 신",
+    name: PUBLIC_NAMES.elderGods.the_rotting.en,
+    labelKo: `${PUBLIC_NAMES.elderGods.the_rotting.ko}, 스스로를 먹은 신`,
     mechanicId: "SELF_EATING",
     heartId: "heart__rot",
   },

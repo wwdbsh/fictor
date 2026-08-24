@@ -9,6 +9,7 @@ import type {
   Track1UiForgeReview,
   Track1UiProjection,
 } from "../application";
+import { PUBLIC_NAMES } from "../content/public-names";
 import { AssetImage } from "./assets";
 import { FirstDiscoveryOverlay, RepeatDiscoveryToast } from "./discovery";
 import { CanonicalPreview } from "./forge/CanonicalPreview";
@@ -24,7 +25,7 @@ export interface AppProps {
 }
 
 function Brand() {
-  return <div className="brand" aria-label="FICTOR 픽토르">FICTOR <span>· 픽토르</span></div>;
+  return <div className="brand" aria-label={`${PUBLIC_NAMES.title.en} · ${PUBLIC_NAMES.title.ko}`}>{PUBLIC_NAMES.title.en} <span>· {PUBLIC_NAMES.title.ko}</span></div>;
 }
 
 function BookIcon() {
@@ -151,9 +152,9 @@ function JourneyScreen({ projection, session, busy, onAction }: { projection: Ex
   const closeForge = () => { setForgeOpen(false); queueMicrotask(() => forgeOpener.current?.focus({ preventScroll: true })); };
   return (
     <section className="journey-screen page-screen art-screen">
-      <AssetImage assetRole="STATIC_MANIFEST" className="screen-background" src={projection.backgroundSrc} placeholderLabel="어름의 터" alt="" /><JourneyRail projection={projection} />
+      <AssetImage assetRole="STATIC_MANIFEST" className="screen-background" src={projection.backgroundSrc} placeholderLabel={`${PUBLIC_NAMES.elderGods.the_stilling.ko}의 터`} alt="" /><JourneyRail projection={projection} />
       {forgeOpen ? <ForgePanel mode="WORKSHOP_PAID" materials={projection.workshopMaterials} requiredCount={projection.raceId === "Joinkin" ? 3 : 2} session={session} busy={busy} onAction={onAction} onClose={closeForge} /> : null}
-      <div className="journey-record" hidden={forgeOpen} inert={forgeOpen ? true : undefined}><p>고정된 여정의 다음 기록</p><h2>{projection.nextLabelKo}</h2><p>경로는 갈라지지 않습니다. 어름의 터를 더 깊이 기록합니다.</p><div className="journey-actions"><ActionButton action={projection.action} busy={busy} onAction={onAction} className="primary-cta" /><button ref={forgeOpener} type="button" className="action-button" onClick={() => setForgeOpen(true)} disabled={busy || !projection.paidWorkshopEnabled} aria-label={`공방 열기${projection.paidWorkshopDisabledReasonKo ? ` · ${projection.paidWorkshopDisabledReasonKo}` : ""}`}>공방 빚기 <small>연료 1 · 영구</small></button></div>{projection.paidWorkshopDisabledReasonKo ? <p className="forge-disabled-reason">{projection.paidWorkshopDisabledReasonKo}</p> : null}</div>
+      <div className="journey-record" hidden={forgeOpen} inert={forgeOpen ? true : undefined}><p>고정된 여정의 다음 기록</p><h2>{projection.nextLabelKo}</h2><p>경로는 갈라지지 않습니다. {PUBLIC_NAMES.elderGods.the_stilling.ko}의 터를 더 깊이 기록합니다.</p><div className="journey-actions"><ActionButton action={projection.action} busy={busy} onAction={onAction} className="primary-cta" /><button ref={forgeOpener} type="button" className="action-button" onClick={() => setForgeOpen(true)} disabled={busy || !projection.paidWorkshopEnabled} aria-label={`공방 열기${projection.paidWorkshopDisabledReasonKo ? ` · ${projection.paidWorkshopDisabledReasonKo}` : ""}`}>공방 빚기 <small>연료 1 · 영구</small></button></div>{projection.paidWorkshopDisabledReasonKo ? <p className="forge-disabled-reason">{projection.paidWorkshopDisabledReasonKo}</p> : null}</div>
       <StatsStrip projection={projection} />
     </section>
   );
@@ -179,7 +180,7 @@ function CombatScreen({ projection, session, busy, onAction, onCardAction }: { p
   const executeInstant = () => { if (instantAction) { setSelectionMode(null); setSelected([]); onAction(instantAction); } };
   return (
     <section className="combat-screen page-screen art-screen">
-      <AssetImage assetRole="STATIC_MANIFEST" className="screen-background" src={projection.backgroundSrc} placeholderLabel="어름의 터" alt="" />
+      <AssetImage assetRole="STATIC_MANIFEST" className="screen-background" src={projection.backgroundSrc} placeholderLabel={`${PUBLIC_NAMES.elderGods.the_stilling.ko}의 터`} alt="" />
       <div className="enemy-stage"><p className="intent-banner">다음 의도 · <strong>{projection.enemy.intentKo}{projection.enemy.intentAmount === null ? "" : ` ${projection.enemy.intentAmount}`}</strong></p><figure className="enemy-record"><AssetImage assetRole="STATIC_MANIFEST" src={projection.enemy.artSrc} placeholderLabel={projection.enemy.nameKo} alt={projection.enemy.nameKo} /><figcaption><strong>{projection.enemy.nameKo}</strong><span>체력 {projection.enemy.hp} / {projection.enemy.maxHp}</span><span>방어 {projection.enemy.block}</span></figcaption></figure></div>
       <div className="combat-instruction"><p>{selectionMode === "FORGE" ? `즉석 빚기 재료 ${requiredCount === 3 ? "세" : "두"} 장을 고르세요. ${requiredCount === 3 ? "앞의 두 칸이 기본 결과, 세 번째 칸이 공명 오버레이입니다." : "카드 사용과 선택은 분리됩니다."}` : selectionMode === "KINDLE" ? "소멸시켜 코스트만큼 에너지로 바꿀 카드 한 장을 고르세요." : projection.instructionKo}</p><div className="race-combat-actions"><button type="button" className="instant-mode-toggle" aria-pressed={selectionMode === "FORGE"} onClick={toggleForgeMode} disabled={busy || (selectionMode !== "FORGE" && !projection.instantForgeAvailable)} aria-label={`즉석 빚기 선택 모드${projection.instantForgeDisabledReasonKo && selectionMode !== "FORGE" ? ` · ${projection.instantForgeDisabledReasonKo}` : ""}`}>{selectionMode === "FORGE" ? "즉석 빚기 취소" : "즉석 빚기"}<small>행동 1회 · 전투 한정</small></button>{projection.raceId === "Burnkin" ? <>{projection.burnkinPassiveAction ? <ActionButton action={projection.burnkinPassiveAction} busy={busy} onAction={onAction} detailKo="체력 1 → 에너지 1" /> : null}<button type="button" className="instant-mode-toggle" aria-pressed={selectionMode === "KINDLE"} onClick={toggleKindleMode} disabled={busy || projection.hand.every((card) => !card.kindleAction || card.kindleAction.disabled)}>{selectionMode === "KINDLE" ? "지피기 취소" : "지피기"}<small>카드 소멸 · 코스트만큼 에너지</small></button></> : null}{projection.joinkinExtendAction ? <ActionButton action={projection.joinkinExtendAction} busy={busy} onAction={onAction} detailKo="턴당 1회 · 빚기 행동 +1" disabledReasonKo="이번 턴에는 사용할 수 없습니다" /> : null}</div></div>
       <div className="hand" aria-label="손패">{projection.hand.length > 0 ? projection.hand.map((card, index) => <CombatCard key={card.instanceId} card={card} handIndex={index} busy={busy} selectionMode={selectionMode} selected={selected.includes(card.instanceId)} onAction={onCardAction} onToggleForge={toggleCard} />) : <p className="empty-hand" role="note">손에 든 카드가 없습니다.</p>}</div>
@@ -193,7 +194,7 @@ function CombatScreen({ projection, session, busy, onAction, onCardAction }: { p
 }
 
 function RewardScreen({ projection, busy, onAction }: { projection: Extract<Track1UiProjection, { phase: "AWAITING_REWARD" }>; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void }) {
-  return <section className="reward-screen page-screen"><div className="reward-heading"><h2>전투에서 살아남았습니다.</h2><p>재료 하나를 골라 덱에 넣으세요.</p></div><div className="reward-grid">{projection.choices.map((choice) => <article className="reward-card" key={choice.choiceId}>{choice.artSrc ? <AssetImage assetRole="REWARD" src={choice.artSrc} placeholderLabel={choice.nameKo} alt="" /> : <div className="missing-art" aria-hidden="true" />}<h3>{choice.nameKo}</h3><p>{choice.kindLabelKo} · 어름</p><ActionButton action={choice.action} busy={busy} onAction={onAction} /></article>)}</div><StatsStrip projection={projection} /></section>;
+  return <section className="reward-screen page-screen"><div className="reward-heading"><h2>전투에서 살아남았습니다.</h2><p>재료 하나를 골라 덱에 넣으세요.</p></div><div className="reward-grid">{projection.choices.map((choice) => <article className="reward-card" key={choice.choiceId}>{choice.artSrc ? <AssetImage assetRole="REWARD" src={choice.artSrc} placeholderLabel={choice.nameKo} alt="" /> : <div className="missing-art" aria-hidden="true" />}<h3>{choice.nameKo}</h3><p>{choice.kindLabelKo} · {PUBLIC_NAMES.elderGods.the_stilling.ko}</p><ActionButton action={choice.action} busy={busy} onAction={onAction} /></article>)}</div><StatsStrip projection={projection} /></section>;
 }
 
 function EventScreen({ projection, busy, onAction }: { projection: Extract<Track1UiProjection, { phase: "IN_EVENT" }>; busy: boolean; onAction: (action: Track1UiActionDescriptor) => void }) {

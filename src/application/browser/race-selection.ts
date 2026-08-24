@@ -1,15 +1,16 @@
 import { listEnabledRaces } from "../../content";
+import { PUBLIC_NAMES, type PublicRaceId, type PublicRaceNameKo } from "../../content/public-names";
 import { freeze } from "../../freeze";
 import { FICTOR_SAVE_V2_KEY, type StorageLike } from "../../persistence";
 import { createStillkinTrack1UiSession } from "./stillkin-track1-ui-session";
 import type { StillkinTrack1UiSession } from "./ui-types";
 
 export const FICTOR_RACE_SELECTION_KEY = "fictor.race.v1" as const;
-export type PlayableTrack1RaceId = "Stillkin" | "Burnkin" | "Joinkin";
+export type PlayableTrack1RaceId = PublicRaceId;
 
 export interface Track1RaceSelectionChoice {
   readonly raceId: PlayableTrack1RaceId;
-  readonly labelKo: "어름붙이" | "사름붙이" | "이음붙이";
+  readonly labelKo: PublicRaceNameKo;
   readonly attribute: "STILL" | "BURN" | "JOIN";
   readonly summaryKo: string;
 }
@@ -38,9 +39,9 @@ function selectedRace(storage: StorageLike): PlayableTrack1RaceId | null {
 
 export function createTrack1RaceSelection(options: Track1RaceSelectionOptions): Track1RaceSelection {
   const choices = listEnabledRaces().flatMap((race): Track1RaceSelectionChoice[] => {
-    if (race.id === "Stillkin") return [{ raceId: "Stillkin", labelKo: "어름붙이", attribute: "STILL", summaryKo: "방어를 붙잡고 공명을 잊지 않습니다." }];
-    if (race.id === "Burnkin") return [{ raceId: "Burnkin", labelKo: "사름붙이", attribute: "BURN", summaryKo: "체력과 카드를 태워 속도를 얻습니다." }];
-    if (race.id === "Joinkin") return [{ raceId: "Joinkin", labelKo: "이음붙이", attribute: "JOIN", summaryKo: "세 재료와 결속 공명으로 조합을 이어갑니다." }];
+    if (race.id === "Stillkin") return [{ raceId: "Stillkin", labelKo: PUBLIC_NAMES.races.Stillkin.ko, attribute: "STILL", summaryKo: "방어를 붙잡고 공명을 잊지 않습니다." }];
+    if (race.id === "Burnkin") return [{ raceId: "Burnkin", labelKo: PUBLIC_NAMES.races.Burnkin.ko, attribute: "BURN", summaryKo: "체력과 카드를 태워 속도를 얻습니다." }];
+    if (race.id === "Joinkin") return [{ raceId: "Joinkin", labelKo: PUBLIC_NAMES.races.Joinkin.ko, attribute: "JOIN", summaryKo: "세 재료와 결속 공명으로 조합을 이어갑니다." }];
     return [];
   });
   return freeze({

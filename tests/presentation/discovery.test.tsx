@@ -65,6 +65,7 @@ describe("discovery phase machine", () => {
     const timerSpy = vi.spyOn(window, "setTimeout");
     const view = render(<StrictMode><FirstDiscoveryOverlay presentation={presentation()} onDismiss={onDismiss} /></StrictMode>);
     const overlay = screen.getByRole("dialog", { name: "빚기 기록" });
+    expect(document.querySelector(".discovery-card-back")).toHaveTextContent("FICTOR");
     expect(overlay).toHaveAttribute("data-discovery-phase", "BURNING");
     expect(timerSpy.mock.calls.filter(([, delay]) => delay === 900)).toHaveLength(2); // StrictMode setup, cleanup, setup.
 

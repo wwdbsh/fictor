@@ -1,17 +1,18 @@
 import { createEnabledGround } from "./factory";
+import { PUBLIC_NAMES } from "../public-names";
 
 export const WASH_GROUND_DESCRIPTOR = createEnabledGround({
   id: "GROUND_WASH",
   stem: "wash",
-  nameKo: "씻음의 터",
+  nameKo: `${PUBLIC_NAMES.elderGods.the_washing.ko}의 터`,
   attribute: "WASH",
   depthLabels: ["닳은 돌밭", "매끈하게 파인 수로", "완전한 공백"],
   normalLabels: ["맑은 눈물", "닳은 돌", "빈 껍질", "지워진 자국", "가라앉은 앙금"],
   elite: { id: "elite__wash__join", labelKo: "더 맑아진 것", mechanicId: "CLARIFIED" },
   boss: {
     id: "the_washing",
-    name: "The Washing",
-    labelKo: "씻음, 흔적을 지운 신",
+    name: PUBLIC_NAMES.elderGods.the_washing.en,
+    labelKo: `${PUBLIC_NAMES.elderGods.the_washing.ko}, 흔적을 지운 신`,
     mechanicId: "EMPTIED",
     heartId: "heart__wash",
   },
