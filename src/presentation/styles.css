@@ -622,6 +622,7 @@ button.codex-entry { cursor: pointer; }
   .screen-header { grid-template-columns: 1fr; padding-inline: 1rem; text-align: center; }
   .brand { font-size: 1.35rem; }
   .header-actions { position: absolute; right: 0.75rem; gap: .35rem; }
+  .ai-disclosure-panel { position: fixed; top: 4rem; right: 0.75rem; left: 0.75rem; width: auto; max-height: calc(100dvh - 5rem); overflow-y: auto; }
   .race-change { font-size: .68rem; }
   .codex-open { padding: 0.4rem; }
   .reward-grid { gap: 0.75rem; }
