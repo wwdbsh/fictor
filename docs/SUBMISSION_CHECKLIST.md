@@ -55,7 +55,8 @@
 
 ### 폼 항목과 파일
 
-- [x] [폼 필드 초안](submission/track1-form-field-draft.md)에 required 게임 제목 source `src/content/public-names.ts`의 `FICTOR · 픽토르`를 연결하고 DOM `maxlength=80` 이내임을 확인했습니다. 실제 제출 폼 반영은 아직 하지 않았습니다.
+- [ ] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`이며 DOM `maxlength=80` 이내입니다. 최종 폼 반영은 T051 승인 뒤에만 완료합니다.
+- [x] [폼 필드 초안](submission/track1-form-field-draft.md)에 위 canonical title source와 12/80 Unicode code-point 검사를 기록했습니다.
 - [x] required 게임 소개는 [canonical Track 1 제출 설명](submission/track1-description.ko.json)의 `description_ko`를 사용하며 200자 이내임을 초안에서 확인했습니다. 실제 제출 폼 반영은 아직 하지 않았습니다.
 - [ ] required 플레이 가능한 URL이 심사 기간에 접근됩니다.
 - [ ] required 썸네일이 file input의 JPEG/PNG accept에 맞습니다. UI recommendation인 16:9·최대 10MB도 따랐습니다.
