@@ -4,6 +4,18 @@ import { resolve } from "node:path";
 
 export const T055_OBSERVED_PATH = "assets/evidence/t055-account-observed-v1.json" as const;
 export const T055_AUDIT_PATH = "assets/manifests/t055-release-ai-rights-audit-v1.json" as const;
+export const T055_DISPOSITION_PATH = "assets/evidence/t055-owner-release-risk-disposition-v1.json" as const;
+export const T055_AUDIT_SHA256 =
+  "78f87523b51c854cb28a2e503b5a3592e233f3e5447bc449f05bef033afc22de" as const;
+export const T055_GOAL_CONTRACT_SHA256 =
+  "2cfe2bbafb93b432d82179ec33ef1c6b042f666de3a1fe816ac9e60f1f77ea04" as const;
+export const T055_CONTRACT_SHA256 =
+  "f94931653c2b44096e260245056302703480a6dc0dd4c3505c1a0a90e0c1afd2" as const;
+export const T055_OWNER_APPROVED_AT = "2026-08-24T04:05:07Z" as const;
+export const T055_OWNER_STATEMENT =
+  "ship-fictor-track1-2026 Goal amendment를 승인합니다. AI PNG 622개의 미해소 생성 당시 권리 증거 위험을 제가 수용하며, 이를 권리 검증이나 법률 보증으로 간주하지 않습니다. 관련 Goal·Task 계약 갱신과 T055 재개를 승인합니다." as const;
+export const T055_OWNER_DISPOSITION =
+  "OWNER_RELEASE_RISK_ACCEPTED_WITH_UNRESOLVED_GENERATION_TIME_RIGHTS_EVIDENCE" as const;
 export const T055_T022_PATH = "assets/manifests/t022-m2-assets-audit-v1.json" as const;
 export const T055_SELECTED_STYLE_PATH = "public/assets/style/master-candidate-01.png" as const;
 export const T055_SELECTED_STYLE_SHA256 =
@@ -85,6 +97,18 @@ export interface T055Summary {
   readonly substantive_gaps: 6;
   readonly completion_eligible: false;
   readonly raw_evidence_stored: false;
+}
+
+export interface T055DispositionSummary {
+  readonly result: "PASS_OWNER_DISPOSITION";
+  readonly disposition: typeof T055_OWNER_DISPOSITION;
+  readonly release_assets: 622;
+  readonly structural_gaps: 0;
+  readonly substantive_gaps: 6;
+  readonly historical_completion_eligible: false;
+  readonly rights_verified: false;
+  readonly legal_warranty: false;
+  readonly release_authorized: false;
 }
 
 function fail(code: string, detail?: string): never {
@@ -232,6 +256,19 @@ function verifyReleaseDigest(root: string): void {
   if (sha256(readFileSync(resolve(root, T055_SELECTED_STYLE_PATH))) !== T055_SELECTED_STYLE_SHA256) fail("SELECTED_STYLE_BYTES");
 }
 
+export function verifyT055DispositionReleaseBytes(root: string): void {
+  const { rows } = releaseRows(root);
+  for (const [path, expectedSha256] of rows) {
+    let actualSha256: string;
+    try {
+      actualSha256 = sha256(readFileSync(resolve(root, path)));
+    } catch {
+      fail("DISPOSITION_RELEASE_BYTES", path);
+    }
+    if (actualSha256 !== expectedSha256) fail("DISPOSITION_RELEASE_BYTES", path);
+  }
+}
+
 function verifyLocalSources(root: string, sourceRegister: unknown): void {
   if (!Array.isArray(sourceRegister) || sourceRegister.length !== EXPECTED_LOCAL_SOURCES.length) fail("SOURCE_REGISTER_COUNT");
   const expected = EXPECTED_LOCAL_SOURCES.map(([path, hash]) => ({ path, sha256: hash, kind: path === T055_T022_PATH ? "RELEASE_INVENTORY" : path === "scripts/assets/release-public-assets.ts" ? "RELEASE_ALLOWLIST_IMPLEMENTATION" : "LOCAL_PROVENANCE" }));
@@ -301,4 +338,100 @@ export function checkT055(root = process.cwd()): T055Summary {
 export function assertT055Complete(root = process.cwd()): never {
   const summary = checkT055(root);
   fail("NOT_COMPLETE", String(summary.substantive_gaps));
+}
+
+export function validateT055Disposition(value: unknown, auditBytes: Uint8Array): T055DispositionSummary {
+  const disposition = record(value, "DISPOSITION_OBJECT");
+  assertNoForbiddenKeys(disposition);
+  assertNoForbiddenValues(disposition);
+  exactKeys(disposition, [
+    "schema_version",
+    "disposition_version",
+    "task_key",
+    "issue_number",
+    "goal_binding",
+    "task_contract_sha256",
+    "approved_at",
+    "owner_decision",
+    "historical_audit_binding",
+    "release_scope",
+    "non_claims",
+    "authorization_boundaries",
+    "rollback",
+  ], "DISPOSITION_SCHEMA");
+  exact(
+    [disposition.schema_version, disposition.disposition_version, disposition.task_key, disposition.issue_number],
+    [1, "t055-owner-release-risk-disposition-v1", "T055", 105],
+    "DISPOSITION_IDENTITY",
+  );
+  exact(disposition.goal_binding, {
+    goal_key: "ship-fictor-track1-2026",
+    issue_number: 2,
+    contract_sha256: T055_GOAL_CONTRACT_SHA256,
+  }, "DISPOSITION_GOAL_BINDING");
+  exact(disposition.task_contract_sha256, T055_CONTRACT_SHA256, "DISPOSITION_TASK_CONTRACT");
+  exact(disposition.approved_at, T055_OWNER_APPROVED_AT, "DISPOSITION_APPROVED_AT");
+  exact(disposition.owner_decision, {
+    disposition: T055_OWNER_DISPOSITION,
+    exact_statement: T055_OWNER_STATEMENT,
+  }, "DISPOSITION_OWNER_DECISION");
+  exact(disposition.historical_audit_binding, {
+    path: T055_AUDIT_PATH,
+    sha256: T055_AUDIT_SHA256,
+    completion_eligible: false,
+  }, "DISPOSITION_AUDIT_BINDING");
+  if (sha256(auditBytes) !== T055_AUDIT_SHA256) fail("DISPOSITION_AUDIT_BYTES");
+  exact(disposition.release_scope, {
+    digest_encoding: T055_RELEASE_DIGEST_ENCODING,
+    digest_sha256: T055_RELEASE_DIGEST,
+    production_ai_png: 622,
+    structural_gaps: 0,
+    substantive_gaps: 6,
+  }, "DISPOSITION_RELEASE_SCOPE");
+  exact(disposition.non_claims, {
+    rights_verification: false,
+    legal_warranty: false,
+  }, "DISPOSITION_NON_CLAIMS");
+  exact(disposition.authorization_boundaries, {
+    release: false,
+    deploy: false,
+    submission: false,
+    provider_call: false,
+    paid_call: false,
+    t047_release_decision_remains_separate: true,
+  }, "DISPOSITION_AUTHORIZATION_BOUNDARIES");
+  exact(disposition.rollback, {
+    applies_only_while_release_digest_matches: true,
+    automatic_carry_forward: false,
+    conditions: [
+      "OWNER_WITHDRAWAL",
+      "RELEASE_DIGEST_CHANGE",
+      "EXPLICIT_RULE_CONFLICT",
+    ],
+    non_inferable_resolution: "REQUIRES_MANUAL_SUPERSEDING_DATED_OWNER_DECISION",
+  }, "DISPOSITION_ROLLBACK");
+
+  return {
+    result: "PASS_OWNER_DISPOSITION",
+    disposition: T055_OWNER_DISPOSITION,
+    release_assets: 622,
+    structural_gaps: 0,
+    substantive_gaps: 6,
+    historical_completion_eligible: false,
+    rights_verified: false,
+    legal_warranty: false,
+    release_authorized: false,
+  };
+}
+
+export function checkT055Disposition(root = process.cwd()): T055DispositionSummary {
+  checkT055(root);
+  verifyT055DispositionReleaseBytes(root);
+  const audit = readJson(root, T055_AUDIT_PATH);
+  const disposition = readJson(root, T055_DISPOSITION_PATH);
+  return validateT055Disposition(disposition.value, audit.bytes);
+}
+
+export function assertT055OwnerDisposition(root = process.cwd()): T055DispositionSummary {
+  return checkT055Disposition(root);
 }

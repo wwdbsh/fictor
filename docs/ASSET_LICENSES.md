@@ -99,6 +99,14 @@ substantive gap은 6이며 `completionEligible=false`다. 이 결과는 기존 �
 않고 T055, B-01, T047을 계속 blocked로 유지한다. 계정 비밀·개인정보·원본 화면은 저장하지 않았고
 새 생성·유료 호출·제외·대체 작업도 수행하지 않았다.
 
+위 내용은 감사 당시의 immutable blocked snapshot이다. 이후 상헌 님은
+[T055 소유자 release-risk disposition](legal/t055-owner-release-risk-disposition-2026-08-24.md)에서
+release digest `a691621e04e44c1ee45d79722e83fbe1765c3f1e148b9740985fe60a6f81d632`의 622개에 한해
+미해소 생성 당시 권리 증거 위험을 수용했다. T055의 개정 계약상 disposition은 충족되지만 substantive
+gap 6과 역사적 `completionEligible=false`는 그대로이며, 이는 권리 검증·법률 보증·공개 release·배포·
+출품·provider/유료 호출 승인이 아니다. T047 공개 결정은 별도 gate로 남는다. digest 변경, 소유자 철회,
+명시적 규칙 충돌 시 자동 승계하지 않고 수동·날짜가 기록된 superseding decision을 요구한다.
+
 ## AI 생성물 provenance 연결
 
 - 계획과 ID·경로·프롬프트 hash: `assets/manifests/core-v1.plan.json`
@@ -115,6 +123,7 @@ T010은 이미지를 생성하지 않았습니다. T011 스타일 후보 4장과
 - [x] T046 기준 실제 이미지·폰트·오디오·비디오·AI·오픈소스·작성 항목 inventory를 구분했습니다.
 - [x] T022 621장과 T011 스타일 4장의 provenance·manifest·결정 링크를 보존했습니다.
 - [x] T060에서 후보 02–04를 evidence-only로 보존하고 production build 입력·`dist`에서 제외해 PNG 622장을 고정했습니다.
+- [x] T055 owner disposition을 immutable blocked audit와 exact release digest에 별도 결속했습니다. 권리 검증 checkbox와 T047 release gate는 완료시키지 않습니다.
 - [x] T046 문서에 계정 ID, 이메일, API 키, form 개인정보나 signed URL을 복제하지 않았습니다.
 - [x] 번들 폰트·오디오·비디오가 없고 system font fallback만 쓰는 것을 확인했습니다.
 - [ ] 생성 당시 계정 적용 Terms·Privacy와 요청/보고 모델의 supplemental policy가 확인됐습니다.
