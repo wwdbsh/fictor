@@ -2,7 +2,7 @@
 
 ## 상태와 범위
 
-- 상태: `IN_PROGRESS` / `DRAFT_NON_SUBMITTABLE` — local-only 계약 개정과 초안 재개만 승인됐습니다. T061 complete와 PR #119 merge는 blocked이며, 이 문서는 완료·merge 또는 T047 공개 release 증거가 아닙니다.
+- 상태: `BLOCKED` / `DRAFT_NON_SUBMITTABLE` — 승인된 local-only 계약 개정과 초안 작성은 끝났습니다. T061은 downstream T049/T052 계약 blocker 해소와 별도 complete·PR #119 merge 승인을 기다리며, 이 문서는 완료·merge 또는 T047 공개 release 증거가 아닙니다.
 - disposition: `B06_OPERATIONALLY_CLOSED_WITH_UNKNOWN_CUTOFF_AND_NO_LATE_MUTATION_DEPENDENCY`
 - 범위: 이미 확인한 공식 공개 자료의 두 YES와 세 UNKNOWN을 보존하고, UNKNOWN에 의존하지 않는 FICTOR 운영 경계를 기록합니다.
 - 제외: 추가 외부 조사·운영진 문의·live form 접근, 플레이테스트·게임 변경·test/build, 데모 capture/upload, T062/T047/T048 실행, release·배포·QA·제출, 이미지 생성, provider·유료 호출.
@@ -53,6 +53,6 @@ B06_OPERATIONALLY_CLOSED_WITH_UNKNOWN_CUTOFF_AND_NO_LATE_MUTATION_DEPENDENCY
 
 ## 차단과 다음 증거
 
-T061은 승인된 local-only drafting 범위에서 in-progress이고, T061 complete와 PR #119 merge는 계속 blocked입니다. T062, T047과 후속 Task도 blocked입니다. 현재 승인은 계약 개정과 T061 local-only drafting 재개에만 적용되며 완료·merge 증거로 재사용할 수 없습니다. T061의 다음 결정은 초안 검토와 별도 완료·merge 승인입니다. 이후에는 상헌 님의 dated exact-commit 직접 플레이테스트 disposition과 exact-candidate-ready 별도 승인이 필요합니다.
+승인된 T061 local-only drafting은 끝났고 T061은 blocked입니다. T049 exact-artifact 배포와 T052 PII-free·ambiguous-submit 복구 계약 blocker를 승인된 amendment로 해소하고 독립 리뷰를 다시 통과한 뒤에만 별도 complete·PR #119 merge 승인을 요청할 수 있습니다. T062, T047과 후속 Task도 blocked입니다. 2026-08-24 drafting 승인은 완료·merge 증거로 재사용할 수 없습니다. 이후에는 상헌 님의 dated exact-commit 직접 플레이테스트 disposition과 exact-candidate-ready 별도 승인이 필요합니다.
 
 정확한 cutoff나 마감 후 mutation 정책을 추가로 해소하는 것은 T061 완료 조건이 아닙니다. 실제 폼, 개인정보, 화면, payload, 이메일, 쿠키, 계정, 연락처, session, token은 저장하지 않습니다. release·배포·QA·데모 capture/upload·제출은 수행하지 않았습니다.
