@@ -56,4 +56,21 @@ describe("T055 blocked account and model rights audit", () => {
     leaked.release_inventory.evidence_only_candidates[0].production_count = 1;
     expect(() => validateT055Audit(leaked, observedBytes, repositoryRoot)).toThrow(/T055_INVENTORY_VALUES/);
   });
+
+  test("exact-binds claim reasons and rejects sensitive values recursively", () => {
+    const rewritten = structuredClone(audit);
+    rewritten.substantive_claims[0].reason += " 별도 추정을 허용한다.";
+    expect(() => validateT055Audit(rewritten, observedBytes, repositoryRoot)).toThrow(/T055_CLAIM_VALUES/);
+
+    for (const injected of [
+      " 담당자 victim@example.com",
+      " Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmaWN0b3IifQ.signaturevalue",
+      " https://cdn.example.invalid/file?token=secret-value-1234",
+      " /@private-profile",
+    ]) {
+      const sensitive = structuredClone(audit);
+      sensitive.substantive_claims[0].reason += injected;
+      expect(() => validateT055Audit(sensitive, observedBytes, repositoryRoot)).toThrow(/T055_FORBIDDEN_VALUE/);
+    }
+  });
 });

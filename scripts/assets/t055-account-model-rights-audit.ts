@@ -20,6 +20,47 @@ const EVIDENCE_ONLY_PATHS = [
   "public/assets/style/master-candidate-04.png",
 ] as const;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
+const FORBIDDEN_VALUE_PATTERNS = [
+  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
+  /\bBearer\s+[A-Za-z0-9._~+/-]{12,}={0,2}\b/i,
+  /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/,
+  /\b(?:sk-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[A-Z0-9]{16})\b/,
+  /[?&](?:access_token|auth_token|token|signature|sig|x-amz-signature)=[^&\s]{8,}/i,
+  /\/@[A-Za-z0-9_][A-Za-z0-9_.-]{2,}\b/,
+] as const;
+
+const EXPECTED_SUBSTANTIVE_CLAIMS = [
+  {
+    claim_id: "ALL_622_SAME_ACCOUNT_HISTORICAL_BINDING",
+    status: "UNRESOLVED",
+    reason: "두 개의 알려진 job만 동일 로그인 계정 UI와 결속되었으며 이를 나머지 620개에 확대하지 않는다.",
+  },
+  {
+    claim_id: "GENERATION_TIME_ACCOUNT_TERMS_REVISION_EFFECTIVE_INTERVAL",
+    status: "UNRESOLVED",
+    reason: "계정 UI에 2026-08-11~14 생성 당시 적용 Terms revision과 effective interval이 표시되지 않았다.",
+  },
+  {
+    claim_id: "GENERATION_TIME_TERMS_ACCEPTANCE_OR_EARLY_CONSENT_TIMESTAMP",
+    status: "UNRESOLVED",
+    reason: "계정 UI에 약관 acceptance 또는 early-consent timestamp가 표시되지 않았다.",
+  },
+  {
+    claim_id: "GENERATION_TIME_APPLICABLE_PRIVACY_REVISION",
+    status: "UNRESOLVED",
+    reason: "계정 UI에 생성 당시 계정에 적용된 Privacy revision이 표시되지 않았다.",
+  },
+  {
+    claim_id: "REQUEST_TO_REPORTED_MODEL_OFFICIAL_RELATIONSHIP",
+    status: "UNRESOLVED",
+    reason: "요청 nano_banana_2와 provider 보고 nano_banana_flash의 공식 관계를 설명하는 과거 적용 증거가 없다.",
+  },
+  {
+    claim_id: "UPSTREAM_SUPPLEMENTAL_POLICY_COVERAGE",
+    status: "UNRESOLVED",
+    reason: "생성 당시 상위 제공자 supplemental policy가 622개 출력에 적용된 범위를 입증하는 증거가 없다.",
+  },
+] as const;
 
 const EXPECTED_LOCAL_SOURCES = [
   [T055_T022_PATH, "1456506d259c95f3e68d8383b9fafe2ed026ffa260b9f82fc65960d5395a429b"],
@@ -103,9 +144,20 @@ function assertNoForbiddenKeys(value: unknown): void {
   }
 }
 
+function assertNoForbiddenValues(value: unknown): void {
+  if (typeof value === "string") {
+    if (FORBIDDEN_VALUE_PATTERNS.some((pattern) => pattern.test(value))) fail("FORBIDDEN_VALUE");
+  } else if (Array.isArray(value)) {
+    for (const child of value) assertNoForbiddenValues(child);
+  } else if (isRecord(value)) {
+    for (const child of Object.values(value)) assertNoForbiddenValues(child);
+  }
+}
+
 export function validateT055Observed(value: unknown, root: string): void {
   const observed = record(value, "OBSERVED_OBJECT");
   assertNoForbiddenKeys(observed);
+  assertNoForbiddenValues(observed);
   exactKeys(observed, ["schema_version", "evidence_version", "task_key", "issue_number", "observed_at", "observed_local_date", "timezone", "secret_free", "raw_evidence_stored", "access", "account_ui", "known_job_bindings", "redaction"], "OBSERVED_SCHEMA");
   exact([observed.schema_version, observed.evidence_version, observed.task_key, observed.issue_number], [1, "t055-account-observed-v1", "T055", 105], "OBSERVED_IDENTITY");
   if (typeof observed.observed_at !== "string" || !/^2026-08-24T\d{2}:\d{2}:\d{2}Z$/.test(observed.observed_at)) fail("OBSERVED_TIME");
@@ -190,6 +242,7 @@ function verifyLocalSources(root: string, sourceRegister: unknown): void {
 export function validateT055Audit(value: unknown, observedBytes: Uint8Array, root: string): T055Summary {
   const audit = record(value, "AUDIT_OBJECT");
   assertNoForbiddenKeys(audit);
+  assertNoForbiddenValues(audit);
   exactKeys(audit, ["schema_version", "audit_version", "task_key", "issue_number", "contract_sha256", "recorded_at", "secret_free", "raw_evidence_stored", "observed_evidence", "source_register", "release_inventory", "coverage", "substantive_claims", "decision"], "AUDIT_SCHEMA");
   exact([audit.schema_version, audit.audit_version, audit.task_key, audit.issue_number, audit.contract_sha256], [1, "t055-release-ai-rights-audit-v1", "T055", 105, "c5cd05800a5fffd715aa7fc693c1e597de5e1b5672024680bff4ea0ca24f0db0"], "AUDIT_IDENTITY");
   exact([audit.recorded_at, audit.secret_free, audit.raw_evidence_stored], ["2026-08-24T02:37:04Z", true, false], "AUDIT_BOUNDARY");
@@ -219,20 +272,12 @@ export function validateT055Audit(value: unknown, observedBytes: Uint8Array, roo
   exact(coverage.structural, { status: "VERIFIED", release_assets: 622, path_sha_rows: 622, duplicate_paths: 0, duplicate_rows: 0, gaps: 0 }, "STRUCTURAL_COVERAGE");
   exact(coverage.substantive, { status: "UNRESOLVED", claims: 6, verified: 0, unresolved: 6, not_applicable: 0, gaps: 6 }, "SUBSTANTIVE_COVERAGE");
 
-  const claimIds = [
-    "ALL_622_SAME_ACCOUNT_HISTORICAL_BINDING",
-    "GENERATION_TIME_ACCOUNT_TERMS_REVISION_EFFECTIVE_INTERVAL",
-    "GENERATION_TIME_TERMS_ACCEPTANCE_OR_EARLY_CONSENT_TIMESTAMP",
-    "GENERATION_TIME_APPLICABLE_PRIVACY_REVISION",
-    "REQUEST_TO_REPORTED_MODEL_OFFICIAL_RELATIONSHIP",
-    "UPSTREAM_SUPPLEMENTAL_POLICY_COVERAGE",
-  ];
-  if (!Array.isArray(audit.substantive_claims) || audit.substantive_claims.length !== claimIds.length) fail("CLAIM_COUNT");
+  if (!Array.isArray(audit.substantive_claims) || audit.substantive_claims.length !== EXPECTED_SUBSTANTIVE_CLAIMS.length) fail("CLAIM_COUNT");
   audit.substantive_claims.forEach((item, index) => {
     const claim = record(item, `CLAIM:${index}`);
     exactKeys(claim, ["claim_id", "status", "reason"], "CLAIM_SCHEMA");
-    if (claim.claim_id !== claimIds[index] || claim.status !== "UNRESOLVED" || typeof claim.reason !== "string" || claim.reason.length < 20) fail("CLAIM_VALUE", String(index));
   });
+  exact(audit.substantive_claims, EXPECTED_SUBSTANTIVE_CLAIMS, "CLAIM_VALUES");
 
   exact(audit.decision, {
     completion_eligible: false,

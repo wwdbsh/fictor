@@ -65,8 +65,8 @@ screenshot·HTML·HAR·raw dump는 수집·저장하지 않았다. 저장한 것
 ## 재현과 다음 승인 가능 단계
 
 ```bash
-npm run assets:rights:t055:check
-npm run assets:rights:t055:assert-complete # 현재는 의도적으로 exit 1: T055_NOT_COMPLETE:6
+npx tsx scripts/assets/t055-account-model-rights-audit-cli.ts check
+npx tsx scripts/assets/t055-account-model-rights-audit-cli.ts assert-complete # 현재는 의도적으로 exit 1: T055_NOT_COMPLETE:6
 npx tsx scripts/assets/t022-m2-assets-audit-v1-cli.ts check
 npm run assets:style:v2:evidence-check
 npm run assets:master-style:check
