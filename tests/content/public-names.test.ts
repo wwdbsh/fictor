@@ -131,7 +131,7 @@ describe("T057 exact public naming contract", () => {
     expect(checklist).toContain("- [x] [T057 공개 명칭 결정](decisions/t057-public-naming-decision-2026-08-24.md)");
     expect(checklist).toContain("- [ ] T047에서 T057의 exact 공개 명칭 결정");
     expect(checklist).toContain("- [ ] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`");
-    expect(checklist).toContain("- [ ] 게임이 브라우저에서 바로 실행되는 웹 빌드입니다.");
+    expect(checklist).toContain("- [x] exact candidate의 정적 production build");
     expect(checklist).toContain("- [ ] 심사 기간 내 링크가 공개 상태이고");
 
     const assetLicenses = source("docs/ASSET_LICENSES.md");

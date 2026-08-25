@@ -1,0 +1,3182 @@
+{
+  "schema_version": 1,
+  "manifest_version": "t062-production-artifact-v1",
+  "task_key": "T062",
+  "contract_sha256": "268d2edb64ce5ebab2b87982d6e93f71d4c9ff7a060de5795c69ff57f08888e1",
+  "candidate_revision": "f434656cdf3fce0fa35e8598169da6b678cdf627",
+  "evidence_commit": null,
+  "evidence_commit_note": "The manifest binds dist bytes to candidate_revision; the later evidence commit is intentionally not represented as the candidate.",
+  "file_count": 628,
+  "total_bytes": 1261180248,
+  "extension_counts": {
+    ".css": 1,
+    ".html": 1,
+    ".js": 3,
+    ".png": 622,
+    ".txt": 1
+  },
+  "png_count": 622,
+  "evidence_only_candidates": [
+    {
+      "path": "assets/style/master-candidate-02.png",
+      "absent": true
+    },
+    {
+      "path": "assets/style/master-candidate-03.png",
+      "absent": true
+    },
+    {
+      "path": "assets/style/master-candidate-04.png",
+      "absent": true
+    }
+  ],
+  "third_party_notices": {
+    "path": "THIRD_PARTY_NOTICES.txt",
+    "bytes": 115480,
+    "sha256": "eb74e08cf7c0f51294ae2df39874ae9d11b22729615401aa5a4777f80e460703"
+  },
+  "files": [
+    {
+      "path": "THIRD_PARTY_NOTICES.txt",
+      "bytes": 115480,
+      "sha256": "eb74e08cf7c0f51294ae2df39874ae9d11b22729615401aa5a4777f80e460703"
+    },
+    {
+      "path": "assets/AssetPolicySmokeProbe-Ctu5EEJz.js",
+      "bytes": 703,
+      "sha256": "fa4bd81e651d4b7cd242b09bece1af05af546d65ffead4f87ce906afb747460e"
+    },
+    {
+      "path": "assets/CodexSurface-Bpecey0C.js",
+      "bytes": 4373,
+      "sha256": "c4fe367a1654816e06593eb319a0934d14ee7dd192db39947d05a597f2cc8fd1"
+    },
+    {
+      "path": "assets/backgrounds/background__burn__depth_01.png",
+      "bytes": 2522463,
+      "sha256": "ef50bf3f1ba65fb1087bb49b3ac08290cc942f094d13fc51180ed88206e94434"
+    },
+    {
+      "path": "assets/backgrounds/background__burn__depth_02.png",
+      "bytes": 2606242,
+      "sha256": "1257c471563bd040ca67e6185ba6cc43e673e073fcb19e60ec39278d4eae0d80"
+    },
+    {
+      "path": "assets/backgrounds/background__burn__depth_03.png",
+      "bytes": 2769181,
+      "sha256": "7924273c17ebcdfa1932605f1ac14566d0fe55999e2efd3a61a849d24fef3651"
+    },
+    {
+      "path": "assets/backgrounds/background__join__depth_01.png",
+      "bytes": 2077056,
+      "sha256": "85949029fa769f57a8dcec09edda7bcd05e0094b22a84b951c5583f1aa98337b"
+    },
+    {
+      "path": "assets/backgrounds/background__join__depth_02.png",
+      "bytes": 2676268,
+      "sha256": "14462da944c4e0995fcd00bfec754ed61215ca27f584d7ee3ed5f596fceb604d"
+    },
+    {
+      "path": "assets/backgrounds/background__join__depth_03.png",
+      "bytes": 2654387,
+      "sha256": "32c4883364dc815d6ad3f31f13e6053954e594b083b828dd32e211d5194cef4c"
+    },
+    {
+      "path": "assets/backgrounds/background__rot__depth_01.png",
+      "bytes": 4371852,
+      "sha256": "e1f0991bf38281d0b673ffcaae0ef64063dde23eb338e088506b8d5aab925ee1"
+    },
+    {
+      "path": "assets/backgrounds/background__rot__depth_02.png",
+      "bytes": 2705576,
+      "sha256": "afd709a2dfcc69940b3948186b72e1585e2ac8a1dfde3c8d99584a6d3dab8d1b"
+    },
+    {
+      "path": "assets/backgrounds/background__rot__depth_03.png",
+      "bytes": 2699657,
+      "sha256": "b686fd2f53c9fd93ea2ff858df5de9baac25ae2fb6c8ea351f160acabb8c4c3a"
+    },
+    {
+      "path": "assets/backgrounds/background__scatter__depth_01.png",
+      "bytes": 2324804,
+      "sha256": "79070ef6b5be34dc033e8889fd7d81ecf197e86009c8f8f3299994de9516f524"
+    },
+    {
+      "path": "assets/backgrounds/background__scatter__depth_02.png",
+      "bytes": 2314573,
+      "sha256": "c674f9b8f318587d1b515b8d32232c7d320dd5a62429144e44cfdc7f0c9a04d3"
+    },
+    {
+      "path": "assets/backgrounds/background__scatter__depth_03.png",
+      "bytes": 2362879,
+      "sha256": "75dc113cae7f6455325aab777b1d5b8bec470cd1422e0784dddba30eb9f26ff7"
+    },
+    {
+      "path": "assets/backgrounds/background__still__depth_01.png",
+      "bytes": 2296255,
+      "sha256": "7a67c4cc17bafcedd522ffa45273e3420b539289509d7756a7127e89d491a0be"
+    },
+    {
+      "path": "assets/backgrounds/background__still__depth_02.png",
+      "bytes": 2621788,
+      "sha256": "dd072455909d2e5f6c8b84d31ce36bdf1f4a007abdd39c9736dd2966e95d89c2"
+    },
+    {
+      "path": "assets/backgrounds/background__still__depth_03.png",
+      "bytes": 2295908,
+      "sha256": "ad00e85febef89e2a5229bbf72bcb0c10920c7ce56e4a3f5d4a332afc19acf4d"
+    },
+    {
+      "path": "assets/backgrounds/background__wash__depth_01.png",
+      "bytes": 2054193,
+      "sha256": "39ac8b47f2dd0a9e60ae6ee08c9f0d9af7f82722fca22a81a47dc782c7b3ccdf"
+    },
+    {
+      "path": "assets/backgrounds/background__wash__depth_02.png",
+      "bytes": 3373451,
+      "sha256": "80ffa15777ac7552c167e25a1cc8d4e3748aad8a39725e09af5dfae5636dd355"
+    },
+    {
+      "path": "assets/backgrounds/background__wash__depth_03.png",
+      "bytes": 1432835,
+      "sha256": "5ad50523eddeea6b712640c75e9b18f3aee9adb905659de1912da02ab010b9dc"
+    },
+    {
+      "path": "assets/cards/burn_01.png",
+      "bytes": 1638629,
+      "sha256": "c7f3be4133f94209793cd25fac27496ef4978a84c1af7302a39b9d5b557dface"
+    },
+    {
+      "path": "assets/cards/burn_02.png",
+      "bytes": 1576010,
+      "sha256": "50e2efe458f46d69e7147248ed883de5985b76fc4061756a6735288ffdee5c48"
+    },
+    {
+      "path": "assets/cards/burn_03.png",
+      "bytes": 1660858,
+      "sha256": "f37e8cfc1099b0c56d66c36045ba288d93eccb4d2ab3e8c4420f7eb5ba8c21f8"
+    },
+    {
+      "path": "assets/cards/burn_04.png",
+      "bytes": 2032329,
+      "sha256": "5ddb497a6051075e94a4a4e09602d2287ad670256f6218740160f615b778ca0c"
+    },
+    {
+      "path": "assets/cards/burn_05.png",
+      "bytes": 1725849,
+      "sha256": "4c7e04f150223a3f1206ae2bd51c06274ae0295923f7ecd9bf86a3430317fb04"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__burn_02.png",
+      "bytes": 2205880,
+      "sha256": "79398f7bfcd90b5440c4244bc871085f5bd347d24ec2f4d32831bcb9ff344abe"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__burn_03.png",
+      "bytes": 2202180,
+      "sha256": "9a674010ea8a27414ec78e8693ad62173db8d2c0560469f25ef54d46c1ba90a8"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__burn_04.png",
+      "bytes": 2111985,
+      "sha256": "1d93e88746b31383c53a292b58bf6ecbdb18d5c17cef435e3870b60614acae44"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__burn_05.png",
+      "bytes": 1996216,
+      "sha256": "6f1479136f15eb8d18f8b0840c57e154ce405ab219fe1e365503f917d54dea21"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__join_01.png",
+      "bytes": 2163477,
+      "sha256": "a56c3b976acc056088cce464c5006a57dbb4ff2f9decd38579c6eb798e72e461"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__join_02.png",
+      "bytes": 2130423,
+      "sha256": "dc1f994ae011b5585a840bd397233b37821a9698a1bc62debbff535273d819ed"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__join_03.png",
+      "bytes": 2174443,
+      "sha256": "b03886e12cb288ffc2633038964a47883fdb168ad89a4a290b27128e1eccf9f9"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__join_04.png",
+      "bytes": 2222231,
+      "sha256": "da84e391f9d143b012d5d8d683765faf6c411f2b4b7a5cdc51650030015a4b9a"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__join_05.png",
+      "bytes": 2289583,
+      "sha256": "2a5aee04b14a5a540980a92262f797e3ec838a2a5611826bb0b230582d9da4cf"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__odd_01.png",
+      "bytes": 1668707,
+      "sha256": "81bb334acebe7b73b0baaf63acbc9bbb20f04019dd9aa786fe86ae203c9ddc6a"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__odd_02.png",
+      "bytes": 1922688,
+      "sha256": "8ac4ea1750e3373092f81fe6c0b01dbb8d522a74a99b9b79803bdefb0c373101"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__odd_03.png",
+      "bytes": 1984427,
+      "sha256": "0069bb922209dac31ce180f403b5372abff01f0722f5e74c44dad7f16d8eb13c"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__odd_04.png",
+      "bytes": 1880533,
+      "sha256": "1423a568b2e8731c5454db6253ae63fc7726ced0b7439ada0baab8aa9229dae9"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__odd_05.png",
+      "bytes": 2079027,
+      "sha256": "7548a24fa75cc25bf01899d5141714bf38869d6655d31eaf8be4fd71a7b8fe8d"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__odd_06.png",
+      "bytes": 1773365,
+      "sha256": "e5c018e79996ba565d2bba3002b5f31162929383f08a07205b62497113305dca"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__ore_burn.png",
+      "bytes": 1996431,
+      "sha256": "e59f84414191b605dd145f1e0f3a11a9641f050a6269c362cb259a1264f6dda7"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__ore_join.png",
+      "bytes": 1687530,
+      "sha256": "0910ac18cbf18b3266dacf00055027a76b2a176f394404ff14f8440c78e39ffb"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__ore_rot.png",
+      "bytes": 1844292,
+      "sha256": "63e54d7c1ff6d5ad212b5d6aeff2103881e0315de17fa0b17012bb25eff2627e"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__ore_scatter.png",
+      "bytes": 2217760,
+      "sha256": "e74a383e2d8c31b2d7040522c4498c6080604715ee27c95eed3affa91c5d36d2"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__ore_still.png",
+      "bytes": 2013796,
+      "sha256": "9f0ed1240ec03708e3a50a5523f3e77862d9c18be71240b5d689835dded89de9"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__ore_wash.png",
+      "bytes": 1803154,
+      "sha256": "3c7befc5540b46b710e7d15c0ac63cf6420ac90ee067994f0f072d0adef2ff85"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__rot_01.png",
+      "bytes": 2004874,
+      "sha256": "95e2dfe334f2c6e2079b60abf505b8513d6fb1e6544209cbc69a53afd49bb63c"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__rot_02.png",
+      "bytes": 1662978,
+      "sha256": "4b38d08b233910d7e2b6d2122bb1f7c76e1539bcf1bb6caad04d4cbd20e9edc5"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__rot_03.png",
+      "bytes": 1909908,
+      "sha256": "1d128547d528a3e36ff36a917c316f7b86480e10ad255fdc53b377f36e590211"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__rot_04.png",
+      "bytes": 1843658,
+      "sha256": "9a5771453ed7235d64e8dcd1f3745516e4e75905560ee73547bab8af2e91814e"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__rot_05.png",
+      "bytes": 1634245,
+      "sha256": "87f9e5c0c8c9ba9bbc88f52ea2fa8080e6ec1562c16c5a5aa3f7ba24ee3ddc7b"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__scat_01.png",
+      "bytes": 2007647,
+      "sha256": "35018afcd7e2826c7b248bea556b1abc7e7f7d6a7f2d27091260e934d875af9f"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__scat_02.png",
+      "bytes": 2187054,
+      "sha256": "7c3fa89a0dda27fa5ffba0c3b8bec6eec73301670ec0c1ff5fabc97633935a5b"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__scat_03.png",
+      "bytes": 1841617,
+      "sha256": "2a603d3feee7b58d471f9cbe208f2e7745d968cb0b80bb434a64b9862d354033"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__scat_04.png",
+      "bytes": 1978163,
+      "sha256": "2d65d55f7d5d38a0d2dcae1d28a65fbe9193cb708351feaea2cc3a60e2683e5a"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__scat_05.png",
+      "bytes": 2200425,
+      "sha256": "bc6924a3a69b1e3d2f1b3a33a5da0ce1b187a6a1b5d2c1abb5ae910aed4e0da8"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__still_01.png",
+      "bytes": 1914949,
+      "sha256": "d04929cdfd2c4d477e3534a65d9e96a4c1b6f7036058bcfa91cf967aef943c9a"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__still_02.png",
+      "bytes": 2061560,
+      "sha256": "b6a096311fff79f8f510f833ffb6ad086efce7546ecbfa53c01d3ba9dedac0cf"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__still_03.png",
+      "bytes": 1993499,
+      "sha256": "a5eb6207aad41d014ca2504987a69765ac46e1340c9112c8a4dbbe3d46ab6087"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__still_04.png",
+      "bytes": 2210449,
+      "sha256": "f609e409e7229c9d7ee90aa69913bd924d97a7866536e81ad899e49aabfbf76e"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__still_05.png",
+      "bytes": 2077574,
+      "sha256": "3816b0b3cb11b5d8a8acddbe8977c13be1129122ae32a682cf7be42c4e010f7d"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_01.png",
+      "bytes": 1886064,
+      "sha256": "00f7be86a536d387046d9517237e6c2679a6da833a0404d71459ee524a50fb0c"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_02.png",
+      "bytes": 1630119,
+      "sha256": "8c39ba6bd5943abb6251c0af8517971fcafdc4628aeeb6e39c43ef9eb6c9de85"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_03.png",
+      "bytes": 2095889,
+      "sha256": "8c70ad83611cb88aebb37912bd7c423c74788e5cc59197ef74e2ebb52c1eae0b"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_04.png",
+      "bytes": 1690721,
+      "sha256": "2d48d9817bb94ccb4b570a2fe6402d3e277cdd52264c95a984cd1757350dceb3"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_05.png",
+      "bytes": 1762756,
+      "sha256": "2bed4bd28776d28754a03b22c1621845d56a15d3d9effb3f101f18942ed035eb"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_06.png",
+      "bytes": 1955982,
+      "sha256": "df759afabbc5e090f6cab620a1ae546429f80d4d8beaf72d31fb586b35fb827e"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_07.png",
+      "bytes": 1526909,
+      "sha256": "e9ec1ead0e46f1cce3a20672643b1b60c23c79f15eec4448b564f1ef01ae47b5"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_08.png",
+      "bytes": 1901134,
+      "sha256": "a0b8d5f5b276b7a34906554edb69a59eda65397468e133aefd5c0805f8c6983f"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_09.png",
+      "bytes": 1860655,
+      "sha256": "2074c096ab1f08c90095bbe8aabab3a51f38d758f90f50fec808b6046d21f516"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__tool_10.png",
+      "bytes": 1633987,
+      "sha256": "91a9e829cb03c2ac7d5a42191d1dc654c70d9c18c9d7ab9379d8bef97a3cef9f"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__wash_01.png",
+      "bytes": 2167529,
+      "sha256": "d9db3acac3560bcd5617d1490014007d8a2bb0a39aa7339d96cf7dfb0443a863"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__wash_02.png",
+      "bytes": 1918570,
+      "sha256": "d0e5bff7825d4f34504c71fb1bbcd918cecfcb1062033f739405473498ea1627"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__wash_03.png",
+      "bytes": 2033139,
+      "sha256": "71558e2cc4b15c24b075f77e18736b9b54c5aa6b4cd31ff00c5b5fc10052cd2f"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__wash_04.png",
+      "bytes": 2110030,
+      "sha256": "779ee4f14e65683b0f4d3e99f8a66beede07f6eebef709998257d11ce92784f4"
+    },
+    {
+      "path": "assets/cards/forge__burn_01__wash_05.png",
+      "bytes": 2158644,
+      "sha256": "f848757cd28c59a716fc7056b04669c5fd474fd04d2fdb337542d7ed220721d1"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__burn_03.png",
+      "bytes": 2095293,
+      "sha256": "4fda31425e1dca6237f8b2f5d5748c208a5731152ff7148f4d7e4d48d9115c60"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__burn_04.png",
+      "bytes": 3424120,
+      "sha256": "210fb3beb0eeb75889644269214105424a4314c137470e037021847737c65310"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__burn_05.png",
+      "bytes": 2249286,
+      "sha256": "bdbc1feab82e7cefbc34ac1cee2bb140bfd4267beb53eee0db3d517d042ec8bd"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__join_01.png",
+      "bytes": 2315580,
+      "sha256": "3e611be91f67899ec53f9e60fe41dd4336c3a733d431d6bb2f62769b71f4c7eb"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__join_02.png",
+      "bytes": 2957761,
+      "sha256": "a6b1fe0de3b8a0505f76e977aa6c240541ea649a9ecffd68d32493c1a77abb3e"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__join_03.png",
+      "bytes": 3057153,
+      "sha256": "31b80ab68d214c778fb64517020848a123d4b1fd939c614608f9f89163d48cec"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__join_04.png",
+      "bytes": 2316746,
+      "sha256": "98cb01794b831e4ef131c0201bb40e04f85dac12d5a5e937a445d779c02290c3"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__join_05.png",
+      "bytes": 2214218,
+      "sha256": "2b4c1d4f8fc659438c2b6856c894ec64d0283c365f2cba5cc34407fa34f26ede"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__odd_01.png",
+      "bytes": 1635821,
+      "sha256": "fc209d4b5e61ed9be224fb5dfb37bdec5e50c7b75e25c3a6219ebb9896ded6bb"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__odd_02.png",
+      "bytes": 1698183,
+      "sha256": "89072ceca844d7984dd985afa2b2b985bbb1195efa66de26a036c5afa4a162e6"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__odd_03.png",
+      "bytes": 1990730,
+      "sha256": "75bdf1d8851095167954727db06704ee81195586e3044b1e5a5751a87fa23329"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__odd_04.png",
+      "bytes": 1870557,
+      "sha256": "82c369a48f423bfee429173e0430013183a52f449b210b9b7e0ec2db32532b65"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__odd_05.png",
+      "bytes": 1804491,
+      "sha256": "d33c7d575b8cacf469a7aa16e20d3865dd063a3714f7d6a35b9ac151b9ad4d5a"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__odd_06.png",
+      "bytes": 1723732,
+      "sha256": "25110bbdca08557b9acdc449d7ea9dc27e5d7a0576544435b414624ffc90057b"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__ore_burn.png",
+      "bytes": 1653221,
+      "sha256": "8221b45ee857b842696bcec8c527cf48d992ee19174707c15ceaefaa4a38ea3b"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__ore_join.png",
+      "bytes": 1974919,
+      "sha256": "7975fd574c9b743b946e6d5b48fd8273ecc58513e3db36bb7f6f9d0772463af8"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__ore_rot.png",
+      "bytes": 1664299,
+      "sha256": "d63f8b5667525de118b6cc7d0f17dfc4733dd36b39b5139e1bf696a2457dd0eb"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__ore_scatter.png",
+      "bytes": 2394832,
+      "sha256": "7a43aa9fc8f1f7a9cdbd93634bd1b984406d24219187f80398b68fb88259d091"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__ore_still.png",
+      "bytes": 1867333,
+      "sha256": "d9f4ecee9fe039fe98156027fc61f1c3e4c9b74a0afbdf77056617d6f9eece5d"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__ore_wash.png",
+      "bytes": 2025608,
+      "sha256": "ac222efcb13ac8eb8e27829bb711c3fa36714beb3b9d3e00411d0d58c4742a71"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__rot_01.png",
+      "bytes": 1890728,
+      "sha256": "3cad857aaac123e80fa68ccc9ec8bde6e32ede367e2ff41ca138e62b04dedd77"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__rot_02.png",
+      "bytes": 1549514,
+      "sha256": "45d1072e9b7703f77d6f359b7d38831f6717f2a86a9fe4b2842e04ca1a32080d"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__rot_03.png",
+      "bytes": 1995490,
+      "sha256": "b2acb16505cbf18189bf6ee138de324a475e86df44360407f8b97bdcb15ccf68"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__rot_04.png",
+      "bytes": 2055944,
+      "sha256": "f95bbc3e5fe6d85f31267751f822003f26c9702a8a4181e83d5c80ce4b4b7190"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__rot_05.png",
+      "bytes": 1872544,
+      "sha256": "34e0236e77b4130195dda7050d47d6dd88bbb5d9701f1b98b6af9649a91e58bb"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__scat_01.png",
+      "bytes": 1694260,
+      "sha256": "e832fa742938f187a5ed215dc688ddcc883b5d67df003daaaa7d569a9d241094"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__scat_02.png",
+      "bytes": 2196220,
+      "sha256": "7975d40070ffbcf0fbc065b85e7ec3a1cc231f813bed9e6d93c202c705667792"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__scat_03.png",
+      "bytes": 2236601,
+      "sha256": "23f251fee431fc4e09913e4b99798976e556dfb7ce3f7e845ad79187c367cb83"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__scat_04.png",
+      "bytes": 2228106,
+      "sha256": "f96471db2383ee02d423ac850908e84872eef13fef356c58bea45b3ae244a958"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__scat_05.png",
+      "bytes": 2599678,
+      "sha256": "75b32efc7f6eae2bf37cdcdafc13fe7791f490422c1a9d11bca21076063067d6"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__still_01.png",
+      "bytes": 3315224,
+      "sha256": "1801b948237d23c3052265b0a1980a394aafc6da58b8a71a2373c1c629e67dbd"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__still_02.png",
+      "bytes": 1961523,
+      "sha256": "069fed2748c525295cf46c6a6fa3fef0aebf1aaa7ad659e4f3972433457d6890"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__still_03.png",
+      "bytes": 1755249,
+      "sha256": "9fdd8af02b7978bf48d468ffb6778bb9bef8c4c29dd28883b439fe48e2521f39"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__still_04.png",
+      "bytes": 2337493,
+      "sha256": "cf25dff9c79baafa170071971e33354ae02b403414087608cf146d517990b090"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__still_05.png",
+      "bytes": 2031219,
+      "sha256": "2b028b55374c88a5138a3c0e4ea01b254c27a2cfa29ecdf96f62cf47babd4e18"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_01.png",
+      "bytes": 1529629,
+      "sha256": "b0caa303ae9580a86bf4562becb892bc4c58c2269db93251b2380e53f66c78d6"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_02.png",
+      "bytes": 1824874,
+      "sha256": "dfe0044c174935e5a324a9b8a4f929ec3f3d8e47de51a9b334739d4045826e5c"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_03.png",
+      "bytes": 1623085,
+      "sha256": "1ab6d776ca9492ad40682662bac989051400d2f8c30a07df9edc3c614ace1489"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_04.png",
+      "bytes": 1977068,
+      "sha256": "47fff1c27aee0440f891ec4ac9c96b382cb0989031053a497e90722b606c301a"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_05.png",
+      "bytes": 1789988,
+      "sha256": "b670ea1e773f3b3d50568ca9c7cc5e50d2e82e4d83643b1e9a23b27d54eb10d6"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_06.png",
+      "bytes": 1542863,
+      "sha256": "333143e956f2097124a4dc1c51c92e15ee6c86dc68df99d7f2bcd49d6132e3f9"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_07.png",
+      "bytes": 1668178,
+      "sha256": "8e5789ae42c19e9d7302024476101f1648a2c29b1f0a4a23e4bc979388ece60d"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_08.png",
+      "bytes": 1613581,
+      "sha256": "c10f49f1bc59a291387ae5ad1e1bbb44ccb0c6d991704d81d2dcd452871d1cab"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_09.png",
+      "bytes": 1940174,
+      "sha256": "c2d2f238f288752ba9ec862739bfd23df4352e042e983e97a29b869bc06a0d0f"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__tool_10.png",
+      "bytes": 1831586,
+      "sha256": "a814103fdfe780bf1e55202733328b7e3488313df7abd32a9ca6d64d2e5ea880"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__wash_01.png",
+      "bytes": 2036251,
+      "sha256": "607a6f2d796d8949b42534a73e53fe44c8e9bea12a3e45cbf651976f76324300"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__wash_02.png",
+      "bytes": 1764954,
+      "sha256": "f3cb109865479ee965f94efeaa27b911f0509385373d3ec5cd7efb1735011524"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__wash_03.png",
+      "bytes": 1638990,
+      "sha256": "c1b14952e522525e4562d580833dddf0eba127d26756dc18d5c354c7e9ffad0e"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__wash_04.png",
+      "bytes": 2105241,
+      "sha256": "2c9707e5f4da0143973a1058018e05ba3d460dd3e0f7a9e63b340743a6deeac5"
+    },
+    {
+      "path": "assets/cards/forge__burn_02__wash_05.png",
+      "bytes": 2183194,
+      "sha256": "e3b6a623eda0d8097c472ce3039b9da6145ac62a95c8955cfb60ad5d7c027aef"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__burn_04.png",
+      "bytes": 2232879,
+      "sha256": "22f7e224d3bff69c207125bf7dd802ef09cca643e3f417e3b1ed8ff269858b09"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__burn_05.png",
+      "bytes": 2210738,
+      "sha256": "ebecb0f07dda365429ff1c66e3fcf7ea8765318aafdff4d2754c77583e37c2e7"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__join_01.png",
+      "bytes": 2025760,
+      "sha256": "7a789bda46fd950ee3d9a84d9cfc9c032846a71fe0d930d0d5264dfdaf6a0195"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__join_02.png",
+      "bytes": 1836167,
+      "sha256": "31836b4bf37aefd4ea169bb28f4383b52cef238268c8dfd403b83a6fd6357ce0"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__join_03.png",
+      "bytes": 1795130,
+      "sha256": "22de8985a3a30085b6e21e710c03669805c8502698fd94388f4e2f3376b4f5ec"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__join_04.png",
+      "bytes": 2550971,
+      "sha256": "732be0da6b597b7c640d770fdcfe4e16ae55dc3d27909a26e320f04401f1738f"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__join_05.png",
+      "bytes": 2278701,
+      "sha256": "29a40c558bf1b1ff2aa9fd8419b8f12372bb22c85bb6a9cdafc386d6de465e36"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__odd_01.png",
+      "bytes": 1861879,
+      "sha256": "cc46db63e6d6f526fef474cf043b60116a7b230f0288e60f9479257d133b8afa"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__odd_02.png",
+      "bytes": 1657585,
+      "sha256": "e4699688f0e52e7b42d1cd95dc502cf774f2616d3ec829b49f59896c67d6ed37"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__odd_03.png",
+      "bytes": 2089359,
+      "sha256": "1e4d15ffec22e6955fef5bd909f26f4f83842eb16138e33e54d51cac8fef8069"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__odd_04.png",
+      "bytes": 1798234,
+      "sha256": "d6124e7a2875116794682096254a13307022f1aa38fcb75a134224cc79f21690"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__odd_05.png",
+      "bytes": 1636016,
+      "sha256": "1a0e5adcb7a0ddefdce4001bcca0868000913cd1afcf6ff728823fa770c009c2"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__odd_06.png",
+      "bytes": 1761638,
+      "sha256": "b903edabff7c920700002262379d19eda49d848e81c8f8a75742a28e93c77c1a"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__ore_burn.png",
+      "bytes": 2068515,
+      "sha256": "7877531e6af0babb6f62ecd8a1ffc1b3a900b17c09a9a73937073a36be711a5b"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__ore_join.png",
+      "bytes": 2050685,
+      "sha256": "031e75d10a2550abb28e140760928a451cc27cdd8dae8f1150f20fd309351080"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__ore_rot.png",
+      "bytes": 1815049,
+      "sha256": "78abd6a13da65bd9141b57f70a77c253efa7bbb60ff8889f1a631e4170b4198d"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__ore_scatter.png",
+      "bytes": 1979511,
+      "sha256": "682544f23e7e590103d7e599fa7bb367728bde8534c0c5cfa9303f2647868e94"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__ore_still.png",
+      "bytes": 2150940,
+      "sha256": "ce852503cb481db49e89483c6813e6f15e2723db35ce51d6facf8142beab2c1b"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__ore_wash.png",
+      "bytes": 1593387,
+      "sha256": "b95732765361c9ce7c973405556564aec2beb7ba37dc72cffbc3c5e7693bb7f0"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__rot_01.png",
+      "bytes": 2168766,
+      "sha256": "27f88d58b7d672ab856d78fc38fd9003d929bc4f80247170fea8baef6d5b5494"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__rot_02.png",
+      "bytes": 3152184,
+      "sha256": "ef6961f71062ed1029aee8482b3df54f7af41bf23e1b72d624e3a13bfa5844bb"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__rot_03.png",
+      "bytes": 1842544,
+      "sha256": "2f6f84e2c7175eedef11365e2e512316fb87273c5f4088205135bc18b6ceba35"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__rot_04.png",
+      "bytes": 1950183,
+      "sha256": "964786417c3f098e1b016393266a67c44d51276273a0dc980a3fa3753ac6838f"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__rot_05.png",
+      "bytes": 1806618,
+      "sha256": "d4d80afdc229754830a4b9e329db7a1050b1090e6ab36f483edc55ce5d3768e3"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__scat_01.png",
+      "bytes": 2123300,
+      "sha256": "0cd82f7282e1a9b3ab26f43213d7fa5f1872d3c74f16687a46b5cd59e4065b59"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__scat_02.png",
+      "bytes": 2004388,
+      "sha256": "f63af8800f5d1e380eb51f07baf2c84f70353ac17113d3eba5e61193fed49efc"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__scat_03.png",
+      "bytes": 1786289,
+      "sha256": "29fd343a1b3a62cd144ebf8f52625cf9c6ab369081cb0ce0299cc09155603943"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__scat_04.png",
+      "bytes": 3410350,
+      "sha256": "fffa4d811788544e1a8292aa4f63c9bd3e0cf30667768372985a5d4889723f5c"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__scat_05.png",
+      "bytes": 2083243,
+      "sha256": "e8b01acc9b1e7608555f0b3413116bf3d4673e93dd5f7efae47966fefabb6baa"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__still_01.png",
+      "bytes": 2136069,
+      "sha256": "9aca68e2a8698df1f84c13274caf231d257aab2c0b0607ba554a785a790e2a4b"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__still_02.png",
+      "bytes": 2001716,
+      "sha256": "26c5ae72dae10c384814a177ee7a1bf428f6eee2883daa8d348bdeb70e430a86"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__still_03.png",
+      "bytes": 1906305,
+      "sha256": "14dbeece6b0a94184009c9d05a0a59c2c6a94e102944211c58cca8fa7c582c58"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__still_04.png",
+      "bytes": 2285732,
+      "sha256": "3874b4f6f87f3c3cd41eb026ca28f4f49df838b545de508262292513949fe2bb"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__still_05.png",
+      "bytes": 2033036,
+      "sha256": "509fd6560395477d2d22f28844e86c825bee0f2266e11e10c72ad9be3daa2505"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_01.png",
+      "bytes": 1928414,
+      "sha256": "d873e14997d7dfcd5f42e7d6df4838855ad505ea6c5aaa90322e1fa8a5309e7b"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_02.png",
+      "bytes": 1703593,
+      "sha256": "1f5c5990a69a7418d17de320802e9d848e8189345b2b4b2d78d477c7195c3993"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_03.png",
+      "bytes": 2234713,
+      "sha256": "557ae198f6cde468311edead0a76d75ce084464361cb4093b4b21817e00c5751"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_04.png",
+      "bytes": 1861133,
+      "sha256": "bedaf8e59efd30d2a9881f43a7fdd220e9d6d1eb6bbbe5f5297335a79f854030"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_05.png",
+      "bytes": 2070800,
+      "sha256": "344b020485dd42e68bd6ef7ad5a330b144eb7d64fdb3e50b90086407b5c0ced5"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_06.png",
+      "bytes": 1912585,
+      "sha256": "f612fa1e13f28379fc46e4d020d108777271a3d1c91d925b6af0b58ff1d752a5"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_07.png",
+      "bytes": 2714264,
+      "sha256": "7567874bb12887a2105d5dfca87b48e09cf73113443ba13bf77e2a89b0938221"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_08.png",
+      "bytes": 1845607,
+      "sha256": "277abf269a6faace133daae14617ff4f3bd4e762f851f8161b9dee6b50a6196b"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_09.png",
+      "bytes": 1973043,
+      "sha256": "fba66097f209a78887288640dfe880144a71552a4661824dd1bbb70b0b308b92"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__tool_10.png",
+      "bytes": 1765496,
+      "sha256": "aba9f838e3856d1593f53d8a474fcde34078f27e9a7b61f3a596c6d371cb6c79"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__wash_01.png",
+      "bytes": 2016799,
+      "sha256": "f7e5267d5dab639b4f2cf5f594ead16b9fd6017ca1542cdcf2273eccb5dbe07e"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__wash_02.png",
+      "bytes": 2009549,
+      "sha256": "29c2ff30ff0cafb35d0fa7e8e12a4375a426df70b84bc3de3be563380f832ac1"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__wash_03.png",
+      "bytes": 1973799,
+      "sha256": "4cf0f3919ff1f904f215551cec4ed5801d4bf85257fdde3670316466ed97620c"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__wash_04.png",
+      "bytes": 2279762,
+      "sha256": "634b34478c7bd823c92cc4a29b8eac8c4bce2c243bd2395b07fc7c69dbce7c9e"
+    },
+    {
+      "path": "assets/cards/forge__burn_03__wash_05.png",
+      "bytes": 2162909,
+      "sha256": "e301e92a039c5a148c8046989483caddc822b0225909638cc608d7a441c3c43e"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__burn_05.png",
+      "bytes": 2432225,
+      "sha256": "7c4620b059573a321fc04b908eaff7b5833a6d373030875c3a273682bd21e724"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__join_01.png",
+      "bytes": 2323173,
+      "sha256": "f233eaa5638deb4fa975dfdd1b7aac8cdf3bc3bdd594e12cb7b7492f575db100"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__join_02.png",
+      "bytes": 2270898,
+      "sha256": "648954b647aecf11cd1bcc0a7e75acece22728b7a152b90424f61a78e005f06f"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__join_03.png",
+      "bytes": 2054253,
+      "sha256": "4369af9146978728c68a3820c533b8959edb24bbf72579de0dd38c18f1bc890a"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__join_04.png",
+      "bytes": 2116067,
+      "sha256": "623bcdec823b2938a7f0df3d71dae01f5bbcbe0c5faadbc5361be728dc44009e"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__join_05.png",
+      "bytes": 1898670,
+      "sha256": "865a85912826d6ecd64a5a9843479c9b2c3c33a4484d7e956e47d881aa6739c5"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__odd_01.png",
+      "bytes": 2222303,
+      "sha256": "5c868021356e4c669083b1744570cec4b03f68c7eaf5147e999d51950206891b"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__odd_02.png",
+      "bytes": 2122223,
+      "sha256": "540be702a76cedc49ecb4b29f42539728539442dc4ad746ab90110d7d5e3d834"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__odd_03.png",
+      "bytes": 2410025,
+      "sha256": "c0c6fac0ea88551b57482fd356d9ac60b7a36d7bd81249c6132b895be697f987"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__odd_04.png",
+      "bytes": 1857123,
+      "sha256": "4581c974239ceaeb3836848ecd0d31123b1fb5c1298505e281a94bca0270db73"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__odd_05.png",
+      "bytes": 2461975,
+      "sha256": "1dffabf1f70acaec553bc1ae8f10e89f9684e7a21708a8470b6dd6fe68bc55f3"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__odd_06.png",
+      "bytes": 2218920,
+      "sha256": "47a7dee3dfb469f156746ed0e7d4418681ab838192cff07052de955bdcd66854"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__ore_burn.png",
+      "bytes": 2384058,
+      "sha256": "22b7bca715de8c6ce82f75468c5edb06ff9f6369222688f9c214c27a6cbaba41"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__ore_join.png",
+      "bytes": 2072968,
+      "sha256": "d0946b7723564d7f6f39a86e57f3bfec950f962f0609083db7983aa617a9dd33"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__ore_rot.png",
+      "bytes": 2052881,
+      "sha256": "9986bf63fa51ac14363256a9213731a7034a27ca5a4e3b98b0a38bf6f69d8080"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__ore_scatter.png",
+      "bytes": 2263090,
+      "sha256": "406e4c45c78007ad37101a37b8e3584bcf8c80247f1c526a902582b004f2199c"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__ore_still.png",
+      "bytes": 1962701,
+      "sha256": "0ae3633eb89af478d4ac74f114c0bd2268ae81480d532ebf20f3a074930e9312"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__ore_wash.png",
+      "bytes": 2225993,
+      "sha256": "65a96c0f738b5e8ad9602d4bf8232e297caf42e20b378af28ada74174124b06b"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__rot_01.png",
+      "bytes": 1889471,
+      "sha256": "58ed40b232ffd2267179e9d3768925a3847b8e2ab4508cf1301486ecbdc10e36"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__rot_02.png",
+      "bytes": 2181888,
+      "sha256": "01b4ba87f5aaad1272326b4baef80c664b1c8f6149703378a4c6da639e065a40"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__rot_03.png",
+      "bytes": 2117306,
+      "sha256": "591e66125823c5d3b716cd0d7a4873195190182add258a32bdd684aba120ff75"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__rot_04.png",
+      "bytes": 2284796,
+      "sha256": "d9cb2c6955f9154f46cbb8ddfef5eef9d374c9fba8207ae7cbf51ca3aa5118ff"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__rot_05.png",
+      "bytes": 2076954,
+      "sha256": "42182a9cee95bf331683fe54003b3a8636693a30b096d09336a0a420757b3033"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__scat_01.png",
+      "bytes": 2224749,
+      "sha256": "d46cd7c670f4cae52093be13288b374ca57e731c2bb71c14af6f57a67925c76d"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__scat_02.png",
+      "bytes": 2294336,
+      "sha256": "8d1d12d94af4037c4a1e66d199ce729576b6b6a640f867ec67b193f7cc1f7f28"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__scat_03.png",
+      "bytes": 2061756,
+      "sha256": "8b81fc63bb907d6fc3be477dea1719c12319b896fd4970f0be6737b03c5c9b9a"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__scat_04.png",
+      "bytes": 1943394,
+      "sha256": "5f6fc42057241c8d572d3e3e58a7d06e305763aea959ad52b3690a393e1ab230"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__scat_05.png",
+      "bytes": 2108115,
+      "sha256": "3601ee061605ec1120bcd7fe6b9d882342cd56fc004c93d2a25c83cc5967ad35"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__still_01.png",
+      "bytes": 1949414,
+      "sha256": "0b444634542f4fec8005f262c490f1a472efa31f7618c5e4e7dea12941ec5d94"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__still_02.png",
+      "bytes": 2064804,
+      "sha256": "6c1cae4ab36b21cbb1b06766dd3ccc0ecb43a3e7aeace9516cf8b13940f58c8b"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__still_03.png",
+      "bytes": 1962077,
+      "sha256": "feb4031b154abd85c8a3d77052070a4206d6027305a654ff5e81aac3bfe70034"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__still_04.png",
+      "bytes": 1938177,
+      "sha256": "01c7692dddbbcacf4a73c6b56b4facc5959cdbb7a356dc8e5a69a871a9767fdb"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__still_05.png",
+      "bytes": 2002441,
+      "sha256": "8340c075f7e045b7b07633cacdcbb31d38c2df4d7f3b1186df30b701bdeaf1a2"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_01.png",
+      "bytes": 1887995,
+      "sha256": "94736e5b100484dd7f896fe5bb41c97bf346eb6d3030b27cc6b25ea8541682cb"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_02.png",
+      "bytes": 1931565,
+      "sha256": "101a317c8f8a41df968ce47e43990bce499521bf118d52733f88f67d275f0c9b"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_03.png",
+      "bytes": 2121505,
+      "sha256": "99ae4e84b293709d5752ce746294f31595a448381d6c7a487067f08e98acfa6c"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_04.png",
+      "bytes": 2040307,
+      "sha256": "dc447e9d30b3816875adf88c7ea2e6633ed83d24f6d4fa114a1fb02e0b46a3ae"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_05.png",
+      "bytes": 1975230,
+      "sha256": "aa1ad18829c3e2069ec5ee39cf949809cf9f483aeb8e5f2f04b50943e47be8e0"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_06.png",
+      "bytes": 2128404,
+      "sha256": "b220e6ee349cb18834db59a2e54692db2a9b4e9ca6e0d111fbfb7994a284adb7"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_07.png",
+      "bytes": 1895808,
+      "sha256": "b72c37a838483ed2ecc3c92e320c840fdad23b7a1017f8c19ef0cc658d5aa169"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_08.png",
+      "bytes": 2008254,
+      "sha256": "ec0da3d44252aef16414409d24095e85da4f6057756b995f87964950c58a4236"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_09.png",
+      "bytes": 1920074,
+      "sha256": "8aac20e1fda3f06516bd81847a3bed4074856b065f07a3a405ec23823451cf15"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__tool_10.png",
+      "bytes": 1899328,
+      "sha256": "9ceb78828decb569dcaaabc1108434ff5a534dc3821aae25a865c2daf6c7242a"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__wash_01.png",
+      "bytes": 2088384,
+      "sha256": "f300e3ba4eab6ff2022f2be86302fbbdb94bbfb80d78c0df9b3492dab1346348"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__wash_02.png",
+      "bytes": 2302803,
+      "sha256": "85a2a98ab030af73a863449c9bc5c9148bb733e8394c6006afbb1ae3bd0a50f3"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__wash_03.png",
+      "bytes": 2109436,
+      "sha256": "23a4a4baa9f6ad5e8daa7ce73abf4ea5f63d1839eb79b4e6f08b2cb7dfb12b92"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__wash_04.png",
+      "bytes": 2037634,
+      "sha256": "820be6e8df6eecb5c17fce692b97cd7fbcbaa70ddfe23a8bec410422e3933a0a"
+    },
+    {
+      "path": "assets/cards/forge__burn_04__wash_05.png",
+      "bytes": 1998414,
+      "sha256": "623d4bd96e843273c397bc3aebaa12a8b9e71bc68d7b2a431aebfd301933d5cc"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__join_01.png",
+      "bytes": 2124492,
+      "sha256": "0aa2874b1d36377cf337929cb300112fd9eba4a058c9ff7a0d517f86a2bbde09"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__join_02.png",
+      "bytes": 2264323,
+      "sha256": "e9013b4d609f2f9652c5b366656538ab1e28c1969b8d4020d9c18b15cfa778df"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__join_03.png",
+      "bytes": 2042423,
+      "sha256": "044bc8e7ea8f34c10d109cd4def6c9f3351481d805c051151e47a09a147aed47"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__join_04.png",
+      "bytes": 2025713,
+      "sha256": "3fe721164909f81f69ff6fd83e41de2c5c37f4365ea6fc27a58ae866328b3079"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__join_05.png",
+      "bytes": 2335978,
+      "sha256": "a908a0ab46ea4113138636461cd49fbfa8d94c39c06609afd83299ffc88b91bd"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__odd_01.png",
+      "bytes": 2228516,
+      "sha256": "f5aea919f9b944ed0a1cf4e980b8e1a66aab1c4d0d191f28400751a89b45bb8c"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__odd_02.png",
+      "bytes": 2008776,
+      "sha256": "010abd9bd1340fd474351aab2381c8b83de3a180cc85282b7c5e23f36f198ebd"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__odd_03.png",
+      "bytes": 1990805,
+      "sha256": "f0b88be2b570aa5007acf453f797cba5644b77490d44b3e60f91be1c5e12bda7"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__odd_04.png",
+      "bytes": 2067390,
+      "sha256": "10307673d8e35a52f1150496e4712f25ba5a30ad8a36b01221e040ccc30a3f0f"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__odd_05.png",
+      "bytes": 2097262,
+      "sha256": "40afe7480d726d479e80a830980a01da184d3dc881a51819f5d13c7a9ce29e5a"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__odd_06.png",
+      "bytes": 2071972,
+      "sha256": "d7ec29004d98eaac56b18f5b656fe85fb0d59be8aa80c72911b4df73458d33c2"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__ore_burn.png",
+      "bytes": 2421754,
+      "sha256": "55ef2b0a6e30b3729f37da1ed0004e5de6f7152abf3e93c24b66ad409ad66f28"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__ore_join.png",
+      "bytes": 2193356,
+      "sha256": "2edcc2539bd029abb4122e52ed1ff4d4fcf0c238f3a759d18e55517e09d4f991"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__ore_rot.png",
+      "bytes": 2179202,
+      "sha256": "a35126b04f09dc088deccd2734cc33314948b521df94b20c4996e7eef32e7545"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__ore_scatter.png",
+      "bytes": 2179673,
+      "sha256": "6c6f7792a3d41541db61086e215b7fbce98054cf8ab0dc17fd3da2e5ff509746"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__ore_still.png",
+      "bytes": 2112867,
+      "sha256": "3df897c097c866011918f59655653eeaa2a360c197f16b1134a320ba58cae672"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__ore_wash.png",
+      "bytes": 2211631,
+      "sha256": "9ed58cd4ac486f55d3113cdb15f4ec3f3a483dad24859d18e3191eedc175d59b"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__rot_01.png",
+      "bytes": 2123688,
+      "sha256": "4542974c6de83dc558a0bb60de62a30f646600b5e35d31dd1724e28358df97ea"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__rot_02.png",
+      "bytes": 2038070,
+      "sha256": "ceb40c02fead96d0af2b79423ae80ece5db59553a69528cc02c6337495ce5a70"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__rot_03.png",
+      "bytes": 1729865,
+      "sha256": "0dcd9310330c6a8a7fc777688517ef06e5d6f3fe8f068c9ced9c828b4d482d10"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__rot_04.png",
+      "bytes": 1887056,
+      "sha256": "acd58b7f39f2fc71ecc7aea88e906a2fcfd90dd7be841034d14a60cfaa2f5947"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__rot_05.png",
+      "bytes": 1799636,
+      "sha256": "50e960f9e474cde776fd9e8642c4b58a443b11b0451842774d444bace37baf9a"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__scat_01.png",
+      "bytes": 2342692,
+      "sha256": "60eb2f207c46e53da34c861a72da7d4c7c52327f4012d6f43679d4840b796072"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__scat_02.png",
+      "bytes": 2087873,
+      "sha256": "0242d6927ea91f010278d92a4e7acb3de4aae3d784324a82fe0e9154af2e21ef"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__scat_03.png",
+      "bytes": 2505560,
+      "sha256": "1eab9f3663bdaecdc292e20e9fa47d87231fd39fbeb1494d6de4de03e5043989"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__scat_04.png",
+      "bytes": 2345208,
+      "sha256": "7f1a6a072997ce734179c424d1d0819cf6b6833fb2b40304b3f1660e2aa5ae7c"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__scat_05.png",
+      "bytes": 2490549,
+      "sha256": "29644f07a54171811ce1952eb16ccbd6c78153d142dd264d2bd0d40681c152c2"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__still_01.png",
+      "bytes": 2204874,
+      "sha256": "64755ceb8d1ffcac961d71c572789617f77022e542bc0eca17b54dee038fe95a"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__still_02.png",
+      "bytes": 1999417,
+      "sha256": "47afa28b03e71f5f4074e0af88d23abf09202fd5fb40e43e1687c491c1ad7453"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__still_03.png",
+      "bytes": 2081991,
+      "sha256": "cc285514d08c9ec2f3dcd160b924f7ab13d4bfc0a4daf2dc4a8f1e84e840f0e9"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__still_04.png",
+      "bytes": 2041916,
+      "sha256": "312c538447a1660726f56fb171a8e79bc6c34fcd00eba257932354d056253b10"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__still_05.png",
+      "bytes": 2319860,
+      "sha256": "b38893e96b9dc14dd24488bf6ac17cd1bda5d4033b20e39aa39e3961c8081a43"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_01.png",
+      "bytes": 2116250,
+      "sha256": "d4a08ade989929488cfb4d8a83345cf58d7f6602e064c934a447a584855c307d"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_02.png",
+      "bytes": 1967167,
+      "sha256": "afdd136e8e6916173b51905e4a8205a3b924a40401cd935ca794410cb60f2741"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_03.png",
+      "bytes": 2021923,
+      "sha256": "b22c6c651a9ffe85b1613e25cc1bd40cf28a653be4f9ed33c5e6c95d90417614"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_04.png",
+      "bytes": 1889629,
+      "sha256": "a543e72e9e10783a375bb0a6390a014fc5741f753eea5192cc9ab2714cd5ad8d"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_05.png",
+      "bytes": 2151175,
+      "sha256": "3bc13a86e700600226eb18ac160bce0f46d1f14b554f03381fc69bcf721bb192"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_06.png",
+      "bytes": 2004910,
+      "sha256": "586019e043832af09ba713ac911a09be333a148fa68b0da5551dbfc815e54f15"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_07.png",
+      "bytes": 1975834,
+      "sha256": "3bf96e583fdbb9ed5b61d3786da9e4e9ebfdd0d515f6d1f69b0f8b170a784a7b"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_08.png",
+      "bytes": 1799871,
+      "sha256": "f60fbb9251618eeb88302d031af360782b70df30cd1702716bab72e1e7a489d3"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_09.png",
+      "bytes": 3514034,
+      "sha256": "3ca3ee740f47cc5cba61b4a67ec5065ea88f5b98dcc8534dacdf4ca630e081d2"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__tool_10.png",
+      "bytes": 1658057,
+      "sha256": "a6f0c27ff310cc5add92189d3f37971426623b471c82f8f7ce60be2cc5c62591"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__wash_01.png",
+      "bytes": 1907092,
+      "sha256": "cf06837d4b49a6dd6592b3d9370ccd0764f5cde323ddba837a569bdf6f7eab31"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__wash_02.png",
+      "bytes": 2203620,
+      "sha256": "66010db3e266ea07256ccdc66931114abb8c33b63982b1ef2496fed2b153baad"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__wash_03.png",
+      "bytes": 2028108,
+      "sha256": "ca807373f6a2e5abc3139f34c679976d8bcc1d5dc85c0ee81c4c7eae27ded3b1"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__wash_04.png",
+      "bytes": 1907465,
+      "sha256": "714a5392c7711b181ad7f16384d4aa7235dcb6b5eb7f00d85846e4ca9930a8f5"
+    },
+    {
+      "path": "assets/cards/forge__burn_05__wash_05.png",
+      "bytes": 2145941,
+      "sha256": "02461c9c8c1f8d514319ab7cf478ae78f50c9da1b9f8c357f5feec5dbca4faf1"
+    },
+    {
+      "path": "assets/cards/forge__join_01__join_02.png",
+      "bytes": 1730290,
+      "sha256": "105772dfa6500739c6b9fe8dc11a8e1512004d11291626eadb2bb84c79433939"
+    },
+    {
+      "path": "assets/cards/forge__join_01__join_03.png",
+      "bytes": 1840409,
+      "sha256": "96c063bafbebfbf6a5de225f0e393336600f84526155aa2e1d75cd47e74e4b28"
+    },
+    {
+      "path": "assets/cards/forge__join_01__join_04.png",
+      "bytes": 2226641,
+      "sha256": "01748c4138033afd068850fe956bf0776e780f50cfc35f90a5082982b7ff7460"
+    },
+    {
+      "path": "assets/cards/forge__join_01__join_05.png",
+      "bytes": 2177281,
+      "sha256": "6440ccd0e6858a6c779153dc9f67b0a27e062f932a1a0de436014d890e02787a"
+    },
+    {
+      "path": "assets/cards/forge__join_01__odd_01.png",
+      "bytes": 1844015,
+      "sha256": "fc4fe12cf0047a818e764c33da65d71833ebf5bdcf61811c1d3600d8362bb719"
+    },
+    {
+      "path": "assets/cards/forge__join_01__odd_02.png",
+      "bytes": 1913217,
+      "sha256": "e2e075c417bd6d6ec694eb91dce59febbc09471ea8ba2043a24c830c0a8d08d7"
+    },
+    {
+      "path": "assets/cards/forge__join_01__odd_03.png",
+      "bytes": 2697537,
+      "sha256": "68a92f6007d91b7bf69ff08f1b3d284c15f0a1712c705f80f11c075829be0e91"
+    },
+    {
+      "path": "assets/cards/forge__join_01__odd_04.png",
+      "bytes": 2010198,
+      "sha256": "7b31d9e52bfe82dfd2249420cabcf2d80599992a1d6d6b69ca737f7a145195f5"
+    },
+    {
+      "path": "assets/cards/forge__join_01__odd_05.png",
+      "bytes": 1698288,
+      "sha256": "976952a82fc1e43c97dd2902a2d403ca777781ec9bed67507cc8534c61d8cfb3"
+    },
+    {
+      "path": "assets/cards/forge__join_01__odd_06.png",
+      "bytes": 2035453,
+      "sha256": "5d8e3a5cfa040b114fe566965c6bc1e33e20bd0e39cf2699cddf0e36837f0d5e"
+    },
+    {
+      "path": "assets/cards/forge__join_01__ore_burn.png",
+      "bytes": 1701705,
+      "sha256": "8fa25ee389cab8fa73f681bfcfdb59f55e5feec2d77286caeb81b3837e99b216"
+    },
+    {
+      "path": "assets/cards/forge__join_01__ore_join.png",
+      "bytes": 1775766,
+      "sha256": "966bb09fc82eedc3e8e8fa463f8fa202258fe746c4444056d2dc271e929d502c"
+    },
+    {
+      "path": "assets/cards/forge__join_01__ore_rot.png",
+      "bytes": 1904578,
+      "sha256": "4d8d37d33a31c0a8be394fc574a232c2635b577e9b73c74ef0185a080c6f63d7"
+    },
+    {
+      "path": "assets/cards/forge__join_01__ore_scatter.png",
+      "bytes": 1713325,
+      "sha256": "a13234f3dc6dc7cea676bd8c3d93775957ccd9081c6d72f1b784eefc1af34f72"
+    },
+    {
+      "path": "assets/cards/forge__join_01__ore_still.png",
+      "bytes": 1814805,
+      "sha256": "8bfdd31d77393de6bf1df8b038de976b7f58c7cc2bce9b0e616874dc0dc32992"
+    },
+    {
+      "path": "assets/cards/forge__join_01__ore_wash.png",
+      "bytes": 2012528,
+      "sha256": "765ab951a44593738e46da5b8fd54c471d255fd94c75d5f42ccfcced6ac9319b"
+    },
+    {
+      "path": "assets/cards/forge__join_01__rot_01.png",
+      "bytes": 1734004,
+      "sha256": "3247403b2287344b6dc20bd80dc82fe9b5c503893d421cf7f8e549bf2c3289b8"
+    },
+    {
+      "path": "assets/cards/forge__join_01__rot_02.png",
+      "bytes": 1993685,
+      "sha256": "e278742fe46531ac25f3d222fea8de72812473e29c96de5b574e3042c6ac2691"
+    },
+    {
+      "path": "assets/cards/forge__join_01__rot_03.png",
+      "bytes": 2023653,
+      "sha256": "1d5e22da0a21881fc07331b57641b23f45df0db20e8829456635351bfeb1cafb"
+    },
+    {
+      "path": "assets/cards/forge__join_01__rot_04.png",
+      "bytes": 2411721,
+      "sha256": "427d87eda640409d1ddab0cac3bf317354d8793a507341ac072091dd9d5df19a"
+    },
+    {
+      "path": "assets/cards/forge__join_01__rot_05.png",
+      "bytes": 2255118,
+      "sha256": "fa874e7fd8557abf3ac30d33fc5e614bf86d5317b9330cd4a974e42e7a85a0b9"
+    },
+    {
+      "path": "assets/cards/forge__join_01__scat_01.png",
+      "bytes": 3148304,
+      "sha256": "7ab71b90602984c62abd7f30b98f3a2d2a45929317131f12377a337cfb42330d"
+    },
+    {
+      "path": "assets/cards/forge__join_01__scat_02.png",
+      "bytes": 1707163,
+      "sha256": "2b82fd882f6f4090cf2abd604549e9305fd03b413daca2c7792434673e0aa766"
+    },
+    {
+      "path": "assets/cards/forge__join_01__scat_03.png",
+      "bytes": 1799931,
+      "sha256": "d349a66614bb75ba48923632f9cf22f3ae1df41556fd24b1dae92bd864d74e80"
+    },
+    {
+      "path": "assets/cards/forge__join_01__scat_04.png",
+      "bytes": 1609190,
+      "sha256": "06a7baddfc6bd90600ce0d40df5c2b5dbe1fbb10e5ce8b51ceb701be49d4582f"
+    },
+    {
+      "path": "assets/cards/forge__join_01__scat_05.png",
+      "bytes": 1982657,
+      "sha256": "9170ece8d0972e3c51123e776149ad3d5f1d3e20f98e33a2ce3d24bac912f1df"
+    },
+    {
+      "path": "assets/cards/forge__join_01__still_01.png",
+      "bytes": 1915726,
+      "sha256": "29eaec9a238f9bab1772d733e77c007ac6533b5b53bc6c11c6a597dfaeb9674d"
+    },
+    {
+      "path": "assets/cards/forge__join_01__still_02.png",
+      "bytes": 2159464,
+      "sha256": "fc90fde4e3fb03b6d0ce2ddd480481f9c75882c0cbdd07818e9938272a77a3a6"
+    },
+    {
+      "path": "assets/cards/forge__join_01__still_03.png",
+      "bytes": 1899399,
+      "sha256": "e057b4f985cf901a685e45c9f12a4e39ad815cd19fbfe04bb1d623ca2897814e"
+    },
+    {
+      "path": "assets/cards/forge__join_01__still_04.png",
+      "bytes": 2152083,
+      "sha256": "29a3bd5846bbb349d98d3fd39af1c6a296b579a307b2579d2b1b867189285f43"
+    },
+    {
+      "path": "assets/cards/forge__join_01__still_05.png",
+      "bytes": 2214190,
+      "sha256": "09a0d3d830f74a282ecc17defeb25f56c5c7295eb3051da64124e8f2d6abab2f"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_01.png",
+      "bytes": 1825775,
+      "sha256": "3d837b1bf12d36288adfe3161a9bf9a5deb7221edb6558e3fc8dec6ca1448ac7"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_02.png",
+      "bytes": 2897287,
+      "sha256": "3bc72cf513edfae2155574051a4ca6a48df28db9c905596dab0154095e542f49"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_03.png",
+      "bytes": 1944184,
+      "sha256": "d728c97a9ed5b2ad02a86bca7f530c91af411e2b33d3f3833161c99312d4e2ec"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_04.png",
+      "bytes": 1862878,
+      "sha256": "9effba0a891301f834222c514128a2b96e2d247d644931dd2785d812d35cadab"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_05.png",
+      "bytes": 2544121,
+      "sha256": "bb43c7f3512606c4fd2fd688b7d3fb6070ff65a622119ae8d7487497ce49dd71"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_06.png",
+      "bytes": 1898620,
+      "sha256": "52e9222084d397bee828ac9fde959a201af68a7bfba1ef94d2674dd193ceb2a1"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_07.png",
+      "bytes": 1512818,
+      "sha256": "b32289f1d512b5274de98e021b1937937173959d4737c2ae9d6bd25a661b8eeb"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_08.png",
+      "bytes": 2952178,
+      "sha256": "3c28d58efdd3427405606d37460d54758880c7486b5debc3080f618e59e97c93"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_09.png",
+      "bytes": 2083049,
+      "sha256": "71da000a9bb371e74aadbd758322761dd817b9e60cbfd83b93bc3de8b63ff992"
+    },
+    {
+      "path": "assets/cards/forge__join_01__tool_10.png",
+      "bytes": 1789542,
+      "sha256": "27ae6108149c10836965a97d6853b8e2bb0bf90d256ee45b65ab9143f2286139"
+    },
+    {
+      "path": "assets/cards/forge__join_01__wash_01.png",
+      "bytes": 1772434,
+      "sha256": "41d2ec7cd464c4d7190b61657f9ef71caffeff5f405484166e68c4f7fd82819b"
+    },
+    {
+      "path": "assets/cards/forge__join_01__wash_02.png",
+      "bytes": 1819158,
+      "sha256": "809bb92140affba9e7dc1f9a45a566816ec79ea76e8168d275b1ff5a461f9b0e"
+    },
+    {
+      "path": "assets/cards/forge__join_01__wash_03.png",
+      "bytes": 2033750,
+      "sha256": "a86c321f6e450fa960119afb8e53e11e03d2d82ae27060a728d1774dcc03cd09"
+    },
+    {
+      "path": "assets/cards/forge__join_01__wash_04.png",
+      "bytes": 1901778,
+      "sha256": "64a4bfd0f7133bd5f4a5bdec7e18db1e216980614b68bd90ebf443b0a1d9ce60"
+    },
+    {
+      "path": "assets/cards/forge__join_01__wash_05.png",
+      "bytes": 1869438,
+      "sha256": "72ad1d08c7f18a6f53bc28c3e18dba0b54233410e60f665cc32a9630a98ba731"
+    },
+    {
+      "path": "assets/cards/forge__join_02__join_03.png",
+      "bytes": 2081574,
+      "sha256": "49d5114d596abe978c2b769c0f28722cd841f7afaf8f1e1d5bf916fe22f26f7e"
+    },
+    {
+      "path": "assets/cards/forge__join_02__join_04.png",
+      "bytes": 2073922,
+      "sha256": "1e20e9abce8a8d8c0532d7b647732cbfe9d929d01b2aa024f8523c97764601ae"
+    },
+    {
+      "path": "assets/cards/forge__join_02__join_05.png",
+      "bytes": 2083803,
+      "sha256": "7a15f37288f9a43f97af974f8158968a7f00fb3ec9d5016ae307e0eedde51c17"
+    },
+    {
+      "path": "assets/cards/forge__join_02__odd_01.png",
+      "bytes": 3164178,
+      "sha256": "1e7cf81bf8cc1e8b9ae3aeb528a0a03ae45bb849a951cce1fa30caa5d3b17bfc"
+    },
+    {
+      "path": "assets/cards/forge__join_02__odd_02.png",
+      "bytes": 1552253,
+      "sha256": "7be41d5ecd4ae054c8b8298f90a2f629e271e09ccc565d10b95b2413ee1c403f"
+    },
+    {
+      "path": "assets/cards/forge__join_02__odd_03.png",
+      "bytes": 1702666,
+      "sha256": "d774fec4eef17b29ffc8a955e12748fc88b8ad0582926ddc9f8a84aa5740214e"
+    },
+    {
+      "path": "assets/cards/forge__join_02__odd_04.png",
+      "bytes": 3078404,
+      "sha256": "71a55075639276bdc49bd63e8945e62008c99118dcbd6ea7ac817d5418206bea"
+    },
+    {
+      "path": "assets/cards/forge__join_02__odd_05.png",
+      "bytes": 1995397,
+      "sha256": "39771b2c738880a8c84fd5e205119a8ece6570c523dbc4caeb0bc1a0bc7dea80"
+    },
+    {
+      "path": "assets/cards/forge__join_02__odd_06.png",
+      "bytes": 2062549,
+      "sha256": "2abf235e0f36fd8dcc715f97db543b0ba39e732e85cc14d7e13c3546355ef8ce"
+    },
+    {
+      "path": "assets/cards/forge__join_02__ore_burn.png",
+      "bytes": 1780462,
+      "sha256": "071e286ae8afcd72481517eca4c7693f28ebb0fb4f4e4e540b64b44b9cdd8a07"
+    },
+    {
+      "path": "assets/cards/forge__join_02__ore_join.png",
+      "bytes": 1868369,
+      "sha256": "d5c8ba4b46996680f858b9999ca091086601672bfedce22eb7c876099af765e8"
+    },
+    {
+      "path": "assets/cards/forge__join_02__ore_rot.png",
+      "bytes": 2143229,
+      "sha256": "31fddea39cd4167ded2a323763758302876be0465376f293e905fe01452bcbb3"
+    },
+    {
+      "path": "assets/cards/forge__join_02__ore_scatter.png",
+      "bytes": 1662304,
+      "sha256": "d8e7cd3e6d9e80698c93203c641723efaddecceed8c0f41f6dc16e8c4950978e"
+    },
+    {
+      "path": "assets/cards/forge__join_02__ore_still.png",
+      "bytes": 1876068,
+      "sha256": "83e83fdb6c149c657c8e7a98e6b5f4c4ca22716193370481585ddf78dc067510"
+    },
+    {
+      "path": "assets/cards/forge__join_02__ore_wash.png",
+      "bytes": 1807207,
+      "sha256": "cb36e82cbad7dd51d38c12306e81e983a9baed4fd261920bdab275f23ba50d40"
+    },
+    {
+      "path": "assets/cards/forge__join_02__rot_01.png",
+      "bytes": 1857748,
+      "sha256": "0cd1876f48b0ff7c3509e26bdc5ea5c4d4b2f8d5f4ecd8048e904763df20eaac"
+    },
+    {
+      "path": "assets/cards/forge__join_02__rot_02.png",
+      "bytes": 1827207,
+      "sha256": "30fac6e6a06a2006bdb7afecb49ac89d760ef59b5bbac8dcf08eca4b0b05752d"
+    },
+    {
+      "path": "assets/cards/forge__join_02__rot_03.png",
+      "bytes": 2150693,
+      "sha256": "159e9190c8fd33e61415f8c77c8f425e388df1833921fd02e49fe4e7a04d3921"
+    },
+    {
+      "path": "assets/cards/forge__join_02__rot_04.png",
+      "bytes": 2092244,
+      "sha256": "95ac9112795971a8c975e4d54b71790bc883d7b5e78bb9a85983a29093c26210"
+    },
+    {
+      "path": "assets/cards/forge__join_02__rot_05.png",
+      "bytes": 2070850,
+      "sha256": "89d92781db96a64e373cd84937bb4d1c4d5973666f7007292041c1b60fbd62e1"
+    },
+    {
+      "path": "assets/cards/forge__join_02__scat_01.png",
+      "bytes": 1634436,
+      "sha256": "fb0a92b2abfab4f219f000f5198111931923da62c3513e5276f31f0373a47894"
+    },
+    {
+      "path": "assets/cards/forge__join_02__scat_02.png",
+      "bytes": 1972444,
+      "sha256": "0fe18bd49760fa57c14fe30a6d9d0169d8b8043efd0ca132a8bd624b35561e15"
+    },
+    {
+      "path": "assets/cards/forge__join_02__scat_03.png",
+      "bytes": 1896730,
+      "sha256": "3881dfa9e9a80e85cdbe3f0bff6ba22448d5091afe00da5fdb2f06bac52e3c1e"
+    },
+    {
+      "path": "assets/cards/forge__join_02__scat_04.png",
+      "bytes": 1935877,
+      "sha256": "0f529d44d844233e7d3960bf69495df5da3729c39a43b3160d86d999256eba84"
+    },
+    {
+      "path": "assets/cards/forge__join_02__scat_05.png",
+      "bytes": 1899223,
+      "sha256": "b9b8384a5bf17bfb809dffc37a4fc1a3b4753dcc94ae95c33ad1df7faf2e2d58"
+    },
+    {
+      "path": "assets/cards/forge__join_02__still_01.png",
+      "bytes": 2096896,
+      "sha256": "cc6af0c52d1014a28876eb15779aa65fd51e7fb6a12d57693ec6e3f157e8c9fd"
+    },
+    {
+      "path": "assets/cards/forge__join_02__still_02.png",
+      "bytes": 1893659,
+      "sha256": "7618642448f6bb3f6beb8c020782e26785ab6a7c98f2debf3d0578c7ac3409df"
+    },
+    {
+      "path": "assets/cards/forge__join_02__still_03.png",
+      "bytes": 2130474,
+      "sha256": "48c5803775b97bb76195331244579430fc9b86efdb09a819ab9625fd66395ad8"
+    },
+    {
+      "path": "assets/cards/forge__join_02__still_04.png",
+      "bytes": 2134036,
+      "sha256": "6062b6af67455df90d1777285c1a69b849b3ca5b1b76f2e690ed98e353046f76"
+    },
+    {
+      "path": "assets/cards/forge__join_02__still_05.png",
+      "bytes": 2344970,
+      "sha256": "9b259a591df682b06d8d859d070c384951c6f60702cdf409676fca5883ce0266"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_01.png",
+      "bytes": 3181754,
+      "sha256": "e74091032cad4ae36a7ebd7ca0f0c7b7fa004a6d206e8e0e16c310a32926f447"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_02.png",
+      "bytes": 1619412,
+      "sha256": "c62b684c0be5bc49915baef34fe6634f4b7ea9ac88209b6893c5c18396390fb2"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_03.png",
+      "bytes": 1861773,
+      "sha256": "3864329f33e9fc44ee176e94e0a6518e6ceea378a6247e3d5e69187bd02df763"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_04.png",
+      "bytes": 1784084,
+      "sha256": "260266f48ff2177cf401bd7fdf24a7a345b29771a03c4e86d3db27f19cbc8f59"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_05.png",
+      "bytes": 1722783,
+      "sha256": "ee004e01f3104178ceaaa279cf9723d917094ad4467becbeecd528027f94cd86"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_06.png",
+      "bytes": 1797037,
+      "sha256": "bab6a19bd625a6d09bdb2c5806d4c40f67511c55c7c3e3a4607da3cfc7d3a134"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_07.png",
+      "bytes": 1982247,
+      "sha256": "090e1978d9e4a9b4290e9dfba27ca6fa9f3ba186c5856c0f576368d8e4ba8341"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_08.png",
+      "bytes": 1751013,
+      "sha256": "d663413eb6aa2637b0379d34d19ebdc680342a14bd36bb82ca5e3aa4f4ff7ac7"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_09.png",
+      "bytes": 1846753,
+      "sha256": "777b020f28b0689cfd65a746f2d8fd3795883a99f40414eec57cd6042063f492"
+    },
+    {
+      "path": "assets/cards/forge__join_02__tool_10.png",
+      "bytes": 1815944,
+      "sha256": "fbbdbf80f0fff9680dc6e04bfa7418a5a16b2aabaa74a554ce35dc9c5719ec27"
+    },
+    {
+      "path": "assets/cards/forge__join_02__wash_01.png",
+      "bytes": 2990554,
+      "sha256": "83fd4a628fab580771f0c098230fd2212d5adf606a910c3009aa3ef31e5d73fd"
+    },
+    {
+      "path": "assets/cards/forge__join_02__wash_02.png",
+      "bytes": 1824243,
+      "sha256": "97f27cb7df6436d6efd0b3e28753cdf4edd382c830eaa7a8a27d3ec2861b1e72"
+    },
+    {
+      "path": "assets/cards/forge__join_02__wash_03.png",
+      "bytes": 1707070,
+      "sha256": "684343520ecca3d03ca38292d2a53704c9f4de8f5b32165ebb684912f924940b"
+    },
+    {
+      "path": "assets/cards/forge__join_02__wash_04.png",
+      "bytes": 1944597,
+      "sha256": "2eed020e2325ea541e0edf8b63fdf597629d28d49b3843075166927c22d0c23d"
+    },
+    {
+      "path": "assets/cards/forge__join_02__wash_05.png",
+      "bytes": 2049148,
+      "sha256": "c47e5cab8c48cf94cba0dc2f5f71f898909a5f208d6fa41878aa618b9302d001"
+    },
+    {
+      "path": "assets/cards/forge__join_03__join_04.png",
+      "bytes": 2391293,
+      "sha256": "c6d4f9bc14efaa7de9c48f70f4a32c6bf3abcdea595072c3459f430acbade546"
+    },
+    {
+      "path": "assets/cards/forge__join_03__odd_01.png",
+      "bytes": 3034317,
+      "sha256": "5b7eae1f2e6e9303556a9835c794e985d3b006f1e004ccbe2148508cbb8b0e5d"
+    },
+    {
+      "path": "assets/cards/forge__join_03__odd_02.png",
+      "bytes": 2145388,
+      "sha256": "1db3fbd26b470ce6451f1c21be6ed72ed9fefd2e3938614b513dc7f2b90aec4e"
+    },
+    {
+      "path": "assets/cards/forge__join_03__odd_03.png",
+      "bytes": 1734441,
+      "sha256": "a58c541b1b1deb0aada844a3a123d0384a7b9dc2e6d3a99155993aa441718b54"
+    },
+    {
+      "path": "assets/cards/forge__join_03__odd_04.png",
+      "bytes": 1768331,
+      "sha256": "ae34acea12cb91605548dbbb0c6a08b74d53757ceaed955c50d40ddb18cf4869"
+    },
+    {
+      "path": "assets/cards/forge__join_03__ore_rot.png",
+      "bytes": 2064245,
+      "sha256": "c6d63118dc1759c61abd5897301121e2bfb0314d0c7398655f19e22d04d92652"
+    },
+    {
+      "path": "assets/cards/forge__join_03__ore_scatter.png",
+      "bytes": 1706787,
+      "sha256": "6f125b126d98c9a22cd045b5d0422a120df38f13c3a3a258184a1b4660232b3b"
+    },
+    {
+      "path": "assets/cards/forge__join_03__ore_still.png",
+      "bytes": 1944111,
+      "sha256": "aa9fbeb22ade60b3743cdc2ba5d0321152b95aca9b16e1c65504d28a115d848a"
+    },
+    {
+      "path": "assets/cards/forge__join_03__rot_01.png",
+      "bytes": 1918231,
+      "sha256": "68139c34ae0aa36947dda6a285a78f0b9ec1cc4c51d54a16a0aa23c38003a185"
+    },
+    {
+      "path": "assets/cards/forge__join_03__rot_02.png",
+      "bytes": 2071960,
+      "sha256": "0f08ad241e1946307fd0f09ddcab6ad476ac9309d6788e69f613964bd344dffc"
+    },
+    {
+      "path": "assets/cards/forge__join_03__rot_03.png",
+      "bytes": 1732316,
+      "sha256": "48c798cf5535eb0b2c2ec7b6db6060b64dd255ad8b5d4728e41c93db5c7aee33"
+    },
+    {
+      "path": "assets/cards/forge__join_03__scat_01.png",
+      "bytes": 1716470,
+      "sha256": "074d80b571dc99636ea88aae865a98aab869ec1029bc677d0061efd87c9d7640"
+    },
+    {
+      "path": "assets/cards/forge__join_03__scat_02.png",
+      "bytes": 1619461,
+      "sha256": "6dcaa68ee5ca3e596cfdbecab9ba457fcb01176f0f74940acbaef74111f3daa9"
+    },
+    {
+      "path": "assets/cards/forge__join_03__scat_03.png",
+      "bytes": 1913711,
+      "sha256": "eae44b0151d8229202b3b9e1053b67f447bd11ef954e801cd06b6df15d04611d"
+    },
+    {
+      "path": "assets/cards/forge__join_03__still_01.png",
+      "bytes": 1824650,
+      "sha256": "0b5330d676e14071fd8464a5956d5812fb5759c6ea6f39457190bf464f58af4e"
+    },
+    {
+      "path": "assets/cards/forge__join_03__still_02.png",
+      "bytes": 1873476,
+      "sha256": "508cb78cc510bedd627cc84a556788f1296a2cff73df87dc446197158e50f401"
+    },
+    {
+      "path": "assets/cards/forge__join_03__still_03.png",
+      "bytes": 3099236,
+      "sha256": "13b945fd7e4044e1271988a06e28541a277e89f31c34ba94d3b449c44d509faf"
+    },
+    {
+      "path": "assets/cards/forge__join_03__tool_01.png",
+      "bytes": 2012034,
+      "sha256": "7ab1bab25c6c2ac097618c3139492512b5ee6790e4aa747ce67d4a5ee50bf07d"
+    },
+    {
+      "path": "assets/cards/forge__join_03__tool_02.png",
+      "bytes": 1719862,
+      "sha256": "916298c0913fb8ed6efa3e00633497a1f3bee729d1232dd6e065a6c10c832efb"
+    },
+    {
+      "path": "assets/cards/forge__join_03__tool_03.png",
+      "bytes": 1969552,
+      "sha256": "bfd4b140736692a827871fdbb794f54468be92132941b71bbe2267bb52becc3e"
+    },
+    {
+      "path": "assets/cards/forge__join_03__tool_04.png",
+      "bytes": 1806051,
+      "sha256": "3bf63cc2b03fd54ccecdb39fd3e299fc86f30b2aa6927039e3a18e9708292e62"
+    },
+    {
+      "path": "assets/cards/forge__join_03__tool_05.png",
+      "bytes": 1997510,
+      "sha256": "8becb4822c61def9ac5b6ab1b401fa8e38f314037321c9e3792cb9811a2a3c64"
+    },
+    {
+      "path": "assets/cards/forge__join_03__tool_06.png",
+      "bytes": 1883777,
+      "sha256": "bac15856fee19c68920a028e641e65864c6da62f727e125daedb7c1e3856bee5"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__odd_02.png",
+      "bytes": 1632916,
+      "sha256": "88436bf713a281e43e7284ea68299bc7d2ee1a54589c89f375cf12d1477b9f12"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__odd_03.png",
+      "bytes": 3207564,
+      "sha256": "776c6fe6d950d5df1015a0938fe7ceaf8d35731a9e86885db067b2376e0d52a5"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__ore_burn.png",
+      "bytes": 1958374,
+      "sha256": "2ad32be83c4133265ee0d2dbe0a213d87f510161aa9fcf60fb6ade744c18f1e9"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__ore_rot.png",
+      "bytes": 1960933,
+      "sha256": "32dc0155f8893e81399456290e76336ec60d3247e31d62881c686688b8ede98a"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__ore_still.png",
+      "bytes": 1637225,
+      "sha256": "bd1aaddf553d08cbb97693188c0f3d281ad9492f43fd9cca9daed56283a75ef9"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__ore_wash.png",
+      "bytes": 1861870,
+      "sha256": "9bb1f4cb5540b9558825125fadccac6d5a1b77256bc2d17a042a27f37a60f54e"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__rot_01.png",
+      "bytes": 2934204,
+      "sha256": "7045db8db39be7b0140ea04ca74e51f757eeb1b508ff3c1beba8fed1b6671b5a"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__rot_02.png",
+      "bytes": 2147434,
+      "sha256": "d1104c5666cf168f50f7e328761131c3407daf29d966489ecfc8971b1bc58fb4"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__rot_03.png",
+      "bytes": 1981012,
+      "sha256": "1e1914dea24c8ec3bb51d15bb9691a398859bf2f98940f122dfc4c824f10f4b1"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__rot_04.png",
+      "bytes": 2132000,
+      "sha256": "e492e3398e87867c18d4c395c908bc4a6d1541930c48ee91bf5f9e67723ab306"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__rot_05.png",
+      "bytes": 2263611,
+      "sha256": "1495f9501d5e627b74b5e544b482c672e7b1d5439b3f1f738e13e4536bd231f5"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__scat_01.png",
+      "bytes": 1947352,
+      "sha256": "ed9e8c802cbd638735cc76603035318975989e420f7e05452d54a306245a17a3"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__scat_02.png",
+      "bytes": 1767233,
+      "sha256": "bd5ae66cd2781677eb6f518b8f99e2242c7dde76f76990a9182d0b66bf8cf48e"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__scat_03.png",
+      "bytes": 1941500,
+      "sha256": "de8e839bdd2ffeb623b76b88342d52001b5698c8637d0d67ad026068c0a8cf6b"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__scat_04.png",
+      "bytes": 1682008,
+      "sha256": "c20f846f9d41b99b2b6333dd73bbd49bdd4a69e48713e4184756d55ce64d1e31"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__scat_05.png",
+      "bytes": 1962161,
+      "sha256": "4ad2194e124dc1ff4c749de1f4b3ff66f099b5e497cb018294c43bf422b8d982"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__still_01.png",
+      "bytes": 2136006,
+      "sha256": "da224399e28a824294c4d542c696a19f0cfbb2299e03779f73fb829e26df6cff"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__still_02.png",
+      "bytes": 1864638,
+      "sha256": "19c94174f4bbe111591e5b1177dab2d66ca5d059d091c3f1c9d62839d7008556"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__still_03.png",
+      "bytes": 2730754,
+      "sha256": "ad740587e2929b9330ef3ab636511e9b2171cd15fc7943bf21aaef0f7a82e1f3"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__still_04.png",
+      "bytes": 3435789,
+      "sha256": "acfd4f01c097d497fc6d6877daaf6cc60b0b65b29e01c23887811bae19ddff98"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__still_05.png",
+      "bytes": 1832828,
+      "sha256": "23aa40090cc8b7a63aa6e8b3a05eda05572018a3909b4a9dc34241e59a771f08"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_01.png",
+      "bytes": 1607507,
+      "sha256": "b500405ad104a366eadfea0e978ed3877574f9f7bbf48973dd4d3fdf5a938369"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_02.png",
+      "bytes": 1881825,
+      "sha256": "1f6d70c2005180f218c5f45a6413e4dc377ff1648c79836bb277a94a279dd9f7"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_03.png",
+      "bytes": 1744712,
+      "sha256": "8ca8fe2d8f9f2cf44fdd158952b561fde7c58d0c89a392463555c286721254d3"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_04.png",
+      "bytes": 1829616,
+      "sha256": "909963907085c3839a2020b2fe5135cf909ca4053c9e96b14550be38892fa18b"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_05.png",
+      "bytes": 1947541,
+      "sha256": "3ebfb714411928af1ad87ae043fd57038b947f23bfa013f86487f8831979d4dc"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_06.png",
+      "bytes": 1788871,
+      "sha256": "38f4fb8fa86abcd3004dda0da63be03a993e1194cebf6b108264266481886d30"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_07.png",
+      "bytes": 1586729,
+      "sha256": "3259c006696782899c2648cf103dd19104e104d20e98337f6267d2e291197461"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_08.png",
+      "bytes": 1846516,
+      "sha256": "b16c675c9f8f942a170a60be3db122d226dec92aad0d9f93cb12ff28f8ddc660"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_09.png",
+      "bytes": 1843452,
+      "sha256": "796fef776c5934cffe0923fe678b4b2c2ad97ff0c91798c4e15daf9739f7caa1"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__tool_10.png",
+      "bytes": 1572582,
+      "sha256": "e15725917c913aa20070949a08d32b3a2a0f931fbb693ff811d82a5ea6774e13"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__wash_01.png",
+      "bytes": 1761815,
+      "sha256": "065157b65943e18d0cc94e6c75833be7ff328942629671c97a3f0e5c65a1e523"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__wash_02.png",
+      "bytes": 1851190,
+      "sha256": "8b512bfad00d8cabda25d9f31d61c9fdb1001d538658973cff904a29e893d0cf"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__wash_03.png",
+      "bytes": 1699028,
+      "sha256": "a944444b25b0cc061186641aec0788df563080ab9a4a9d93cd627c7b06cb9950"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__wash_04.png",
+      "bytes": 2045370,
+      "sha256": "c6ae5effaa247b9451c665b5895252997c4d1477ad846e3a985ea826ee17cb90"
+    },
+    {
+      "path": "assets/cards/forge__odd_01__wash_05.png",
+      "bytes": 1987066,
+      "sha256": "af5fb6140d60f73f38b578771f6d7d9f3da31785067a488d72e498932318275e"
+    },
+    {
+      "path": "assets/cards/forge__ore_burn__ore_rot.png",
+      "bytes": 1863305,
+      "sha256": "5ae100c7403bb23152fa1bc441fd9a8288e7e164982ed22a599b058a59ff0692"
+    },
+    {
+      "path": "assets/cards/forge__ore_burn__ore_scatter.png",
+      "bytes": 2122654,
+      "sha256": "06357ec048a9d539266fb01f66f3f09959f42c6135b69d4b413d4ee7d257e8d3"
+    },
+    {
+      "path": "assets/cards/forge__ore_burn__ore_still.png",
+      "bytes": 1841536,
+      "sha256": "1280227e8b3f051abe0f2250ae770a0964eed32e615806236867371a35baa4f1"
+    },
+    {
+      "path": "assets/cards/forge__ore_burn__ore_wash.png",
+      "bytes": 2171436,
+      "sha256": "245575c918d258f7b2d18b08e8924cc9bd762d70af535ded7a5eb8741adb1072"
+    },
+    {
+      "path": "assets/cards/forge__ore_burn__tool_01.png",
+      "bytes": 1786192,
+      "sha256": "d04787157d3dfa768510a8887e8d1b679bbf59ebcf92838fba017bebe1b50bbe"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__ore_scatter.png",
+      "bytes": 2039065,
+      "sha256": "ff2195e2f59b451eadafe8cd3cbaa0281e47bd71260d6685bb53e3d328bc49f9"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__ore_still.png",
+      "bytes": 1848291,
+      "sha256": "8dccb5de7053b118e8488a286996a22e88144d54d91ddc26d11583b4c9824bb7"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__ore_wash.png",
+      "bytes": 1986733,
+      "sha256": "f5c995545826bcab0f07d2ae0542b4b4240f5d9f0ac0b4208539812f7c53c11d"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__rot_01.png",
+      "bytes": 2027388,
+      "sha256": "e6bb0e77979bc8e5436bd5ebe20e02af2fb7f4e6c95e668d654240a1696f1d9d"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__rot_02.png",
+      "bytes": 2279027,
+      "sha256": "d41e41250a737cb99e27a2bd2999a4cb6cab6931d1f776089ba15810d244a5a8"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__scat_01.png",
+      "bytes": 1989798,
+      "sha256": "26f9bdae91d21be4a5973acfb7a01609d692b6bf28dfae9504292709bf565a0f"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__scat_02.png",
+      "bytes": 1886922,
+      "sha256": "e8773a889c7f4c1963bf8c5ae9138dde52f3bf9235ed62d4baa57f0effd00de4"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__scat_03.png",
+      "bytes": 1990760,
+      "sha256": "924f324cea26a50eee5a5c5078feff6c10d3a5f901e59af4af7cb9647d487630"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__scat_04.png",
+      "bytes": 1806704,
+      "sha256": "e84d81de5b25273e05ea8a334d01373703b17e104e5671983da9d0e9affe3458"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__scat_05.png",
+      "bytes": 1849624,
+      "sha256": "3cc63ce8ba3bb67693801bc290f076ee7bc03cdfd3ccc38098fb4a75882ab2d3"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__still_01.png",
+      "bytes": 1866513,
+      "sha256": "ec03674cd3e5630a02a2c3098d982762e45c051c4aaa1febc11c56c23eeaf618"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__still_02.png",
+      "bytes": 2279525,
+      "sha256": "be85750ac3ae23d4f5f20a496899086356daa9f794c148c9522b88c649ce5588"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__still_03.png",
+      "bytes": 2017566,
+      "sha256": "b4d76c8bc8eb664a8541b78bb0a75338bd0c9b8aeb162c1f20a9d48f9ad02e47"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__still_04.png",
+      "bytes": 2083709,
+      "sha256": "9736fc79aa1501e0c748ac9163898d89bfa7e698eedc640f0a2e9da3e240b2b0"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__still_05.png",
+      "bytes": 1906730,
+      "sha256": "561fac1d188fb8475e968976bbac053697c03c6cf67bcd4466840b1677dc50cd"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_01.png",
+      "bytes": 2048184,
+      "sha256": "a9c20ae5254a1a2f23487414f76f86137f2de1b00d1f2e3bdea01c784b6fc186"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_02.png",
+      "bytes": 1824360,
+      "sha256": "a8c436d61092891df7a96a0a4ab883c4a2750bc1a0c59f754e8cf36634067022"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_04.png",
+      "bytes": 2086574,
+      "sha256": "696c5ff136c440dd971fb8c5b30b5c94938b1199fcb3b5c75d8ef6289c4b2e47"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_05.png",
+      "bytes": 1924528,
+      "sha256": "468b9d86103025edf562b7bd7a480624332e6311d32f24652d6f88632c7540f0"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_06.png",
+      "bytes": 2122894,
+      "sha256": "deea8fb85c809ff2e691550e60d4a95e1bd796d9d6ff7c42be7309df514d1802"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_07.png",
+      "bytes": 1582002,
+      "sha256": "4418d2814b6fb3316d6609c9da0539bd367d68331ccedff048fbe2328e36a765"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_08.png",
+      "bytes": 1736935,
+      "sha256": "95884d5bc0badd4d068cb2d9a8eb4c99d36c760fc9ffdf19a980af0421a6be51"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_09.png",
+      "bytes": 1917929,
+      "sha256": "03d7843203e6eab316001ad029597169ee5cb4926539c738494657f83a093c0e"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__tool_10.png",
+      "bytes": 1824177,
+      "sha256": "d181b850ad38c86f5c26f16064625c1cc3ea15745b1335461f7a51031af03bb3"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__wash_02.png",
+      "bytes": 1887397,
+      "sha256": "c975fa8dc03cc779677df4c05862cdbda7acf04e50b60c92e96d3d85fc466e02"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__wash_03.png",
+      "bytes": 2056447,
+      "sha256": "4a50f756f8b4900fa1610151d3a4ce7f41d2262d77cb0fa1d6758543a53dab03"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__wash_04.png",
+      "bytes": 1803561,
+      "sha256": "67718f0a20c35e64484aff3ba5e02dc77cf21aca8115b604405a54ee8a68d782"
+    },
+    {
+      "path": "assets/cards/forge__ore_rot__wash_05.png",
+      "bytes": 2306814,
+      "sha256": "c070489da5ed5b19f6da69417ff3a0018b03a215480d5692998003dd28bd4cc7"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__ore_still.png",
+      "bytes": 2037488,
+      "sha256": "355cb4a8fe4ada980e2c57825033faa21f2018e72ae6dd3e3536c4da6c98d1ac"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__ore_wash.png",
+      "bytes": 1517001,
+      "sha256": "050fcfefbf7be913fe83950ec1d567442f9e6d71b69375b5e7cbc292610be2b1"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__scat_01.png",
+      "bytes": 1769667,
+      "sha256": "b6d5d3900ec83d9977bb7876dad39bd775d8c05a31d647b91472ddc3ff668e50"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__scat_02.png",
+      "bytes": 1951030,
+      "sha256": "93330e6245ca671df594d3eccde8ae5e5fd784eb22072e172af0b16c2e01357e"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__still_01.png",
+      "bytes": 1929538,
+      "sha256": "d16699c925c77b8bfade15593d888ad8315ba0187c5937121d53b042de786fc0"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__still_02.png",
+      "bytes": 1823519,
+      "sha256": "cab9e88b3829779eea77b45c4b639f183dd9dd77330136727b55d632ec0da2e8"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__still_03.png",
+      "bytes": 1819086,
+      "sha256": "cb983ecc326dbd85ec699c46be3b6f91454b066f8855b316f73a4a27174fec12"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__still_04.png",
+      "bytes": 1886437,
+      "sha256": "e06b4d45cc210032292db5397e5c8411ffd8745c2a15896e207771e9db12ff8f"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__still_05.png",
+      "bytes": 2085451,
+      "sha256": "e7743851c3e90ef32dcc3a70344ba362fa3f63fd9022b1f49b00b4d8f2d135e7"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_01.png",
+      "bytes": 2339323,
+      "sha256": "b5aedfe43a196fa257abcc78e1498ca9aac7553301fe7e80dd152d4be7d5564d"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_02.png",
+      "bytes": 2161561,
+      "sha256": "76eb5923c66a25fa2118b238b16c62c1d6c23fa59ba8fc29bb6dfc72cda04263"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_03.png",
+      "bytes": 2139008,
+      "sha256": "05724bf3bea8338be13b67122214ec6490ec86259f0e946a2b570b25b95b640d"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_04.png",
+      "bytes": 1961096,
+      "sha256": "a04ad10f20d4791181599bbdd0b11961412dace31dc8ac2896c3608657cf9ede"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_05.png",
+      "bytes": 2321541,
+      "sha256": "0f3f55750af6e21cf7fde0481b027651b75ae1a16f0dddf77223c9b329d51d1f"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_06.png",
+      "bytes": 2392962,
+      "sha256": "12f510bcfb870c241fb853d2a61e718116eaf6c21b67c27cff72403ac12fea46"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_07.png",
+      "bytes": 1728972,
+      "sha256": "c2d7112e1402cefac1d9ae0f850907f90b17f26935be83ffaeb4ebe3338d9572"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_08.png",
+      "bytes": 2242036,
+      "sha256": "78d810d5bbe42d0eaab1be35ea4566a4560694d96124eb150a8dfc4b78a57877"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_09.png",
+      "bytes": 2141000,
+      "sha256": "3a534acf4a09a55227c497b26b7841f247e3ef71c74543f8f3eddd6f0afe1c90"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__tool_10.png",
+      "bytes": 1754744,
+      "sha256": "64e392ff60d338a9551b84feb78708b8b149d9ec5770d0b2c7cfcffc80f4683a"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__wash_01.png",
+      "bytes": 1664454,
+      "sha256": "aeab7095e4a95e9a670a424db6b32e3ad4ae1f4b9ff19a124a01209b5e675fb6"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__wash_02.png",
+      "bytes": 1712317,
+      "sha256": "2459496590f9287f60f5d163f7e4191db8c91452e7cc161da268fa58f91e8202"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__wash_03.png",
+      "bytes": 1802789,
+      "sha256": "582129b61b625d743eb74a1f108f05ed6812997e6b35accc5106592eefc50cb2"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__wash_04.png",
+      "bytes": 1841096,
+      "sha256": "4197ec88cbe692788e236dc3f236cbcac3646682a6209af416c030f014b213df"
+    },
+    {
+      "path": "assets/cards/forge__ore_scatter__wash_05.png",
+      "bytes": 1768149,
+      "sha256": "e0bf445ec14e53a871db63db64b734a8b062d1472880bcbe6d2b4841f45d401f"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__ore_wash.png",
+      "bytes": 2020104,
+      "sha256": "cd227551559f5afe421636454d2456933edbd5439683765b70524c20a2ea1532"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__still_01.png",
+      "bytes": 1957780,
+      "sha256": "ea7d053965680912aa67c526911c1fcd5239c878a31585a26bf1bccaf37b3d88"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__still_02.png",
+      "bytes": 2166034,
+      "sha256": "02f12f00717064edeffacfae709b793196b0091aab43dc0c3bf5ef3fd555371a"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_01.png",
+      "bytes": 1795018,
+      "sha256": "da61d2b175b114d322283d9874df74c5a81bb1018d838ada0766a48d96ae1f82"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_02.png",
+      "bytes": 1738659,
+      "sha256": "07d102bf49b2f25f36ab2ac1bd644395a78ddda1920b83b9397d9fecfb5e9e54"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_03.png",
+      "bytes": 1680272,
+      "sha256": "9cea81eed9553902e05586495340766df32bfb2edd7ec1eaca8851aa00c13b8b"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_04.png",
+      "bytes": 2013604,
+      "sha256": "4f2eb0dfd16c55e60dbe57c33b0f2ef4359fcc1909a430f7f48b2d42444df4d0"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_05.png",
+      "bytes": 1879971,
+      "sha256": "e442dce36c011e50d76d9501c4af004f5ea7ec4bb4b88fb4a5ed653d1337847c"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_06.png",
+      "bytes": 1851764,
+      "sha256": "5166c5b239896212c6f1ef79bf8202b4d23a7b03796c81918a497d51afe1127c"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_07.png",
+      "bytes": 1726098,
+      "sha256": "76c3d2327929d391ccd81b380d6e81729aead8045fd07892f7e6794a3f2dab7c"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_08.png",
+      "bytes": 1977139,
+      "sha256": "df9e8697b4a7863b3c5ccfe555e39666db26ee07dbcc2db4b2f743cb73e026f1"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_09.png",
+      "bytes": 1730660,
+      "sha256": "d853b0e8f49de98bad55078bb570396f82672015b38260a5c51f7b12c5b1fc43"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__tool_10.png",
+      "bytes": 1869639,
+      "sha256": "5c23ef37ffb614e45991f4bb10e154bee013fb117d9e715d600a579fa6dc1dda"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__wash_01.png",
+      "bytes": 1742087,
+      "sha256": "ab1f1d40d89f7ccc3d1d90510247e751f2fc9741f21f6bd685d89c4f144f0ef8"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__wash_02.png",
+      "bytes": 2035757,
+      "sha256": "2f0cd7d43ae575b09127df131fff8f2186c7d752484bf8f802dcac2b61baa9ab"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__wash_03.png",
+      "bytes": 2105938,
+      "sha256": "b4397f30ee31e4443d37c28c057c811113c2a01e5aeec7177c2544780abd825a"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__wash_04.png",
+      "bytes": 2727439,
+      "sha256": "dea16538ffb0f26da4cfa1f87f6916d83f6460535678c9341497294e6d23677e"
+    },
+    {
+      "path": "assets/cards/forge__ore_still__wash_05.png",
+      "bytes": 2159942,
+      "sha256": "451a2567c3d4bdf9af75537da6e5688dd5751609bfbd3c1de096f476195c0304"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_01.png",
+      "bytes": 1663488,
+      "sha256": "3ab1eabc1f78801e2787ecbc1b24d7e0768332a1b18271771c4898becf8134b3"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_02.png",
+      "bytes": 1643683,
+      "sha256": "b3df586c851ff626dc58bf58f5860c95fb73e3e28b3816604bd7108dfa5aef8c"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_03.png",
+      "bytes": 1964514,
+      "sha256": "2c6d8c1c86314cd6c2f048134789145be324d54d0d9f73e5f3038ee3c1d23cac"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_04.png",
+      "bytes": 1869730,
+      "sha256": "82df2de43bf42151b0c87896d5fc593e231849d39cc206c9354487e823f168a4"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_05.png",
+      "bytes": 1922803,
+      "sha256": "e4f43d04cb8e653dd49d5ad6f1e9bce4be488ef0b6064ced7ac3f5eb5ebffe10"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_06.png",
+      "bytes": 1814247,
+      "sha256": "1110cdb05b7fe190e8df98f82e048c7fea0a3b4a0acfb79b6d8fc6d0f89321cb"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_07.png",
+      "bytes": 1729067,
+      "sha256": "fba1656fe58294ec6b06db2e9cbb82dd349fef2e11b4f7a236eff1622a7e2601"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_08.png",
+      "bytes": 2061829,
+      "sha256": "49dc38a3ac1bf3bbb560efc4a7370701b3bc3aa11712349718bf0ec529d93d5c"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_09.png",
+      "bytes": 3643878,
+      "sha256": "58da4f0b632891d8c0e4c894c5778383f0020000053e6d6965f1d16d1f5bf777"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__tool_10.png",
+      "bytes": 1831837,
+      "sha256": "78e763d3597e34119da9265c506de9d74e0775722ac05f4ff16469f3930fbf8e"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__wash_01.png",
+      "bytes": 1715924,
+      "sha256": "ff043e5faccf94c252e347d7b18253516f1b9cffe8edc65b435368fc8dbdddd2"
+    },
+    {
+      "path": "assets/cards/forge__ore_wash__wash_02.png",
+      "bytes": 2096288,
+      "sha256": "b3811b442942c2174f3514f3a1b5704f0a3e426cce67a39432816876e2d4985b"
+    },
+    {
+      "path": "assets/cards/forge__tool_01__tool_02.png",
+      "bytes": 1836633,
+      "sha256": "994ba7a8664bc3f68a82bff37a26e75bb531dec9839cbc88dd2f5187882c6206"
+    },
+    {
+      "path": "assets/cards/forge__tool_01__tool_03.png",
+      "bytes": 2189120,
+      "sha256": "fc35ac296adf665059fa6cf696b5d2af4aa2ccf676980c115bf62402f805da2e"
+    },
+    {
+      "path": "assets/cards/forge__tool_01__tool_04.png",
+      "bytes": 2151766,
+      "sha256": "9c71e848d92590305ac630e30f1195133f898ad3113722d4ad599e7f9712e06e"
+    },
+    {
+      "path": "assets/cards/forge__tool_01__tool_05.png",
+      "bytes": 2081976,
+      "sha256": "f8d9793197f24e7d6d11dcf98f3ff71aad0f7e3898b89d39d286b8882e42166b"
+    },
+    {
+      "path": "assets/cards/forge__tool_01__tool_06.png",
+      "bytes": 2177008,
+      "sha256": "da2cf05b9dc51edc1643431811b42b9f21aed2d2d3a7ddf3d4121fd70765c678"
+    },
+    {
+      "path": "assets/cards/forge__tool_01__tool_07.png",
+      "bytes": 1772355,
+      "sha256": "5ba7c5ec5ab318ddf56062bff159b8497244002b525fb8f129096de419da7e81"
+    },
+    {
+      "path": "assets/cards/forge__tool_01__tool_08.png",
+      "bytes": 1798033,
+      "sha256": "71727574e5d6d5bcda1a2727c9ec29c0228c18a2226900f3afc69b4d92971b4f"
+    },
+    {
+      "path": "assets/cards/heart__burn.png",
+      "bytes": 2192235,
+      "sha256": "e1fd60f736c0a764d1b6ce896679fcc9ca3f560312ebf9f56adb726c4fd561d9"
+    },
+    {
+      "path": "assets/cards/heart__join.png",
+      "bytes": 2457093,
+      "sha256": "236a8fb5e96906a974b95aad43de2b6968f26b8b9bec34c70253e8b5562f6865"
+    },
+    {
+      "path": "assets/cards/heart__rot.png",
+      "bytes": 2021469,
+      "sha256": "0a6cbafa7c7f292336735aadce34be5703aeba1d840582c2c8f9cc1eb24da415"
+    },
+    {
+      "path": "assets/cards/heart__scatter.png",
+      "bytes": 1955213,
+      "sha256": "bc9f85128fd8d537a9892fb6573f362a062472f34fe1782e2f155f448caf2ab6"
+    },
+    {
+      "path": "assets/cards/heart__still.png",
+      "bytes": 2451768,
+      "sha256": "2a079532f0610de1af117422a32c7d33a24bd0c55758c48db94e724911e98995"
+    },
+    {
+      "path": "assets/cards/heart__wash.png",
+      "bytes": 2115758,
+      "sha256": "9e4aea7a373419b794504e3dbfd78829273380a658a3552e88ac97fa7f2d0f4f"
+    },
+    {
+      "path": "assets/cards/join_01.png",
+      "bytes": 1753007,
+      "sha256": "2c5e38da33db6d3e8d531925be3738a69bceb73a9bf5a7f3b30411ac7e91d377"
+    },
+    {
+      "path": "assets/cards/join_02.png",
+      "bytes": 1823112,
+      "sha256": "8e159018fa4e9ce12eccefae600c4fdf51c75efb99a825559e9019133f239ad3"
+    },
+    {
+      "path": "assets/cards/join_03.png",
+      "bytes": 1726616,
+      "sha256": "c8f69856d0851ac0700595c51d6de0cd23077926caf96d71e20295ef4b4a5108"
+    },
+    {
+      "path": "assets/cards/join_04.png",
+      "bytes": 1818968,
+      "sha256": "847c14c78d5a0782ff621547462026b297536ec933baa019552ff38551c0c26e"
+    },
+    {
+      "path": "assets/cards/join_05.png",
+      "bytes": 1770916,
+      "sha256": "9aa9e38ffac5a66ed99c030ecdf396dcbcf2447c8b3b6c93f50af30e0c003ce6"
+    },
+    {
+      "path": "assets/cards/odd_01.png",
+      "bytes": 1806968,
+      "sha256": "91ae77d15fe7e97e3045d013e4f8093dc669e6d915a80dcb051955645c7075e2"
+    },
+    {
+      "path": "assets/cards/odd_02.png",
+      "bytes": 1934839,
+      "sha256": "b17c984b61272d674502b21d8cefdb5f0f526e436f48b341f4eb3fd2e1e82eb4"
+    },
+    {
+      "path": "assets/cards/odd_03.png",
+      "bytes": 1657259,
+      "sha256": "10148b37e5147422cc7181498930972c418293782f731759373dabd640861267"
+    },
+    {
+      "path": "assets/cards/odd_04.png",
+      "bytes": 1674406,
+      "sha256": "d8ce54b9de9bb88a72cac16d25eea3ce298ae72c2ef205309835e81ae79bba53"
+    },
+    {
+      "path": "assets/cards/odd_05.png",
+      "bytes": 1931582,
+      "sha256": "a01fee4e3260520eff0aecdabd18cfd5a5a73f41ee481e765bbc4cd009800f24"
+    },
+    {
+      "path": "assets/cards/odd_06.png",
+      "bytes": 2076181,
+      "sha256": "23b74a071007bb44adeda66c4f7d83a6121d86487eeafe05462c3d4a4f7a5a4f"
+    },
+    {
+      "path": "assets/cards/ore_burn.png",
+      "bytes": 2896412,
+      "sha256": "28ee7a32dbb4ccafd47de598604d1790d501c7f5f38dc04475b9d6df02205023"
+    },
+    {
+      "path": "assets/cards/ore_join.png",
+      "bytes": 1806581,
+      "sha256": "e54ad70e7a56b4f8a97df7c818c6b7450949648d4d320bb9788bc552b7db3cfb"
+    },
+    {
+      "path": "assets/cards/ore_rot.png",
+      "bytes": 1771081,
+      "sha256": "8e4be1f57beecb30c4bce94926e6718a30951e195c12562a326e7a206e1d5fb4"
+    },
+    {
+      "path": "assets/cards/ore_scatter.png",
+      "bytes": 1880745,
+      "sha256": "e69c6e11062819ed3f175b7b78b0dbfe101285875cd618a5c5b7080447dbec74"
+    },
+    {
+      "path": "assets/cards/ore_still.png",
+      "bytes": 1678253,
+      "sha256": "33a2dcae1c8c3dfc27fe5fc869f24fceab94ba4c23a297feef20781f2c65edb5"
+    },
+    {
+      "path": "assets/cards/ore_wash.png",
+      "bytes": 1831324,
+      "sha256": "b66502509aeba83e76b1ec79bd2f9829f357e1c69b2783bd74257585455b80c2"
+    },
+    {
+      "path": "assets/cards/rot_01.png",
+      "bytes": 2054994,
+      "sha256": "db6ace4f3f59ff65816f7bfe78457b8bc850624403be210ed20489cd71f84484"
+    },
+    {
+      "path": "assets/cards/rot_02.png",
+      "bytes": 1588466,
+      "sha256": "de408301f704e9682116e8068a0669065302c70b34201430d5df5a8affc5c9fb"
+    },
+    {
+      "path": "assets/cards/rot_03.png",
+      "bytes": 2044743,
+      "sha256": "67a231f4bc7fed01cd967630f5bd09b68a4286d9fe2cc44546f23c7b24311cfe"
+    },
+    {
+      "path": "assets/cards/rot_04.png",
+      "bytes": 2192982,
+      "sha256": "288d3ba7b4578d950a35d672e14892c8556cb6a3ede38a5938372c311765603b"
+    },
+    {
+      "path": "assets/cards/rot_05.png",
+      "bytes": 1705228,
+      "sha256": "61c443fd0712d1f76e0580c1ff2f9805159d3f385dcde3bb7931f5dfbf33894e"
+    },
+    {
+      "path": "assets/cards/scat_01.png",
+      "bytes": 1995364,
+      "sha256": "f363a3ec3ae82bbc462f2416f49b60d6cd3a2b1ce8c7b7d46d8663c03c1d4a08"
+    },
+    {
+      "path": "assets/cards/scat_02.png",
+      "bytes": 1531888,
+      "sha256": "852bdcb0fed587d5c19609ceb442c1d0cd84692c8ef4eb4e9385ca5a819ceb2b"
+    },
+    {
+      "path": "assets/cards/scat_03.png",
+      "bytes": 1643389,
+      "sha256": "ad5553fafdd438afe7993c5e1f78569c9379e487cbbd4d02aab867bbead8dcbb"
+    },
+    {
+      "path": "assets/cards/scat_04.png",
+      "bytes": 1814576,
+      "sha256": "9c2bfbfec776952d594484da7b8b814e7aa7b91de5ba90dd57733adf933f0d1d"
+    },
+    {
+      "path": "assets/cards/scat_05.png",
+      "bytes": 1795990,
+      "sha256": "49050d85b033b56fb3afa0b1788c718b02787d11b9887d1f68df85b56b225ba5"
+    },
+    {
+      "path": "assets/cards/still_01.png",
+      "bytes": 1821151,
+      "sha256": "0070b5d805fe66c6eba963a1f81a5395e09ec90dc5665a1233e25c3bf37adff5"
+    },
+    {
+      "path": "assets/cards/still_02.png",
+      "bytes": 1594346,
+      "sha256": "919269fb53594c2cd6abb1c53031281f537e7a63cab29a1cd7e6d5afcf3bbd8a"
+    },
+    {
+      "path": "assets/cards/still_03.png",
+      "bytes": 1695452,
+      "sha256": "899ee057f52654d6e80e17c120fac42cfacf3bb6139681334a70c8afa3331349"
+    },
+    {
+      "path": "assets/cards/still_04.png",
+      "bytes": 1932466,
+      "sha256": "2640624d74c9e05ee4df82a199a4b36c57be0c99f8a775b98c904c641ec87036"
+    },
+    {
+      "path": "assets/cards/still_05.png",
+      "bytes": 1832921,
+      "sha256": "a6ed4f666578aee684c0043db3e802c8a62c57bf0c4ce200c91330590518b315"
+    },
+    {
+      "path": "assets/cards/tool_01.png",
+      "bytes": 1809596,
+      "sha256": "793bb9fe4651f9495c6990374e49b02e422e200097ef838fb9c4932324d838f2"
+    },
+    {
+      "path": "assets/cards/tool_02.png",
+      "bytes": 1626596,
+      "sha256": "d9beac5f9c727ae5f5bdde70835c12a959b5ec62c4b947172755d37869f0d50a"
+    },
+    {
+      "path": "assets/cards/tool_03.png",
+      "bytes": 1729986,
+      "sha256": "3c5f48ec7cdf469b4e70d1094091eaa7e5c09f1461a26098eabbff4a6ff74031"
+    },
+    {
+      "path": "assets/cards/tool_04.png",
+      "bytes": 1703754,
+      "sha256": "d40c69db1ed6709a8ad2f81f85b6792e510f20bc73e3a2476ecfc3769e197ca5"
+    },
+    {
+      "path": "assets/cards/tool_05.png",
+      "bytes": 1816410,
+      "sha256": "981d6db25ba1653e269a8fc243716d9f8da30ec7bb953db17ffd31749761758f"
+    },
+    {
+      "path": "assets/cards/tool_06.png",
+      "bytes": 1594151,
+      "sha256": "dd1d570125564dff2e42e51f8547488fc641c8f9a217e7a6ea950d98010f7800"
+    },
+    {
+      "path": "assets/cards/tool_07.png",
+      "bytes": 1874558,
+      "sha256": "9fd1f8ceeb23a9d62e57bf01ce9c735eb214a534b31e8fc2f5295058dcd902ab"
+    },
+    {
+      "path": "assets/cards/tool_08.png",
+      "bytes": 2040583,
+      "sha256": "6f18d32e0d6ef8df663e283926ea3fdd455badb2409dd5274bb76a4cf7e50881"
+    },
+    {
+      "path": "assets/cards/tool_09.png",
+      "bytes": 1960570,
+      "sha256": "e4fd637f1ab89a8c0570edd6948a7f12d050a9d83130991c41658bbf3971d5f9"
+    },
+    {
+      "path": "assets/cards/tool_10.png",
+      "bytes": 1694321,
+      "sha256": "a5ad8c64c6c38e709558916962933e21e2c8c96775905372a8cbbc0049416c12"
+    },
+    {
+      "path": "assets/cards/wash_01.png",
+      "bytes": 1800632,
+      "sha256": "461882049ebb71153875b9009aa65a0bcd83b22575ccb589628d6666114121e9"
+    },
+    {
+      "path": "assets/cards/wash_02.png",
+      "bytes": 1654384,
+      "sha256": "da101a4e7fe4512dbb6583c56c6cbe65591136b5c7e50f5b4cb49c66ba2f4a02"
+    },
+    {
+      "path": "assets/cards/wash_03.png",
+      "bytes": 2048240,
+      "sha256": "adbd3438a393872bb8e2cce684fe495ae9ac99d4a24576cb25d341154ecf68da"
+    },
+    {
+      "path": "assets/cards/wash_04.png",
+      "bytes": 1726249,
+      "sha256": "bc5a54fbe241eeb7c35a38b800be8d5aab1a42927cf95a9fd4e51202ee5c7bb2"
+    },
+    {
+      "path": "assets/cards/wash_05.png",
+      "bytes": 1853639,
+      "sha256": "dabce86422d63cad64456a574d64c7184fed1a225e44af4179da2bff1f0708ad"
+    },
+    {
+      "path": "assets/enemies/elite__burn__scatter.png",
+      "bytes": 2115984,
+      "sha256": "b3de6984f38d3d041bb638d4b924d289d9dd861087b5d8b21bbab702632bf783"
+    },
+    {
+      "path": "assets/enemies/elite__join__still.png",
+      "bytes": 1927697,
+      "sha256": "6d4457ef2ce317d65bd57a940716f8d680c23730bae10ac88e9b416fc7c106ff"
+    },
+    {
+      "path": "assets/enemies/elite__rot__wash.png",
+      "bytes": 2057779,
+      "sha256": "798e72f3af98490df3cc4f7de4e7199823ef7882db85c044d6f39d282fb7ea67"
+    },
+    {
+      "path": "assets/enemies/elite__scatter__rot.png",
+      "bytes": 2273009,
+      "sha256": "1b756c8b90f8fd9dea740cfb16ca8a05cd9cf6243eef5fb377f0c828ed8b84f2"
+    },
+    {
+      "path": "assets/enemies/elite__still__burn.png",
+      "bytes": 2122207,
+      "sha256": "486d5ef2e6550e4386c46d24df959290dd3c8117d8ede306af45374044f8dcad"
+    },
+    {
+      "path": "assets/enemies/elite__wash__join.png",
+      "bytes": 2177276,
+      "sha256": "be5f8d169c17ff5b5d10960c31c96154f85dbfba6b8df5b321adc5a5fc984923"
+    },
+    {
+      "path": "assets/enemies/enemy__burn__bulk.png",
+      "bytes": 1982074,
+      "sha256": "5e5fecbea52817341b8fec3302d1e05b8b91279789107b2643860c61e7acf4a0"
+    },
+    {
+      "path": "assets/enemies/enemy__burn__mimic.png",
+      "bytes": 1893598,
+      "sha256": "2aa11a9c3ca0cc5d327a306e53ddfc2c3ce2f1a2ec5951f6283e5b83358b9420"
+    },
+    {
+      "path": "assets/enemies/enemy__burn__reach.png",
+      "bytes": 1997046,
+      "sha256": "fd539fecfaba1ab628f9a7856983ed3a693ebb43449426c8ab26d93ca2197258"
+    },
+    {
+      "path": "assets/enemies/enemy__burn__shell.png",
+      "bytes": 2203479,
+      "sha256": "8e4fc837734672ac31f0406ba5145ae517234ea4d4f64c03587885b17004dc44"
+    },
+    {
+      "path": "assets/enemies/enemy__burn__swarm.png",
+      "bytes": 2309876,
+      "sha256": "7e8361a33cfc2df433fabd842ca6587f382eb3509c8a184c319de9efcdfc7944"
+    },
+    {
+      "path": "assets/enemies/enemy__join__bulk.png",
+      "bytes": 1907702,
+      "sha256": "637d789b2b73ba23545c3a3211288fb6df3be53361b6b0d4b07d997137fa717b"
+    },
+    {
+      "path": "assets/enemies/enemy__join__mimic.png",
+      "bytes": 1812565,
+      "sha256": "6ba2a21ec30ac383e46fb7a1257ad43f7797e07c634d6ff4c69f153923cc5a45"
+    },
+    {
+      "path": "assets/enemies/enemy__join__reach.png",
+      "bytes": 1716401,
+      "sha256": "7c8c308dc235831a7baa3b73896c7fa7e1f975c44c44eb96e9b6e796d36078fb"
+    },
+    {
+      "path": "assets/enemies/enemy__join__shell.png",
+      "bytes": 1927197,
+      "sha256": "ec6b6a41e77f200c319c4659a414212482f7c284cdb21833c8c2f7c513bf9692"
+    },
+    {
+      "path": "assets/enemies/enemy__join__swarm.png",
+      "bytes": 2822179,
+      "sha256": "bde8eced519845b15f195f0a294abd277e6ce28b73ef61424d34924095e6ebf5"
+    },
+    {
+      "path": "assets/enemies/enemy__rot__bulk.png",
+      "bytes": 2016868,
+      "sha256": "671642f81edef8b136a9d4a2383b65a6901203402a52d68396813becd6e89250"
+    },
+    {
+      "path": "assets/enemies/enemy__rot__mimic.png",
+      "bytes": 2096201,
+      "sha256": "e8a2deef0749ac9d3fce8dbfe312e044a7948266338cb670b636c7088f744a02"
+    },
+    {
+      "path": "assets/enemies/enemy__rot__reach.png",
+      "bytes": 1655980,
+      "sha256": "82abcd0e83a92561a6e2cab3dfbbf6a3a2e61031ef84ba682595b43d9aa02447"
+    },
+    {
+      "path": "assets/enemies/enemy__rot__shell.png",
+      "bytes": 1943777,
+      "sha256": "d26a9edb11e62a06eac570280113b5280f7e35502d1151243ad6a7cfcc0b827f"
+    },
+    {
+      "path": "assets/enemies/enemy__rot__swarm.png",
+      "bytes": 2185880,
+      "sha256": "fca5f6967142aca65eb749164ca770d3b7a083a302ab7e36ab8890baeeaa8d3b"
+    },
+    {
+      "path": "assets/enemies/enemy__scatter__bulk.png",
+      "bytes": 2043594,
+      "sha256": "4c0eb522820d9277167f291a8d4609458eb900744c944a7f7e2e0a59fbe56bc3"
+    },
+    {
+      "path": "assets/enemies/enemy__scatter__mimic.png",
+      "bytes": 2015643,
+      "sha256": "4daaa18db3d983663d3cbe4fdb4337ebf7dfcb1bffa9c21b05ac3f47c987963e"
+    },
+    {
+      "path": "assets/enemies/enemy__scatter__reach.png",
+      "bytes": 1833846,
+      "sha256": "aa25b93d2a7784f4de44b9e1dbe93788ea7f0ed9cc6d7cbce256e29daed9903c"
+    },
+    {
+      "path": "assets/enemies/enemy__scatter__shell.png",
+      "bytes": 2141097,
+      "sha256": "b087c5ae31e8abb4f28962618ba3e491a64d9b860951f2cb1790a3fd011a3e14"
+    },
+    {
+      "path": "assets/enemies/enemy__scatter__swarm.png",
+      "bytes": 1961207,
+      "sha256": "52a0fce2b9b5d1df252437855e3570c65842e3ab4ce27e1b2eeba5d9f6fd7f3f"
+    },
+    {
+      "path": "assets/enemies/enemy__still__bulk.png",
+      "bytes": 2096721,
+      "sha256": "aa33ea19699f52f880d893546650acb491687d088f8333c15246241f5e65f8ba"
+    },
+    {
+      "path": "assets/enemies/enemy__still__mimic.png",
+      "bytes": 2102622,
+      "sha256": "bc4ec278795f3cf46e0177276c752971af319c614b63565d73a2d100dced94a1"
+    },
+    {
+      "path": "assets/enemies/enemy__still__reach.png",
+      "bytes": 2098669,
+      "sha256": "cb4ad70059d8ccd4d6d66d2c3bc483578bc20e8e2fc983411b7834b5e45653c3"
+    },
+    {
+      "path": "assets/enemies/enemy__still__shell.png",
+      "bytes": 1996536,
+      "sha256": "82e02474e9677283c663c69b4fc6f4a38f0f06ae3ce4d9bb49c59aed91d7d413"
+    },
+    {
+      "path": "assets/enemies/enemy__still__swarm.png",
+      "bytes": 2034875,
+      "sha256": "5d864fd06ed8a0a5e0e6b7150d01a303cba931de295a388e062642cbe67e3442"
+    },
+    {
+      "path": "assets/enemies/enemy__wash__bulk.png",
+      "bytes": 1907276,
+      "sha256": "bdea07562c84f0dbe30c78834106177fb42de184c2a72c821935fffda86fed39"
+    },
+    {
+      "path": "assets/enemies/enemy__wash__mimic.png",
+      "bytes": 2074879,
+      "sha256": "2bcf1befff553de35726fcfca24c67d6e1a669ec092924b76526a6262138747f"
+    },
+    {
+      "path": "assets/enemies/enemy__wash__reach.png",
+      "bytes": 2052254,
+      "sha256": "4c3dc2154323587b46dbf2caf3ca7ce838d30fbbdbd84db220c789c353d2635a"
+    },
+    {
+      "path": "assets/enemies/enemy__wash__shell.png",
+      "bytes": 1669161,
+      "sha256": "683d62f590e7c9b3a7e74b8497b70e4bb3b41fe1f51d416513379246533da127"
+    },
+    {
+      "path": "assets/enemies/enemy__wash__swarm.png",
+      "bytes": 1982738,
+      "sha256": "3964fb885c10507bcde0d06b1992ca5cb77638b42bbe06c57907de3e9193d18a"
+    },
+    {
+      "path": "assets/events/event__cache.png",
+      "bytes": 3131564,
+      "sha256": "43b6aa25903d3bc420d146922a201987bfd5a42aadc277e0f5fbaf0ab013d62a"
+    },
+    {
+      "path": "assets/events/event__cache__burn.png",
+      "bytes": 1826045,
+      "sha256": "8fd80924938e41f6b1d9ef5be3138c34bbab7e8e0ed365d3aa5aaf9130b6b930"
+    },
+    {
+      "path": "assets/events/event__cache__join.png",
+      "bytes": 2042122,
+      "sha256": "0fd325c42ee3416953295f3d6ef2017c6ca30fe21b437a8a0f2add7c99a30a23"
+    },
+    {
+      "path": "assets/events/event__cache__rot.png",
+      "bytes": 2277846,
+      "sha256": "9244e431cb8f18062712b70b9c661c6b77110711a418292bb6efbd8b981113cc"
+    },
+    {
+      "path": "assets/events/event__cache__scatter.png",
+      "bytes": 2091974,
+      "sha256": "a75656ed17e0ef644f32bbcbeb3675406ea1cde1d32ad394241945d40e557e68"
+    },
+    {
+      "path": "assets/events/event__cache__still.png",
+      "bytes": 2430152,
+      "sha256": "b2ce5f357726f0271b1a6a78c838bb8baebb1bc11165a45453205f85b1f07f5b"
+    },
+    {
+      "path": "assets/events/event__cache__wash.png",
+      "bytes": 2016594,
+      "sha256": "5659928bc96ab37ec798ba860e42cb4ccfbe8e985522dfc142d5cf1bdf48fa93"
+    },
+    {
+      "path": "assets/events/event__collapse.png",
+      "bytes": 1739882,
+      "sha256": "4c8cb202bfe0c082105811eb54ab6e71477b0b20689924daf31af61487fb7c94"
+    },
+    {
+      "path": "assets/events/event__collapse__burn.png",
+      "bytes": 1930926,
+      "sha256": "9b10b7c8d6515c3420582a2533990c47a3ec236a83470e0c744d3cd52000434f"
+    },
+    {
+      "path": "assets/events/event__collapse__wash.png",
+      "bytes": 1838632,
+      "sha256": "2fbb930d45b5d5db51a5b04dc4c642f73f0c01319b0dabb9ab05772897cf0de8"
+    },
+    {
+      "path": "assets/events/event__fictor.png",
+      "bytes": 3003886,
+      "sha256": "fdac21b47a93d9c24991a69951badf642fa5a811ae7548760d9f0d378c94cb5d"
+    },
+    {
+      "path": "assets/events/event__oddity.png",
+      "bytes": 2177420,
+      "sha256": "c127831206dcb512fce330cd12223fb489024f03735b0a3130f000a4d73f517d"
+    },
+    {
+      "path": "assets/events/event__oddity__burn.png",
+      "bytes": 1981122,
+      "sha256": "ab90e051d782727e007fa3fe636acb7fc981e07c2e1ccdffaf21a65ffc8ed621"
+    },
+    {
+      "path": "assets/events/event__oddity__join.png",
+      "bytes": 1764696,
+      "sha256": "34fec78c0f51ff9796e369b5cad3f124f3a6d8245fe08fde26bd10f59011344f"
+    },
+    {
+      "path": "assets/events/event__oddity__rot.png",
+      "bytes": 1884310,
+      "sha256": "87e7cf9b72ff494e75a29f26c56d7fcfc903f5c9ddb91fff34ad1cf4efa21951"
+    },
+    {
+      "path": "assets/events/event__oddity__scatter.png",
+      "bytes": 2396584,
+      "sha256": "10264095a510eea024583d28fecdc7e6c3734ff873d085aacfd60a9edb64de71"
+    },
+    {
+      "path": "assets/events/event__oddity__still.png",
+      "bytes": 2165378,
+      "sha256": "e34908ba1c3ef84db6a2e898fcc34f04f0bd66b86442bfd232ad6aa2d5a98609"
+    },
+    {
+      "path": "assets/events/event__oddity__wash.png",
+      "bytes": 1931004,
+      "sha256": "5cf5be8b99ac3e2d0ad07319e2b0763f7a532fe53616e2b0bff6b29331999bd0"
+    },
+    {
+      "path": "assets/events/event__record.png",
+      "bytes": 1697247,
+      "sha256": "c30dec9acce3a0ed1a4b2a1f1f5085c4739c7c6f0638466127ef33c69b896357"
+    },
+    {
+      "path": "assets/events/event__workshop.png",
+      "bytes": 2173162,
+      "sha256": "0de206c5fe3ce95909d3711fdafc324a223227892ba5d0187ac0e2554c526028"
+    },
+    {
+      "path": "assets/index-B0K7A4c8.css",
+      "bytes": 31863,
+      "sha256": "0a22c1908c40f3acfc259b19e11769d946b01b5e6c76135edac9b45a281fed68"
+    },
+    {
+      "path": "assets/index-CwdGERN6.js",
+      "bytes": 407430,
+      "sha256": "a62cdcc0d7b2c289577319ac1e7c16268faf08a570f91ef1878151acd07d37e5"
+    },
+    {
+      "path": "assets/style/master-candidate-01.png",
+      "bytes": 1618931,
+      "sha256": "3cadedb377db1e299bf2ac355404df3c8c092a3d229665c5e519243bbb5efde3"
+    },
+    {
+      "path": "index.html",
+      "bytes": 536,
+      "sha256": "75e9734531d71c53b114acc37f9376cd0917d3729812a36c96bd05f42fc4f694"
+    }
+  ],
+  "dist_tree_encoding": "sha256 + \" \" + bytes + \" \" + path + \"\\n\"",
+  "dist_tree_sha256": "43ee3cbcc3c5b3681890ba3082fb882b1b89dfb564003d1cd23dfb7746df1b0e"
+}
