@@ -129,7 +129,7 @@ describe("T057 exact public naming contract", () => {
 
     const checklist = source("docs/SUBMISSION_CHECKLIST.md");
     expect(checklist).toContain("- [x] [T057 공개 명칭 결정](decisions/t057-public-naming-decision-2026-08-24.md)");
-    expect(checklist).toContain("- [ ] T047에서 T057의 exact 공개 명칭 결정");
+    expect(checklist).toContain("- [x] [T047 공개 release 결정](decisions/t047-public-release-decision-2026-08-25.md)");
     expect(checklist).toContain("- [ ] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`");
     expect(checklist).toContain("- [x] exact candidate의 정적 production build");
     expect(checklist).toContain("- [ ] 심사 기간 내 링크가 공개 상태이고");
@@ -137,7 +137,8 @@ describe("T057 exact public naming contract", () => {
     const assetLicenses = source("docs/ASSET_LICENSES.md");
     expect(assetLicenses).toContain("2026-08-11 당시 공개 타이틀 미승인");
     expect(assetLicenses.match(/공개 타이틀 미승인/g)).toHaveLength(1);
-    expect(assetLicenses).toContain("현재는 T057이 `FICTOR · 픽토르` 명칭을, T058이 AI 표기를 승인했지만 T047 release는 미승인");
+    expect(assetLicenses).toContain("현재는 T057이 `FICTOR · 픽토르` 명칭을, T058이 AI 표기를 승인했고 T047이 exact T062 artifact만 공개 release 승인");
+    expect(assetLicenses).toContain("T047은 이 exact 명칭 결정과 잔여 위험을 release 판단에 결속했습니다");
   });
 
   it("records all 20 retained decisions, approval evidence, limitations, and authorization boundaries once", () => {

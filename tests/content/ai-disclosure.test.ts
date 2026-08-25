@@ -75,9 +75,14 @@ describe("T058 exact AI disclosure contract", () => {
 
     const checklist = source("docs/SUBMISSION_CHECKLIST.md");
     expect(checklist).toContain("- [x] [T058 AI 제작 고지 승인]");
-    expect(checklist).toContain("- [ ] T047에서 T057의 exact 공개 명칭 결정");
+    expect(checklist).toContain("- [x] [T047 공개 release 결정](decisions/t047-public-release-decision-2026-08-25.md)");
     expect(checklist).toContain("- [x] [T062 production 재감사](legal/t062-production-reaudit-2026-08-25.md)");
     expect(checklist).toContain("- [x] exact candidate의 정적 production build");
     expect(checklist).toContain("실제 제출 폼 반영은 아직 하지 않았습니다");
+
+    const releaseDecision = source("docs/decisions/t047-public-release-decision-2026-08-25.md");
+    expect(releaseDecision).toContain("OWNER_RELEASE_RISK_ACCEPTED_WITH_UNRESOLVED_GENERATION_TIME_RIGHTS_EVIDENCE");
+    expect(releaseDecision).toContain("substantive gap 6, historical `completionEligible=false`");
+    expect(releaseDecision).toContain("생성 당시 권리 검증 또는 법률 보증이 아니다");
   });
 });

@@ -33,11 +33,11 @@
 - [x] [T055 blocked audit](legal/t055-account-model-rights-blocked-audit-2026-08-24.md)에 production 622개 path·SHA 구조 gap 0, secret-free account 관찰, substantive gap 6과 `completionEligible=false`를 기록했습니다. 이 항목은 위 두 권리 확인 checkbox를 완료시키지 않습니다.
 - [x] [T055 소유자 release-risk disposition](legal/t055-owner-release-risk-disposition-2026-08-24.md)을 immutable blocked audit와 exact release digest에 결속했습니다. T055의 개정 계약상 disposition만 수용하며 권리 검증·법률 보증·T047 공개 release·배포·출품·provider/유료 호출 승인이 아닙니다. 위 두 권리 확인 checkbox는 계속 미완료입니다.
 - [x] [T056 공개 명칭 source register](legal/t056-b03-naming-screening-2026-08-23.md)와 [T057 비결정 자료](decisions/t056-b03-naming-decision-brief-2026-08-23.md)에 20개 대상의 공식 원장·스토어 관찰, 후보와 조사 한계를 기록했습니다.
-- [ ] T047에서 T057의 exact 공개 명칭 결정과 기록된 잔여 상표 위험 수용을 release 판단에 결속했습니다.
+- [x] [T047 공개 release 결정](decisions/t047-public-release-decision-2026-08-25.md)에서 T057의 exact 공개 명칭 결정과 기록된 잔여 상표 위험 수용을 exact T062 artifact의 release 판단에 결속했습니다.
 - [x] [T057 공개 명칭 결정](decisions/t057-public-naming-decision-2026-08-24.md)에서 타이틀·종족·옛 신 20개의 exact 공개 명칭과 기록된 잔여 위험 수용을 명시적으로 결정했습니다.
 - [x] [T060 packaging 기록](asset-runs/t060-release-packaging-2026-08-22.md)에 따라 `style/master-candidate-01`만 production에 포함하고 `NOT_SELECTED` 후보 02–04는 원본·backup·provenance를 보존한 채 build 입력과 `dist`에서 제외했습니다.
 - [x] [T059 법적 고지 기록](legal/t059-oss-mit-notices-2026-08-24.md)에 따라 lockfile 버전·원문 SHA·canonical MIT block을 입력과 staging에서 검증했고, 게임의 접근 가능한 고지 링크를 확인했습니다. exact production `dist` 포함 여부는 T062에서 재검증합니다.
-- [x] [T058 AI 제작 고지 승인](decisions/t058-ai-disclosure-approval-2026-08-24.md)의 exact 문구를 게임 크레딧, README, [canonical Track 1 제출 설명](submission/track1-description.ko.json), `ASSET_LICENSES.md` 네 위치에 적용하고 byte 기준으로 대조했습니다. 이는 B-02/T058 준비만 완료하며 권리 확인과 T047 release를 완료하지 않습니다.
+- [x] [T058 AI 제작 고지 승인](decisions/t058-ai-disclosure-approval-2026-08-24.md)의 exact 문구를 게임 크레딧, README, [canonical Track 1 제출 설명](submission/track1-description.ko.json), `ASSET_LICENSES.md` 네 위치에 적용하고 byte 기준으로 대조했습니다. 권리 확인은 미완료로 유지하며, T047은 exact T062 artifact의 release만 별도 승인했습니다.
 
 ### 실행 링크
 
