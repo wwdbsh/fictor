@@ -77,6 +77,8 @@ manifest는 candidate commit과 이후 evidence commit을 구분하며, evidence
 | static smoke | PASS — 시작·보상·공방·보스·완주·reload save; browser error, failed response, external/API/WebSocket request 모두 0; T022 PNG 621/621 HTTP 200·SHA 일치 |
 | post-smoke manifest check | PASS — dist byte drift 0 |
 | frozen path diff | PASS — `src`, `public`, `vite.config.ts`, `package.json`, `package-lock.json` candidate 대비 diff 0 |
+| evidence PR CI 첫 시도 | FAIL 0/2 — gameplay 회귀가 아니라 T062에서 완료로 바꾼 checklist 두 문구를 이전 `[ ]` 상태로 기대한 content contract assertion 2개가 원인이었다. Ready·merge·T047은 계속 중단했다. |
+| CI 실패 직접 관련 집중 검증 | PASS — AI disclosure/public names content contract 11/11. candidate·artifact bytes 변경 없이 assertion만 새 T062 checklist 문구에 동기화했다. |
 
 중단된 local `npm test`를 PASS로 표현하지 않는다. T062 evidence commit의 PR CI가 `npm run verify`를
 자연 종료해 성공해야 전체 regression acceptance가 닫힌다. repository CI가 push와 pull request에서
@@ -91,7 +93,7 @@ check가 확인됐다. hostile concurrent filesystem actor까지 threat model에
 `lstat`→`read` 사이 TOCTOU를 `O_NOFOLLOW`·`fstat`로 더 강화할 수 있다는 non-blocking 의견은
 기록하되, 현재 생성된 artifact의 T062 blocker나 원본 변경 사유로 확대하지 않는다.
 
-evidence commit의 필수 PR CI가 모두 성공하면 Issue #112를 `complete`로 닫을 수 있다. CI 실패,
+최신 evidence commit의 필수 PR CI가 모두 성공하면 Issue #112를 `complete`로 닫을 수 있다. CI 실패,
 artifact drift 또는 frozen path 변경이 발생하면 T047을 열지 않고 fail closed한다.
 
 ## rollback

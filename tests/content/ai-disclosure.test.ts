@@ -76,8 +76,8 @@ describe("T058 exact AI disclosure contract", () => {
     const checklist = source("docs/SUBMISSION_CHECKLIST.md");
     expect(checklist).toContain("- [x] [T058 AI 제작 고지 승인]");
     expect(checklist).toContain("- [ ] T047에서 T057의 exact 공개 명칭 결정");
-    expect(checklist).toContain("- [ ] exact production `dist`의 법적 고지와 PNG inventory를 확인했습니다.");
-    expect(checklist).toContain("- [ ] 게임이 브라우저에서 바로 실행되는 웹 빌드입니다.");
+    expect(checklist).toContain("- [x] [T062 production 재감사](legal/t062-production-reaudit-2026-08-25.md)");
+    expect(checklist).toContain("- [x] exact candidate의 정적 production build");
     expect(checklist).toContain("실제 제출 폼 반영은 아직 하지 않았습니다");
   });
 });
