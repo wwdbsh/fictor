@@ -20,10 +20,10 @@
 - [x] `B06_OPERATIONALLY_CLOSED_WITH_UNKNOWN_CUTOFF_AND_NO_LATE_MUTATION_DEPENDENCY`가 정책 PASS·법률 보증·운영 보증이 아님을 기록했습니다.
 - [x] [repository-safe 폼 필드 초안](submission/track1-form-field-draft.md)을 `REPO_SAFE_STATIC`·`FINAL_CANDIDATE_BOUND`·`OWNER_LIVE_ENTRY`로 분류했습니다.
 - [x] [완성 프로젝트 데모 프리프로덕션](submission/track1-demo-preproduction.md)에 storyboard·script·shot checklist와 final-only binding을 작성했습니다.
-- [ ] 상헌 님이 T061 local-only 산출물을 검토하고 T061 complete·PR #119 merge를 별도로 승인했습니다. 2026-08-24 drafting 승인은 재사용하지 않습니다.
-- [ ] 상헌 님이 dated exact commit을 직접 플레이하고 `NO_CHANGE_REQUIRED` 또는 구체적인 bounded change Tasks를 확정했습니다.
-- [ ] 변경이 있다면 bounded change Tasks를 모두 완료하고 변경된 exact commit을 다시 플레이했습니다.
-- [ ] 상헌 님이 exact candidate를 별도로 승인해 T062를 시작했습니다.
+- [x] 상헌 님이 T061 local-only 산출물의 complete와 PR #119 merge를 별도로 승인했고, PR #119가 merge됐습니다.
+- [x] exact candidate `f434656cdf3fce0fa35e8598169da6b678cdf627`의 직접 플레이는 수행하지 않았습니다. 상헌 님은 이를 `OWNER_DIRECT_PLAY_NOT_PERFORMED_TIMEBOX_WAIVED_FOR_INITIAL_SUBMISSION`으로 수용했으며 playtest PASS나 `NO_CHANGE_REQUIRED`로 표현하지 않습니다.
+- [x] waiver 뒤 gameplay·content·data·build config·lockfile·art byte 변경 없이 candidate를 동결했습니다.
+- [x] 상헌 님이 `2026-08-25T11:59:10Z`에 exact candidate와 submission-first amendment를 승인해 T062를 시작했습니다.
 
 ### T046 공개 차단 gate
 
@@ -42,9 +42,9 @@
 ### 실행 링크
 
 - [x] race selection과 gameplay 상태에서 `제3자 라이선스 고지` native link가 각각 정확히 하나이고, `/fictor-test/` BASE_URL 하위 href와 keyboard focus-visible을 focused test로 확인했습니다.
-- [ ] exact production `dist`의 법적 고지와 PNG inventory를 확인했습니다. T062 예약 항목이며 T059에서 완료로 표시하지 않습니다.
+- [x] [T062 production 재감사](legal/t062-production-reaudit-2026-08-25.md)에서 exact production `dist`의 법적 고지, PNG 622개, 미선택 후보 absence와 전체 artifact SHA를 확인했습니다. T062 완료는 독립 review blocker 0건과 PR CI 성공을 모두 요구합니다.
 
-- [ ] 게임이 브라우저에서 바로 실행되는 웹 빌드입니다.
+- [x] exact candidate의 정적 production build와 시작→보상→공방→보스→완주·reload save smoke가 PASS했습니다.
 - [ ] 심사 기간 내 링크가 공개 상태이고 별도 승인·설치 없이 접근됩니다.
 - [ ] 제출 뒤에도 같은 URL이 유지되며, URL 교체 가능성을 전제로 하지 않습니다.
 - [ ] 로그인 없이 플레이할 수 있습니다. 로그인이 필요하면 만료되지 않는 테스트 계정과 접속 안내를 제공합니다.
