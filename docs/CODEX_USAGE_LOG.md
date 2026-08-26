@@ -27,6 +27,6 @@ FICTOR는 Codex와 함께 TypeScript/React 정적 웹 게임으로 개발했습�
 - 소유자 보고 관찰 시각(KST): `2026-08-26T19:02:03+09:00`; 실제 제출 시각은 `UNKNOWN`
 - PII-free local evidence: `FICTOR-T052-REPORT-20260826T190203KST-9A6EB7254766` — provider receipt가 아님
 - 작업: 기존 production 아트만 사용한 합성 썸네일 제작, 보편 용어 194자 소개문 반영, repository-safe 필드와 hash 대조, 라이브 폼의 비개인 필드 입력을 수행했습니다.
-- 사람의 보고: 소유자가 OWNER_LIVE_ENTRY와 동의를 직접 처리한 뒤 수동 제출 완료를 보고했습니다. exact attempt count와 action-time 명시 수락은 별도 증거로 확인되지 않았습니다.
+- 사람의 보고: 소유자가 수동 제출 완료를 보고했습니다. OWNER_LIVE_ENTRY 입력·동의 처리·exact attempt count·action-time 명시 수락은 별도 증거로 확인되지 않았습니다.
 - 프라이버시: 폼 화면·network payload·OWNER_LIVE_ENTRY·Google 계정 값·confirmation email·credential·cookie·session·token은 보관하지 않습니다.
 - 한계: provider receipt/reference와 성공 화면을 관찰하지 않았고 수정 tuple은 T051 승인 tuple과 다릅니다. `completion_eligible=false`이며 Codex 자동 재시도는 `0`입니다.

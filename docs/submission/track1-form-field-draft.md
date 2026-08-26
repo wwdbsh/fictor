@@ -85,8 +85,8 @@ submission_package_sha256
 - [x] 필드 분류와 repository-safe exact value를 작성했습니다.
 - [x] 현재 알려진 maxlength를 exact value의 문자 수와 대조했습니다.
 - [x] exact final candidate와 플레이 URL을 T049/T062 증거에 결속했습니다. URL QA는 T050에서 수행합니다.
-- [x] 기존 production 에셋의 crop-only 썸네일을 제작·검증했습니다.
+- [x] 기존 production 배경·재료 카드·조합 결과 카드만 사용한 결정론적 합성 썸네일을 제작·검증했습니다.
 - [x] optional 데모는 빈 값과 `DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED` disposition으로 고정했습니다.
 - [x] PII-free 제출 패키지 manifest와 detached SHA-256을 만들었습니다.
 - [ ] T051 exact tuple 승인을 받았습니다.
-- [ ] 라이브 폼에 입력·전송했습니다.
+- [ ] 소유자가 수동 제출 완료를 보고했지만 exact attempt·전송 tuple·action-time 동의·provider 결과는 확인되지 않았습니다.

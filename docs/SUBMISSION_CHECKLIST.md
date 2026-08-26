@@ -64,7 +64,7 @@
 - [x] optional 데모 URL은 빈 값이며 `DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED`로 기록했습니다. 데모 제작·업로드를 수행하지 않았습니다.
 - [x] optional Codex 서술 exact value가 DOM `maxlength=5000` 이내이며 사용 위치·기능·해결한 문제·사람의 결정을 설명합니다.
 - [x] PII-free `track1-submission-package.json`과 detached `.sha256`이 title·description·URL·deployment·artifact·thumbnail·Codex 서술 및 leaf inventory를 결속합니다.
-- [ ] 소유자가 라이브 폼의 OWNER_LIVE_ENTRY와 동의를 직접 처리하고 제출 완료를 보고했습니다. 값 자체는 저장하지 않지만 action-time 고지·terms/privacy 명시 수락과 exact attempt count는 별도 증거로 확인되지 않았습니다.
+- [ ] 소유자가 수동 제출 완료를 보고했습니다. OWNER_LIVE_ENTRY 값 자체는 저장하지 않으며, 해당 값 입력·동의 처리·action-time 고지·terms/privacy 명시 수락·exact attempt count는 별도 증거로 확인되지 않았습니다.
 - [x] 폼 개인정보·화면·network payload·confirmation email을 저장소에 보관하지 않았습니다. [PII-free T052 owner report](submission/t052-owner-reported-submission-2026-08-26.json)만 보관하며 provider receipt로 표현하지 않습니다.
 
 ### 권리·안전·기록
