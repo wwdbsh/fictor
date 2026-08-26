@@ -1,6 +1,6 @@
 # 제출 체크리스트
 
-제출 직전에는 공식 [참여 페이지](https://openaigame2026.com/)의 최신 안내와 실제 폼을 함께 확인합니다. Track 1 공개 접수 기간은 2026-08-04–2026-08-26입니다. 정확한 cutoff와 마감 후 제출 정보 수정·URL 교체 가능 여부는 UNKNOWN이지만 FICTOR는 이에 의존하지 않습니다. 현재 산출물은 `DRAFT_NON_SUBMITTABLE`이며 실제 폼 입력·제출을 의미하지 않습니다.
+제출 직전에는 공식 [참여 페이지](https://openaigame2026.com/)의 최신 안내와 실제 폼을 함께 확인합니다. Track 1 공개 접수 기간은 2026-08-04–2026-08-26입니다. 정확한 cutoff와 마감 후 제출 정보 수정·URL 교체 가능 여부는 UNKNOWN이지만 FICTOR는 이에 의존하지 않습니다. 현재 제출 패키지는 `READY_FOR_T050_QA_AND_T051_APPROVAL`이며 실제 URL QA, 폼 입력·제출 또는 제출 완료를 의미하지 않습니다.
 
 ## 제출 전
 
@@ -43,13 +43,14 @@
 
 - [x] race selection과 gameplay 상태에서 `제3자 라이선스 고지` native link가 각각 정확히 하나이고, `/fictor-test/` BASE_URL 하위 href와 keyboard focus-visible을 focused test로 확인했습니다.
 - [x] [T062 production 재감사](legal/t062-production-reaudit-2026-08-25.md)에서 exact production `dist`의 법적 고지, PNG 622개, 미선택 후보 absence와 전체 artifact SHA를 확인했습니다. T062 완료는 독립 review blocker 0건과 PR CI 성공을 모두 요구합니다.
+- [x] [T049 production run](deployment/t049-vercel-production-run-2026-08-26.md)이 exact T062 artifact를 deployment `dpl_EASQhMvfgBVw3U2sXSCuPLV5QtrC`와 `https://project-702iz-sandy.vercel.app/`에 결속했습니다.
 
 - [x] exact candidate의 정적 production build와 시작→보상→공방→보스→완주·reload save smoke가 PASS했습니다.
 - [ ] 심사 기간 내 링크가 공개 상태이고 별도 승인·설치 없이 접근됩니다.
 - [ ] 제출 뒤에도 같은 URL이 유지되며, URL 교체 가능성을 전제로 하지 않습니다.
 - [ ] 로그인 없이 플레이할 수 있습니다. 로그인이 필요하면 만료되지 않는 테스트 계정과 접속 안내를 제공합니다.
 - [ ] 심사위원이 다른 계정·기기에서도 링크를 열어 핵심 플레이를 완료할 수 있습니다.
-- [ ] 조작법, 실행 방법, 필요한 키보드·마우스 입력을 링크 주변 설명에 적었습니다.
+- [x] README에 정적 실행, `localStorage`, 카드·빚기 조작과 키보드 입력을 적고 Edge·Firefox·Safari 직접 QA 공백을 유지했습니다.
 - [ ] 모바일/데스크톱 등 대상 환경에서 새 시크릿 창으로 링크를 테스트했습니다.
 - [ ] 링크에 API 키, 비밀번호, 토큰, 내부 주소나 개인정보가 노출되지 않습니다.
 
@@ -59,9 +60,10 @@
 - [x] [폼 필드 초안](submission/track1-form-field-draft.md)에 위 canonical title source와 12/80 Unicode code-point 검사를 기록했습니다.
 - [x] required 게임 소개는 [canonical Track 1 제출 설명](submission/track1-description.ko.json)의 `description_ko`를 사용하며 200자 이내임을 초안에서 확인했습니다. 실제 제출 폼 반영은 아직 하지 않았습니다.
 - [ ] required 플레이 가능한 URL이 심사 기간에 접근됩니다.
-- [ ] required 썸네일이 file input의 JPEG/PNG accept에 맞습니다. UI recommendation인 16:9·최대 10MB도 따랐습니다.
-- [x] 공식 optional 데모 URL을 owner-required 품질 산출물로 결정했습니다. URL은 완성 프로젝트 capture·upload 뒤 T048에서만 채웁니다.
-- [x] optional Codex 서술의 exact draft가 DOM `maxlength=5000` 이내이며 사용 위치·기능·해결한 문제·사람의 결정을 설명합니다. T048에서 final candidate와 다시 대조합니다.
+- [x] required 썸네일은 기존 production 배경의 crop-only PNG이며 1280×720, 16:9, 1,966,209 bytes로 검증했습니다.
+- [x] optional 데모 URL은 빈 값이며 `DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED`로 기록했습니다. 데모 제작·업로드를 수행하지 않았습니다.
+- [x] optional Codex 서술 exact value가 DOM `maxlength=5000` 이내이며 사용 위치·기능·해결한 문제·사람의 결정을 설명합니다.
+- [x] PII-free `track1-submission-package.json`과 detached `.sha256`이 title·description·URL·deployment·artifact·thumbnail·Codex 서술 및 leaf inventory를 결속합니다.
 - [ ] Google login/account, 국가, 생년월일, 신청자·팀·연락처, 참석·동의 항목을 라이브 폼에 직접 입력했습니다.
 - [ ] 폼 개인정보·화면·network payload를 캡처하거나 저장소에 커밋하지 않았습니다. 제출 완료 증거도 PII 없는 receipt/reference만 보관합니다.
 
@@ -71,8 +73,8 @@
 - [ ] 상업적/공개 제출에 필요한 라이선스, 출처, 허가 증빙을 보관했습니다.
 - [ ] 타인의 저작권·상표권·초상권·개인정보·영업비밀을 침해하지 않습니다.
 - [ ] 저장소·빌드·영상·브라우저 개발자 도구에 비밀값이 남아 있지 않습니다.
-- [ ] [Codex 사용 기록](CODEX_USAGE_LOG.md)에 날짜, 목표, Codex 사용, 결과, 해결 문제, 사람의 결정, 증거/커밋, 새 작업 여부를 기록했습니다.
-- [ ] Codex 개발 사용 사실을 제출 자료에서 설명할 수 있습니다. 런타임 OpenAI API 연동은 필수가 아닙니다.
+- [x] [Codex 사용 기록](CODEX_USAGE_LOG.md)에 제출용 exact 서술, 챌린지 기간 Git 경계와 T048 패키지 작업을 기록했습니다.
+- [x] Codex 개발 사용 사실을 제출 자료에서 설명할 수 있으며 런타임 OpenAI API를 사용하지 않음을 명시했습니다.
 
 ## 본선 진출 시
 
@@ -88,7 +90,7 @@
 
 ## 제출 기록
 
-- 제출 일시(KST): `YYYY-MM-DD HH:MM`
-- 제출 링크: `https://…`
-- 제출 완료 증거: `PII 없는 receipt/reference만; 폼 화면·payload 캡처 금지`
-- 문의가 필요한 사항: `없음 또는 질문`
+- 제출 일시(KST): `T052_PENDING — value not stored`
+- 제출 링크: `T052_PENDING — value not stored`
+- 제출 완료 증거: `T052_PENDING — PII-free receipt/reference only; value not stored`
+- 문의가 필요한 사항: `OWNER_LIVE_ENTRY — value not stored`

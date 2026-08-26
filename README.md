@@ -33,7 +33,8 @@
 
 - Node.js 22.22.1 (`.nvmrc`)
 - npm 10.9.4
-- 지원 브라우저: ES2022를 지원하는 최신 Chrome, Edge, Firefox, Safari
+- 지원 대상: ES2022를 지원하는 최신 Chrome, Edge, Firefox, Safari
+- 검증 상태: Chrome/Chromium 경로는 자동·수동 검증 완료. Edge, Firefox, Safari는 호환성 대상이지만 직접 QA하지 않았습니다.
 
 ```bash
 nvm use
@@ -61,6 +62,12 @@ npx tsx scripts/t031-m3-candidate-audit-cli.ts audit # T031 dist/secret 후보 �
 개발 서버는 `npm run dev`로 실행합니다. 제출용 빌드는 `npm run build`로 만들며, 생성된 `dist/`는 별도 런타임 서버 없이 정적 파일 호스트에 배포할 수 있습니다. 로컬에서 정적 결과를 직접 확인하려면 `npx vite preview`처럼 정적 파일을 제공하는 도구를 사용할 수 있습니다.
 
 이 애플리케이션은 런타임 서버, 외부 API, 로그인, 환경 변수 비밀값에 의존하지 않습니다. 이후 진행 저장은 브라우저 `localStorage`를 사용합니다.
+
+## 플레이와 조작
+
+배포된 정적 URL을 최신 데스크톱 브라우저에서 열고 붙이를 선택하면 시작합니다. 마우스 클릭 또는 `Tab`과 `Enter`/`Space`로 버튼과 카드를 조작하며, 전투에서는 턴 시작 → 카드 사용 또는 즉석 빚기 → 턴 종료 순서로 진행합니다. 즉석 빚기는 손의 재료 두 장(이음붙이는 세 장)을 선택하고, 여정의 공방 빚기는 재료를 고른 뒤 최종 확인합니다. `Escape`는 열린 공방·도감을 닫고 발견 연출을 최종 상태로 넘깁니다.
+
+설치·로그인은 필요하지 않고 진행은 현재 브라우저의 `localStorage`에 저장됩니다. 다른 브라우저나 시크릿 창에는 저장 기록이 공유되지 않습니다. Chrome/Chromium 외 브라우저는 지원 대상이지만 Edge, Firefox, Safari의 T045 직접 QA는 수행하지 않았습니다.
 
 GitHub Actions의 정적 브라우저 smoke는 격리된 호스팅 러너에서만 Chromium sandbox 비활성화를 명시적으로 허용합니다. 로컬 실행은 기본 Chromium sandbox를 유지하며, smoke 대상 서버는 `127.0.0.1` 임시 포트에만 열립니다.
 
