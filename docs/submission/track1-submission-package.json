@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "manifest_version": "t048-track1-submission-package-v1",
+  "task_key": "T048",
+  "issue_number": 50,
+  "package_status": "READY_FOR_T050_QA_AND_T051_APPROVAL",
+  "privacy": {
+    "classification": "PII_FREE_REPOSITORY_SAFE",
+    "owner_live_entry": {
+      "classification": "OWNER_LIVE_ENTRY",
+      "values_stored": false
+    }
+  },
+  "challenge_scope": {
+    "first_tracked_commit": "3fa3e69597e51c305ecbe24b570fe80a4a465b7f",
+    "first_tracked_commit_timestamp": "2026-08-10T20:12:57+09:00",
+    "limitation": "Repository history proves tracked work from the first commit only; pre-repository planning is not proven."
+  },
+  "source_binding": {
+    "repository_base_revision": "fd92ae54cf792e77e03431f743573b1669e674b3",
+    "game_candidate_revision": "f434656cdf3fce0fa35e8598169da6b678cdf627",
+    "production": {
+      "deployment_id": "dpl_EASQhMvfgBVw3U2sXSCuPLV5QtrC",
+      "playable_game_url": "https://project-702iz-sandy.vercel.app/",
+      "artifact_manifest_path": "assets/manifests/t062-production-artifact-v1.json",
+      "artifact_tree_encoding": "sha256 + \" \" + bytes + \" \" + path + \"\\n\"",
+      "artifact_tree_sha256": "43ee3cbcc3c5b3681890ba3082fb882b1b89dfb564003d1cd23dfb7746df1b0e",
+      "file_count": 628,
+      "total_bytes": 1261180248
+    }
+  },
+  "fields": {
+    "title": {
+      "classification": "REPO_SAFE_STATIC",
+      "canonical_source": "src/content/public-names.ts#PUBLIC_NAMES.title",
+      "value": "FICTOR · 픽토르",
+      "unicode_code_points": 12,
+      "utf8_bytes": 19,
+      "sha256": "777eefc392dba8d7b8613d6dcd5bb17ecd6ae9ac1e84b2fd865df2f1f3ae9f24"
+    },
+    "description": {
+      "classification": "REPO_SAFE_STATIC",
+      "canonical_source": "docs/submission/track1-description.ko.json#description_ko",
+      "value": "카드 2장을 빚어 새 카드를 발견하는 조합 기반 로그라이크 덱빌더입니다. 세 붙이의 규칙으로 어름의 터 3단계를 공략합니다. 카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.",
+      "unicode_code_points": 152,
+      "utf8_bytes": 344,
+      "sha256": "72db82afa86602ecb9a0629312915cad4551bb7b297c0aaa03903ebc59108987"
+    },
+    "playable_url": {
+      "classification": "FINAL_CANDIDATE_BOUND",
+      "value": "https://project-702iz-sandy.vercel.app/",
+      "status": "PLAYABLE_URL_BOUND_T050_QA_NOT_RUN"
+    },
+    "thumbnail": {
+      "classification": "FINAL_CANDIDATE_BOUND",
+      "path": "docs/submission/track1-thumbnail.png",
+      "media_type": "image/png",
+      "width": 1280,
+      "height": 720,
+      "bytes": 1966209,
+      "sha256": "85ff9c858e85a52b1e7d7d80cad632c5a16a0d6eebf56996650160657bad36ac",
+      "provenance": {
+        "source_path": "public/assets/backgrounds/background__still__depth_01.png",
+        "source_manifest_path": "assets/manifests/t022-m2-assets-audit-v1.json",
+        "source_sha256": "7a67c4cc17bafcedd522ffa45273e3420b539289509d7756a7127e89d491a0be",
+        "transform": "crop=1280:720:48:24",
+        "transform_kind": "CROP_ONLY_NO_SCALE_NO_REPAINT_NO_GENERATION",
+        "tool": "ffmpeg",
+        "tool_version": "8.1.2",
+        "deterministic_settings": [
+          "-map_metadata -1",
+          "-fflags +bitexact",
+          "-flags:v +bitexact",
+          "-threads 1",
+          "-c:v png",
+          "-pred mixed",
+          "-compression_level 9",
+          "-pix_fmt rgb24"
+        ]
+      }
+    },
+    "demo_url": {
+      "classification": "FINAL_CANDIDATE_BOUND",
+      "value": "",
+      "disposition": "DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED"
+    },
+    "codex_process": {
+      "classification": "REPO_SAFE_STATIC",
+      "disposition": "INCLUDED",
+      "value": "FICTOR는 Codex와 함께 TypeScript/React 정적 웹 게임으로 개발했습니다. Codex는 52개 재료와 21개 법칙에서 1,326개 canonical 조합을 결정론적으로 생성하는 데이터 파이프라인, 즉석·공방 빚기가 같은 recipe resolver를 공유하는 전투 규칙, 도감과 localStorage 저장, 정적 빌드 검증을 구현·점검했습니다. 사람은 두 카드를 빚어 발견하는 핵심 경험, 세계관과 명칭, 밸런스 경계, 공개 위험 수용 여부를 결정하고 최종 공개·제출 승인 경계를 관리했습니다. 서버나 런타임 OpenAI API는 사용하지 않습니다.",
+      "unicode_code_points": 319,
+      "utf8_bytes": 642,
+      "sha256": "e0f7af59959d57673fd124994b602d4aa998133f061eebdeda6fff39dae77b56",
+      "maxlength": 5000
+    }
+  },
+  "boundaries": {
+    "t050_public_url_qa_run": false,
+    "t051_owner_approval_received": false,
+    "live_form_opened_or_entered": false,
+    "submission_sent": false,
+    "new_image_generation_used": false,
+    "external_provider_or_paid_call_used": false,
+    "production_artifact_bytes_changed": false
+  },
+  "inventory_encoding": "Each leaf entry binds repository-relative path, exact byte length, and SHA-256. This manifest and its detached .sha256 are excluded from the inventory.",
+  "leaf_files": [
+    {
+      "path": "README.md",
+      "bytes": 10926,
+      "sha256": "cea0fc8799d1721c5a6b581d15ea3eb2c099ff1fbadb25b104bf984dca318f14"
+    },
+    {
+      "path": "assets/manifests/t022-m2-assets-audit-v1.json",
+      "bytes": 575065,
+      "sha256": "1456506d259c95f3e68d8383b9fafe2ed026ffa260b9f82fc65960d5395a429b"
+    },
+    {
+      "path": "assets/manifests/t062-production-artifact-v1.json",
+      "bytes": 112203,
+      "sha256": "31c0a4e6a739103f45061a1ced1af7e408359542954b5b0a00319ad5a0a50b7f"
+    },
+    {
+      "path": "docs/ASSET_LICENSES.md",
+      "bytes": 18043,
+      "sha256": "6e493f08bf41b63c1a0a23910fb6f83fc4d2f7b39871ac0480be7a13ea2ad640"
+    },
+    {
+      "path": "docs/CODEX_USAGE_LOG.md",
+      "bytes": 2614,
+      "sha256": "ce85c6b3886725b3fd49c7d60e66619c9af8edcf9b8f77540cacce083aa23cb7"
+    },
+    {
+      "path": "docs/SUBMISSION_CHECKLIST.md",
+      "bytes": 11704,
+      "sha256": "7c6715c8182130764537027ac739b8beb2d19acd64e491acf325a58d77e490d5"
+    },
+    {
+      "path": "docs/decisions/t047-public-release-decision-2026-08-25.md",
+      "bytes": 5765,
+      "sha256": "9093376168fa74a4ccf6bdc40935f12476e3a947e0f1ec2d4e0b06605296b5c4"
+    },
+    {
+      "path": "docs/decisions/t057-public-naming-decision-2026-08-24.md",
+      "bytes": 5161,
+      "sha256": "0c4907e7833610c06173cfdd037e89cf6f339410c82cb3b54ac503c9e6262bc2"
+    },
+    {
+      "path": "docs/decisions/t058-ai-disclosure-approval-2026-08-24.md",
+      "bytes": 1978,
+      "sha256": "20d27e988aea04757246a11739263f7b64cbf6614ee926aa12fb74cd587ea956"
+    },
+    {
+      "path": "docs/deployment/t049-vercel-production-run-2026-08-26.md",
+      "bytes": 11421,
+      "sha256": "2ed1cf9076308d1d804ca33ffbe75ca6022ff5e422981b43ad0a72ac6771a85d"
+    },
+    {
+      "path": "docs/submission/track1-description.ko.json",
+      "bytes": 366,
+      "sha256": "312120f0fa23890b518c4ec9fcde835a4f901a5c28178b1832e06470a1cedd8f"
+    },
+    {
+      "path": "docs/submission/track1-form-field-draft.md",
+      "bytes": 6194,
+      "sha256": "8058e5c0f3ff2380c8955c5d647d3a2b73e2ec7c281e6671199f948e8c570d8c"
+    },
+    {
+      "path": "docs/submission/track1-thumbnail.png",
+      "bytes": 1966209,
+      "sha256": "85ff9c858e85a52b1e7d7d80cad632c5a16a0d6eebf56996650160657bad36ac"
+    },
+    {
+      "path": "public/assets/backgrounds/background__still__depth_01.png",
+      "bytes": 2296255,
+      "sha256": "7a67c4cc17bafcedd522ffa45273e3420b539289509d7756a7127e89d491a0be"
+    },
+    {
+      "path": "src/content/public-names.ts",
+      "bytes": 1162,
+      "sha256": "0f17996d5ef9609421f1d842e81935739f1512d52146c36fc8fc92c97ec66809"
+    }
+  ]
+}
