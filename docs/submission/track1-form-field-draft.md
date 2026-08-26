@@ -60,7 +60,7 @@ game_url
 game_candidate_revision
 production_artifact_tree_sha256
 demo_url
-demo_video_sha256
+demo_disposition
 thumbnail_sha256
 title_text_sha256
 description_text_sha256

@@ -199,6 +199,15 @@ describe("T048 PII-free Track 1 submission package", () => {
       value: "",
       disposition: "DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED",
     });
+    const form = text("docs/submission/track1-form-field-draft.md");
+    const tuple = form.match(/```text\n([\s\S]*?)\n```/)?.[1].split("\n");
+    expect(tuple).toContain("demo_url");
+    expect(tuple).toContain("demo_disposition");
+    expect(tuple).not.toContain("demo_video_sha256");
+    expect(form).toContain("empty string (0 Unicode code points, 0 UTF-8 bytes)");
+    expect(form).toContain("`DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED`");
+    expect(manifest.fields.demo_url.value).toBe("");
+    expect(manifest.fields.demo_url.disposition).toBe("DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED");
     expect(manifest.privacy.owner_live_entry).toEqual({
       classification: "OWNER_LIVE_ENTRY",
       values_stored: false,

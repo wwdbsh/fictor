@@ -127,8 +127,8 @@
     },
     {
       "path": "docs/CODEX_USAGE_LOG.md",
-      "bytes": 2614,
-      "sha256": "ce85c6b3886725b3fd49c7d60e66619c9af8edcf9b8f77540cacce083aa23cb7"
+      "bytes": 2644,
+      "sha256": "dc86ab040555d35f655fb5225db0b64dd2a33202ed8dd57321df353b69106a21"
     },
     {
       "path": "docs/SUBMISSION_CHECKLIST.md",
@@ -162,8 +162,8 @@
     },
     {
       "path": "docs/submission/track1-form-field-draft.md",
-      "bytes": 6194,
-      "sha256": "8058e5c0f3ff2380c8955c5d647d3a2b73e2ec7c281e6671199f948e8c570d8c"
+      "bytes": 6193,
+      "sha256": "34adf342711f668cdebfbea6c1a0c2809d79ccb994bfc7a5d5a8d97a1d2fad93"
     },
     {
       "path": "docs/submission/track1-thumbnail.png",
