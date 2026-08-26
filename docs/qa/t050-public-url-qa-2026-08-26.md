@@ -65,3 +65,31 @@ PASS로 판정하지 않으며 공개 QA 완료를 주장하지 않는다.
 별도 계정·환경의 로그인 없는 완주 환경이 모두 준비된 경우에만 재개한다. 상헌 님이 T050 계약 변경이나
 면제를 승인해 재개하는 경우에는 생략되는 각 계약 항목을 개별적으로 명시해야 한다. 재개 시 이
 체크포인트에서 T050만 다시 실행하며 T051 이후 범위로 넘어가지 않는다.
+
+## 2026-08-26 소유자 계약 변경 — 기존 재개 조건 supersede
+
+상헌 님은 위 exact production tuple에 한해서 다음 항목을 실제로 실행하지 않는 결정을
+`OWNER_WAIVED_NOT_TESTED`로 승인했다.
+
+1. Chrome, Edge, Firefox, Safari 각각의 실제 브라우저 QA
+2. fresh-profile E2E
+3. fresh profile과 별개인 incognito E2E
+4. 별도 계정·환경에서 로그인 없이 첫 실행부터 최종 보스까지 완주
+5. production gameplay 전반
+6. network, console, asset 404와 secret 검사
+7. `localStorage` 새로고침, 새 런과 schema migration 검사
+
+승인 근거는 2026-08-26 Asia/Seoul의 상헌 님 지시인 “edge, firefox는 테스트하지 않을 거야.”,
+“다른 항목들도 pass 처리하도록 해”, “OWNER_WAIVED_NOT_TESTED 로 진행하자”이다. 두 번째 지시는
+실행하지 않은 검사를 PASS로 바꾸라는 뜻으로 기록하지 않고, 이어진 명시적 disposition에 따라 위 전
+항목을 테스트하지 않은 채 잔여 위험을 수용하는 소유자 면제로 기록한다.
+
+이 변경은 이 문서의 기존 preflight 관찰과 미실행 사실을 수정하지 않는다. T050의 원래 acceptance는
+계속 **PASS 0**이며, `OWNER_WAIVED_NOT_TESTED`는 PASS, Chrome·Edge·Firefox·Safari 호환성 증명,
+보안 또는 기능 증명, 공개 URL QA 완료 주장이 아니다. README에 선언된 지원 브라우저 범위도 줄이지
+않는다.
+
+이 절은 위 exact tuple에 한해 앞 절의 환경 준비 재개 조건을 supersede한다. URL, source, deploy 또는
+결속된 artifact가 바뀌거나 상헌 님이 결정을 철회하면 면제는 즉시 무효화되며, 실제 공개 URL QA 또는
+새 소유자 판단 없이는 T050을 완료할 수 없다. T051 이후 작업, 신청서 입력·전송, 배포 변경, 새 이미지
+생성, 외부 provider·유료 호출은 이 승인에 포함되지 않는다.
