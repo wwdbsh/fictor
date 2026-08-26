@@ -1,6 +1,6 @@
 # 제출 체크리스트
 
-제출 직전에는 공식 [참여 페이지](https://openaigame2026.com/)의 최신 안내와 실제 폼을 함께 확인합니다. Track 1 공개 접수 기간은 2026-08-04–2026-08-26입니다. 정확한 cutoff와 마감 후 제출 정보 수정·URL 교체 가능 여부는 UNKNOWN이지만 FICTOR는 이에 의존하지 않습니다. 현재 제출 패키지는 `READY_FOR_T050_QA_AND_T051_APPROVAL`이며 실제 URL QA, 폼 입력·제출 또는 제출 완료를 의미하지 않습니다.
+제출 직전에는 공식 [참여 페이지](https://openaigame2026.com/)의 최신 안내와 실제 폼을 함께 확인합니다. Track 1 공개 접수 기간은 2026-08-04–2026-08-26입니다. 정확한 cutoff와 마감 후 제출 정보 수정·URL 교체 가능 여부는 UNKNOWN이지만 FICTOR는 이에 의존하지 않습니다. 소유자는 `2026-08-26T19:02:03+09:00`에 수동 제출 완료를 보고했지만 provider reference·정확한 제출 시각·attempt count는 확인되지 않았고, 수정 tuple은 T051 승인 tuple과 다르므로 T052 완료 계약은 충족되지 않았습니다.
 
 ## 제출 전
 
@@ -56,16 +56,16 @@
 
 ### 폼 항목과 파일
 
-- [ ] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`이며 DOM `maxlength=80` 이내입니다. 최종 폼 반영은 T051 승인 뒤에만 완료합니다.
+- [x] required 게임 제목 source가 `src/content/public-names.ts`의 `FICTOR · 픽토르`이며 DOM `maxlength=80` 이내이고 최종 폼에 반영됐습니다.
 - [x] [폼 필드 초안](submission/track1-form-field-draft.md)에 위 canonical title source와 12/80 Unicode code-point 검사를 기록했습니다.
-- [x] required 게임 소개는 [canonical Track 1 제출 설명](submission/track1-description.ko.json)의 `description_ko`를 사용하며 200자 이내임을 초안에서 확인했습니다. 실제 제출 폼 반영은 아직 하지 않았습니다.
+- [x] required 게임 소개는 [canonical Track 1 제출 설명](submission/track1-description.ko.json)의 보편 용어 194자 문구를 사용하며 최종 폼에 반영됐습니다.
 - [ ] required 플레이 가능한 URL이 심사 기간에 접근됩니다.
-- [x] required 썸네일은 기존 production 배경의 crop-only PNG이며 1280×720, 16:9, 1,966,209 bytes로 검증했습니다.
+- [x] required 썸네일은 기존 production 배경·재료 카드·조합 결과 카드만 사용한 결정론적 합성 PNG이며 1280×720, 16:9, 1,131,301 bytes로 검증하고 최종 폼에 반영했습니다. 신규 AI 이미지는 생성하지 않았습니다.
 - [x] optional 데모 URL은 빈 값이며 `DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED`로 기록했습니다. 데모 제작·업로드를 수행하지 않았습니다.
 - [x] optional Codex 서술 exact value가 DOM `maxlength=5000` 이내이며 사용 위치·기능·해결한 문제·사람의 결정을 설명합니다.
 - [x] PII-free `track1-submission-package.json`과 detached `.sha256`이 title·description·URL·deployment·artifact·thumbnail·Codex 서술 및 leaf inventory를 결속합니다.
-- [ ] Google login/account, 국가, 생년월일, 신청자·팀·연락처, 참석·동의 항목을 라이브 폼에 직접 입력했습니다.
-- [ ] 폼 개인정보·화면·network payload를 캡처하거나 저장소에 커밋하지 않았습니다. 제출 완료 증거도 PII 없는 receipt/reference만 보관합니다.
+- [ ] 소유자가 라이브 폼의 OWNER_LIVE_ENTRY와 동의를 직접 처리하고 제출 완료를 보고했습니다. 값 자체는 저장하지 않지만 action-time 고지·terms/privacy 명시 수락과 exact attempt count는 별도 증거로 확인되지 않았습니다.
+- [x] 폼 개인정보·화면·network payload·confirmation email을 저장소에 보관하지 않았습니다. [PII-free T052 owner report](submission/t052-owner-reported-submission-2026-08-26.json)만 보관하며 provider receipt로 표현하지 않습니다.
 
 ### 권리·안전·기록
 
@@ -90,7 +90,7 @@
 
 ## 제출 기록
 
-- 제출 일시(KST): `T052_PENDING — value not stored`
-- 제출 링크: `T052_PENDING — value not stored`
-- 제출 완료 증거: `T052_PENDING — PII-free receipt/reference only; value not stored`
+- 제출 일시(KST): `UNKNOWN`; 소유자 보고 관찰 시각 `2026-08-26T19:02:03+09:00`
+- 제출 링크: `https://project-702iz-sandy.vercel.app/`
+- 제출 완료 증거: owner-reported local evidence `FICTOR-T052-REPORT-20260826T190203KST-9A6EB7254766`; local evidence hash `9a6eb72547663064a0c3dab91e5c1f2ae241b21f8c66d9a954d4a543991872c1`; provider reference `NOT_PROVIDED_OR_NOT_OBSERVED`; attempt `UNKNOWN`; Codex automatic retry `0`; `completion_eligible=false`
 - 문의가 필요한 사항: `OWNER_LIVE_ENTRY — value not stored`
