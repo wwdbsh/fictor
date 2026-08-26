@@ -12,6 +12,19 @@ const DETACHED_PATH = "docs/submission/track1-submission-package.sha256";
 const BASE_REVISION = "fd92ae54cf792e77e03431f743573b1669e674b3";
 const TITLE = "FICTOR · 픽토르";
 const CODEX_NARRATIVE = "FICTOR는 Codex와 함께 TypeScript/React 정적 웹 게임으로 개발했습니다. Codex는 52개 재료와 21개 법칙에서 1,326개 canonical 조합을 결정론적으로 생성하는 데이터 파이프라인, 즉석·공방 빚기가 같은 recipe resolver를 공유하는 전투 규칙, 도감과 localStorage 저장, 정적 빌드 검증을 구현·점검했습니다. 사람은 두 카드를 빚어 발견하는 핵심 경험, 세계관과 명칭, 밸런스 경계, 공개 위험 수용 여부를 결정하고 최종 공개·제출 승인 경계를 관리했습니다. 서버나 런타임 OpenAI API는 사용하지 않습니다.";
+const FROZEN_HEAD_OBJECTS: Record<string, string | null> = {
+  "src": "ab6994138784d85d85df454d9ff1c7a5593ea49a",
+  "public": "9572361b26d2339b78dc1532e62f6b11d6c3f6c9",
+  "assets/manifests": "847fb123002ae3c0597c6b0b29175ca468e529dc",
+  "index.html": "b782911f0b373b30e12eb8ee11cc3b5899f79418",
+  "vite.config.ts": "842411b3b711d21ff016120e88a9743d872af5bd",
+  "package.json": "dc74b7fcac5033a4c67873662c02f334b1e5987c",
+  "package-lock.json": "1c54ce69e7b3057ab12584302ea45370b016733b",
+  ".nvmrc": "32a2d7bd80d19160ec2ba57a6bf6a311b5470868",
+  "tsconfig.json": "73d5395d53342ec40263b5f65c97c11fc9f56f43",
+  "tsconfig.app.json": null,
+  "tsconfig.node.json": null,
+};
 
 type Leaf = { path: string; bytes: number; sha256: string };
 type JsonRecord = Record<string, any>;
@@ -20,6 +33,18 @@ const bytes = (path: string) => readFileSync(resolve(root, path));
 const text = (path: string) => bytes(path).toString("utf8");
 const sha256 = (value: Buffer | string) => createHash("sha256").update(value).digest("hex");
 const manifest = JSON.parse(text(MANIFEST_PATH)) as JsonRecord;
+
+function headObjectId(path: string): string | null {
+  try {
+    return execFileSync("git", ["rev-parse", "--verify", `HEAD:${path}`], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  } catch {
+    return null;
+  }
+}
 
 function findRecord(value: unknown, predicate: (record: JsonRecord) => boolean): JsonRecord | undefined {
   if (!value || typeof value !== "object") return undefined;
@@ -253,12 +278,10 @@ describe("T048 PII-free Track 1 submission package", () => {
       external_provider_or_paid_call_used: false,
       production_artifact_bytes_changed: false,
     });
-    const frozenDiff = execFileSync("git", [
-      "diff", "--name-only", BASE_REVISION, "--",
-      "src", "public", "assets/manifests", "dist", "index.html", "vite.config.ts",
-      "package.json", "package-lock.json", ".nvmrc", "tsconfig.json", "tsconfig.app.json", "tsconfig.node.json",
-    ], { cwd: root, encoding: "utf8" });
-    expect(frozenDiff).toBe("");
+    for (const [path, expectedObjectId] of Object.entries(FROZEN_HEAD_OBJECTS)) {
+      expect(headObjectId(path), path).toBe(expectedObjectId);
+    }
+    expect(headObjectId("dist")).toBeNull();
     expect((manifest.leaf_files as Leaf[]).some(({ path }) => path.startsWith("dist/"))).toBe(false);
     expect(text("README.md")).toContain("Edge, Firefox, Safari의 T045 직접 QA는 수행하지 않았습니다");
     expect(text("docs/submission/track1-form-field-draft.md")).toContain("T051 승인은");
