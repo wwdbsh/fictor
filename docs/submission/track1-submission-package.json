@@ -3,7 +3,7 @@
   "manifest_version": "t048-track1-submission-package-v1",
   "task_key": "T048",
   "issue_number": 50,
-  "package_status": "READY_FOR_T050_QA_AND_T051_APPROVAL",
+  "package_status": "READY_FOR_T051_REAPPROVAL",
   "privacy": {
     "classification": "PII_FREE_REPOSITORY_SAFE",
     "owner_live_entry": {
@@ -41,10 +41,10 @@
     "description": {
       "classification": "REPO_SAFE_STATIC",
       "canonical_source": "docs/submission/track1-description.ko.json#description_ko",
-      "value": "카드 2장을 빚어 새 카드를 발견하는 조합 기반 로그라이크 덱빌더입니다. 세 붙이의 규칙으로 어름의 터 3단계를 공략합니다. 카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.",
-      "unicode_code_points": 152,
-      "utf8_bytes": 344,
-      "sha256": "72db82afa86602ecb9a0629312915cad4551bb7b297c0aaa03903ebc59108987"
+      "value": "재료 카드를 조합해 새로운 카드를 발견하고, 매번 달라지는 전투를 헤쳐 나가는 로그라이크 덱빌딩 게임입니다. 다양한 조합을 실험해 효과를 익히고, 세 가지 플레이 방식으로 얼어붙은 세계를 공략합니다. 카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.",
+      "unicode_code_points": 194,
+      "utf8_bytes": 452,
+      "sha256": "eb63038f5bd6c31e593f9acff9d1b79665f58464f3cb5d1b3857ab9aaf8a303a"
     },
     "playable_url": {
       "classification": "FINAL_CANDIDATE_BOUND",
@@ -57,16 +57,21 @@
       "media_type": "image/png",
       "width": 1280,
       "height": 720,
-      "bytes": 1966209,
-      "sha256": "85ff9c858e85a52b1e7d7d80cad632c5a16a0d6eebf56996650160657bad36ac",
+      "bytes": 1131301,
+      "sha256": "b64f24262a89dc79818ff38ac08a9d9a577d7775947f4156b960b9a63802aba4",
       "provenance": {
         "source_path": "public/assets/backgrounds/background__still__depth_01.png",
         "source_manifest_path": "assets/manifests/t022-m2-assets-audit-v1.json",
         "source_sha256": "7a67c4cc17bafcedd522ffa45273e3420b539289509d7756a7127e89d491a0be",
-        "transform": "crop=1280:720:48:24",
-        "transform_kind": "CROP_ONLY_NO_SCALE_NO_REPAINT_NO_GENERATION",
-        "tool": "ffmpeg",
-        "tool_version": "8.1.2",
+        "supporting_source_paths": [
+          "public/assets/cards/still_01.png",
+          "public/assets/cards/burn_01.png",
+          "public/assets/cards/forge__burn_03__still_01.png"
+        ],
+        "transform": "crop=1280:720:48:24 + existing card-art overlays + deterministic title and typography overlay",
+        "transform_kind": "DETERMINISTIC_EXISTING_ASSET_COMPOSITE_NO_REPAINT_NO_GENERATION",
+        "tool": "sips + ffmpeg",
+        "tool_version": "macOS sips + ffmpeg 8.1.2",
         "deterministic_settings": [
           "-map_metadata -1",
           "-fflags +bitexact",
@@ -157,18 +162,18 @@
     },
     {
       "path": "docs/submission/track1-description.ko.json",
-      "bytes": 366,
-      "sha256": "312120f0fa23890b518c4ec9fcde835a4f901a5c28178b1832e06470a1cedd8f"
+      "bytes": 474,
+      "sha256": "e468349d5fd20b91fdffafaf42c065f28950acff3d16a01777e99d1bf93815c1"
     },
     {
       "path": "docs/submission/track1-form-field-draft.md",
-      "bytes": 6193,
-      "sha256": "34adf342711f668cdebfbea6c1a0c2809d79ccb994bfc7a5d5a8d97a1d2fad93"
+      "bytes": 6508,
+      "sha256": "d88fba870510483eabae2d7e68c54e52ddaee69cdcb761a33665b7492187ec5d"
     },
     {
       "path": "docs/submission/track1-thumbnail.png",
-      "bytes": 1966209,
-      "sha256": "85ff9c858e85a52b1e7d7d80cad632c5a16a0d6eebf56996650160657bad36ac"
+      "bytes": 1131301,
+      "sha256": "b64f24262a89dc79818ff38ac08a9d9a577d7775947f4156b960b9a63802aba4"
     },
     {
       "path": "public/assets/backgrounds/background__still__depth_01.png",

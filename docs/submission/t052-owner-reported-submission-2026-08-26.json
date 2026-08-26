@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "local_evidence_id": "FICTOR-T052-REPORT-20260826T190203KST-9A6EB7254766",
+  "local_evidence_hash": "9a6eb72547663064a0c3dab91e5c1f2ae241b21f8c66d9a954d4a543991872c1",
+  "evidence_payload": {
+    "schema_version": 1,
+    "evidence_status": "OWNER_REPORTED_MANUAL_SUBMISSION_CONTRACT_DEVIATION",
+    "owner_reported_complete": true,
+    "owner_report_observed_at_kst": "2026-08-26T19:02:03+09:00",
+    "submitted_at_kst": null,
+    "submission_attempt_count": null,
+    "automatic_retry_by_codex": 0,
+    "provider_reference": null,
+    "provider_reference_status": "NOT_PROVIDED_OR_NOT_OBSERVED",
+    "safe_submission_id": null,
+    "t051_contract_hash": "c060d445541fe5aae937f004571f75d20e421d61b6a6fad18c54d4be1fbd21de",
+    "t052_contract_hash": "a32ec3a75a4e3cfbe623b1d5b294116a5189397f2af6d4d622e35e799bbc5b24",
+    "t051_approved_package_sha256": "cffb77b2ba513df70b50abe12e4e80f89fe8e620d94d4fe774dc3242737c2ac9",
+    "owner_reported_revised_package_sha256": "36473d88f8989d9df7f15647de9b4f06dc7a069f2ca994b72d38d1350d7aeb52",
+    "approved_tuple_matches_reported_tuple": false,
+    "description_sha256": "eb63038f5bd6c31e593f9acff9d1b79665f58464f3cb5d1b3857ab9aaf8a303a",
+    "thumbnail_sha256": "b64f24262a89dc79818ff38ac08a9d9a577d7775947f4156b960b9a63802aba4",
+    "game_url": "https://project-702iz-sandy.vercel.app/",
+    "revision": "f434656cdf3fce0fa35e8598169da6b678cdf627",
+    "artifact_sha256": "43ee3cbcc3c5b3681890ba3082fb882b1b89dfb564003d1cd23dfb7746df1b0e",
+    "demo_disposition": "DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED",
+    "action_time_notice_terms_privacy_acceptance_explicitly_recorded": false,
+    "completion_eligible": false
+  },
+  "privacy": {
+    "classification": "PII_FREE_REPOSITORY_SAFE",
+    "owner_live_entry_values_stored": false,
+    "form_screenshot_stored": false,
+    "network_payload_stored": false,
+    "confirmation_email_stored": false,
+    "credential_cookie_session_token_stored": false
+  }
+}
