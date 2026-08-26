@@ -1,6 +1,6 @@
 # Track 1 폼 필드 초안
 
-상태: `READY_FOR_T050_QA_AND_T051_APPROVAL`
+상태: `READY_FOR_T051_REAPPROVAL`
 
 이 문서는 라이브 폼에 복사하기 전 검토할 repository-safe manifest입니다. 폼 접근·입력·전송을 수행했다는 증거가 아니며, 개인정보 값·동의 값·화면·network payload·cookie·session·token을 저장하지 않습니다.
 
@@ -15,9 +15,9 @@
 | 필드 | 분류 | exact draft 또는 source | 제한·현재 판정 |
 | --- | --- | --- | --- |
 | 게임 제목 | `REPO_SAFE_STATIC` | `FICTOR · 픽토르` — canonical source: `src/content/public-names.ts` | 12 Unicode code points, 19 UTF-8 bytes, SHA-256 `777eefc392dba8d7b8613d6dcd5bb17ecd6ae9ac1e84b2fd865df2f1f3ae9f24`; 80자 이하 |
-| 게임 소개 | `REPO_SAFE_STATIC` | `카드 2장을 빚어 새 카드를 발견하는 조합 기반 로그라이크 덱빌더입니다. 세 붙이의 규칙으로 어름의 터 3단계를 공략합니다. 카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.` — canonical source: `docs/submission/track1-description.ko.json#description_ko` | 152 Unicode code points, 344 UTF-8 bytes, SHA-256 `72db82afa86602ecb9a0629312915cad4551bb7b297c0aaa03903ebc59108987`; 200자 이하 |
+| 게임 소개 | `REPO_SAFE_STATIC` | `재료 카드를 조합해 새로운 카드를 발견하고, 매번 달라지는 전투를 헤쳐 나가는 로그라이크 덱빌딩 게임입니다. 다양한 조합을 실험해 효과를 익히고, 세 가지 플레이 방식으로 얼어붙은 세계를 공략합니다. 카드와 세계 아트는 Higgsfield의 생성형 AI 모델을 활용해 제작했으며, 프롬프트 설계·선별·편집은 FICTOR 제작 과정에서 수행했습니다.` — canonical source: `docs/submission/track1-description.ko.json#description_ko` | 194 Unicode code points, 452 UTF-8 bytes, SHA-256 `eb63038f5bd6c31e593f9acff9d1b79665f58464f3cb5d1b3857ab9aaf8a303a`; 200자 이하 |
 | 플레이 URL | `FINAL_CANDIDATE_BOUND` | `https://project-702iz-sandy.vercel.app/` | required; `PLAYABLE_URL_BOUND_T050_QA_NOT_RUN` |
-| 썸네일 | `FINAL_CANDIDATE_BOUND` | `docs/submission/track1-thumbnail.png` — SHA-256 `85ff9c858e85a52b1e7d7d80cad632c5a16a0d6eebf56996650160657bad36ac` | PNG, 1280×720, 16:9, 1,966,209 bytes |
+| 썸네일 | `FINAL_CANDIDATE_BOUND` | `docs/submission/track1-thumbnail.png` — SHA-256 `b64f24262a89dc79818ff38ac08a9d9a577d7775947f4156b960b9a63802aba4` | PNG, 1280×720, 16:9, 1,131,301 bytes |
 | 데모 URL | `FINAL_CANDIDATE_BOUND` | empty string (0 Unicode code points, 0 UTF-8 bytes) | optional; `DEMO_OPTIONAL_NOT_SUBMITTED_TIMEBOX_DEFERRED` |
 | Codex 활용 서술 | `REPO_SAFE_STATIC` | 아래 exact value | 319 Unicode code points, 642 UTF-8 bytes, SHA-256 `e0f7af59959d57673fd124994b602d4aa998133f061eebdeda6fff39dae77b56`; 5,000자 이하 |
 
@@ -44,12 +44,12 @@
 
 ## 썸네일 provenance
 
-- source: `public/assets/backgrounds/background__still__depth_01.png`
+- sources: `public/assets/backgrounds/background__still__depth_01.png`, `public/assets/cards/still_01.png`, `public/assets/cards/burn_01.png`, `public/assets/cards/forge__burn_03__still_01.png`
 - source manifest: `assets/manifests/t022-m2-assets-audit-v1.json`
-- source SHA-256: `7a67c4cc17bafcedd522ffa45273e3420b539289509d7756a7127e89d491a0be`
-- transform: crop only, `crop=1280:720:48:24`; scale·repaint·새 이미지 생성 없음
-- tool: `ffmpeg version 8.1.2`, metadata stripped, bitexact flags, single-threaded PNG encoder
-- result: `docs/submission/track1-thumbnail.png`, 1280×720, SHA-256 `85ff9c858e85a52b1e7d7d80cad632c5a16a0d6eebf56996650160657bad36ac`
+- background source SHA-256: `7a67c4cc17bafcedd522ffa45273e3420b539289509d7756a7127e89d491a0be`
+- transform: 1280×720 crop + existing card-art overlays + deterministic title and typography overlay; repaint·새 이미지 생성 없음
+- tool: macOS `sips` SVG rasterization + `ffmpeg version 8.1.2`, metadata stripped, bitexact flags, single-threaded PNG encoder
+- result: `docs/submission/track1-thumbnail.png`, 1280×720, SHA-256 `b64f24262a89dc79818ff38ac08a9d9a577d7775947f4156b960b9a63802aba4`
 
 ## Final-candidate binding
 
